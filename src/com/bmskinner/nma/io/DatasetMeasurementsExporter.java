@@ -40,6 +40,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
@@ -94,9 +95,10 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 	 * Create specifying the folder stats will be exported into
 	 * 
 	 * @param folder
+	 * @throws MissingOptionException
 	 */
 	public DatasetMeasurementsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
-			@NonNull HashOptions options) {
+			@NonNull HashOptions options) throws MissingOptionException {
 		super(file, list, options);
 		segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
 		if (list.size() == 1) {
@@ -148,9 +150,10 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 	 * Create specifying the folder stats will be exported into
 	 * 
 	 * @param folder
+	 * @throws MissingOptionException
 	 */
 	public DatasetMeasurementsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
-			@NonNull HashOptions options) {
+			@NonNull HashOptions options) throws MissingOptionException {
 		this(file, List.of(dataset), options);
 	}
 

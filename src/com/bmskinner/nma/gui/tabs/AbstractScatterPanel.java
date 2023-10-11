@@ -234,15 +234,15 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			if (result == 0)
 				return;
 
-			LOGGER.log(Level.FINER, "Filtering datasets on {0} and {1}",
-					new Object[] { statABox.getSelectedItem(), statBBox.getSelectedItem() });
-
 			MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
 			Range domain = getDomainBounds();
 			Range range = getRangeBounds();
 			Measurement statA = (Measurement) statABox.getSelectedItem();
 			Measurement statB = (Measurement) statBBox.getSelectedItem();
+
+			LOGGER.log(Level.FINER,
+					() -> "Filtering datasets by %s and %s".formatted(statA, statB));
 
 			FilteringOptions options = new CellCollectionFilterBuilder()
 					.setMatchType(FilterMatchType.ALL_MATCH)
@@ -273,12 +273,11 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 				} catch (CollectionFilteringException | ProfileException | MissingProfileException
 						| MissingLandmarkException e1) {
 					LOGGER.log(Loggable.STACK, e1,
-							() -> "Unable to filter collection for {0} " + d.getName());
+							() -> "Unable to filter collection for '%s'".formatted(d.getName()));
 				}
 			}
 
-			LOGGER.log(Level.INFO, "Filtered datasets by {0} and {1}",
-					new Object[] { statA, statB });
+			LOGGER.log(Level.INFO, () -> "Filtered datasets by %s and %s".formatted(statA, statB));
 		}
 
 		@Override

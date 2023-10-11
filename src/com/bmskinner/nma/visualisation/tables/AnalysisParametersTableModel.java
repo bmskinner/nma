@@ -102,7 +102,8 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			case 3 -> createNucleusCircFilterString(options);
 			case 4 -> createAnalysisRunTimeString(mainOptions);
 			case 5 -> createSourceFolderString(datasets.get(c - 1), mainOptions);
-			case 6 -> mainOptions.getRuleSetCollection().getName();
+			case 6 -> mainOptions.getRuleSetCollection().getName() + " (version "
+					+ mainOptions.getRuleSetCollection().getRulesetVersion() + ")";
 			case 7 -> String.valueOf(mainOptions.getProfileWindowProportion());
 			case 8 -> createPixelScaleString(datasets.get(c - 1));
 			case 9 -> datasets.get(c - 1).getVersionCreated().toString();

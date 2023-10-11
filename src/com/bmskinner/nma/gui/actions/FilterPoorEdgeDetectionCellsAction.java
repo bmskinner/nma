@@ -1,10 +1,20 @@
 package com.bmskinner.nma.gui.actions;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridBagLayout;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -16,10 +26,15 @@ import com.bmskinner.nma.analysis.nucleus.PoorEdgeDetectionProfilePredicate;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.options.DefaultOptions;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
+import com.bmskinner.nma.components.options.OptionsBuilder;
+import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
+import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
@@ -51,16 +66,22 @@ public class FilterPoorEdgeDetectionCellsAction extends SingleDatasetResultActio
 
 			RuleSetCollection rsc = dataset.getAnalysisOptions().get().getRuleSetCollection();
 
+			HashOptions filterOptions = new DefaultOptions();
+
 			if (rsc.getRulesetVersion().isOlderThan(Version.V_2_2_0)) {
 				LOGGER.warning(
 						"The ruleset for this dataset is from version %s, and does not have edge detection values set"
 								.formatted(rsc.getRulesetVersion()));
-				cancel();
-				return;
+
+				SubAnalysisSetupDialog optionsDialog = new FilteringOptionsDialog(dataset);
+				if (optionsDialog.isReadyToRun())
+					filterOptions = optionsDialog.getOptions();
+			} else {
+				filterOptions = rsc.getOtherOptions();
 			}
 
 			Predicate<ICell> profilePredicate = new PoorEdgeDetectionProfilePredicate(
-					rsc.getOtherOptions());
+					filterOptions);
 
 			IAnalysisMethod m = new CellCollectionFilteringMethod(dataset, profilePredicate,
 					dataset.getName() + "_passing_edge_detection");
@@ -109,6 +130,104 @@ public class FilterPoorEdgeDetectionCellsAction extends SingleDatasetResultActio
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE,
 					"Unable to filter cells with poor edge detection: " + e.getMessage(), e);
+		}
+
+	}
+
+	/**
+	 * Configure the exported parameters
+	 * 
+	 * @author ben
+	 * @since 2.1.1
+	 *
+	 */
+	@SuppressWarnings("serial")
+	private class FilteringOptionsDialog extends SubAnalysisSetupDialog {
+
+		private HashOptions options = new OptionsBuilder().build();
+		private static final String MIN = "Min angle in a profile";
+		private static final String MAX = "Max angle in a profile";
+		private static final String DELTA = "Max change in angle";
+
+		public FilteringOptionsDialog(final IAnalysisDataset dataset) {
+			super(dataset, "Filtering options");
+			setDefaults();
+			createUI();
+			packAndDisplay();
+		}
+
+		@Override
+		public IAnalysisMethod getMethod() {
+			// Not used here, we need to select a file first
+			return null;
+		}
+
+		@Override
+		public HashOptions getOptions() {
+			return options;
+		}
+
+		@Override
+		protected void createUI() {
+			JPanel panel = new JPanel();
+			GridBagLayout layout = new GridBagLayout();
+			panel.setLayout(layout);
+			List<JLabel> labels = new ArrayList<>();
+			List<Component> fields = new ArrayList<>();
+
+			SpinnerModel minValue = new SpinnerNumberModel(20f, // initial
+					0f, // min
+					360f, // max
+					1f); // step
+			JSpinner minSpinner = new JSpinner(minValue);
+
+			minSpinner.addChangeListener(
+					e -> options.setFloat(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_MIN,
+							(float) (double) minValue.getValue()));
+
+			SpinnerModel maxValue = new SpinnerNumberModel(270f, // initial
+					0f, // min
+					360f, // max
+					1f); // step
+			JSpinner maxSpinner = new JSpinner(maxValue);
+
+			maxSpinner.addChangeListener(
+					e -> options.setFloat(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_MAX,
+							(float) (double) maxValue.getValue()));
+
+			SpinnerModel deltaValue = new SpinnerNumberModel(40f, // initial
+					0f, // min
+					360f, // max
+					1f); // step
+			JSpinner deltaSpinner = new JSpinner(deltaValue);
+
+			deltaValue.addChangeListener(
+					e -> options.setFloat(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_DELTA_MAX,
+							(float) (double) deltaValue.getValue()));
+
+			// Add elements in order
+
+			labels.add(new JLabel(MIN));
+			fields.add(minSpinner);
+
+			labels.add(new JLabel(MAX));
+			fields.add(maxSpinner);
+
+			labels.add(new JLabel(DELTA));
+			fields.add(deltaSpinner);
+
+			addLabelTextRows(labels, fields, layout, panel);
+			add(panel, BorderLayout.CENTER);
+			add(createFooter(), BorderLayout.SOUTH);
+		}
+
+		@Override
+		protected void setDefaults() {
+			options.set(RuleSetCollection.RULESET_EDGE_FILTER_PROFILE,
+					ProfileType.ANGLE.toString());
+			options.set(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_MIN, 20f);
+			options.set(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_MAX, 270f);
+			options.set(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_DELTA_MAX, 40f);
 		}
 
 	}
