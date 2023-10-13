@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -26,9 +27,7 @@ import com.bmskinner.nma.analysis.nucleus.PoorEdgeDetectionProfilePredicate;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -66,29 +65,30 @@ public class FilterPoorEdgeDetectionCellsAction extends SingleDatasetResultActio
 
 			RuleSetCollection rsc = dataset.getAnalysisOptions().get().getRuleSetCollection();
 
-			HashOptions filterOptions = new DefaultOptions();
-
 			if (rsc.getRulesetVersion().isOlderThan(Version.V_2_2_0)) {
-				LOGGER.warning(
-						"The ruleset for this dataset is from version %s, and does not have edge detection values set"
-								.formatted(rsc.getRulesetVersion()));
-
-				SubAnalysisSetupDialog optionsDialog = new FilteringOptionsDialog(dataset);
-				if (optionsDialog.isReadyToRun())
-					filterOptions = optionsDialog.getOptions();
-			} else {
-				filterOptions = rsc.getOtherOptions();
+				LOGGER.info(
+						() -> "The ruleset for dataset '%s' is from version %s, and does not have edge detection values set. Input manually."
+								.formatted(dataset.getName(), rsc.getRulesetVersion()));
 			}
 
-			Predicate<ICell> profilePredicate = new PoorEdgeDetectionProfilePredicate(
-					filterOptions);
+			// If options exist in the ruleset, use as default. Otherwise use standard
+			// default. Always get confirmation from user.
+			SubAnalysisSetupDialog optionsDialog = new FilteringOptionsDialog(dataset);
+			if (optionsDialog.isReadyToRun()) {
+				HashOptions filterOptions = optionsDialog.getOptions();
 
-			IAnalysisMethod m = new CellCollectionFilteringMethod(dataset, profilePredicate,
-					dataset.getName() + "_passing_edge_detection");
-			worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
-		} catch (IllegalArgumentException | MissingOptionException e) {
+				Predicate<ICell> profilePredicate = new PoorEdgeDetectionProfilePredicate(
+						filterOptions);
+
+				IAnalysisMethod m = new CellCollectionFilteringMethod(dataset, profilePredicate,
+						dataset.getName() + "_filtered");
+				worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
+				worker.addPropertyChangeListener(this);
+				ThreadManager.getInstance().submit(worker);
+			} else {
+				cancel();
+			}
+		} catch (IllegalArgumentException | NoSuchElementException e) {
 			LOGGER.log(Level.SEVERE, "Unable to create edge filterer: %s".formatted(e.getMessage()),
 					e);
 			cancel();
@@ -152,6 +152,10 @@ public class FilterPoorEdgeDetectionCellsAction extends SingleDatasetResultActio
 		public FilteringOptionsDialog(final IAnalysisDataset dataset) {
 			super(dataset, "Filtering options");
 			setDefaults();
+
+			// If the dataset has ruleset options, override the defaults
+			options.set(dataset.getAnalysisOptions().get()
+					.getRuleSetCollection().getOtherOptions());
 			createUI();
 			packAndDisplay();
 		}

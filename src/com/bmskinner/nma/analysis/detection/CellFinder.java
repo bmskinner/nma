@@ -27,10 +27,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
-import com.bmskinner.nma.components.measure.Measurement;
-import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.io.ImageImporter;
@@ -44,7 +41,7 @@ import com.bmskinner.nma.logging.Loggable;
  * @since 1.13.5
  *
  */
-public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
+public abstract class CellFinder extends AbstractFinder<ICell> {
 
 	private static final Logger LOGGER = Logger.getLogger(CellFinder.class.getName());
 
@@ -55,6 +52,7 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 	 */
 	protected CellFinder(@NonNull final IAnalysisOptions op) {
 		super(op);
+
 	}
 
 	@Override
@@ -131,17 +129,4 @@ public abstract class CellFinder extends AbstractFinder<Collection<ICell>> {
 		});
 		return list;
 	}
-
-	public static boolean isValid(@NonNull HashOptions o, @NonNull CellularComponent c) {
-		if (c.getMeasurement(Measurement.AREA) < o.getInt(HashOptions.MIN_SIZE_PIXELS))
-			return false;
-		if (c.getMeasurement(Measurement.AREA) > o.getInt(HashOptions.MAX_SIZE_PIXELS))
-			return false;
-		if (c.getMeasurement(Measurement.CIRCULARITY) < o.getDouble(HashOptions.MIN_CIRC))
-			return false;
-		if (c.getMeasurement(Measurement.CIRCULARITY) > o.getDouble(HashOptions.MAX_CIRC))
-			return false;
-		return true;
-	}
-
 }

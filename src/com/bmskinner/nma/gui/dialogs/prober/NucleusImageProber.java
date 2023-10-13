@@ -59,7 +59,7 @@ import com.bmskinner.nma.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class NucleusImageProber extends IntegratedImageProber
-		implements DetectedObjectListener<Collection<ICell>> {
+		implements DetectedObjectListener<ICell> {
 
 	private static final Logger LOGGER = Logger.getLogger(NucleusImageProber.class.getName());
 
@@ -88,7 +88,7 @@ public class NucleusImageProber extends IntegratedImageProber
 					.build();
 			optionsSettingsPanel.setEnabled(false);
 
-			Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(options,
+			Finder<ICell> finder = new FluorescentNucleusFinder(options,
 					FinderDisplayType.PREVIEW);
 
 			imageProberPanel = new GenericImageProberPanel(folder, finder, this);
@@ -163,7 +163,7 @@ public class NucleusImageProber extends IntegratedImageProber
 	}
 
 	@Override
-	public void detectedObjectEventReceived(DetectedObjectEvent<Collection<ICell>> e) {
+	public void detectedObjectEventReceived(DetectedObjectEvent<ICell> e) {
 		TableModel model = new ObjectTableModel(e.getValidObjects(), e.getInvalidObjects());
 		detectedObjectsTable.setModel(model);
 	}

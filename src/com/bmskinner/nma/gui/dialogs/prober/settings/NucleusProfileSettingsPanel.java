@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JComboBox;
@@ -37,6 +38,7 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLReader;
@@ -60,16 +62,23 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 	private static final double MAX_PROFILE_PROP = 1;
 	private static final double STEP_PROFILE_PROP = 0.01;
 
-	private static final String TYPE_LBL = "Nucleus type";
+	private static final String TYPE_LBL = "Ruleset";
 	private static final String PROFILE_WINDOW_LBL = "Profile window";
 
 	private IAnalysisOptions options;
 
 	private JSpinner profileWindow;
 
-	private JComboBox<String> typeBox;
+	private JComboBox<RulesetEntry> typeBox;
 
-	private String[] availableRules = getAvailableRulesets();
+	private RulesetEntry[] availableRules = getAvailableRulesets();
+
+	private record RulesetEntry(File file, RuleSetCollection rsc) {
+		@Override
+		public String toString() {
+			return rsc.getName() + " (" + rsc.getRulesetVersion() + ")";
+		}
+	}
 
 	public NucleusProfileSettingsPanel(final IAnalysisOptions op) {
 		super();
@@ -77,22 +86,33 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 		this.add(createPanel(), BorderLayout.CENTER);
 	}
 
-	private String[] getAvailableRulesets() {
+	private RulesetEntry[] getAvailableRulesets() {
+		LOGGER.finer("Reading available rulesets from disk");
 		File[] files = Io.getRulesetDir()
 				.listFiles((d, s) -> s.toLowerCase().endsWith(Io.XML_FILE_EXTENSION));
+
 		return Arrays.stream(files)
-				.map(File::getName)
-				.map(f -> f.replaceAll(Io.XML_FILE_EXTENSION, ""))
-				.toArray(String[]::new);
+				.map(f -> {
+					try {
+						return new RulesetEntry(f,
+								XMLReader.readRulesetCollection(f));
+					} catch (XMLReadingException | ComponentCreationException e) {
+						LOGGER.log(Level.SEVERE,
+								"Unable to read ruleset from file: %s".formatted(e.getMessage()),
+								e);
+						return new RulesetEntry(null, null);
+					}
+				})
+				.toArray(RulesetEntry[]::new);
 	}
 
-	private void setRuleset(File f) {
-		try {
-			options.setRuleSetCollection(XMLReader.readRulesetCollection(f));
-		} catch (XMLReadingException | ComponentCreationException e1) {
-			LOGGER.log(Loggable.STACK, e1, () -> "Unable to read XML file: " + f.getAbsolutePath()
-					+ ": " + e1.getMessage());
-		}
+	private void setRuleset(RulesetEntry f) {
+
+		// TODO ensure that when ruleset changes, the prober loads the new ruleset
+
+		options.setRuleSetCollection(f.rsc);
+		fireOptionsChangeEvent();
+		fireProberReloadEvent();
 	}
 
 	/**
@@ -100,45 +120,37 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 	 */
 	private void createSpinners() {
 
-		String defaultNucleusType = GlobalOptions.getInstance()
+		// Name of the default ruleset
+		String defaultRulesetName = GlobalOptions.getInstance()
 				.getString(GlobalOptions.DEFAULT_RULESET_KEY);
 
-		LOGGER.finer("Default type: " + defaultNucleusType);
+		LOGGER.fine(() -> "Default ruleset is '%s': ".formatted(defaultRulesetName));
 
 		typeBox = new JComboBox<>(availableRules);
-
 		typeBox.addActionListener(e -> {
 
 			Optional<HashOptions> nOptions = options.getDetectionOptions(CellularComponent.NUCLEUS);
 			if (!nOptions.isPresent())
 				return;
 
-			// Rebuild the file name from the cleaned names
-			File type = new File(Io.getRulesetDir(),
-					(String) typeBox.getSelectedItem() + Io.XML_FILE_EXTENSION);
-			setRuleset(type);
+			RulesetEntry selected = (RulesetEntry) typeBox.getSelectedItem();
+			LOGGER.fine(() -> "Selected ruleset %s".formatted(selected.toString()));
+			setRuleset(selected);
 		});
 
 		// Check if the default option from the config file is present
-		boolean hasDefault = Arrays.stream(availableRules)
-				.anyMatch(r -> r.equals(defaultNucleusType));
+		Optional<RulesetEntry> defaultEntry = Arrays.stream(availableRules)
+				.filter(r -> r.rsc.getName().equals(defaultRulesetName))
+				.findFirst();
 
 		// If a default ruleset is in the config options and the file is present set it
-		if (hasDefault) {
-			LOGGER.finer("Default type found");
-			typeBox.setSelectedItem(defaultNucleusType);
-
-			// Set the default from the order of the dropdown list
-			File defaultRuleset = new File(Io.getRulesetDir(),
-					defaultNucleusType + Io.XML_FILE_EXTENSION);
-
-			setRuleset(defaultRuleset);
+		if (defaultEntry.isPresent()) {
+			LOGGER.fine(() -> "Default ruleset present '%s': ".formatted(defaultRulesetName));
+			typeBox.setSelectedItem(defaultEntry.get());
+			setRuleset(defaultEntry.get());
 		} else {
 			typeBox.setSelectedIndex(0);
-			// Set the rules to the first element in the list
-			File type = new File(Io.getRulesetDir(),
-					typeBox.getItemAt(0) + Io.XML_FILE_EXTENSION);
-			setRuleset(type);
+			setRuleset((RulesetEntry) typeBox.getSelectedItem());
 		}
 
 		profileWindow = new JSpinner(
@@ -187,11 +199,14 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 	@Override
 	protected void update() {
 		super.update();
+
 		availableRules = getAvailableRulesets();
 		profileWindow.setValue(options.getProfileWindowProportion());
-		String rulesetName = options.getRuleSetCollection().getName();
-		if (Arrays.stream(availableRules).anyMatch(r -> r.equals(rulesetName)))
-			typeBox.setSelectedItem(rulesetName);
+		RuleSetCollection rsc = options.getRuleSetCollection();
+
+		Arrays.stream(availableRules)
+				.filter(r -> r.rsc.equals(rsc))
+				.findFirst().ifPresent(r -> typeBox.setSelectedItem(r));
 	}
 
 	@Override

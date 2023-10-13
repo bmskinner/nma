@@ -36,26 +36,38 @@ public class PoorEdgeDetectionProfilePredicate implements Predicate<ICell> {
 	private float deltaMax;
 
 	/**
+	 * If we can't create the filter, pass everything
+	 */
+	private boolean passAll = false;
+
+	/**
 	 * Create from options. This options will usually be the 'other options' from a
 	 * RuleSetCollection
 	 * 
 	 * @param options
 	 * @throws MissingOptionException
 	 */
-	public PoorEdgeDetectionProfilePredicate(@NonNull HashOptions options)
-			throws MissingOptionException {
+	public PoorEdgeDetectionProfilePredicate(@NonNull HashOptions options) {
 
-		this.profileType = ProfileType
-				.fromString(options.get(RuleSetCollection.RULESET_EDGE_FILTER_PROFILE));
+		try {
 
-		this.min = options.get(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_MIN);
-		this.max = options.get(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_MAX);
-		this.deltaMax = options.get(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_DELTA_MAX);
+			this.profileType = ProfileType
+					.fromString(options.get(RuleSetCollection.RULESET_EDGE_FILTER_PROFILE));
+
+			this.min = options.get(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_MIN);
+			this.max = options.get(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_MAX);
+			this.deltaMax = options.get(RuleSetCollection.RULESET_EDGE_FILTER_THRESHOLD_DELTA_MAX);
+		} catch (MissingOptionException e) {
+			LOGGER.log(Level.WARNING, "No rulesets with edge filtering, skipping");
+			passAll = true;
+		}
 
 	}
 
 	@Override
 	public boolean test(ICell t) {
+		if (passAll)
+			return true;
 
 		boolean cellPasses = true;
 		for (Nucleus n : t.getNuclei()) {

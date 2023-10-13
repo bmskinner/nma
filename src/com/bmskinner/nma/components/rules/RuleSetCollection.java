@@ -87,11 +87,6 @@ public class RuleSetCollection implements XmlSerializable {
 	/**
 	 * Options identifier for whether to filter on poor edge detection by default
 	 */
-	public static final String RULESET_IS_EDGE_FILTER = "isEdgeFilter";
-
-	/**
-	 * Options identifier for whether to filter on poor edge detection by default
-	 */
 	public static final String RULESET_EDGE_FILTER_PROFILE = "edgeFilterProfile";
 
 	/** Options identifier for how to filter poor edge detection */
@@ -518,7 +513,6 @@ public class RuleSetCollection implements XmlSerializable {
 		Landmark op = new DefaultLandmark("Tail socket");
 
 		HashOptions other = new DefaultOptions();
-		other.set(RULESET_IS_EDGE_FILTER, false);
 		other.set(RULESET_EDGE_FILTER_PROFILE, ProfileType.ANGLE);
 		other.set(RULESET_EDGE_FILTER_THRESHOLD_MAX, 280f);
 		other.set(RULESET_EDGE_FILTER_THRESHOLD_MIN, 10f);
@@ -552,7 +546,6 @@ public class RuleSetCollection implements XmlSerializable {
 		Landmark rp = new DefaultLandmark("Tail socket");
 
 		HashOptions other = new DefaultOptions();
-		other.set(RULESET_IS_EDGE_FILTER, false);
 		other.set(RULESET_EDGE_FILTER_PROFILE, ProfileType.ANGLE);
 		other.set(RULESET_EDGE_FILTER_THRESHOLD_MAX, 280f);
 		other.set(RULESET_EDGE_FILTER_THRESHOLD_MIN, 10f);
@@ -582,7 +575,6 @@ public class RuleSetCollection implements XmlSerializable {
 		Landmark rp = new DefaultLandmark("Longest axis");
 
 		HashOptions other = new DefaultOptions();
-		other.set(RULESET_IS_EDGE_FILTER, false);
 		other.set(RULESET_EDGE_FILTER_PROFILE, ProfileType.ANGLE);
 		other.set(RULESET_EDGE_FILTER_THRESHOLD_MAX, 280f);
 		other.set(RULESET_EDGE_FILTER_THRESHOLD_MIN, 10f);

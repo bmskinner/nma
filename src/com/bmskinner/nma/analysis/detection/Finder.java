@@ -17,6 +17,7 @@
 package com.bmskinner.nma.analysis.detection;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.EventObject;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -44,7 +45,7 @@ public interface Finder<E> {
 	 * @return the cells detected in the folder of images
 	 * @throws Exception if detection fails
 	 */
-	E find() throws Exception;
+	Collection<E> find() throws Exception;
 
 	/**
 	 * Find cells using the options given in the setup in the given folder
@@ -54,7 +55,7 @@ public interface Finder<E> {
 	 * @throws ImageImportException
 	 * @throws ComponentCreationException
 	 */
-	E findInFolder(@NonNull File folder) throws ImageImportException;
+	Collection<E> findInFolder(@NonNull File folder) throws ImageImportException;
 
 	/**
 	 * Find cells using the options given in the setup in the given image
@@ -64,7 +65,16 @@ public interface Finder<E> {
 	 * @throws ImageImportException
 	 * @throws ComponentCreationException
 	 */
-	E findInImage(@NonNull File imageFile) throws ImageImportException;
+	Collection<E> findInImage(@NonNull File imageFile) throws ImageImportException;
+
+	/**
+	 * Test if the given entity is valid for this finder based on the option used to
+	 * create the finder.
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	boolean isValid(@NonNull E entity);
 
 	/**
 	 * Add a listener for progress through the detection.
@@ -133,7 +143,7 @@ public interface Finder<E> {
 	 * @param invalid objects that did not pass filtering
 	 * @param message any message
 	 */
-	void fireDetectedObjectEvent(E valid, E invalid, String message);
+	void fireDetectedObjectEvent(Collection<E> valid, Collection<E> invalid, String message);
 
 	/**
 	 * Interface implemented by probers to be notified that a new image is available
@@ -211,11 +221,12 @@ public interface Finder<E> {
 	@SuppressWarnings("serial")
 	class DetectedObjectEvent<E> extends EventObject {
 
-		private final transient E valid;
-		private final transient E invalid;
+		private final transient Collection<E> valid;
+		private final transient Collection<E> invalid;
 		private final String message;
 
-		public DetectedObjectEvent(final Object source, final E valid, final E invalid,
+		public DetectedObjectEvent(final Object source, final Collection<E> valid,
+				final Collection<E> invalid,
 				final String message) {
 			super(source);
 			this.valid = valid;
@@ -228,7 +239,7 @@ public interface Finder<E> {
 		 * 
 		 * @return
 		 */
-		public E getValidObjects() {
+		public Collection<E> getValidObjects() {
 			return valid;
 		}
 
@@ -237,7 +248,7 @@ public interface Finder<E> {
 		 * 
 		 * @return
 		 */
-		public E getInvalidObjects() {
+		public Collection<E> getInvalidObjects() {
 			return invalid;
 		}
 

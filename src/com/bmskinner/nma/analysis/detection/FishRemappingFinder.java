@@ -17,6 +17,7 @@
 package com.bmskinner.nma.analysis.detection;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -54,7 +55,7 @@ public class FishRemappingFinder extends VoidFinder {
 	}
 
 	@Override
-	public Void findInImage(@NonNull File imageFile) throws ImageImportException {
+	public Collection<Void> findInImage(@NonNull File imageFile) throws ImageImportException {
 
 		String imageName = imageFile.getName();
 
@@ -88,6 +89,12 @@ public class FishRemappingFinder extends VoidFinder {
 		fireProgressEvent();
 		return null;
 
+	}
+
+	@Override
+	public boolean isValid(@NonNull Void entity) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

@@ -103,6 +103,11 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	String CANNY_IS_AUTO_THRESHOLD = "Use auto threshold";
 	String CANNY_IS_ADD_BORDER = "Add border";
 
+	/**
+	 * Options identifier for whether to filter on poor edge detection
+	 */
+	String IS_RULESET_EDGE_FILTER = "Filter poor edge detection";
+
 	float DEFAULT_CANNY_LOW_THRESHOLD = 0.5f;
 	float DEFAULT_CANNY_HIGH_THRESHOLD = 1.5f;
 	float DEFAULT_CANNY_TAIL_LOW_THRESHOLD = 0.1f;
