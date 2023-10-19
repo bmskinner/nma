@@ -464,7 +464,7 @@ Nuclear signal measurements | The measured values for each nuclear signal
 Nuclear signal shells | The measured nuclear signal in each shell, following shell analysis
 Cell locations within images | The XY coordinates of nucleus centres-of-mass within their source image
 Consensus nuclei as SVG | The consensus nucleus outlines for all selected datasets in SVG so you can make custom figures
-Single cell images | Export each nucleus as a separate image to a folder in the same directory as the `nmd` file. You will be given the option to mask out background; if this is selected, any pixels not within the nucleus will be set to black.
+Single cell images | Export each nucleus as a separate image to a folder in the same directory as the `nmd` file. You will be given the option to mask out pixels inside or outside the nucleus; if these are selected, pixels within the nucleus will be set to white (255), and pixels outside the nucleus will be set to black (0).
 Dataset analysis options | The options used to analyse this dataset in XML format. This can be used directly to set up subsequent analyses
 Landmark rulesets | The rules used to detect landmarks, so you can modify them for custom nucleus types
 

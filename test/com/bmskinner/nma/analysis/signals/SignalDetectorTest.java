@@ -70,8 +70,8 @@ public class SignalDetectorTest {
 		int signals = 0;
 		for (Nucleus n : d.getCollection().getNuclei(testFile)) {
 			assertTrue(testFile.exists());
-			ImageProcessor ip = new ImageImporter(testFile)
-					.importImage(o.getInt(HashOptions.CHANNEL));
+			ImageProcessor ip = ImageImporter
+					.importImage(testFile, o.getInt(HashOptions.CHANNEL));
 
 			ip.threshold(o.getInt(HashOptions.THRESHOLD));
 

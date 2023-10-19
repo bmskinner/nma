@@ -343,7 +343,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
 			DefaultShellResult counter = counters.get(signalGroup);
 
-			ImageStack signalStack = new ImageImporter(sourceFile).importToStack();
+			ImageStack signalStack = ImageImporter.importToStack(sourceFile);
 			int signalChannel = n.getSignalCollection().getSourceChannel(signalGroup);
 
 			long[] totalSignalIntensity = shellDetector.findPixelIntensities(signalStack,

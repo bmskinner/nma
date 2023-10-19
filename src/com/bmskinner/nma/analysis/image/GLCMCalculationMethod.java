@@ -28,33 +28,33 @@ public class GLCMCalculationMethod extends SingleDatasetAnalysisMethod {
 	}
 
 	/**
-	 * Calculate the GLCM value across the entire
-	 * nucleus image
+	 * Calculate the GLCM value across the entire nucleus image
+	 * 
 	 * @throws Exception
 	 */
 	private void run() throws Exception {
-		GLCM glcm = new GLCM();
-				
+		GLCM glcm = new GLCM(GLCM.defaultOptions());
+
 		List<GLCMTile> results = new ArrayList<>();
-		
+
 		// Do all cells in an image at a time
-		// This should store the image as a weak reference in the nucleus	
-		for(File f : dataset.getCollection().getImageFiles()) {
-			for(ICell c : dataset.getCollection().getCells(f)) {
-				for(Nucleus n : c.getNuclei()) {
+		// This should store the image as a weak reference in the nucleus
+		for (File f : dataset.getCollection().getImageFiles()) {
+			for (ICell c : dataset.getCollection().getCells(f)) {
+				for (Nucleus n : c.getNuclei()) {
 					GLCMTile r = glcm.calculate(n);
 					results.add(r);
-					for(GLCMParameter v : GLCMParameter.values())
-						n.setMeasurement(v.toStat(), r.get(v));
+					for (GLCMParameter v : GLCMParameter.values())
+						n.setMeasurement(v.toMeasurement(), r.get(v));
 				}
 				fireProgressEvent();
 			}
 		}
-		
+
 		// Clear stats caches
-		for(Measurement stat : GLCMParameter.toStats()) {
+		for (Measurement stat : GLCMParameter.toStats()) {
 			dataset.getCollection().clear(stat, CellularComponent.NUCLEUS);
-			for(IAnalysisDataset child : dataset.getAllChildDatasets()) {
+			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 				child.getCollection().clear(stat, CellularComponent.NUCLEUS);
 			}
 		}

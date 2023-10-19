@@ -250,7 +250,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 		if (arr == null)
 			return false;
 		for (File f : arr)
-			if (ImageImporter.fileIsImportable(f))
+			if (ImageImporter.isFileImportable(f))
 				return true;
 		return false;
 	}
@@ -269,7 +269,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 		int result = 0;
 
 		for (File file : listOfFiles) {
-			boolean ok = ImageImporter.fileIsImportable(file);
+			boolean ok = ImageImporter.isFileImportable(file);
 			if (ok) {
 				result++;
 			} else {

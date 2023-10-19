@@ -428,7 +428,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
 		int result = 0;
 		for (File file : listOfFiles) {
-			if (ImageImporter.fileIsImportable(file))
+			if (ImageImporter.isFileImportable(file))
 				result++;
 		}
 		return result > 0;

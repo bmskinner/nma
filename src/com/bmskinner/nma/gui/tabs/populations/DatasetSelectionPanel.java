@@ -269,8 +269,7 @@ public class DatasetSelectionPanel extends DetailPanel
 
 				// Update table header with number of selected cells
 				int cellCount = datasetSelectionOrder.stream().map(d -> d.getCollection().size())
-						.reduce(0,
-								Integer::sum);
+						.reduce(0, Integer::sum);
 
 				treeTable.getColumnModel().getColumn(0)
 						.setHeaderValue(
@@ -282,8 +281,8 @@ public class DatasetSelectionPanel extends DetailPanel
 				DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
 
 			} catch (Exception ex) {
-				LOGGER.warning("Error in tree selection handler");
-				LOGGER.log(Loggable.STACK, "Error in tree selection handler", ex);
+				LOGGER.log(Loggable.STACK, "Error in tree selection handler: " + ex.getMessage(),
+						ex);
 			}
 		}
 

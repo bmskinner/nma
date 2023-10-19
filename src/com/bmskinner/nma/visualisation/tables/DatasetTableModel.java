@@ -38,4 +38,5 @@ public abstract class DatasetTableModel extends AbstractTableModel {
 		names.addAll(datasets.stream().map(IAnalysisDataset::getName).toList());
 		return names.toArray(new String[0]);
 	}
+
 }

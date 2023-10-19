@@ -18,9 +18,9 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
-import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.io.Io;
+import com.bmskinner.nma.utility.DatasetUtils;
 
 public class AnalysisParametersTableModel extends DatasetTableModel {
 
@@ -55,7 +55,7 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 		int colCount = colNames.length + 1;
 
 		List<String> rowNames = new ArrayList<>(DEFAULT_ROW_NAMES);
-		if (hasMergeSource(datasets) && recoverable)
+		if (DatasetUtils.hasMergeSource(datasets) && recoverable)
 			rowNames.add(Labels.Merges.RECOVER_SOURCE);
 
 		int rowCount = rowNames.size();
@@ -115,20 +115,6 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 					+ e.getMessage());
 			rowData[r][c] = "Error";
 		}
-	}
-
-	/**
-	 * Test if any of the given datasets in the input list are merge sources. Checks
-	 * against all open datasets.
-	 * 
-	 * @return
-	 */
-	private boolean hasMergeSource(@NonNull List<IAnalysisDataset> datasets) {
-		for (IAnalysisDataset d : datasets) {
-			if (DatasetListManager.getInstance().isMergeSource(d))
-				return true;
-		}
-		return false;
 	}
 
 	@Override

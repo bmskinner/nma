@@ -14,7 +14,7 @@ import com.bmskinner.nma.io.Io;
 public class TestResources {
 
 	/** Base folder for test images */
-	private static final File IMAGE_FOLDER_BASE = new File("test/samples/images/");
+	public static final File IMAGE_FOLDER_BASE = new File("test/samples/images/");
 
 	/**
 	 * Base folder for general output files - use DATASET_FOLDER for actual storage

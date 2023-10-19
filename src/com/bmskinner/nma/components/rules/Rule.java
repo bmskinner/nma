@@ -19,6 +19,8 @@ package com.bmskinner.nma.components.rules;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
@@ -118,9 +120,14 @@ public class Rule implements XmlSerializable {
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append(type);
-		for (Double d : values) {
-			b.append(" : " + d);
-		}
+		b.append(" [parameters: ");
+
+		String params = IntStream.range(0, values.size()).mapToObj(i -> {
+			return type.isBoolean(i) ? String.valueOf(getBooleanValue(i))
+					: String.valueOf(getValue(i));
+		}).collect(Collectors.joining(", "));
+
+		b.append(params + "]");
 		return b.toString();
 	}
 
@@ -160,23 +167,111 @@ public class Rule implements XmlSerializable {
 	 */
 	public enum RuleType {
 
-		IS_ZERO_INDEX,
+		/**
+		 * If 1, finds the point at the first index of a profile. If 0, finds all points
+		 * except the first index
+		 */
+		IS_ZERO_INDEX(true),
 
-		IS_MINIMUM, IS_MAXIMUM,
+		/**
+		 * If 1, finds the minimum point in a profile. If 0, finds all points except the
+		 * minimum
+		 */
+		IS_MINIMUM(true),
 
-		IS_LOCAL_MINIMUM, IS_LOCAL_MAXIMUM,
+		/**
+		 * If 1, finds the maximum point in a profile. If 0, finds all points except the
+		 * maximum
+		 */
+		IS_MAXIMUM(true),
 
-		VALUE_IS_LESS_THAN, VALUE_IS_MORE_THAN,
+		/**
+		 * If the first value is 1, finds local minima in a profile. If 0, finds all
+		 * points except the local minima . A window size is needed to find minima and
+		 * maxima; this is provided in the second value as an integer
+		 */
+		IS_LOCAL_MINIMUM(true, false),
 
-		INDEX_IS_LESS_THAN, INDEX_IS_MORE_THAN,
+		/**
+		 * If the first value is 1, finds local maxima in a profile. If 0, finds all
+		 * points except the local maxima. A window size is needed to find minima and
+		 * maxima; this is provided in the second value as an integer
+		 */
+		IS_LOCAL_MAXIMUM(true, false),
 
-		IS_CONSTANT_REGION,
+		/**
+		 * Finds points that are less than the given absolute value
+		 */
+		VALUE_IS_LESS_THAN(false),
 
-		FIRST_TRUE, LAST_TRUE,
+		/**
+		 * Finds points that are more than the given absolute value
+		 */
+		VALUE_IS_MORE_THAN(false),
 
-		INDEX_IS_WITHIN_FRACTION_OF, INDEX_IS_OUTSIDE_FRACTION_OF,
+		/**
+		 * Finds points that have an index in their profile lower than the value
+		 */
+		INDEX_IS_LESS_THAN(false),
 
-		INVERT;
+		/**
+		 * Finds points that have an index in their profile higher than the value
+		 */
+		INDEX_IS_MORE_THAN(false),
+
+		/**
+		 * Finds regions with a constant value over at least a given number of indexes.
+		 * The stringency of the constant calue can be altered.
+		 * 
+		 */
+		IS_CONSTANT_REGION(false, false, false),
+
+		/**
+		 * Designed to be applied after a previous rule. If 1, finds the first index
+		 * matching the rule conditions. If 0, finds all except the first index matching
+		 * the rule conditions
+		 */
+		FIRST_TRUE(true),
+
+		/**
+		 * Designed to be applied after a previous rule. If 1, finds the last index
+		 * matching the rule conditions. If 0, finds all except the last index matching
+		 * the rule conditions
+		 */
+		LAST_TRUE(true),
+
+		/**
+		 * Finds indexes that are within the given fraction of the profile
+		 * 
+		 */
+		INDEX_IS_WITHIN_FRACTION_OF(false),
+
+		/**
+		 * Finds indexes that areoutside the given fraction of the profile
+		 * 
+		 */
+		INDEX_IS_OUTSIDE_FRACTION_OF(false),
+
+		/**
+		 * Inverts the boolean profile state
+		 */
+		INVERT();
+
+		private boolean[] isBoolean;
+
+		/**
+		 * Create with an array indicating whcih options are booleans disguised as
+		 * doubles
+		 * 
+		 * @param options an array, each element of which is a boolean
+		 */
+		RuleType(boolean... options) {
+			this.isBoolean = options;
+		}
+
+		public boolean isBoolean(int index) {
+			return isBoolean[index];
+		}
 
 	}
 }

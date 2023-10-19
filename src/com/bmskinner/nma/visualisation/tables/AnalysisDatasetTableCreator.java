@@ -80,6 +80,23 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	}
 
 	/**
+	 * Create a table model of rulesets from datasets. If null parameter is passed,
+	 * will create an empty table
+	 * 
+	 * @return
+	 */
+	public TableModel createAnalysisRulesetsTable() {
+
+		// If we are showing merge sources, ensure there is something to show
+		if (options.getBoolean(AbstractOptions.IS_MERGE_SOURCE_OPTIONS_TABLE)
+				&& !hasMergeSource(options.getDatasets()))
+			return createBlankTable();
+
+		return new AnalysisRulesetsTableModel(options.getDatasets());
+
+	}
+
+	/**
 	 * Create a table model of analysis parameters from a nucleus collection. If
 	 * null parameter is passed, will create an empty table
 	 * 

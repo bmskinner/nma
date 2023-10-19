@@ -17,10 +17,12 @@
 package com.bmskinner.nma.io;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -29,12 +31,16 @@ import com.bmskinner.nma.components.MissingComponentException;
 import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.generic.FloatPoint;
+import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
@@ -44,6 +50,7 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.logging.Loggable;
+import com.bmskinner.nma.utility.ArrayUtils;
 
 /**
  * Export all the stats from a dataset to a text file for downstream analysis
@@ -52,16 +59,27 @@ import com.bmskinner.nma.logging.Loggable;
  * @since 1.13.4
  *
  */
-public class DatasetStatsExporter extends StatsExporter {
+public class DatasetMeasurementsExporter extends StatsExporter {
 
-	private static final Logger LOGGER = Logger.getLogger(DatasetStatsExporter.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(DatasetMeasurementsExporter.class.getName());
 
+	private boolean isIncludeMeasurements = true;
 	private boolean isIncludeProfiles = true;
+	private boolean isIncludeOutlines = false;
 	private boolean isIncludeSegments = false;
 	private boolean isIncludeGlcm = false;
+	private boolean isIncludePixelHistogram = false;
+
+	/** Which image channels have pixel histogram values? */
+	private int[] pixelHistogramChannels = null;
 
 	/** How many samples should be taken from each profile? */
 	private int profileSamples = 100;
+
+	/** How many samples should be taken from each outline? */
+	private int outlineSamples = 100;
+
 	private int segCount = 0;
 
 	/** The default length to which profiles should be normalised */
@@ -77,8 +95,8 @@ public class DatasetStatsExporter extends StatsExporter {
 	 * 
 	 * @param folder
 	 */
-	public DatasetStatsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
-			HashOptions options) {
+	public DatasetMeasurementsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
+			@NonNull HashOptions options) {
 		super(file, list, options);
 		segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
 		if (list.size() == 1) {
@@ -88,13 +106,38 @@ public class DatasetStatsExporter extends StatsExporter {
 					.allMatch(d -> d.getCollection().getProfileManager()
 							.getSegmentCount() == segCount);
 		}
-		profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
+		profileSamples = options.get(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
+		outlineSamples = options.get(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY);
+
+		isIncludeMeasurements = options.get(HashOptions.EXPORT_MEASUREMENTS_KEY);
+		isIncludeOutlines = options.get(HashOptions.EXPORT_OUTLINES_KEY);
+		isIncludeProfiles = options.get(HashOptions.EXPORT_PROFILES_KEY);
 
 		// Only include if present in all cells of all datasets
 		isIncludeGlcm = list.stream()
 				.allMatch(d -> d.getCollection().getCells().stream().noneMatch(c -> c
 						.getPrimaryNucleus().getMeasurement(
-								GLCMParameter.SUM.toStat()) == Statistical.ERROR_CALCULATING_STAT));
+								GLCMParameter.SUM
+										.toMeasurement()) == Statistical.ERROR_CALCULATING_STAT));
+
+		// Only include if present in all cells of all datasets
+		isIncludePixelHistogram = hasPixelHistogramsInChannel(list);
+
+		// Determine which image channels need pixel histogram data exporting
+		if (isIncludePixelHistogram) {
+			pixelHistogramChannels = list.stream()
+					.flatMap(d -> d.getCollection().getCells().stream())
+					.flatMap(c -> c.getNuclei().stream())
+					.flatMap(c -> c.getMeasurements().stream()) // get all cells in all datasets
+					.filter(m -> m.name().startsWith(Measurement.Names.PIXEL_HISTOGRAM))
+					.map(m -> m.name() // in the pixel measurements, find the distinct channels
+							.replaceAll(
+									Measurement.Names.PIXEL_HISTOGRAM + "_\\d+_channel_",
+									""))
+					.mapToInt(Integer::parseInt)
+					.distinct()
+					.toArray();
+		}
 
 		normProfileLength = chooseNormalisedProfileLength();
 
@@ -106,21 +149,18 @@ public class DatasetStatsExporter extends StatsExporter {
 	 * 
 	 * @param folder
 	 */
-	public DatasetStatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
-			HashOptions options) {
-		super(file, dataset, options);
-		segCount = dataset.getCollection().getProfileManager().getSegmentCount();
-		isIncludeSegments = true;
-		profileSamples = options.getInt(Io.PROFILE_SAMPLES_KEY);
+	public DatasetMeasurementsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
+			@NonNull HashOptions options) {
+		this(file, List.of(dataset), options);
+	}
 
-		isIncludeGlcm = dataset.getCollection().getCells().stream()
-				.noneMatch(c -> c.getPrimaryNucleus()
-						.getMeasurement(
-								GLCMParameter.SUM.toStat()) == Statistical.ERROR_CALCULATING_STAT);
-
-		normProfileLength = chooseNormalisedProfileLength();
-
-		measurements = chooseMeasurementsToExport();
+	private boolean hasPixelHistogramsInChannel(List<IAnalysisDataset> list) {
+		return list.stream().anyMatch(
+				d -> d.getCollection().getCells().stream()
+						.flatMap(c -> c.getNuclei().stream()) // all datasets should agree
+						.flatMap(n -> n.getMeasurements().stream())
+						.filter(m -> m.name().startsWith(Measurement.Names.PIXEL_HISTOGRAM))
+						.count() > 0); // at least one histogram measurement in a cell
 	}
 
 	/**
@@ -145,34 +185,65 @@ public class DatasetStatsExporter extends StatsExporter {
 	 */
 	@Override
 	protected void appendHeader(@NonNull StringBuilder outLine) {
+		outLine.append("Dataset").append(TAB)
+				.append("File").append(TAB)
+				.append("CellID").append(TAB)
+				.append("Component").append(TAB)
+				.append("Folder").append(TAB)
+				.append("Image").append(TAB)
+				.append("Centre_of_mass").append(TAB);
 
-		outLine.append("Dataset\tFile\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
+		if (isIncludeMeasurements) {
 
-		for (Measurement s : measurements) {
+			for (Measurement s : measurements) {
 
-			String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("(", "_")
-					.replace(")", "")
-					.replace("__", "_");
-			outLine.append(label + TAB);
-
-			if (!s.isDimensionless() && !s.isAngle()) { // only give micron
-														// measurements when
-														// length or area
-
-				label = s.label(MeasurementScale.MICRONS).replace(" ", "_").replace("(", "_")
+				String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("(", "_")
 						.replace(")", "")
 						.replace("__", "_");
-
 				outLine.append(label + TAB);
+
+				if (!s.isDimensionless() && !s.isAngle()) { // only give micron
+					// measurements when
+					// length or area
+
+					label = s.label(MeasurementScale.MICRONS).replace(" ", "_").replace("(", "_")
+							.replace(")", "")
+							.replace("__", "_");
+
+					outLine.append(label + TAB);
+				}
+
 			}
 
-		}
+			if (isIncludeGlcm) {
+				for (Measurement s : Measurement.getGlcmStats()) {
+					String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("__",
+							"_");
+					outLine.append("GLCM_" + label + TAB);
+				}
+			}
 
-		if (isIncludeGlcm) {
-			for (Measurement s : Measurement.getGlcmStats()) {
-				String label = s.label(MeasurementScale.PIXELS).replace(" ", "_").replace("__",
-						"_");
-				outLine.append("GLCM_" + label + TAB);
+			if (isIncludePixelHistogram) {
+				for (int channel : pixelHistogramChannels) {
+					for (Measurement m : Measurement.getPixelHistogramMeasurements(channel)) {
+						String label = m.label(MeasurementScale.PIXELS).replace(" ", "_").replace(
+								"__",
+								"_");
+						outLine.append(label + TAB);
+					}
+				}
+
+			}
+
+			if (isIncludeSegments) {
+				String label = "Length_seg_";
+
+				for (int i = 0; i < segCount; i++) {
+					outLine.append(label + i + "_pixels" + TAB);
+					outLine.append(label + i + "_microns" + TAB);
+					outLine.append("Seg_" + i + "_start" + TAB);
+					outLine.append("Seg_" + i + "_end" + TAB);
+				}
 			}
 		}
 
@@ -185,14 +256,17 @@ public class DatasetStatsExporter extends StatsExporter {
 			}
 		}
 
-		if (isIncludeSegments) {
-			String label = "Length_seg_";
+		if (isIncludeOutlines) {
+			String rawLabel = "Outline_RawCoordinates";
+			for (int i = 0; i < outlineSamples; i++) {
+				outLine.append(rawLabel + "_X_" + i + TAB);
+				outLine.append(rawLabel + "_Y_" + i + TAB);
+			}
 
-			for (int i = 0; i < segCount; i++) {
-				outLine.append(label + i + "_pixels" + TAB);
-				outLine.append(label + i + "_microns" + TAB);
-				outLine.append("Seg_" + i + "_start" + TAB);
-				outLine.append("Seg_" + i + "_end" + TAB);
+			String orientedLabel = "Outline_OrientedCoordinates";
+			for (int i = 0; i < outlineSamples; i++) {
+				outLine.append(orientedLabel + "_X_" + i + TAB);
+				outLine.append(orientedLabel + "_Y_" + i + TAB);
 			}
 		}
 
@@ -230,14 +304,20 @@ public class DatasetStatsExporter extends StatsExporter {
 							.append(n.getSourceFileName() + TAB)
 							.append(n.getOriginalCentreOfMass().toString() + TAB);
 
-					appendNucleusStats(outLine, d, n);
+					if (isIncludeMeasurements) {
+						appendNucleusStats(outLine, d, n);
+
+						if (isIncludeSegments) {
+							appendSegments(outLine, n);
+						}
+					}
 
 					if (isIncludeProfiles) {
 						appendProfiles(outLine, n);
 					}
 
-					if (isIncludeSegments) {
-						appendSegments(outLine, n);
+					if (isIncludeOutlines) {
+						appendOutlines(outLine, n);
 					}
 
 					// Remove final tab
@@ -286,6 +366,16 @@ public class DatasetStatsExporter extends StatsExporter {
 				outLine.append(c.getMeasurement(s) + TAB);
 			}
 		}
+
+		if (isIncludePixelHistogram) {
+			for (int channel : pixelHistogramChannels) {
+				for (Measurement m : Measurement.getPixelHistogramMeasurements(channel)) {
+					// if there is no value, returns 0
+					outLine.append(c.getMeasurement(m) + TAB);
+				}
+			}
+		}
+
 	}
 
 	/**
@@ -378,4 +468,85 @@ public class DatasetStatsExporter extends StatsExporter {
 		}
 		return profileLength;
 	}
+
+	private void appendOutlines(StringBuilder outLine, Nucleus n) {
+
+		try {
+			// Add the outline coordinates to the output line
+			String borderString = createOutlineString(n);
+			outLine.append(borderString).append(TAB);
+
+			// Add the oriented outline coordinates to the output line
+			Nucleus o = n.getOrientedNucleus();
+			o.moveCentreOfMass(IPoint.atOrigin());
+			String orientedString = createOutlineString(o);
+			outLine.append(orientedString);
+
+		} catch (MissingLandmarkException | ProfileException | ComponentCreationException e) {
+			LOGGER.warning(() -> "Error creating outline to export for " + n.getNameAndNumber());
+		}
+	}
+
+	private String createOutlineString(Nucleus n)
+			throws ProfileException, MissingLandmarkException {
+		// If a landmark to offset has been specified, lmOffset will not be null
+		OrientationMark lmOffset = null;
+		for (OrientationMark lm : n.getOrientationMarks()) {
+			if (lm.name().equals(
+					options.getString(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY))) {
+				lmOffset = lm;
+			}
+		}
+
+		// Get the borders offset to requested landmark (if present in options)
+		List<IPoint> borderList = lmOffset == null ? n.getBorderList()
+				: n.getBorderList(lmOffset);
+
+		// Normalise border list - if required - to given number of points
+		if (options.getBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY)) {
+			borderList = normaliseBorderList(borderList,
+					options.getInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY));
+		}
+
+		// Add the outline coordinates to the output line
+		return borderList.stream()
+				.map(p -> p.getX() + TAB + p.getY())
+				.collect(Collectors.joining(TAB));
+	}
+
+	/**
+	 * Given an input border list, sample n points equally spaced around the border
+	 * 
+	 * @param inputBorder
+	 * @return
+	 * @throws ProfileException
+	 */
+	private List<IPoint> normaliseBorderList(List<IPoint> inputBorder, int nPoints)
+			throws ProfileException {
+
+		if (nPoints == inputBorder.size())
+			return inputBorder;
+
+		// This is basically the same interpolation as a profile, but for two
+		// dimensions, x and y. Convert to two profiles
+		float[] xpoints = ArrayUtils
+				.toFloat(inputBorder.stream().mapToDouble(IPoint::getX).toArray());
+		float[] ypoints = ArrayUtils
+				.toFloat(inputBorder.stream().mapToDouble(IPoint::getY).toArray());
+
+		IProfile xprofile = new DefaultProfile(xpoints);
+		IProfile yprofile = new DefaultProfile(ypoints);
+
+		IProfile xScale = xprofile.interpolate(nPoints);
+		IProfile yScale = yprofile.interpolate(nPoints);
+
+		List<IPoint> result = new ArrayList<>();
+		for (int i = 0; i < nPoints; i++) {
+			result.add(new FloatPoint(xScale.get(i), yScale.get(i)));
+		}
+
+		return result;
+
+	}
+
 }

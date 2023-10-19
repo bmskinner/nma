@@ -16,11 +16,13 @@
  ******************************************************************************/
 package com.bmskinner.nma.gui.main;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import com.bmskinner.nma.components.Version;
@@ -51,7 +53,15 @@ public abstract class AbstractMainWindow extends JFrame implements MainView {
 	 */
 	protected AbstractMainWindow() {
 		setTitle(PROGRAM_TITLE_BAR_LBL);
+		loadImageIcon();
 
+	}
+
+	protected void loadImageIcon() {
+		ClassLoader cl = this.getClass().getClassLoader();
+		URL url = cl.getResource("icons/icon.png");
+		ImageIcon icon = new ImageIcon(url);
+		setIconImage(icon.getImage());
 	}
 
 	/**
@@ -69,23 +79,22 @@ public abstract class AbstractMainWindow extends JFrame implements MainView {
 		// charts to redraw at the new aspect ratio rather than stretch.
 		this.addWindowStateListener((e) -> {
 
-				Runnable r = () -> {
-					try {
-						// If the update is called immediately, the chart size has
-						// not yet changed, and therefore will render at the wrong aspect
-						// ratio
-						Thread.sleep(100);
-					} catch (InterruptedException e1) {
-						LOGGER.log(Level.WARNING, "Error in window state listener", e1);
-						Thread.currentThread().interrupt();
-						return;
-					}
-					for (TabPanel d : detailPanels)
-						d.updateSize();
-				};
-				ThreadManager.getInstance().submit(r);
+			Runnable r = () -> {
+				try {
+					// If the update is called immediately, the chart size has
+					// not yet changed, and therefore will render at the wrong aspect
+					// ratio
+					Thread.sleep(100);
+				} catch (InterruptedException e1) {
+					LOGGER.log(Level.WARNING, "Error in window state listener", e1);
+					Thread.currentThread().interrupt();
+					return;
+				}
+				for (TabPanel d : detailPanels)
+					d.updateSize();
+			};
+			ThreadManager.getInstance().submit(r);
 
-			
 		});
 
 		this.setDropTarget(new MainDragAndDropTarget());

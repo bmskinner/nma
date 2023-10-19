@@ -56,15 +56,14 @@ public class FishRemappingFinder extends VoidFinder {
 	@Override
 	public Void findInImage(@NonNull File imageFile) throws ImageImportException {
 
-		// Import the image as a stack
 		String imageName = imageFile.getName();
 
-		LOGGER.finest("Converting image");
-		ImageProcessor openProcessor = new ImageImporter(imageFile).toConverter()
-				.convertToRGBGreyscale()
-				.invert()
-				.convertToColorProcessor()
-				.toProcessor();
+		ImageProcessor openProcessor = new ImageConverter(
+				ImageImporter.importFileTo24bit(imageFile))
+						.convertToRGBGreyscale()
+						.invert()
+						.convertToColorProcessor()
+						.toProcessor();
 
 		fireDetectionEvent(openProcessor.duplicate(), "Original image");
 

@@ -41,16 +41,16 @@ import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.rules.OrientationMark;
+import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
+import com.bmskinner.nma.io.DatasetMeasurementsExporter;
 import com.bmskinner.nma.io.DatasetOutlinesExporter;
 import com.bmskinner.nma.io.DatasetProfileExporter;
 import com.bmskinner.nma.io.DatasetShellsExporter;
 import com.bmskinner.nma.io.DatasetSignalsExporter;
-import com.bmskinner.nma.io.DatasetStatsExporter;
-import com.bmskinner.nma.io.Io;
 
 /**
  * The base action for exporting stats from datasets
@@ -59,11 +59,11 @@ import com.bmskinner.nma.io.Io;
  * @since 1.13.8
  *
  */
-public abstract class ExportStatsAction extends MultiDatasetResultAction {
+public abstract class ExportMeasurementsAction extends MultiDatasetResultAction {
 
-	private static final Logger LOGGER = Logger.getLogger(ExportStatsAction.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ExportMeasurementsAction.class.getName());
 
-	protected ExportStatsAction(@NonNull final List<IAnalysisDataset> datasets,
+	protected ExportMeasurementsAction(@NonNull final List<IAnalysisDataset> datasets,
 			@NonNull final String label,
 			@NonNull final ProgressBarAcceptor acceptor) {
 		super(datasets, label, acceptor);
@@ -76,7 +76,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 	 * @since 1.13.4
 	 *
 	 */
-	public static class ExportNuclearStatsAction extends ExportStatsAction {
+	public static class ExportNuclearStatsAction extends ExportMeasurementsAction {
 
 		private static final @NonNull String PROGRESS_LBL = "Exporting nuclear stats";
 
@@ -91,19 +91,22 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 			SubAnalysisSetupDialog optionsPanel = new ExportOptionsDialog(datasets);
 			if (optionsPanel.isReadyToRun()) {
 
-				File file = FileSelector.chooseStatsExportFile(datasets, "stats");
+				try {
+					File file = FileSelector.chooseStatsExportFile(datasets, "stats");
+					if (is.fileIsOKForSave(file)) {
 
-				if (file == null) {
+						IAnalysisMethod m = new DatasetMeasurementsExporter(file, datasets,
+								optionsPanel.getOptions());
+						worker = new DefaultAnalysisWorker(m, datasets.size());
+						worker.addPropertyChangeListener(this);
+						this.setProgressMessage("Exporting stats");
+						ThreadManager.getInstance().submit(worker);
+					} else {
+						cancel();
+					}
+				} catch (RequestCancelledException e) {
 					cancel();
-					return;
 				}
-
-				IAnalysisMethod m = new DatasetStatsExporter(file, datasets,
-						optionsPanel.getOptions());
-				worker = new DefaultAnalysisWorker(m, datasets.size());
-				worker.addPropertyChangeListener(this);
-				this.setProgressMessage("Exporting stats");
-				ThreadManager.getInstance().submit(worker);
 			} else {
 				cancel();
 			}
@@ -119,7 +122,13 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 		private class ExportOptionsDialog extends SubAnalysisSetupDialog {
 
 			private HashOptions options = new OptionsBuilder().build();
-			private static final String PROFILE_SAMPLE_LBL = "Profile samples";
+
+			private static final String INCLUDE_MEASUREMENTS_LBL = "Include measurements";
+			private static final String INCLUDE_OUTLINES_LBL = "Include outlines";
+			private static final String INCLUDE_PROFILES_LBL = "Include profiles";
+			private static final String PROFILE_SAMPLE_LBL = "Profile length";
+			private static final String OUTLINE_SAMPLE_LBL = "Outline length";
+			private static final String OM_LBL = "Orientation mark to start from";
 
 			public ExportOptionsDialog(final List<IAnalysisDataset> datasets) {
 				super(datasets, "Export options");
@@ -146,16 +155,82 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 				panel.setLayout(layout);
 				List<JLabel> labels = new ArrayList<>();
 				List<Component> fields = new ArrayList<>();
-				SpinnerModel model = new SpinnerNumberModel(100, // initial
+
+				JCheckBox isExportMeasurementsBox = new JCheckBox("", true);
+				isExportMeasurementsBox.addChangeListener(e -> {
+					options.set(DefaultOptions.EXPORT_MEASUREMENTS_KEY,
+							isExportMeasurementsBox.isSelected());
+				});
+
+				SpinnerModel profileInterpolationModel = new SpinnerNumberModel(100, // initial
 						100, // min
 						1000, // max
 						1); // step
-				JSpinner spinner = new JSpinner(model);
+				JSpinner profileInterpolationSpinner = new JSpinner(profileInterpolationModel);
 
-				spinner.addChangeListener(
-						e -> addIntToOptions(spinner, options, Io.PROFILE_SAMPLES_KEY));
+				profileInterpolationSpinner.addChangeListener(
+						e -> addIntToOptions(profileInterpolationSpinner, options,
+								HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH));
+
+				JCheckBox isExportProfilesBox = new JCheckBox("", true);
+				JCheckBox isExportOutlinesBox = new JCheckBox("", false);
+
+				isExportProfilesBox.addChangeListener(e -> {
+					options.setBoolean(DefaultOptions.EXPORT_PROFILES_KEY,
+							isExportProfilesBox.isSelected());
+					profileInterpolationSpinner.setEnabled(
+							isExportProfilesBox.isSelected());
+				});
+
+				// If downsamping, number of points to export
+
+				SpinnerModel outlineInterpolationModel = new SpinnerNumberModel(100, // initial
+						10, // min
+						1000, // max
+						1); // step
+				JSpinner outlineInterpolationSpinner = new JSpinner(outlineInterpolationModel);
+
+				outlineInterpolationSpinner.addChangeListener(
+						e -> addIntToOptions(outlineInterpolationSpinner, options,
+								DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY));
+
+				// Dropdown for which orientation point to index on
+				JComboBox<OrientationMark> omBox = new JComboBox<>(OrientationMark.values());
+				omBox.setSelectedItem(OrientationMark.REFERENCE);
+
+				omBox.addActionListener(e -> {
+					options.setString(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
+							((OrientationMark) omBox.getSelectedItem()).name());
+				});
+
+				isExportOutlinesBox.addChangeListener(e -> {
+					options.set(DefaultOptions.EXPORT_OUTLINES_KEY,
+							isExportOutlinesBox.isSelected());
+					outlineInterpolationSpinner.setEnabled(isExportOutlinesBox.isSelected());
+					omBox.setEnabled(isExportOutlinesBox.isSelected());
+
+				});
+
+				// Add elements in order
+
+				labels.add(new JLabel(INCLUDE_MEASUREMENTS_LBL));
+				fields.add(isExportMeasurementsBox);
+
+				labels.add(new JLabel(INCLUDE_PROFILES_LBL));
+				fields.add(isExportProfilesBox);
+
 				labels.add(new JLabel(PROFILE_SAMPLE_LBL));
-				fields.add(spinner);
+				fields.add(profileInterpolationSpinner);
+
+				labels.add(new JLabel(INCLUDE_OUTLINES_LBL));
+				fields.add(isExportOutlinesBox);
+
+				labels.add(new JLabel(OUTLINE_SAMPLE_LBL));
+				fields.add(outlineInterpolationSpinner);
+
+				labels.add(new JLabel(OM_LBL));
+				fields.add(omBox);
+
 				addLabelTextRows(labels, fields, layout, panel);
 				add(panel, BorderLayout.CENTER);
 				add(createFooter(), BorderLayout.SOUTH);
@@ -163,7 +238,15 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
 			@Override
 			protected void setDefaults() {
-				options.setInt(Io.PROFILE_SAMPLES_KEY, 100);
+				options.set(HashOptions.EXPORT_MEASUREMENTS_KEY, true);
+				options.set(HashOptions.EXPORT_PROFILES_KEY, true);
+				options.set(HashOptions.EXPORT_OUTLINES_KEY, false);
+
+				options.set(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 100);
+				options.set(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, true);
+				options.set(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
+						OrientationMark.REFERENCE.name());
+				options.set(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
 			}
 
 		}
@@ -177,7 +260,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 	 * @since 1.17.2
 	 *
 	 */
-	public static class ExportNuclearProfilesAction extends ExportStatsAction {
+	public static class ExportNuclearProfilesAction extends ExportMeasurementsAction {
 
 		private static final @NonNull String PROGRESS_LBL = "Exporting nuclear stats";
 
@@ -188,21 +271,22 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
 		@Override
 		public void run() {
+			try {
+				File file = FileSelector.chooseStatsExportFile(datasets, "profiles");
+				if (is.fileIsOKForSave(file)) {
 
-			File file = FileSelector.chooseStatsExportFile(datasets, "profiles");
-
-			if (file == null) {
+					IAnalysisMethod m = new DatasetProfileExporter(file, datasets,
+							new DefaultOptions());
+					worker = new DefaultAnalysisWorker(m, datasets.size());
+					worker.addPropertyChangeListener(this);
+					this.setProgressMessage("Exporting profiles");
+					ThreadManager.getInstance().submit(worker);
+				} else {
+					cancel();
+				}
+			} catch (RequestCancelledException e) {
 				cancel();
-				return;
 			}
-
-			IAnalysisMethod m = new DatasetProfileExporter(file, datasets,
-					new DefaultOptions());
-			worker = new DefaultAnalysisWorker(m, datasets.size());
-			worker.addPropertyChangeListener(this);
-			this.setProgressMessage("Exporting profiles");
-			ThreadManager.getInstance().submit(worker);
-
 		}
 	}
 
@@ -213,7 +297,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 	 * @since 1.17.2
 	 *
 	 */
-	public static class ExportNuclearOutlinesAction extends ExportStatsAction {
+	public static class ExportNuclearOutlinesAction extends ExportMeasurementsAction {
 
 		private static final @NonNull String PROGRESS_LBL = "Exporting nuclear stats";
 
@@ -227,20 +311,23 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
 			SubAnalysisSetupDialog optionsPanel = new ExportOutlinesOptionsDialog(datasets);
 			if (optionsPanel.isReadyToRun()) {
+				try {
+					File file = FileSelector.chooseStatsExportFile(datasets, "outlines");
+					if (is.fileIsOKForSave(file)) {
+						IAnalysisMethod m = new DatasetOutlinesExporter(file, datasets,
+								optionsPanel.getOptions());
+						worker = new DefaultAnalysisWorker(m, datasets.size());
+						worker.addPropertyChangeListener(this);
+						this.setProgressMessage("Exporting outlines");
+						ThreadManager.getInstance().submit(worker);
+					} else {
+						cancel();
+					}
 
-				File file = FileSelector.chooseStatsExportFile(datasets, "outlines");
-
-				if (file == null) {
+				} catch (RequestCancelledException e) {
 					cancel();
-					return;
 				}
 
-				IAnalysisMethod m = new DatasetOutlinesExporter(file, datasets,
-						optionsPanel.getOptions());
-				worker = new DefaultAnalysisWorker(m, datasets.size());
-				worker.addPropertyChangeListener(this);
-				this.setProgressMessage("Exporting outlines");
-				ThreadManager.getInstance().submit(worker);
 			} else {
 				cancel();
 			}
@@ -338,10 +425,10 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
 			@Override
 			protected void setDefaults() {
-				options.setBoolean(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, false);
-				options.setString(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
+				options.set(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, false);
+				options.set(DefaultOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY,
 						OrientationMark.REFERENCE.name());
-				options.setInt(DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
+				options.set(DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
 			}
 
 		}
@@ -355,7 +442,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 	 * @since 1.13.8
 	 *
 	 */
-	public static class ExportShellsAction extends ExportStatsAction {
+	public static class ExportShellsAction extends ExportMeasurementsAction {
 
 		private static final String PROGRESS_LBL = "Exporting shells";
 
@@ -367,18 +454,22 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 		@Override
 		public void run() {
 
-			File file = FileSelector.chooseStatsExportFile(datasets, "shells");
+			try {
+				File file = FileSelector.chooseStatsExportFile(datasets, "shells");
+				if (is.fileIsOKForSave(file)) {
 
-			if (file == null) {
+					IAnalysisMethod m = new DatasetShellsExporter(file, datasets,
+							new DefaultOptions());
+					worker = new DefaultAnalysisWorker(m, datasets.size());
+					worker.addPropertyChangeListener(this);
+					this.setProgressMessage("Exporting stats");
+					ThreadManager.getInstance().submit(worker);
+				} else {
+					cancel();
+				}
+			} catch (RequestCancelledException e) {
 				cancel();
-				return;
 			}
-
-			IAnalysisMethod m = new DatasetShellsExporter(file, datasets, new DefaultOptions());
-			worker = new DefaultAnalysisWorker(m, datasets.size());
-			worker.addPropertyChangeListener(this);
-			this.setProgressMessage("Exporting stats");
-			ThreadManager.getInstance().submit(worker);
 
 		}
 
@@ -391,7 +482,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 	 * @since 1.13.8
 	 *
 	 */
-	public static class ExportSignalsAction extends ExportStatsAction {
+	public static class ExportSignalsAction extends ExportMeasurementsAction {
 
 		private static final String PROGRESS_LBL = "Exporting signals";
 
@@ -403,19 +494,22 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 		@Override
 		public void run() {
 
-			File file = FileSelector.chooseStatsExportFile(datasets, "signals");
+			try {
+				File file = FileSelector.chooseStatsExportFile(datasets, "signals");
+				if (is.fileIsOKForSave(file)) {
 
-			if (file == null) {
+					IAnalysisMethod m = new DatasetSignalsExporter(file, datasets,
+							new DefaultOptions());
+					worker = new DefaultAnalysisWorker(m, datasets.size());
+					worker.addPropertyChangeListener(this);
+					this.setProgressMessage("Exporting stats");
+					ThreadManager.getInstance().submit(worker);
+				} else {
+					cancel();
+				}
+			} catch (RequestCancelledException e) {
 				cancel();
-				return;
 			}
-
-			IAnalysisMethod m = new DatasetSignalsExporter(file, datasets, new DefaultOptions());
-			worker = new DefaultAnalysisWorker(m, datasets.size());
-			worker.addPropertyChangeListener(this);
-			this.setProgressMessage("Exporting stats");
-			ThreadManager.getInstance().submit(worker);
-
 		}
 
 	}

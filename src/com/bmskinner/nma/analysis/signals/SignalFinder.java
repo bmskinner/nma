@@ -42,9 +42,9 @@ import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
-import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
+import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.ImageStack;
 import ij.gui.Roi;
@@ -96,7 +96,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 			return list;
 
 		for (File f : folder.listFiles()) {
-			if (ImageImporter.fileIsImportable(f)) {
+			if (ImageImporter.isFileImportable(f)) {
 				try {
 					list.addAll(findInImage(f));
 				} catch (ImageImportException e) {
@@ -135,7 +135,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 		// Import the image processor
 		// Note we are checking stack size to avoid exceptions in the preview windows
 		// when the image does n
-		ImageStack stack = new ImageImporter(imageFile).importToStack();
+		ImageStack stack = ImageImporter.importToStack(imageFile);
 		int stackNumber = ImageImporter.rgbToStack(signalOptions.getInt(HashOptions.CHANNEL));
 		// Ignore incorrect channel selections
 		if (stack.getSize() < stackNumber) {
@@ -256,8 +256,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 		List<INuclearSignal> list = new ArrayList<>();
 
 		// Import the image processor
-		ImageProcessor greyProcessor = new ImageImporter(imageFile)
-				.importImage(signalOptions.getInt(HashOptions.CHANNEL));
+		ImageProcessor greyProcessor = ImageImporter
+				.importImage(imageFile, signalOptions.getInt(HashOptions.CHANNEL));
 
 		// The given image file may not be the same image that the nucleus was
 		// detected in.

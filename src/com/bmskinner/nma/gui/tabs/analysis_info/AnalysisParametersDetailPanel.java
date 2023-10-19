@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.bmskinner.nma.gui.tabs;
+package com.bmskinner.nma.gui.tabs.analysis_info;
 
 import java.awt.BorderLayout;
 import java.util.List;
@@ -31,6 +31,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.renderers.JTextAreaCellRenderer;
 import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
+import com.bmskinner.nma.gui.tabs.TableDetailPanel;
 import com.bmskinner.nma.visualisation.options.AbstractOptions;
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
@@ -38,20 +39,21 @@ import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
 import com.bmskinner.nma.visualisation.tables.AnalysisDatasetTableCreator;
 
 /**
- * Holds the nuclear detection parameters
+ * Display the nuclear detection parameters
  *
  */
 @SuppressWarnings("serial")
-public class AnalysisDetailPanel extends TableDetailPanel implements ScaleUpdatedListener {
+public class AnalysisParametersDetailPanel extends TableDetailPanel
+		implements ScaleUpdatedListener {
 
-	private static final String PANEL_TITLE_LBL = "Analysis info";
-	private static final String PANEL_DESC_LBL = "Show detection parameters and dataset information";
+	private static final String PANEL_TITLE_LBL = "Detection parameters";
+	private static final String PANEL_DESC_LBL = "Show nucleus detection parameters for datasets";
 
 	private static final String HEADER_LBL = "Green rows have the same value in all columns";
 	private ExportableTable table;
 	JScrollPane scrollPane;
 
-	public AnalysisDetailPanel() {
+	public AnalysisParametersDetailPanel() {
 		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
 		this.setLayout(new BorderLayout());

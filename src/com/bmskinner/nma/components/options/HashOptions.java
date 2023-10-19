@@ -206,6 +206,18 @@ public interface HashOptions extends Serializable, XmlSerializable {
 
 	// Export options
 
+	/** Should measurements be exported */
+	String EXPORT_MEASUREMENTS_KEY = "EXPORT_MEASUREMENTS";
+
+	/** Should profiles be exported */
+	String EXPORT_PROFILES_KEY = "EXPORT_PROFILES";
+
+	/** Interpolation length for profiles */
+	String EXPORT_PROFILE_INTERPOLATION_LENGTH = "EXPORT_PROFILE_INTERPOLATION_LENGTH";
+
+	/** Should nuclear outlines be exported */
+	String EXPORT_OUTLINES_KEY = "EXPORT_OUTLINES";
+
 	/**
 	 * Should the exported outline be normalised to a consistent number of points or
 	 * export all points?
@@ -457,6 +469,16 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	 * @return
 	 */
 	Object getValue(String key);
+
+	/**
+	 * Get the object stored with the given key and cast to the appropriate type.
+	 * This is a shortcut to {@link HashOptions::getValue}
+	 * 
+	 * @param <A> the return type
+	 * @param key the key to fetch
+	 * @return the object under they key, or "N/A" if not present
+	 */
+	<A> A get(String key);
 
 	/**
 	 * Set to the values in the given options. Shared keys will be updated, keys not

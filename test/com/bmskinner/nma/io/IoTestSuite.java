@@ -17,6 +17,7 @@ import com.bmskinner.nma.io.xml.IoXmlTestSuite;
 @RunWith(Suite.class)
 @SuiteClasses({
 		IoConversionTestSuite.class,
+		ImageImporterTest.class,
 		DatasetOutlinesExporterTest.class,
 		IoXmlTestSuite.class,
 		DatasetMergeTest.class,

@@ -130,6 +130,7 @@ public class UserActionEvent extends EventObject {
 	public static final String RECALCULATE_MEDIAN = "Recalculate median profiles";
 
 	public static final String RUN_GLCM_ANALYSIS = "Run GLCM analysis";
+	public static final String RUN_HISTOGRAM_CALC = "Run histogram calculations";
 
 	private static final long serialVersionUID = 1L;
 	private String message;

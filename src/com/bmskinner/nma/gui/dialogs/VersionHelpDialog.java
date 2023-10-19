@@ -104,7 +104,10 @@ public class VersionHelpDialog extends SettingsDialog {
 				+ "(click the button below to open the website)" + Io.NEWLINE + Io.NEWLINE
 				+ "A full guide to the software is included via Help > 'Open user guide'"
 				+ Io.NEWLINE + Io.NEWLINE
-				+ "If you use this in your research, please cite our papers!" + Io.NEWLINE;
+				+ "If you use this in your research, please cite our papers!" + Io.NEWLINE
+				+ Io.NEWLINE
+				+ "Skinner et al. 2019: doi:10.1093/biolre/ioz013" + Io.NEWLINE
+				+ "Skinner 2022: doi:10.21105/joss.04767";
 
 		textBox.setText(text);
 		textBox.setEditable(false);

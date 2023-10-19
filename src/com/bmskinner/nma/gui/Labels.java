@@ -112,10 +112,17 @@ public class Labels {
 		public static final String WARP_BTN_TOOLTIP = "Requires single dataset with consensus nucleus and signals";
 
 		public static final String POST_FISH_MAPPING_LBL = "Post-FISH mapping";
-		public static final String ADD_CHILD_CELLS_LBL = "Child collection from file";
-		public static final String ADD_CLUSTER_MANUAL_LBL = "Clustering manually";
-		public static final String ADD_CLUSTER_AUTO_LBL = "Clustering automatically";
-		public static final String ADD_CLUSTER_FILE_LBL = "Clustering from file";
+		public static final String POST_FISH_MAPPING_TOOLTIP = "Match FISH images with pre-FISH nuclei";
+		public static final String ADD_CHILD_CELLS_LBL = "Child dataset from cell location file";
+		public static final String ADD_CHILD_CELLS_TOOLTIP = "Select cells based on image name and location of centre-of-mass";
+
+		public static final String CLUSTER = "Cluster...";
+		public static final String ADD_CLUSTER_MANUAL_LBL = "Manually";
+		public static final String ADD_CLUSTER_MANUAL_TOOLTIP = "Choose which cells to put in each cluster";
+		public static final String ADD_CLUSTER_AUTO_LBL = "Automatically";
+		public static final String ADD_CLUSTER_AUTO_TOOLTIP = "Assign cells to clusters using measured values";
+		public static final String ADD_CLUSTER_FILE_LBL = "From cluster file";
+		public static final String ADD_CLUSTER_FILE_TOOLTIP = "Import a map of cells to clusters created externally";
 
 		public static final String CHANGE_SCALE_LBL = "Set scale";
 
@@ -310,12 +317,22 @@ public class Labels {
 		public static final String NUCLEUS_DETECTION = "Nucleus detection";
 		public static final String NUCLEUS_CIRCULARITY = "Nucleus circularity";
 		public static final String NUCLEUS_SIZE = "Nucleus area";
-		public static final String COLLECTION_SOURCE = "Image source";
+		public static final String COLLECTION_SOURCE = "Original image source";
 		public static final String PIXEL_SCALE = "Pixel scale";
 		public static final String RUN_TIME = "Run time";
 		public static final String RULESET_USED = "Landmark ruleset";
 		public static final String SOFTWARE_VERSION = "Created in";
+	}
+
+	public static class AnalysisRulesets {
+		public static final String RULESET_NAME = "Landmark ruleset";
 		public static final String RULE_APPLICATON_TYPE = "Rule type";
+		public static final String RULESET_PROFILE = "Profile type";
+		public static final String RULE_NAME = "Rule";
+		public static final String LANDMARK_NAME = "Landmark";
+		public static final String ORIENTATION_NAME = "Orientation";
+		public static final String MEASUREMENT_NAME = "Measureable value";
+		public static final String RULE_VALUES = "Values";
 
 	}
 

@@ -249,7 +249,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 
 		Stream.of(folder.listFiles()).forEach(file -> {
 
-			boolean ok = ImageImporter.fileIsImportable(file); // check file
+			boolean ok = ImageImporter.isFileImportable(file); // check file
 																// extension
 
 			if (ok) {

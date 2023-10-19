@@ -55,7 +55,8 @@ public interface InputSupplier {
 	 * @return
 	 * @throws RequestCancelledException
 	 */
-	String requestString(@NonNull String message, @Nullable String existingValue) throws RequestCancelledException;
+	String requestString(@NonNull String message, @Nullable String existingValue)
+			throws RequestCancelledException;
 
 	/**
 	 * Request an int input
@@ -77,7 +78,8 @@ public interface InputSupplier {
 	 * @return
 	 * @throws RequestCancelledException
 	 */
-	int requestInt(@NonNull String messsage, int start, int min, int max, int step) throws RequestCancelledException;
+	int requestInt(@NonNull String messsage, int start, int min, int max, int step)
+			throws RequestCancelledException;
 
 	/**
 	 * Request a double input
@@ -111,7 +113,8 @@ public interface InputSupplier {
 	 * @return the new colour
 	 * @throws RequestCancelledException
 	 */
-	Color requestColor(@NonNull String message, @Nullable Color oldColor) throws RequestCancelledException;
+	Color requestColor(@NonNull String message, @Nullable Color oldColor)
+			throws RequestCancelledException;
 
 	/**
 	 * Request a file input.
@@ -156,7 +159,8 @@ public interface InputSupplier {
 	 * @return
 	 * @throws RequestCancelledException
 	 */
-	File requestFolder(@Nullable String message, @Nullable File defaultFolder) throws RequestCancelledException;
+	File requestFolder(@Nullable String message, @Nullable File defaultFolder)
+			throws RequestCancelledException;
 
 	/**
 	 * Request a file input.
@@ -176,7 +180,8 @@ public interface InputSupplier {
 	 * @return
 	 * @throws RequestCancelledException
 	 */
-	File requestFile(@Nullable String message, @Nullable File defaultFolder, @Nullable String extension,
+	File requestFile(@Nullable String message, @Nullable File defaultFolder,
+			@Nullable String extension,
 			@Nullable String extensionMessage) throws RequestCancelledException;
 
 	/**
@@ -188,7 +193,8 @@ public interface InputSupplier {
 	 * @return the selected file
 	 * @throws RequestCancelledException
 	 */
-	File requestFileSave(@Nullable File defaultFolder, String name, String extension) throws RequestCancelledException;
+	File requestFileSave(@Nullable File defaultFolder, String name, String extension)
+			throws RequestCancelledException;
 
 	/**
 	 * Request the user to choose between a set of options. The default option will
@@ -209,7 +215,8 @@ public interface InputSupplier {
 	 * @param title   a title to provide on dialog boxes
 	 * @return the chosen option
 	 */
-	int requestOption(Object[] options, String message, String title) throws RequestCancelledException;
+	int requestOption(Object[] options, String message, String title)
+			throws RequestCancelledException;
 
 	/**
 	 * Request the user to choose between a set of options
@@ -231,7 +238,8 @@ public interface InputSupplier {
 	 * @param message       the message to provide to the user
 	 * @return the chosen option
 	 */
-	int requestOption(Object[] options, int defaultOption, String message) throws RequestCancelledException;
+	int requestOption(Object[] options, int defaultOption, String message)
+			throws RequestCancelledException;
 
 	/**
 	 * Request the user to choose between a set of options. All the options will be
@@ -242,7 +250,8 @@ public interface InputSupplier {
 	 * @param title   a title to provide on dialog boxes
 	 * @return the chosen option
 	 */
-	int requestOptionAllVisible(Object[] options, String message, String title) throws RequestCancelledException;
+	int requestOptionAllVisible(Object[] options, String message, String title)
+			throws RequestCancelledException;
 
 	/**
 	 * Request the user to choose between a set of options. All the options will be
@@ -267,6 +276,16 @@ public interface InputSupplier {
 	 * @throws RequestCancelledException
 	 */
 	boolean requestApproval(String message, String title) throws RequestCancelledException;
+
+	/**
+	 * Test the given file is suitable as a save option. Checks nulls and requests
+	 * confirmation of overwriting any existing file
+	 * 
+	 * @param file the file to check
+	 * @return true if the file should be written to, false otherwise
+	 * @throws RequestCancelledException if the user cancels
+	 */
+	boolean fileIsOKForSave(File file) throws RequestCancelledException;
 
 	/**
 	 * Exception thrown when the user cancels the input request

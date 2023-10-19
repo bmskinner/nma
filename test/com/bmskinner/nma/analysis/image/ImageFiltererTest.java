@@ -135,8 +135,8 @@ public class ImageFiltererTest {
 	@Test
 	public void testNormaliseToCounterstainOnRealImage() throws Exception {
 
-		ImageProcessor ip1 = new ImageImporter(TestResources.GLCM_SAMPLE_IMAGE).importImage(2);
-		ImageProcessor ip2 = new ImageImporter(TestResources.GLCM_SAMPLE_IMAGE).importImage(2);
+		ImageProcessor ip1 = ImageImporter.importImage(TestResources.GLCM_SAMPLE_IMAGE, 2);
+		ImageProcessor ip2 = ImageImporter.importImage(TestResources.GLCM_SAMPLE_IMAGE, 2);
 
 		ImageProcessor result = ImageFilterer.normaliseToCounterStain(ip1, ip2);
 
@@ -155,10 +155,10 @@ public class ImageFiltererTest {
 	@Test
 	public void testNormaliseToCounterstainOnGradientImage() throws Exception {
 		// Import a real image and test range is zero
-		ImageProcessor ip1 = new ImageImporter(TestResources.WARPING_NORMALISATION_IMAGE)
-				.importImage(0);
-		ImageProcessor ip2 = new ImageImporter(TestResources.WARPING_NORMALISATION_IMAGE)
-				.importImage(2);
+		ImageProcessor ip1 = ImageImporter.importImage(TestResources.WARPING_NORMALISATION_IMAGE,
+				0);
+		ImageProcessor ip2 = ImageImporter.importImage(TestResources.WARPING_NORMALISATION_IMAGE,
+				2);
 
 		ImageProcessor result = ImageFilterer.normaliseToCounterStain(ip1, ip2);
 //		new ImagePlus("", result).show();

@@ -226,8 +226,8 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 							.getNuclearSignalDetectionFolder(options.signalId())
 							.orElseThrow(MissingOptionException::new);
 					File imageFile = new File(imageFolder, n.getSourceFileName());
-					ip = new ImageImporter(imageFile)
-							.importImage(signalOptions.getInt(HashOptions.CHANNEL));
+					ip = ImageImporter
+							.importImage(imageFile, signalOptions.getInt(HashOptions.CHANNEL));
 
 				} else {
 					return createEmptyProcessor();

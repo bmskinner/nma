@@ -48,7 +48,7 @@ public abstract class VoidFinder extends AbstractFinder<Void> {
             return null;
 
         for(File f : files) {
-        	if (ImageImporter.fileIsImportable(f)) {
+        	if (ImageImporter.isFileImportable(f)) {
         		try {
         			findInImage(f);
         		} catch (ImageImportException e) {
