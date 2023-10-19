@@ -493,6 +493,9 @@ public class RuleSetCollection implements XmlSerializable {
 		if (getClass() != obj.getClass())
 			return false;
 		RuleSetCollection other = (RuleSetCollection) obj;
+
+		// note we do not compare 'version created' field deliberately
+		// since different NMA versions may have the same default options
 		return Objects.equals(map, other.map) && Objects.equals(name, other.name)
 				&& Objects.equals(orientationMarks, other.orientationMarks)
 				&& priorityAxis == other.priorityAxis
