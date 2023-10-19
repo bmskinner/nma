@@ -21,6 +21,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
  * Calculate the number of shared cells in datasets for Venn diagrams
  * 
  * @author ben
+ * @since 2.2.0
  *
  */
 public class VennCounter {
@@ -611,8 +612,8 @@ public class VennCounter {
 	 */
 	private void assignDatasets() {
 
-		LOGGER.fine(getType());
-		LOGGER.fine(getCountInfo());
+//		LOGGER.fine(getType());
+//		LOGGER.fine(getCountInfo());
 
 		if (nDatasets == 1)
 			positions.put(VennDatasetPosition.A, D1);
@@ -716,13 +717,6 @@ public class VennCounter {
 			d = findDatasetsWithCount(1).get(2);
 		}
 
-		if ("00031".equals(type)) { // three unshared within fourth
-			b = findDatasetsWithCount(3).get(0);
-			a = findDatasetsWithCount(2).get(0);
-			c = findDatasetsWithCount(2).get(1);
-			d = findDatasetsWithCount(2).get(2);
-		}
-
 		if ("00033".equals(type)) { // three separate, linked by one
 			b = findDatasetsWithCount(3).get(0);
 			a = findDatasetsWithCount(2).get(0);
@@ -731,13 +725,15 @@ public class VennCounter {
 
 		}
 
-		if ("00131".equals(type)) { // all within fourth, one and two shared, third unshared
-			// TODO
-		}
+		// 00031 has multiple possible configurations
 
-		if ("01331".equals(type)) { // all within fourth, other three are triangle
-			// TODO
-		}
+//		if ("00131".equals(type)) { // all within fourth, one and two shared, third unshared
+//			// TODO
+//		}
+//
+//		if ("01331".equals(type)) { // all within fourth, other three are triangle
+//			// TODO
+//		}
 
 		if ("00042".equals(type)) { // A overlaps CD, B overlaps CD
 			d = findDatasetsWithCount(3).get(0);

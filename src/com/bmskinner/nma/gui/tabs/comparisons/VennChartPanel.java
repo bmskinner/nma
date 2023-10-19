@@ -20,7 +20,7 @@ import com.bmskinner.nma.visualisation.venn.VennChartFactory;
 public class VennChartPanel extends ChartDetailPanel implements SwatchUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(VennChartPanel.class.getName());
-	private static final String PANEL_TITLE_LBL = "Venn chart";
+	private static final String PANEL_TITLE_LBL = "Venn diagrams";
 
 	private ExportableChartPanel chartPanel;
 
@@ -49,8 +49,8 @@ public class VennChartPanel extends ChartDetailPanel implements SwatchUpdatedLis
 				.setFillConsensus(GlobalOptions.getInstance().isFillConsensus())
 				.setScale(GlobalOptions.getInstance().getScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
-//				.setShowXAxis(false)
-//				.setShowYAxis(false)
+				.setShowXAxis(false)
+				.setShowYAxis(false)
 				.setTarget(chartPanel)
 				.build();
 

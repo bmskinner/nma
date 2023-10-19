@@ -38,7 +38,7 @@ public class VennChartFactory extends AbstractChartFactory {
 
 			if (!d.isValid())
 				return createTextAnnotatedEmptyChart(
-						"Cannot display more than four overlapping datasets");
+						"Cannot display more than five overlapping datasets");
 
 			JFreeChart chart = ChartFactory.createScatterPlot(null, null, null, d,
 					PlotOrientation.VERTICAL,

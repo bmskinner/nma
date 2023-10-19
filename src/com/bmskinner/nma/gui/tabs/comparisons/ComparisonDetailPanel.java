@@ -37,13 +37,13 @@ public class ComparisonDetailPanel extends DetailPanel {
 
 		tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
+		DetailPanel vennChartPanel = new VennChartPanel();
 		DetailPanel vennPanel = new VennDetailPanel();
 		DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel();
-		DetailPanel vennChartPanel = new VennChartPanel();
 
+		addPanel(tabPanel, vennChartPanel);
 		addPanel(tabPanel, vennPanel);
 		addPanel(tabPanel, pairwiseVennPanel);
-		addPanel(tabPanel, vennChartPanel);
 
 		this.add(tabPanel, BorderLayout.CENTER);
 	}

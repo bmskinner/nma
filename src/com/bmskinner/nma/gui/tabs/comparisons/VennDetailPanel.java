@@ -40,7 +40,7 @@ public class VennDetailPanel extends TableDetailPanel {
 
 	private static final Logger LOGGER = Logger.getLogger(VennDetailPanel.class.getName());
 
-	private static final String PANEL_TITLE_LBL = "Venn";
+	private static final String PANEL_TITLE_LBL = "Pairwise overlaps";
 	private static final String PANEL_DESC_LBL = "Pairwise comparison of cells shared between datasets";
 
 	private static final String HEADER_LBL = "Shows the percentage of cells in each dataset column shared with each other dataset";
