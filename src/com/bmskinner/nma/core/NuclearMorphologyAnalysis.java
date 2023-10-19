@@ -371,6 +371,11 @@ public class NuclearMorphologyAnalysis {
 					System.getProperty("java.version")));
 			LOGGER.config(() -> "NMA version: %s".formatted(Version.currentVersion()));
 
+			// Fix for issue 170 - requires a . in version string
+			String javaVersion = System.getProperty("java.version");
+			if (!javaVersion.contains("."))
+				System.setProperty("java.version", javaVersion + ".0");
+
 			// First invokation of the thread manager will log available resources
 			ThreadManager.getInstance();
 
