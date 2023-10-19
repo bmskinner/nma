@@ -262,10 +262,20 @@ public class ImageImporter implements Importer {
 			if (fileName.startsWith(prefix))
 				return false;
 
-		for (String fileType : IMPORTABLE_FILE_TYPES)
-			if (fileName.endsWith(fileType))
-				return true;
+		return isImageFile(file);
+	}
 
+	/**
+	 * Test if the file is one of the common image file types by checking the file
+	 * extension
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static boolean isImageFile(File file) {
+		for (String fileType : IMPORTABLE_FILE_TYPES)
+			if (file.getName().endsWith(fileType))
+				return true;
 		return false;
 	}
 

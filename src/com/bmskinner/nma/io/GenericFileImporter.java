@@ -78,6 +78,14 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 			return;
 		}
 
+		// We can't import image files direct to NMA, so give a sensible message
+		if (ImageImporter.isImageFile(file)) {
+			LOGGER.info(
+					"Image files cannot be opened directly, provide a folder of images instead.");
+			super.finished();
+			return;
+		}
+
 		setProgressMessage(PROGRESS_BAR_LABEL);
 		setProgressBarIndeterminate();
 

@@ -49,8 +49,6 @@ public class XMLImportMethod extends AbstractAnalysisMethod implements Importer 
 
 			cis.addCountListener((l) -> fireProgressEvent(l));
 			SAXBuilder saxBuilder = new SAXBuilder();
-//			saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-//			saxBuilder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 			doc = saxBuilder.build(cis);
 			fireIndeterminateState(); // TODO: hook the indeterminate state to the end of file
 										// reading,
