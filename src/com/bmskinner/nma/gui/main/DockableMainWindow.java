@@ -21,12 +21,10 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
-import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
@@ -85,7 +83,6 @@ public class DockableMainWindow extends AbstractMainWindow {
 	 */
 	public DockableMainWindow() {
 		super();
-		loadImageIcon();
 		createWindowListeners();
 
 		createUI();
@@ -103,13 +100,6 @@ public class DockableMainWindow extends AbstractMainWindow {
 					"Skipping update check because config setting CHECK_FOR_UPDATES is false");
 		}
 		centerOnScreen();
-	}
-
-	private void loadImageIcon() {
-		ClassLoader cl = this.getClass().getClassLoader();
-		URL url = cl.getResource("icons/icon.png");
-		ImageIcon icon = new ImageIcon(url);
-		setIconImage(icon.getImage());
 	}
 
 	/**

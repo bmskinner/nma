@@ -691,7 +691,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/ome/bio-formats_plugins  -->
+		<!-- https://mvnrepository.com/artifact/ome/bio-formats_plugins -->
 		<dependency>
 			<groupId>ome</groupId>
 			<artifactId>bio-formats_plugins</artifactId>
