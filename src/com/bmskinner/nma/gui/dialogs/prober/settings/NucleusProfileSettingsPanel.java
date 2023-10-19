@@ -107,9 +107,6 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 	}
 
 	private void setRuleset(RulesetEntry f) {
-
-		// TODO ensure that when ruleset changes, the prober loads the new ruleset
-
 		options.setRuleSetCollection(f.rsc);
 		fireOptionsChangeEvent();
 		fireProberReloadEvent();
@@ -138,12 +135,19 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 			setRuleset(selected);
 		});
 
-		// Check if the default option from the config file is present
+		// Check if the default ruleset name from the config file is present
+		// If there are multiple matching names, choose the most recent
+		// version
 		Optional<RulesetEntry> defaultEntry = Arrays.stream(availableRules)
 				.filter(r -> r.rsc.getName().equals(defaultRulesetName))
+				.sorted((r1, r2) -> r1.rsc.getRulesetVersion()
+						.isNewerThan(r2.rsc.getRulesetVersion())
+								? -1
+								: 1)
 				.findFirst();
 
-		// If a default ruleset is in the config options and the file is present set it
+		// If a default ruleset is in the config options, set it, otherwise
+		// use the first entry
 		if (defaultEntry.isPresent()) {
 			LOGGER.fine(() -> "Default ruleset present '%s': ".formatted(defaultRulesetName));
 			typeBox.setSelectedItem(defaultEntry.get());

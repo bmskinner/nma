@@ -40,6 +40,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
@@ -70,7 +71,11 @@ public class FluorescentNucleusFinder extends CellFinder {
 		nuclOptions = options.getNucleusDetectionOptions()
 				.orElseThrow(() -> new IllegalArgumentException("No nucleus options"));
 
-		validCellPredicate = createCellPredicate();
+		// Default edge filter using the constructor options. Can be overridden
+		// in preview detection only
+		final Predicate<ICell> edgeFilter = new PoorEdgeDetectionProfilePredicate(
+				options.getRuleSetCollection().getOtherOptions());
+		validCellPredicate = createCellPredicate(edgeFilter);
 
 		factory = ComponentBuilderFactory.createNucleusBuilderFactory(op.getRuleSetCollection(),
 				options.getProfileWindowProportion(), nuclOptions.getDouble(HashOptions.SCALE));
@@ -81,13 +86,9 @@ public class FluorescentNucleusFinder extends CellFinder {
 	 * 
 	 * @return
 	 */
-	private Predicate<ICell> createCellPredicate() {
+	private Predicate<ICell> createCellPredicate(final Predicate<ICell> edgeFilter) {
 
 		LOGGER.finer("Creating cell predicate");
-
-//		try {
-		final Predicate<ICell> edgeFilter = new PoorEdgeDetectionProfilePredicate(
-				options.getRuleSetCollection().getOtherOptions());
 
 		return (t) -> {
 
@@ -109,21 +110,15 @@ public class FluorescentNucleusFinder extends CellFinder {
 
 			// Only use the predicate if the box was ticked and the options are present
 			if (nuclOptions.has(HashOptions.IS_RULESET_EDGE_FILTER)
-					&& nuclOptions.getBoolean(HashOptions.IS_RULESET_EDGE_FILTER)) {
+					&& nuclOptions.getBoolean(HashOptions.IS_RULESET_EDGE_FILTER)
+					&& options.getRuleSetCollection().getOtherOptions()
+							.has(RuleSetCollection.RULESET_EDGE_FILTER_PROFILE)) {
 
 				result &= edgeFilter.test(t);
 			}
 
 			return result;
 		};
-
-//		} catch (MissingOptionException e) {
-//			LOGGER.log(Level.SEVERE,
-//					"Unable to create cell predicate: %s".formatted(e.getMessage()), e);
-//			return (t) -> {
-//				return false;
-//			};
-//		}
 	}
 
 	@Override
@@ -201,6 +196,8 @@ public class FluorescentNucleusFinder extends CellFinder {
 		}
 		LOGGER.finer(() -> "Detected %d nuclei in %s".formatted(list.size(), imageFile.getName()));
 
+		// In pipeline mode, we don't need to worry about the edge detector options
+		// changing, they will be specified only in the constructor
 		List<ICell> result = new ArrayList<>();
 		for (Nucleus n : list) {
 			ICell c = new DefaultCell(n);
@@ -315,6 +312,11 @@ public class FluorescentNucleusFinder extends CellFinder {
 
 		List<ICell> result = new ArrayList<>();
 		List<ICell> invalid = new ArrayList<>();
+
+		// Need to create this new each image if we are in preview
+		final Predicate<ICell> edgeFilter = new PoorEdgeDetectionProfilePredicate(
+				options.getRuleSetCollection().getOtherOptions());
+		validCellPredicate = createCellPredicate(edgeFilter);
 
 		for (Nucleus n : list) {
 			ICell c = new DefaultCell(n);
