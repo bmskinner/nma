@@ -17,6 +17,7 @@
 package com.bmskinner.nma.analysis.detection;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import com.bmskinner.nma.components.options.IAnalysisOptions;
@@ -33,31 +34,31 @@ import com.bmskinner.nma.logging.Loggable;
  *
  */
 public abstract class VoidFinder extends AbstractFinder<Void> {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(VoidFinder.class.getName());
 
-    public VoidFinder(IAnalysisOptions op) {
-        super(op);
-    }
+	public VoidFinder(IAnalysisOptions op) {
+		super(op);
+	}
 
-    @Override
-    public Void findInFolder(File folder) throws ImageImportException {
+	@Override
+	public Collection<Void> findInFolder(File folder) throws ImageImportException {
 
-        File[] files = folder.listFiles();
-        if (files == null)
-            return null;
+		File[] files = folder.listFiles();
+		if (files == null)
+			return null;
 
-        for(File f : files) {
-        	if (ImageImporter.isFileImportable(f)) {
-        		try {
-        			findInImage(f);
-        		} catch (ImageImportException e) {
-        			LOGGER.log(Loggable.STACK, "Error searching image", e);
-        		}
-        	}
+		for (File f : files) {
+			if (ImageImporter.isFileImportable(f)) {
+				try {
+					findInImage(f);
+				} catch (ImageImportException e) {
+					LOGGER.log(Loggable.STACK, "Error searching image", e);
+				}
+			}
 
-        }
-        return null;
-    }
+		}
+		return null;
+	}
 
 }

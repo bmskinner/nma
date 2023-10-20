@@ -18,6 +18,7 @@ package com.bmskinner.nma.analysis.detection;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +69,7 @@ public abstract class AbstractFinder<E> implements Finder<E> {
 	 */
 
 	@Override
-	public E find() throws Exception {
+	public Collection<E> find() throws Exception {
 
 		Optional<HashOptions> op = options.getDetectionOptions(CellularComponent.CYTOPLASM);
 		if (!op.isPresent())
@@ -131,7 +132,8 @@ public abstract class AbstractFinder<E> implements Finder<E> {
 	}
 
 	@Override
-	public void fireDetectedObjectEvent(E valid, E invalid, String message) {
+	public void fireDetectedObjectEvent(Collection<E> valid, Collection<E> invalid,
+			String message) {
 		for (DetectedObjectListener<E> l : objectlisteners) {
 			l.detectedObjectEventReceived(new DetectedObjectEvent<>(this, valid, invalid, message));
 		}

@@ -30,7 +30,6 @@ import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nma.charting.ChartFactoryTest;
 import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.components.datasets.DefaultAnalysisDataset;
@@ -41,6 +40,7 @@ import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.options.FilteringOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
@@ -416,7 +416,7 @@ public class ICellCollectionTest {
 						medianArea, medianArea * 10)
 				.build();
 
-		ICellCollection c = CellCollectionFilterer.filter(collection, op);
+		ICellCollection c = CellCollectionFilterer.filter(collection, op.getPredicate(collection));
 
 		assertTrue("Filtering in " + source.getSimpleName(),
 				c.getNucleusCount() < collection.getNucleusCount());

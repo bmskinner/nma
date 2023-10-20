@@ -40,14 +40,14 @@ import org.jfree.data.Range;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions.FilterMatchType;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.options.FilteringOptions;
+import com.bmskinner.nma.components.options.FilteringOptions.FilterMatchType;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -234,15 +234,15 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			if (result == 0)
 				return;
 
-			LOGGER.log(Level.FINER, "Filtering datasets on {0} and {1}",
-					new Object[] { statABox.getSelectedItem(), statBBox.getSelectedItem() });
-
 			MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
 			Range domain = getDomainBounds();
 			Range range = getRangeBounds();
 			Measurement statA = (Measurement) statABox.getSelectedItem();
 			Measurement statB = (Measurement) statBBox.getSelectedItem();
+
+			LOGGER.log(Level.FINER,
+					() -> "Filtering datasets by %s and %s".formatted(statA, statB));
 
 			FilteringOptions options = new CellCollectionFilterBuilder()
 					.setMatchType(FilterMatchType.ALL_MATCH)
@@ -255,7 +255,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 					// Get the filtered cells as a real collection
 					ICellCollection filtered = CellCollectionFilterer.filter(d.getCollection(),
-							options);
+							options.getPredicate(d.getCollection()));
 
 					// Put them into a virtual collection
 					IAnalysisDataset virt = new VirtualDataset(d, "Filtered_" + statA + "_" + statB,
@@ -273,12 +273,11 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 				} catch (CollectionFilteringException | ProfileException | MissingProfileException
 						| MissingLandmarkException e1) {
 					LOGGER.log(Loggable.STACK, e1,
-							() -> "Unable to filter collection for {0} " + d.getName());
+							() -> "Unable to filter collection for '%s'".formatted(d.getName()));
 				}
 			}
 
-			LOGGER.log(Level.INFO, "Filtered datasets by {0} and {1}",
-					new Object[] { statA, statB });
+			LOGGER.log(Level.INFO, () -> "Filtered datasets by %s and %s".formatted(statA, statB));
 		}
 
 		@Override

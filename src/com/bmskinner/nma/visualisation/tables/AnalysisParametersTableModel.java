@@ -102,7 +102,8 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			case 3 -> createNucleusCircFilterString(options);
 			case 4 -> createAnalysisRunTimeString(mainOptions);
 			case 5 -> createSourceFolderString(datasets.get(c - 1), mainOptions);
-			case 6 -> mainOptions.getRuleSetCollection().getName();
+			case 6 -> mainOptions.getRuleSetCollection().getName() + " (version "
+					+ mainOptions.getRuleSetCollection().getRulesetVersion() + ")";
 			case 7 -> String.valueOf(mainOptions.getProfileWindowProportion());
 			case 8 -> createPixelScaleString(datasets.get(c - 1));
 			case 9 -> datasets.get(c - 1).getVersionCreated().toString();
@@ -159,7 +160,12 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			builder.append("Kernel width: " + options.getInt(HashOptions.CANNY_KERNEL_WIDTH_INT)
 					+ Io.NEWLINE);
 			builder.append(
-					"Closing radius: " + options.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
+					"Closing radius: " + options.getInt(HashOptions.GAP_CLOSING_RADIUS_INT)
+							+ Io.NEWLINE);
+
+			if (options.getBoolean(HashOptions.IS_RULESET_EDGE_FILTER))
+				builder.append("Poor edge detection filter applied");
+
 		} else {
 			builder.append("Threshold: " + options.getInt(HashOptions.THRESHOLD));
 			if (options.getBoolean(HashOptions.IS_USE_GAP_CLOSING))

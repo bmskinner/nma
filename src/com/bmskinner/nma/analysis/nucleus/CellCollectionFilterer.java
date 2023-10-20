@@ -147,24 +147,10 @@ public class CellCollectionFilterer {
 	}
 
 	/**
-	 * Filter the collection using the given filtering options
-	 * 
-	 * @param collection the collection to filter
-	 * @param options    the filtering options to use
-	 * @return the filtered collection
-	 * @throws CollectionFilteringException
-	 */
-	public static ICellCollection filter(ICellCollection collection, FilteringOptions options)
-			throws CollectionFilteringException {
-		return filter(collection, options.getPredicate(collection));
-
-	}
-
-	/**
 	 * Filter the collection using the given cell predicate
 	 * 
 	 * @param collection the collection to filter
-	 * @param pred       the predicate determining which cells are valids
+	 * @param pred       the predicate determining which cells are valid
 	 * @return the filtered collection
 	 * @throws CollectionFilteringException
 	 */

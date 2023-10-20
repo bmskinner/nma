@@ -42,11 +42,11 @@ import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.options.FilteringOptions;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -119,7 +119,8 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 						defaultArea, defaultArea * 2)
 				.build();
 
-		ICellCollection c = CellCollectionFilterer.filter(d.getCollection(), op);
+		ICellCollection c = CellCollectionFilterer.filter(d.getCollection(),
+				op.getPredicate(d.getCollection()));
 		UUID id = c.getId();
 
 		assertTrue("Filtered collection should contain cells", c.size() > 0);
@@ -141,7 +142,8 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 						defaultArea, defaultArea * 2)
 				.build();
 
-		ICellCollection c = CellCollectionFilterer.filter(d.getCollection(), op);
+		ICellCollection c = CellCollectionFilterer.filter(d.getCollection(),
+				op.getPredicate(d.getCollection()));
 
 		IAnalysisDataset ch = new DefaultAnalysisDataset(c,
 				new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER));
@@ -181,7 +183,8 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 						defaultArea, defaultArea * 2)
 				.build();
 
-		ICellCollection c = CellCollectionFilterer.filter(d.getCollection(), op);
+		ICellCollection c = CellCollectionFilterer.filter(d.getCollection(),
+				op.getPredicate(d.getCollection()));
 
 		d.addChildCollection(c);
 		assertEquals(N_CHILD_DATASETS + 1, d.getChildCount());

@@ -399,5 +399,6 @@ public class TestImageDatasetCreator {
 		LOGGER.fine("Sample dataset opened: " + saveFile.getName());
 		ComponentTester.testDuplicatesByField(d.getName(), d, t);
 		assertEquals("Datasets should match", d, t);
+		assertEquals("Hashcodes should match", d.hashCode(), t.hashCode());
 	}
 }

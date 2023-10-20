@@ -131,7 +131,8 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 			throw new AnalysisMethodException("No datasets returned");
 
 		datasets.addAll(analysedDatasets);
-		LOGGER.fine("Nucleus detection complete for " + analysedDatasets.size() + " folders");
+		LOGGER.fine(() -> "Nucleus detection complete for %d folders"
+				.formatted(analysedDatasets.size()));
 	}
 
 	/**
@@ -149,7 +150,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 		File folder = templateOptions.getNucleusDetectionFolder().get();
 		int totalImages = countSuitableImages(folder);
 		fireUpdateProgressTotalLength(totalImages);
-		LOGGER.info(String.format("Analysing %d images", totalImages));
+		LOGGER.info(() -> "Analysing %d images".formatted(totalImages));
 		return totalImages;
 	}
 
@@ -183,7 +184,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 			try {
 				collection.clear(MeasurementScale.PIXELS);
 				collection.clear(MeasurementScale.MICRONS);
-				LOGGER.info("Found " + collection.size() + " nuclei");
+				LOGGER.info(() -> "Found %d nuclei".formatted(collection.size()));
 				foundDatasets.add(dataset);
 
 			} catch (Exception e) {
@@ -217,23 +218,29 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 		if (!containsImageFiles(folder))
 			return;
 
+		// Make an empty cell collection
 		ICellCollection fc = new DefaultCellCollection(templateOptions.getRuleSetCollection(),
 				folder.getName(), UUID.randomUUID());
 
-		collectionGroup.put(folder, fc);
-
-		final Finder<Collection<ICell>> finder = new FluorescentNucleusFinder(templateOptions,
+		// Make a cell finder
+		final Finder<ICell> finder = new FluorescentNucleusFinder(templateOptions,
 				FinderDisplayType.PIPELINE);
 		finder.addProgressListener(this);
 
+		// Detect cells and add to collection
 		try {
 			final Collection<ICell> cells = finder.findInFolder(folder);
+
 			if (!cells.isEmpty() && !outputFolder.exists())
 				outputFolder.mkdir();
 			fc.addAll(cells);
+
 		} catch (ImageImportException e) {
-			LOGGER.log(Loggable.STACK, "Error searching folder", e);
+			LOGGER.log(Loggable.STACK, "Error searching folder: %s".formatted(e.getMessage()), e);
 		}
+
+		// Add the new collection to the group
+		collectionGroup.put(folder, fc);
 
 	}
 

@@ -59,7 +59,7 @@ import ij.process.ImageProcessor;
  * @since 1.13.5
  *
  */
-public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
+public class SignalFinder extends AbstractFinder<INuclearSignal> {
 
 	private static final Logger LOGGER = Logger.getLogger(SignalFinder.class.getName());
 
@@ -346,6 +346,12 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 				&& s.getMeasurement(Measurement.AREA) <= (signalOptions
 						.getDouble(HashOptions.SIGNAL_MAX_FRACTION)
 						* n.getMeasurement(Measurement.AREA)));
+	}
+
+	@Override
+	public boolean isValid(@NonNull INuclearSignal entity) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

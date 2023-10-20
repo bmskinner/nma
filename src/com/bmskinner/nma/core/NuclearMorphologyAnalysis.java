@@ -31,12 +31,15 @@ import java.util.logging.Logger;
 import javax.swing.UIManager;
 
 import com.bmskinner.nma.components.Version;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.main.DockableMainWindow;
 import com.bmskinner.nma.io.ConfigFileReader;
 import com.bmskinner.nma.io.Io;
+import com.bmskinner.nma.io.XMLReader;
+import com.bmskinner.nma.io.XMLReader.XMLReadingException;
 import com.bmskinner.nma.io.XMLWriter;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.pipelines.BasicAnalysisPipeline;
@@ -419,10 +422,47 @@ public class NuclearMorphologyAnalysis {
 						"Error creating ruleset directory: %s".formatted(e.getMessage()), e);
 			}
 
-		ensureRuleSetFileExists(RuleSetCollection.mouseSpermRuleSetCollection(), "Mouse sperm.xml");
-		ensureRuleSetFileExists(RuleSetCollection.pigSpermRuleSetCollection(), "Pig sperm.xml");
-		ensureRuleSetFileExists(RuleSetCollection.roundRuleSetCollection(), "Round.xml");
+		// Check the default rulesets. If any have changed in this version,
+		// create an update. If this version does not change anything,
+		// do not create anything
+		checkIfDefaultRulesetChanged(RuleSetCollection.mouseSpermRuleSetCollection(),
+				"Mouse sperm." + Version.currentVersion() + ".xml");
+		checkIfDefaultRulesetChanged(RuleSetCollection.pigSpermRuleSetCollection(),
+				"Pig sperm." + Version.currentVersion() + ".xml");
 
+		checkIfDefaultRulesetChanged(RuleSetCollection.roundRuleSetCollection(),
+				"Round." + Version.currentVersion() + ".xml");
+
+	}
+
+	private void checkIfDefaultRulesetChanged(RuleSetCollection rsc, String fileName) {
+		// Find rulesets with the same name
+
+		boolean isPresent = false;
+		for (File f : Io.getRulesetDir().listFiles()) {
+			try {
+				RuleSetCollection present = XMLReader.readRulesetCollection(f);
+
+				if (rsc.equals(present)) {
+					isPresent = true;
+					LOGGER.fine(() -> "Found existing ruleset with unchanged optons for %s"
+							.formatted(rsc.getName()));
+					break;
+				}
+
+			} catch (XMLReadingException | ComponentCreationException e) {
+				LOGGER.log(Level.SEVERE,
+						"Error reading ruleset: %s".formatted(e.getMessage()), e);
+			}
+		}
+
+		// create default rulesets for this version of NMA if needed
+		if (!isPresent) {
+			LOGGER.fine(
+					() -> "Ruleset for %s has changed in this version, adding"
+							.formatted(rsc.getName()));
+			ensureRuleSetFileExists(rsc, fileName);
+		}
 	}
 
 	/**

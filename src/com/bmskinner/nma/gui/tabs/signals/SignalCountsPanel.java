@@ -37,13 +37,13 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions;
-import com.bmskinner.nma.analysis.nucleus.FilteringOptions.FilterMatchType;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.options.FilteringOptions;
+import com.bmskinner.nma.components.options.FilteringOptions.FilterMatchType;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -204,7 +204,7 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 
 			try {
 				ICellCollection filtered = CellCollectionFilterer.filter(dataset.getCollection(),
-						options);
+						options.getPredicate(dataset.getCollection()));
 				ICellCollection virt = new VirtualDataset(dataset, filtered.getName());
 				filtered.getCells().forEach(virt::addCell);
 				virt.setName(

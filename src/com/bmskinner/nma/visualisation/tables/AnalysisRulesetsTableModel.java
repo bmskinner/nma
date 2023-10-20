@@ -240,7 +240,7 @@ public class AnalysisRulesetsTableModel extends DatasetTableModel {
 		try {
 
 			rowData[r][c] = switch (r) {
-			case 0 -> rsc.getName();
+			case 0 -> rsc.getName() + " (version " + rsc.getRulesetVersion() + ")";
 			case 1 -> rsc.getApplicationType().toString();
 			default -> EMPTY_STRING;
 			};

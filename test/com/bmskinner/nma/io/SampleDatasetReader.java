@@ -55,6 +55,20 @@ public class SampleDatasetReader {
 	}
 
 	/**
+	 * Open the mouse testing dataset for the given version (if available)
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public static final IAnalysisDataset openTestMouseDataset(Version version) throws Exception {
+		File testDataset = new File(
+				new File(TestResources.MOUSE_INPUT_FOLDER,
+						TestResources.unitTestFolderName(version)),
+				TestResources.MOUSE + Io.NMD_FILE_EXTENSION);
+		return openDataset(testDataset);
+	}
+
+	/**
 	 * Open the default mouse testing dataset with clusters
 	 * 
 	 * @return

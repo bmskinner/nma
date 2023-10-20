@@ -22,10 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.analysis.nucleus.PoorEdgeDetectionProfilePredicate;
 import com.bmskinner.nma.components.ComponentBuilderFactory;
 import com.bmskinner.nma.components.ComponentBuilderFactory.NucleusBuilderFactory;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
@@ -34,8 +37,10 @@ import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.generic.IPoint;
+import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
@@ -53,6 +58,8 @@ public class FluorescentNucleusFinder extends CellFinder {
 	private final @NonNull HashOptions nuclOptions;
 	private final FinderDisplayType displayType;
 
+	private Predicate<ICell> validCellPredicate = null;
+
 	public FluorescentNucleusFinder(@NonNull final IAnalysisOptions op,
 			@NonNull FinderDisplayType t) {
 		super(op);
@@ -64,8 +71,54 @@ public class FluorescentNucleusFinder extends CellFinder {
 		nuclOptions = options.getNucleusDetectionOptions()
 				.orElseThrow(() -> new IllegalArgumentException("No nucleus options"));
 
+		// Default edge filter using the constructor options. Can be overridden
+		// in preview detection only
+		final Predicate<ICell> edgeFilter = new PoorEdgeDetectionProfilePredicate(
+				options.getRuleSetCollection().getOtherOptions());
+		validCellPredicate = createCellPredicate(edgeFilter);
+
 		factory = ComponentBuilderFactory.createNucleusBuilderFactory(op.getRuleSetCollection(),
 				options.getProfileWindowProportion(), nuclOptions.getDouble(HashOptions.SCALE));
+	}
+
+	/**
+	 * Create the predicate for testing valid cells
+	 * 
+	 * @return
+	 */
+	private Predicate<ICell> createCellPredicate(final Predicate<ICell> edgeFilter) {
+
+		LOGGER.finer("Creating cell predicate");
+
+		return (t) -> {
+
+			boolean result = true;
+
+			for (Nucleus n : t.getNuclei()) {
+				result &= n.getMeasurement(Measurement.AREA) > nuclOptions
+						.getInt(HashOptions.MIN_SIZE_PIXELS);
+
+				result &= n.getMeasurement(Measurement.AREA) < nuclOptions
+						.getInt(HashOptions.MAX_SIZE_PIXELS);
+
+				result &= n.getMeasurement(Measurement.CIRCULARITY) > nuclOptions
+						.getDouble(HashOptions.MIN_CIRC);
+
+				result &= n.getMeasurement(Measurement.CIRCULARITY) < nuclOptions
+						.getDouble(HashOptions.MAX_CIRC);
+			}
+
+			// Only use the predicate if the box was ticked and the options are present
+			if (nuclOptions.has(HashOptions.IS_RULESET_EDGE_FILTER)
+					&& nuclOptions.getBoolean(HashOptions.IS_RULESET_EDGE_FILTER)
+					&& options.getRuleSetCollection().getOtherOptions()
+							.has(RuleSetCollection.RULESET_EDGE_FILTER_PROFILE)) {
+
+				result &= edgeFilter.test(t);
+			}
+
+			return result;
+		};
 	}
 
 	@Override
@@ -137,21 +190,23 @@ public class FluorescentNucleusFinder extends CellFinder {
 
 				list.add(n);
 			} catch (ComponentCreationException e) {
-				LOGGER.log(Loggable.STACK,
-						"Unable to create nucleus from roi: " + e.getMessage() + "; skipping", e);
+				LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: %s; skipping"
+						.formatted(e.getMessage()), e);
 			}
 		}
-		LOGGER.finer(() -> "Detected nuclei in " + imageFile.getName());
+		LOGGER.finer(() -> "Detected %d nuclei in %s".formatted(list.size(), imageFile.getName()));
 
+		// In pipeline mode, we don't need to worry about the edge detector options
+		// changing, they will be specified only in the constructor
 		List<ICell> result = new ArrayList<>();
 		for (Nucleus n : list) {
-			if (isValid(nuclOptions, n)) {
-				ICell c = new DefaultCell(n);
+			ICell c = new DefaultCell(n);
+			if (isValid(c)) {
 				DatasetValidator dv = new DatasetValidator();
 				if (!dv.validate(c))
 					LOGGER.fine("Error in cell " + n.getNameAndNumber() + ": " + dv.getSummary()
 							+ dv.getErrors());
-				result.add(new DefaultCell(n));
+				result.add(c);
 			}
 		}
 		return result;
@@ -238,7 +293,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 		ImageProcessor img = filt.toProcessor();
 
 		Map<Roi, IPoint> rois = gd.getAllRois(img.duplicate());
-		LOGGER.finer(() -> "Image: " + imageFile.getName() + ": " + rois.size() + " rois");
+		LOGGER.finer(() -> "Image: %s has %d rois ".formatted(imageFile.getName(), rois.size()));
 
 		for (Entry<Roi, IPoint> entry : rois.entrySet()) {
 			try {
@@ -249,34 +304,47 @@ public class FluorescentNucleusFinder extends CellFinder {
 						.withCoM(entry.getValue())
 						.build());
 			} catch (ComponentCreationException e) {
-				LOGGER.log(Loggable.STACK,
-						"Unable to create nucleus from roi: " + e.getMessage() + "; skipping", e);
+				LOGGER.log(Level.FINE, "Unable to create nucleus from roi: %s; skipping"
+						.formatted(e.getMessage()), e);
 			}
 		}
 		LOGGER.finer(() -> "Detected nuclei in " + imageFile.getName());
 
-		ImageAnnotator ann = new ImageAnnotator(original);
+		List<ICell> result = new ArrayList<>();
+		List<ICell> invalid = new ArrayList<>();
+
+		// Need to create this new each image if we are in preview
+		final Predicate<ICell> edgeFilter = new PoorEdgeDetectionProfilePredicate(
+				options.getRuleSetCollection().getOtherOptions());
+		validCellPredicate = createCellPredicate(edgeFilter);
 
 		for (Nucleus n : list) {
-			Color colour = isValid(nuclOptions, n) ? Color.ORANGE : Color.RED;
-			ann.drawBorder(n, colour);
+			ICell c = new DefaultCell(n);
+			if (isValid(c)) {
+				result.add(c);
+			} else {
+				invalid.add(c);
+			}
 		}
+
+		// Draw the outlines of passing and invalid nuclei
+		ImageAnnotator ann = new ImageAnnotator(original);
+
+		for (ICell c : result) {
+			c.getNuclei().forEach(n -> ann.drawBorder(n, Color.ORANGE));
+		}
+
+		for (ICell c : invalid) {
+			c.getNuclei().forEach(n -> ann.drawBorder(n, Color.RED));
+		}
+
 		fireDetectionEvent(ann.toProcessor().duplicate(), "Detected objects");
 
+		// Draw the annotated objects
 		for (Nucleus n : list) {
 			ann.annotateStats(n, Color.ORANGE, Color.BLUE);
 		}
 		fireDetectionEvent(ann.toProcessor().duplicate(), "Annotated objects");
-
-		List<ICell> result = new ArrayList<>();
-		List<ICell> invalid = new ArrayList<>();
-		for (Nucleus n : list) {
-			if (isValid(nuclOptions, n)) {
-				result.add(new DefaultCell(n));
-			} else {
-				invalid.add(new DefaultCell(n));
-			}
-		}
 
 		// Return all the cells, whether valid or not for display only
 		if (hasDetectionListeners()) {
@@ -284,6 +352,11 @@ public class FluorescentNucleusFinder extends CellFinder {
 		}
 
 		return result;
+	}
+
+	@Override
+	public boolean isValid(@NonNull ICell c) {
+		return validCellPredicate.test(c);
 	}
 
 }

@@ -22,6 +22,7 @@ import java.awt.GridBagLayout;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
@@ -39,6 +40,7 @@ import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
@@ -105,6 +107,10 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 						cancel();
 					}
 				} catch (RequestCancelledException e) {
+					cancel();
+				} catch (MissingOptionException e) {
+					LOGGER.log(Level.SEVERE, "Unable to export, option is missing" + e.getMessage(),
+							e);
 					cancel();
 				}
 			} else {

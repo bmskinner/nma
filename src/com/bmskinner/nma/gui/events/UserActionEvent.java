@@ -66,6 +66,7 @@ public class UserActionEvent extends EventObject {
 	public static final String DATASET_ARITHMETIC = "BooleanOperationAction";
 	public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
 	public static final String EXTRACT_SUBSET = "Extract subset";
+	public static final String FILTER_POOR_EDGE_DETECTION = "Filter poor edge detection";
 
 	public static final String SAVE_SELECTED_DATASETS = "SaveSelectedDatasetsAction";
 	public static final String SAVE_ALL_DATASETS = "SaveAllDatasetsAction";

@@ -103,6 +103,11 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	String CANNY_IS_AUTO_THRESHOLD = "Use auto threshold";
 	String CANNY_IS_ADD_BORDER = "Add border";
 
+	/**
+	 * Options identifier for whether to filter on poor edge detection
+	 */
+	String IS_RULESET_EDGE_FILTER = "Filter poor edge detection";
+
 	float DEFAULT_CANNY_LOW_THRESHOLD = 0.5f;
 	float DEFAULT_CANNY_HIGH_THRESHOLD = 1.5f;
 	float DEFAULT_CANNY_TAIL_LOW_THRESHOLD = 0.1f;
@@ -463,7 +468,8 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	Map<String, Object> getEntries();
 
 	/**
-	 * Get the object stored with the given key
+	 * Get the object stored with the given key. If no object is found, the method
+	 * will return a string with the value "N/A"
 	 * 
 	 * @param key
 	 * @return
@@ -476,9 +482,19 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	 * 
 	 * @param <A> the return type
 	 * @param key the key to fetch
-	 * @return the object under they key, or "N/A" if not present
+	 * @return the object under the key, or "N/A" if not present
+	 * @throws MissingOptionException
 	 */
-	<A> A get(String key);
+	<A> A get(String key) throws MissingOptionException;
+
+	/**
+	 * Test if the options has any value with the given key. Beware of namespace
+	 * collisions with different value types
+	 * 
+	 * @param key
+	 * @return
+	 */
+	boolean has(String key);
 
 	/**
 	 * Set to the values in the given options. Shared keys will be updated, keys not
