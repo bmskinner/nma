@@ -9,6 +9,6 @@ curl -L -o jebl-0.4.jar https://downloads.sourceforge.net/project/jebl/jebl/jebl
 IF EXIST "jebl-0.4.jar" (
 	mvn install:install-file -Dfile="jebl-0.4.jar" -DgroupId=jebl -DartifactId=jebl -Dversion=0.4 -Dpackaging=jar
 	REM Clean up
-	rm jebl-0.4.jar
+	del jebl-0.4.jar
 )	
 
