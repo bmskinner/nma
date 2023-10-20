@@ -1,3 +1,9 @@
+@ECHO OFF
+
+REM Check the executables are on the path
+where /q jpackage || ECHO Could not find jpackage on the PATH. && EXIT /B
+where /q 7z || ECHO Could not find 7z on the PATH. && EXIT /B
+
 REM Create the portable app image for Windows
 jpackage --name "Nuclear Morphology Analysis" --app-version ${project.version} --icon ..\res\icons\icon.ico --input ..\target\standalone --dest ..\target\appimage-win --type app-image --description "Morphometric analysis software" --vendor "Ben Skinner" --copyright "Ben Skinner 2015-${build.year}" --main-jar ${jar.finalName}.jar --main-class com.bmskinner.nma.core.NuclearMorphologyAnalysis
 
