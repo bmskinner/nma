@@ -33,55 +33,56 @@ import com.bmskinner.nma.components.measure.MeasurementScale;
  */
 public interface Statistical {
 
-    double ERROR_CALCULATING_STAT = -1d;
-    double MISSING_LANDMARK       = -2d;
-    double INVALID_OBJECT_TYPE    = -4d;
+	double ERROR_CALCULATING_STAT = -1d;
+	double MISSING_LANDMARK = -2d;
+	double INVALID_OBJECT_TYPE = -4d;
+	double VALUE_NOT_PRESENT = -8d;
 
-    /**
-     * Get the value of the given measurement for this component. Note that
-     * {@link Measurement.VARIABILILTY} returns zero, as this must be
-     * calculated at the collection level
-     * 
-     * @param stat the measurement to fetch
-     * @param scale the units to return values in
-     * @return the value or zero if
-     *         stat.equals(Measurement.VARIABILILTY)
-     */
-    double getMeasurement(@NonNull Measurement stat, @NonNull MeasurementScale scale);
+	/**
+	 * Get the value of the given measurement for this component. Note that
+	 * {@link Measurement.VARIABILILTY} returns zero, as this must be calculated at
+	 * the collection level
+	 * 
+	 * @param stat  the measurement to fetch
+	 * @param scale the units to return values in
+	 * @return the value or zero if stat.equals(Measurement.VARIABILILTY)
+	 */
+	double getMeasurement(@NonNull Measurement stat, @NonNull MeasurementScale scale);
 
-    /**
-     * Get the measurement at the default scale ({@link MeasurementScale.PIXELS}),
-     * calculating if not already present.
-     * 
-     * @param stat
-     * @return
-     */
-    double getMeasurement(@NonNull Measurement stat);
+	/**
+	 * Get the measurement at the default scale ({@link MeasurementScale.PIXELS}),
+	 * calculating if not already present.
+	 * 
+	 * @param stat
+	 * @return
+	 */
+	double getMeasurement(@NonNull Measurement stat);
 
-    /**
-     * Set the measurement at the default scale ({@link MeasurementScale.PIXELS})
-     * 
-     * @param stat
-     * @param d
-     */
-    void setMeasurement(@NonNull Measurement stat, double d);
-    
-    /*
-     * Remove the given measurement from the cache
-     * @param measurement
-     */
-    void clearMeasurement(@NonNull Measurement stat);
-    
-    /**
-     * Clear all measurements from the cache
-     */
-    void clearMeasurements();
+	/**
+	 * Set the measurement at the default scale ({@link MeasurementScale.PIXELS})
+	 * 
+	 * @param stat
+	 * @param d
+	 */
+	void setMeasurement(@NonNull Measurement stat, double d);
 
-    /**
-     * Get all the measurements in this object
-     * 
-     * @return
-     */
-    List<Measurement> getMeasurements();
+	/*
+	 * Remove the given measurement from the cache
+	 * 
+	 * @param measurement
+	 */
+	void clearMeasurement(@NonNull Measurement stat);
+
+	/**
+	 * Clear all measurements from the cache
+	 */
+	void clearMeasurements();
+
+	/**
+	 * Get all the measurements in this object
+	 * 
+	 * @return
+	 */
+	List<Measurement> getMeasurements();
 
 }

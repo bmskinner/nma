@@ -49,7 +49,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.MissingComponentException;
-import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
@@ -709,7 +708,7 @@ public class DefaultCellCollection implements ICellCollection {
 		case CellularComponent.NUCLEAR_BORDER_SEGMENT:
 			return getSegmentStatistics(stat, scale, id);
 		default: {
-			LOGGER.warning("No component of type " + component + " can be handled");
+			LOGGER.warning(() -> "No component of type " + component + " can be handled");
 			return new double[0];
 		}
 		}
@@ -719,14 +718,12 @@ public class DefaultCellCollection implements ICellCollection {
 			MeasurementScale scale,
 			UUID id) {
 
-		if (!statsCache.hasMedian(stat, component, scale, id)) {
-			double median = Statistical.ERROR_CALCULATING_STAT;
-			if (this.hasCells()) {
-				double[] values = getRawValues(stat, component, scale, id);
-				median = Stats.quartile(values, Stats.MEDIAN);
-			}
-			statsCache.setMedian(stat, component, scale, id, median);
+		if (!statsCache.has(stat, component, scale, id)) {
+			double[] values = getRawValues(stat, component, scale, id);
+			statsCache.set(stat, component, scale, id, values);
+
 		}
+
 		return statsCache.getMedian(stat, component, scale, id);
 
 	}
@@ -756,8 +753,13 @@ public class DefaultCellCollection implements ICellCollection {
 			MeasurementScale scale,
 			UUID id) {
 
-		double[] values = getRawValues(stat, component, scale, id);
-		return Arrays.stream(values).min().orElse(Statistical.ERROR_CALCULATING_STAT);
+		if (!statsCache.has(stat, component, scale, id)) {
+			double[] values = getRawValues(stat, component, scale, id);
+			statsCache.set(stat, component, scale, id, values);
+
+		}
+
+		return statsCache.getMin(stat, component, scale, id);
 	}
 
 	@Override
@@ -782,13 +784,17 @@ public class DefaultCellCollection implements ICellCollection {
 			MeasurementScale scale,
 			UUID id) {
 
-		double[] values = getRawValues(stat, component, scale, id);
-		return Arrays.stream(values).max().orElse(Statistical.ERROR_CALCULATING_STAT);
+		if (!statsCache.has(stat, component, scale, id)) {
+			double[] values = getRawValues(stat, component, scale, id);
+			statsCache.set(stat, component, scale, id, values);
+		}
+
+		return statsCache.getMax(stat, component, scale, id);
 	}
 
 	/**
 	 * Get a sorted list of the given statistic values for each nucleus in the
-	 * collection
+	 * collection, and add summary to the cache
 	 * 
 	 * @param stat  the statistic to use
 	 * @param scale the measurement scale
@@ -798,13 +804,10 @@ public class DefaultCellCollection implements ICellCollection {
 	private synchronized double[] getCellStatistics(@NonNull Measurement stat,
 			@NonNull MeasurementScale scale) {
 
-		double[] result = null;
-
-		if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale, null))
-			return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale, null);
-		result = cells.parallelStream().mapToDouble(c -> c.getMeasurement(stat, scale)).sorted()
+		double[] result = cells.parallelStream().mapToDouble(c -> c.getMeasurement(stat, scale))
+				.sorted()
 				.toArray();
-		statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
+		statsCache.set(stat, CellularComponent.WHOLE_CELL, scale, null, result);
 		return result;
 
 	}
@@ -822,10 +825,6 @@ public class DefaultCellCollection implements ICellCollection {
 
 		double[] result = null;
 
-		if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
-			return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
-		}
-
 		if (Measurement.VARIABILITY.equals(stat)) {
 			result = this.getNormalisedDifferencesToMedianFromPoint(OrientationMark.REFERENCE);
 		} else {
@@ -833,7 +832,7 @@ public class DefaultCellCollection implements ICellCollection {
 					.mapToDouble(n -> n.getMeasurement(stat, scale)).toArray();
 		}
 		Arrays.sort(result);
-		statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
+		statsCache.set(stat, CellularComponent.NUCLEUS, scale, null, result);
 
 		return result;
 	}
@@ -852,9 +851,7 @@ public class DefaultCellCollection implements ICellCollection {
 			@NonNull UUID id) {
 
 		double[] result = null;
-		if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
-			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
-		}
+
 		AtomicInteger errorCount = new AtomicInteger(0);
 		result = getNuclei().parallelStream().mapToDouble(n -> {
 			IProfileSegment segment;
@@ -880,7 +877,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		}).sorted().toArray();
 
-		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
+		statsCache.set(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
 		if (errorCount.get() > 0)
 			LOGGER.warning(String.format(
 					"Problem calculating segment stats for segment %s: %d nuclei had errors getting this segment",
