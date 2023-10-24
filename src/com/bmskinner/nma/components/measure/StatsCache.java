@@ -151,6 +151,15 @@ public class StatsCache {
 	}
 
 	/**
+	 * Clear all stored measurements
+	 */
+	public void clear() {
+		min.clear();
+		max.clear();
+		median.clear();
+	}
+
+	/**
 	 * Clear all values for the given measurement
 	 * 
 	 * @param measurement the measurement being stored

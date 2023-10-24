@@ -275,16 +275,23 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public boolean add(ICell e) {
-		return cells.add(e);
+		boolean b = cells.add(e);
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends ICell> c) {
-		return cells.addAll(c);
+		boolean b = cells.addAll(c);
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
 	public void clear() {
+		statsCache.clear();
 		cells.clear();
 	}
 
@@ -310,17 +317,26 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public boolean remove(Object o) {
-		return cells.remove(o);
+		boolean b = cells.remove(o);
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		return cells.removeAll(c);
+		boolean b = cells.removeAll(c);
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		return cells.retainAll(c);
+		boolean b = cells.retainAll(c);
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
