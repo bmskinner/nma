@@ -473,7 +473,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 
 				Taxon t = tree.getTaxon(n);
 				ICell c = (ICell) t.getAttribute("Cell");
-				clusterCollection.addCell(c);
+				clusterCollection.add(c);
 			}
 		}
 

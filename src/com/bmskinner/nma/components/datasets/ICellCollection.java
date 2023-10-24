@@ -163,21 +163,6 @@ public interface ICellCollection
 	boolean hasNuclei(@NonNull File imageFile);
 
 	/**
-	 * Add the given cell to the collection
-	 * 
-	 * @param r
-	 */
-	void addCell(@NonNull ICell c);
-
-	/**
-	 * Replace the cell with the same ID as the given cell with the new copy. If no
-	 * cell with the given ID is present, no action is taken.
-	 * 
-	 * @param c the replacement cell
-	 */
-	void replaceCell(@NonNull ICell c);
-
-	/**
 	 * Get the cell with the given UUID
 	 * 
 	 * @param id
@@ -192,14 +177,6 @@ public interface ICellCollection
 	 * @return the nucleus, if present, or an empty optional
 	 */
 	Optional<Nucleus> getNucleus(@NonNull UUID id);
-
-	/**
-	 * Remove the given cell from the collection. If the cell is null, has no
-	 * effect. If the cell is not in the collection, has no effect.
-	 * 
-	 * @param c the cell to remove
-	 */
-	void removeCell(@NonNull ICell c);
 
 	/**
 	 * Get the number of cells in the collection
@@ -222,14 +199,6 @@ public interface ICellCollection
 	 * @return
 	 */
 	public boolean hasCells();
-
-	/**
-	 * Test if the given cell is present in the collection (ID comparison test).
-	 * 
-	 * @param cell
-	 * @return
-	 */
-	boolean contains(ICell cell);
 
 	/**
 	 * Test if the given nucleus is present in the collection (ID comparison test).

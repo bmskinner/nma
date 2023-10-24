@@ -237,7 +237,7 @@ public class DefaultCellCollection implements ICellCollection {
 		DefaultCellCollection result = new DefaultCellCollection(ruleSets, name, uuid);
 
 		for (ICell c : this)
-			result.addCell(c.duplicate());
+			result.add(c.duplicate());
 
 		result.consensusNucleus = consensusNucleus == null ? null : consensusNucleus.duplicate();
 		result.profileCollection = profileCollection.duplicate();
@@ -352,35 +352,6 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public Set<UUID> getCellIDs() {
 		return cells.parallelStream().map(ICell::getId).collect(Collectors.toSet());
-	}
-
-	@Override
-	public void addCell(final @NonNull ICell r) {
-		cells.add(r);
-	}
-
-	@Override
-	public void replaceCell(@NonNull ICell r) {
-		boolean found = false;
-		Iterator<ICell> it = cells.iterator();
-		while (it.hasNext()) {
-			ICell test = it.next();
-
-			if (r.getId().equals(test.getId())) {
-				it.remove();
-				found = true;
-				break;
-			}
-		}
-
-		// only put the cell in if it was removed
-		if (found)
-			addCell(r);
-	}
-
-	@Override
-	public synchronized void removeCell(@NonNull ICell c) {
-		cells.removeIf(cell -> cell.getId().equals(c.getId()));
 	}
 
 	@Override
@@ -692,15 +663,7 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public synchronized double getMedian(@NonNull Measurement stat, String component,
 			MeasurementScale scale, UUID id) {
-
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
-			return getMedianStatistic(stat, component, scale, id);
-		}
-
-		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-			return getMedianStatistic(stat, component, scale, id);
-		}
-		return 0;
+		return getMedianStatistic(stat, component, scale, id);
 	}
 
 	@Override
@@ -730,7 +693,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 	}
 
-	private synchronized double getMedianStatistic(Measurement stat, String component,
+	private synchronized double getMedianStatistic(@NonNull Measurement stat, String component,
 			MeasurementScale scale,
 			UUID id) {
 
@@ -753,15 +716,6 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public synchronized double getMin(@NonNull Measurement stat, String component,
 			MeasurementScale scale, UUID id) {
-
-		// Handle old segment and SignalStatistic enums
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
-			return getMinStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
-		}
-
-		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-			return getMinStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
-		}
 		return getMinStatistic(stat, component, scale, id);
 	}
 
@@ -787,12 +741,6 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public synchronized double getMax(@NonNull Measurement stat, String component,
 			MeasurementScale scale, UUID id) {
-
-		// Handle old segment andSignalStatistic enums
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
-			return getMaxStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
-		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
-			return getMaxStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
 		return getMaxStatistic(stat, component, scale, id);
 	}
 
@@ -812,7 +760,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * Get a sorted list of the given statistic values for each nucleus in the
 	 * collection, and add summary to the cache
 	 * 
-	 * @param stat  the statistic to use
+	 * @param stat  the measurement to use
 	 * @param scale the measurement scale
 	 * @return a list of values
 	 * @throws Exception
@@ -820,18 +768,16 @@ public class DefaultCellCollection implements ICellCollection {
 	private synchronized double[] getCellStatistics(@NonNull Measurement stat,
 			@NonNull MeasurementScale scale) {
 
-		double[] result = cells.parallelStream().mapToDouble(c -> c.getMeasurement(stat, scale))
+		return cells.parallelStream()
+				.mapToDouble(c -> c.getMeasurement(stat, scale))
 				.sorted()
 				.toArray();
-		statsCache.set(stat, CellularComponent.WHOLE_CELL, scale, null, result);
-		return result;
-
 	}
 
 	/**
 	 * Get a list of the given statistic values for each nucleus in the collection
 	 * 
-	 * @param stat  the statistic to use
+	 * @param stat  the measurement to use
 	 * @param scale the measurement scale
 	 * @return a list of values
 	 * @throws Exception
@@ -845,11 +791,10 @@ public class DefaultCellCollection implements ICellCollection {
 			result = this.getNormalisedDifferencesToMedianFromPoint(OrientationMark.REFERENCE);
 		} else {
 			result = this.getNuclei().parallelStream()
-					.mapToDouble(n -> n.getMeasurement(stat, scale)).toArray();
+					.mapToDouble(n -> n.getMeasurement(stat, scale))
+					.sorted()
+					.toArray();
 		}
-		Arrays.sort(result);
-		statsCache.set(stat, CellularComponent.NUCLEUS, scale, null, result);
-
 		return result;
 	}
 
@@ -893,7 +838,6 @@ public class DefaultCellCollection implements ICellCollection {
 
 		}).sorted().toArray();
 
-		statsCache.set(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
 		if (errorCount.get() > 0)
 			LOGGER.warning(String.format(
 					"Problem calculating segment stats for segment %s: %d nuclei had errors getting this segment",
@@ -918,13 +862,6 @@ public class DefaultCellCollection implements ICellCollection {
 
 		});
 
-	}
-
-	@Override
-	public boolean contains(ICell c) {
-		if (c == null)
-			return false;
-		return contains(c.getId());
 	}
 
 	@Override

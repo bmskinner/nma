@@ -15,11 +15,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
@@ -111,11 +111,11 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	 * TRANSIENT FIELDS
 	 */
 
-	protected transient Map<UUID, Integer> vennCache = new HashMap<>();
+	protected Map<UUID, Integer> vennCache = new HashMap<>();
 
-	private transient ProfileManager profileManager = new ProfileManager(this);
-	private transient SignalManager signalManager = new SignalManager(this);
-	private transient StatsCache statsCache = new StatsCache();
+	private ProfileManager profileManager = new ProfileManager(this);
+	private SignalManager signalManager = new SignalManager(this);
+	private StatsCache statsCache = new StatsCache();
 
 	/**
 	 * Construct from a parent dataset (of which this will be a child). The new
@@ -284,27 +284,43 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public boolean add(ICell e) {
-		return cellIDs.add(e.getId());
+		boolean b = cellIDs.add(e.getId());
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends ICell> c) {
-		return cellIDs.addAll(c.stream().map(ICell::getId).collect(Collectors.toSet()));
+		boolean b = cellIDs.addAll(c.stream().map(ICell::getId).collect(Collectors.toSet()));
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
 	public void clear() {
 		cellIDs.clear();
+		statsCache.clear();
 	}
 
 	@Override
 	public boolean contains(Object o) {
-		return getCells().contains(o);
+		if (o instanceof ICell c) {
+			return cellIDs.contains(c.getId());
+		}
+
+		if (o instanceof UUID u)
+			return cellIDs.contains(u);
+		return false;
 	}
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		return getCells().containsAll(c);
+		boolean b = false;
+		for (Object o : c)
+			b |= contains(o);
+		return b;
 	}
 
 	@Override
@@ -319,16 +335,28 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public boolean remove(Object o) {
-		return getCells().remove(o);
+		if (o instanceof ICell c) {
+			boolean b = cellIDs.remove(c.getId());
+			if (b)
+				statsCache.clear();
+			return b;
+		}
+		return false;
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		return getCells().removeAll(c);
+		boolean b = false;
+		for (Object o : c)
+			b |= remove(o);
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
+		// TODO operate on the real list
 		return getCells().retainAll(c);
 	}
 
@@ -397,19 +425,6 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	}
 
 	@Override
-	public void addCell(@NonNull ICell c) {
-		if (!parentDataset.getCollection().contains(c.getId()))
-			throw new IllegalArgumentException(
-					"Cannot add a cell to a virtual collection that is not in the parentDataset.getCollection()");
-		cellIDs.add(c.getId());
-	}
-
-	@Override
-	public void replaceCell(@NonNull ICell c) {
-		parentDataset.getCollection().replaceCell(c);
-	}
-
-	@Override
 	public ICell getCell(@NonNull UUID id) {
 		if (cellIDs.contains(id))
 			return parentDataset.getCollection().getCell(id);
@@ -425,12 +440,6 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			}
 		}
 		return Optional.empty();
-	}
-
-	@Override
-	public void removeCell(@NonNull ICell c) {
-		cellIDs.remove(c.getId());
-
 	}
 
 	@Override
@@ -483,13 +492,6 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public boolean hasCells() {
 		return !cellIDs.isEmpty();
-	}
-
-	@Override
-	public boolean contains(ICell cell) {
-		if (cell == null)
-			return false;
-		return cellIDs.contains(cell.getId());
 	}
 
 	@Override
@@ -900,15 +902,18 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	private double[] getSegmentStatistics(Measurement stat, MeasurementScale scale, UUID id) {
 
 		double[] result = null;
-		if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
-			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
 
-		}
+		AtomicInteger errorCount = new AtomicInteger(0);
 		result = getNuclei().parallelStream().mapToDouble(n -> {
 			IProfileSegment segment;
 			try {
 				segment = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegment(id);
 			} catch (ProfileException | MissingComponentException e) {
+				LOGGER.log(Loggable.STACK, String.format(
+						"Error getting segment %s from nucleus %s in DefaultCellCollection::getSegmentStatistics",
+						id,
+						n.getNameAndNumber()), e);
+				errorCount.incrementAndGet();
 				return 0;
 			}
 			double perimeterLength = 0;
@@ -921,9 +926,13 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			}
 			return perimeterLength;
 
-		}).toArray();
-		Arrays.sort(result);
-		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
+		}).sorted().toArray();
+
+		if (errorCount.get() > 0)
+			LOGGER.warning(String.format(
+					"Problem calculating segment stats for segment %s: %d nuclei had errors getting this segment",
+					id,
+					errorCount.get()));
 		return result;
 	}
 
@@ -939,18 +948,14 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 		double[] result = null;
 
-		if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
-			return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
-
-		}
 		if (Measurement.VARIABILITY.equals(stat)) {
 			result = this.getNormalisedDifferencesToMedianFromPoint(OrientationMark.REFERENCE);
 		} else {
 			result = this.getNuclei().parallelStream()
-					.mapToDouble(n -> n.getMeasurement(stat, scale)).toArray();
+					.mapToDouble(n -> n.getMeasurement(stat, scale))
+					.sorted()
+					.toArray();
 		}
-		Arrays.sort(result);
-		statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
 		return result;
 	}
 
@@ -962,13 +967,10 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	 * @return a list of values
 	 */
 	private double[] getCellStatistics(Measurement stat, MeasurementScale scale) {
-		double[] result = null;
-		if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale, null))
-			return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale, null);
-		result = getCells().parallelStream().mapToDouble(c -> c.getMeasurement(stat, scale))
-				.sorted().toArray();
-		statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
-		return result;
+		return this.getCells().parallelStream()
+				.mapToDouble(c -> c.getMeasurement(stat, scale))
+				.sorted()
+				.toArray();
 	}
 
 	/**
@@ -1014,25 +1016,12 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	private double getMedianStatistic(Measurement stat, String component, MeasurementScale scale,
 			UUID id) {
 
-		if (this.statsCache.hasMedian(stat, component, scale, id)) {
-			return statsCache.getMedian(stat, component, scale, id);
-
-		}
-		double median = Statistical.ERROR_CALCULATING_STAT;
-
-		if (this.hasCells()) {
-
+		if (!this.statsCache.has(stat, component, scale, id)) {
 			double[] values = getRawValues(stat, component, scale, id);
-
-			DescriptiveStatistics s = new DescriptiveStatistics();
-			for (double v : values) {
-				s.addValue(v);
-			}
-			median = s.getPercentile(Stats.MEDIAN);
+			statsCache.set(stat, component, scale, id, values);
 		}
 
-		statsCache.setMedian(stat, component, scale, id, median);
-		return median;
+		return statsCache.getMedian(stat, component, scale, id);
 
 	}
 

@@ -92,7 +92,7 @@ public class SegmentUnmergeMethodTest {
 			v.getProfileCollection().calculateProfiles();
 			d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(v);
 			for (ICell c : d.getCollection().getCells()) {
-				v.addCell(c);
+				v.add(c);
 			}
 
 			// Ensure this child dataset has child datasets

@@ -405,7 +405,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 			ICellCollection subCollectionLeft = new VirtualDataset(dataset, "SubCollectionLeft");
 			for (UUID id : selectedNucleiLeft) {
 				ICell cell = dataset.getCollection().getCell(id);
-				subCollectionLeft.addCell(cell);
+				subCollectionLeft.add(cell);
 			}
 			result.add(subCollectionLeft);
 		}
@@ -414,7 +414,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 			ICellCollection subCollectionRight = new VirtualDataset(dataset, "SubCollectionRight");
 			for (UUID id : selectedNucleiRight) {
 				ICell cell = dataset.getCollection().getCell(id);
-				subCollectionRight.addCell(cell);
+				subCollectionRight.add(cell);
 			}
 			result.add(subCollectionRight);
 		}
@@ -438,14 +438,16 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
 		} else {
 
-			if ((e.getModifiersEx() & InputEvent.BUTTON3_DOWN_MASK) == InputEvent.BUTTON3_DOWN_MASK) { // right
-																							// button
+			if ((e.getModifiersEx()
+					& InputEvent.BUTTON3_DOWN_MASK) == InputEvent.BUTTON3_DOWN_MASK) { // right
+				// button
 				selectedNucleiRight.add(c.getId());
 				selectedNucleiLeft.remove(c.getId());
 			}
 
-			if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) == InputEvent.BUTTON1_DOWN_MASK) { // left
-																							// button
+			if ((e.getModifiersEx()
+					& InputEvent.BUTTON1_DOWN_MASK) == InputEvent.BUTTON1_DOWN_MASK) { // left
+				// button
 				selectedNucleiLeft.add(c.getId());
 				selectedNucleiRight.remove(c.getId());
 			}

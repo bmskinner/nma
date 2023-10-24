@@ -358,7 +358,7 @@ public class SignalShellsPanel extends DetailPanel
 
 				LOGGER.info(() -> "Found %d cells".formatted(filtered.size()));
 				ICellCollection virt = new VirtualDataset(dataset, "Filtered_on_shell");
-				filtered.getCells().forEach(virt::addCell);
+				filtered.getCells().forEach(virt::add);
 				dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(virt);
 				dataset.addChildCollection(virt);
 

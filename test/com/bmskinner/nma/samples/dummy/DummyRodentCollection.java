@@ -40,60 +40,58 @@ import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 
 public class DummyRodentCollection extends DefaultCellCollection {
-	
-	public DummyRodentCollection(int nuclei){
-		
-		super(RuleSetCollection.mouseSpermRuleSetCollection(), "test", UUID.randomUUID() );
 
-		for(int i=0; i<nuclei; i++){
-			
+	public DummyRodentCollection(int nuclei) {
+
+		super(RuleSetCollection.mouseSpermRuleSetCollection(), "test", UUID.randomUUID());
+
+		for (int i = 0; i < nuclei; i++) {
+
 			ICell dummy;
-            try {
-                dummy = makeDummyCell(i);
-                this.addCell(dummy);
-            } catch (ComponentCreationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-			
+			try {
+				dummy = makeDummyCell(i);
+				this.add(dummy);
+			} catch (ComponentCreationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}
-		
+
 	}
-	
-	private ICell makeDummyCell(int i) throws ComponentCreationException{
-		
-		
-		Nucleus n = new DummyRodentSpermNucleus("Nucleus "+i);
+
+	private ICell makeDummyCell(int i) throws ComponentCreationException {
+
+		Nucleus n = new DummyRodentSpermNucleus("Nucleus " + i);
 		ICell c = new DefaultCell(n);
 		return c;
-		
+
 	}
-	
-	public static void main(String[] args){	
-		
+
+	public static void main(String[] args) {
+
 		DummyRodentCollection collection = new DummyRodentCollection(10000);
-		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File("C:\\"));		
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File("C:\\"));
 		IAnalysisMethod profiler = new DatasetProfilingMethod(d);
-		
+
 		IAnalysisWorker w = new DefaultAnalysisWorker(profiler);
 		w.run();
-		
+
 		try {
 			w.get();
 		} catch (InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		double area;
 		try {
-			area = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+			area = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS,
+					MeasurementScale.PIXELS);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
-		
+
 	}
 
 }

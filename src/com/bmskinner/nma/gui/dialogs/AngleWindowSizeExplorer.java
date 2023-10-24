@@ -224,7 +224,7 @@ public class AngleWindowSizeExplorer extends MessagingDialog implements ChangeLi
 					for (Nucleus n : newCell.getNuclei()) {
 						n.setWindowProportion(j);
 					}
-					duplicateCollection.addCell(newCell);
+					duplicateCollection.add(newCell);
 				}
 
 				// recalc the aggregate

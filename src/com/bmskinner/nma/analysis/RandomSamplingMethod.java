@@ -108,11 +108,11 @@ public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
 		LOGGER.finer("Shuffled cells");
 
 		for (int i = 0; i < firstSize; i++) {
-			c1.addCell(cells.get(i));
+			c1.add(cells.get(i));
 		}
 		LOGGER.finer("Added first set");
 		for (int i = firstSize; i < firstSize + secondSize; i++) {
-			c2.addCell(cells.get(i));
+			c2.add(cells.get(i));
 		}
 		LOGGER.finer("Added second set");
 

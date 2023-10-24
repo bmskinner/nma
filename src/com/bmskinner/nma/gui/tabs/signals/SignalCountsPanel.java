@@ -206,7 +206,7 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 				ICellCollection filtered = CellCollectionFilterer.filter(dataset.getCollection(),
 						options.getPredicate(dataset.getCollection()));
 				ICellCollection virt = new VirtualDataset(dataset, filtered.getName());
-				filtered.getCells().forEach(virt::addCell);
+				filtered.getCells().forEach(virt::add);
 				virt.setName(
 						"Filtered_signal_count_" + groupPanel.getSelectedGroup().getGroupName());
 
