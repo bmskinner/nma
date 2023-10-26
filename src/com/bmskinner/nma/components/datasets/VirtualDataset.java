@@ -28,6 +28,7 @@ import com.bmskinner.nma.components.MissingComponentException;
 import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Consensus;
@@ -168,28 +169,30 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	public VirtualDataset(@NonNull Element e)
 			throws ComponentCreationException, UnsupportedVersionException {
 		super(e);
-		uuid = UUID.fromString(e.getAttributeValue("id"));
-		name = e.getAttributeValue("name");
+		uuid = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
+		name = e.getAttributeValue(XMLNames.XML_NAME);
 
-		profileCollection = new DefaultProfileCollection(e.getChild("ProfileCollection"));
+		profileCollection = new DefaultProfileCollection(
+				e.getChild(XMLNames.XML_PROFILE_COLLECTION));
 
-		if (e.getChild("ConsensusNucleus") != null)
-			consensusNucleus = new DefaultConsensusNucleus(e.getChild("ConsensusNucleus"));
+		if (e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS) != null)
+			consensusNucleus = new DefaultConsensusNucleus(
+					e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS));
 
-		for (Element el : e.getChildren("Cell"))
-			cellIDs.add(UUID.fromString(el.getAttributeValue("id")));
+		for (Element el : e.getChildren(XMLNames.XML_CELL))
+			cellIDs.add(UUID.fromString(el.getAttributeValue(XMLNames.XML_ID)));
 
 		// Shells are not stored in signal groups for child datasets
 		// becuase signal groups can only be added to root datasets
-		for (Element el : e.getChildren("ShellResult")) {
-			UUID id = UUID.fromString(el.getAttributeValue("id"));
+		for (Element el : e.getChildren(XMLNames.XML_SHELL_RESULT)) {
+			UUID id = UUID.fromString(el.getAttributeValue(XMLNames.XML_ID));
 			IShellResult s = new DefaultShellResult(el);
 			shellResults.put(id, s);
 		}
 		// Warped signals are not stored in signal groups for child datasets
 		// becuase signal groups can only be added to root datasets
-		for (Element el : e.getChildren("WarpedSignal")) {
-			UUID id = UUID.fromString(el.getAttributeValue("id"));
+		for (Element el : e.getChildren(XMLNames.XML_WARPED_SIGNAL)) {
+			UUID id = UUID.fromString(el.getAttributeValue(XMLNames.XML_ID));
 			IWarpedSignal s = new DefaultWarpedSignal(el);
 			warpedSignals.computeIfAbsent(id, k -> new ArrayList<>());
 			warpedSignals.get(id).add(s);
@@ -226,9 +229,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public Element toXmlElement() {
-		Element e = super.toXmlElement().setName("VirtualDataset")
-				.setAttribute("id", uuid.toString())
-				.setAttribute("name", name);
+		Element e = super.toXmlElement().setName(XMLNames.XML_VIRTUAL_DATASET)
+				.setAttribute(XMLNames.XML_ID, uuid.toString())
+				.setAttribute(XMLNames.XML_NAME, name);
 
 		// Collection content
 		e.addContent(profileCollection.toXmlElement());
@@ -237,15 +240,17 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			e.addContent(consensusNucleus.toXmlElement());
 
 		for (UUID c : cellIDs)
-			e.addContent(new Element("Cell").setAttribute("id", c.toString()));
+			e.addContent(
+					new Element(XMLNames.XML_CELL).setAttribute(XMLNames.XML_ID, c.toString()));
 
 		for (Entry<UUID, IShellResult> c : shellResults.entrySet()) {
-			e.addContent(c.getValue().toXmlElement().setAttribute("id", c.getKey().toString()));
+			e.addContent(c.getValue().toXmlElement().setAttribute(XMLNames.XML_ID,
+					c.getKey().toString()));
 		}
 
 		for (Entry<UUID, List<IWarpedSignal>> c : warpedSignals.entrySet()) {
 			for (IWarpedSignal s : c.getValue())
-				e.addContent(s.toXmlElement().setAttribute("id", c.getKey().toString()));
+				e.addContent(s.toXmlElement().setAttribute(XMLNames.XML_ID, c.getKey().toString()));
 		}
 
 		return e;

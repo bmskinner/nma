@@ -91,7 +91,7 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 
 		try {
 			method = new XMLImportMethod(file);
-			worker = new DefaultAnalysisWorker(method);
+			worker = new DefaultAnalysisWorker(method, file.length());
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
 		} catch (Exception e) {

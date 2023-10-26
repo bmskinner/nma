@@ -50,6 +50,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nma.components.MissingComponentException;
 import com.bmskinner.nma.components.Taggable;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Consensus;
@@ -157,7 +158,7 @@ public class DefaultCellCollection implements ICellCollection {
 			@Nullable UUID id) {
 
 		this.uuid = id == null ? UUID.randomUUID() : id;
-		this.name = name == null ? "unnamed" : name;
+		this.name = name == null ? XMLNames.XML_UNNAMED : name;
 		this.ruleSets = ruleSets;
 		profileCollection = new DefaultProfileCollection();
 	}
@@ -189,21 +190,23 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param e the XML element containing the data.
 	 */
 	public DefaultCellCollection(@NonNull Element e) throws ComponentCreationException {
-		uuid = UUID.fromString(e.getAttributeValue("id"));
-		name = e.getAttributeValue("name");
+		uuid = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
+		name = e.getAttributeValue(XMLNames.XML_NAME);
 
-		profileCollection = new DefaultProfileCollection(e.getChild("ProfileCollection"));
+		profileCollection = new DefaultProfileCollection(
+				e.getChild(XMLNames.XML_PROFILE_COLLECTION));
 
-		if (e.getChild("ConsensusNucleus") != null)
-			consensusNucleus = new DefaultConsensusNucleus(e.getChild("ConsensusNucleus"));
+		if (e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS) != null)
+			consensusNucleus = new DefaultConsensusNucleus(
+					e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS));
 
-		for (Element el : e.getChildren("Cell"))
+		for (Element el : e.getChildren(XMLNames.XML_CELL))
 			cells.add(new DefaultCell(el));
 
-		for (Element el : e.getChildren("SignalGroup")) {
+		for (Element el : e.getChildren(XMLNames.XML_SIGNAL_GROUP)) {
 			signalGroups.add(new DefaultSignalGroup(el));
 		}
-		ruleSets = new RuleSetCollection(e.getChild("RuleSetCollection"));
+		ruleSets = new RuleSetCollection(e.getChild(XMLNames.XML_RULESET_COLLECTION));
 
 		try {
 			profileCollection.calculateProfiles();
@@ -214,8 +217,9 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element("CellCollection").setAttribute("id", uuid.toString())
-				.setAttribute("name", name);
+		Element e = new Element(XMLNames.XML_CELL_COLLECTION)
+				.setAttribute(XMLNames.XML_ID, uuid.toString())
+				.setAttribute(XMLNames.XML_NAME, name);
 		e.addContent(profileCollection.toXmlElement());
 
 		if (consensusNucleus != null)

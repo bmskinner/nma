@@ -18,6 +18,8 @@ package com.bmskinner.nma.components.measure;
 
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
+
 /**
  * Allows for arbitrary measurements to be stored with dimensionality
  * 
@@ -27,100 +29,100 @@ import org.jdom2.Element;
  */
 public class DefaultMeasurement implements Measurement {
 
-    private final String             name;
-    private final MeasurementDimension dim;
+	private final String name;
+	private final MeasurementDimension dim;
 
-    public DefaultMeasurement(String s, MeasurementDimension d) {
-        name = s.intern();
-        dim = d;
-    }
-    
-    public DefaultMeasurement(Element e) {
-    	this(e.getAttributeValue("name"), 
-    			MeasurementDimension.valueOf(e.getAttributeValue("dim")));
-    }
-    
-    @Override
+	public DefaultMeasurement(String s, MeasurementDimension d) {
+		name = s.intern();
+		dim = d;
+	}
+
+	public DefaultMeasurement(Element e) {
+		this(e.getAttributeValue(XMLNames.XML_NAME),
+				MeasurementDimension.valueOf(e.getAttributeValue(XMLNames.XML_DIMENSION)));
+	}
+
+	@Override
 	public Element toXmlElement() {
-    	return new Element("Measurement")
-				.setAttribute("name", name)
-				.setAttribute("dim", dim.toString());
-    }
-    
-    @Override
-    public String name() {
-    	return name;
-    }
+		return new Element(XMLNames.XML_MEASUREMENT)
+				.setAttribute(XMLNames.XML_NAME, name)
+				.setAttribute(XMLNames.XML_DIMENSION, dim.toString());
+	}
 
-    @Override
-    public boolean isDimensionless() {
-        return MeasurementDimension.NONE.equals(dim);
-    }
+	@Override
+	public String name() {
+		return name;
+	}
 
-    @Override
-    public boolean isAngle() {
-        return MeasurementDimension.ANGLE.equals(dim);
-    }
+	@Override
+	public boolean isDimensionless() {
+		return MeasurementDimension.NONE.equals(dim);
+	}
 
-    @Override
-    public MeasurementDimension getDimension() {
-        return dim;
-    }
+	@Override
+	public boolean isAngle() {
+		return MeasurementDimension.ANGLE.equals(dim);
+	}
 
-    @Override
-    public String label(MeasurementScale scale) {
+	@Override
+	public MeasurementDimension getDimension() {
+		return dim;
+	}
 
-        StringBuilder b = new StringBuilder(name);
-        
-        if(!dim.equals(MeasurementDimension.NONE))
-        	b.append(" (")
-        	.append(units(scale))
-        	.append(")");
-        
-        return b.toString();
-    }
+	@Override
+	public String label(MeasurementScale scale) {
 
-    @Override
-    public double convert(double value, double factor, MeasurementScale scale) {
-        return Measurement.convert(value, factor, scale, dim);
-    }
+		StringBuilder b = new StringBuilder(name);
 
-    @Override
-    public String units(MeasurementScale scale) {
-        return Measurement.units(scale, dim);
-    }
+		if (!dim.equals(MeasurementDimension.NONE))
+			b.append(" (")
+					.append(units(scale))
+					.append(")");
 
-    @Override
+		return b.toString();
+	}
+
+	@Override
+	public double convert(double value, double factor, MeasurementScale scale) {
+		return Measurement.convert(value, factor, scale, dim);
+	}
+
+	@Override
+	public String units(MeasurementScale scale) {
+		return Measurement.units(scale, dim);
+	}
+
+	@Override
 	public String toString() {
-        return name;
-    }
+		return name;
+	}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((dim == null) ? 0 : dim.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((dim == null) ? 0 : dim.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DefaultMeasurement other = (DefaultMeasurement) obj;
-        if (dim != other.dim)
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        return true;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultMeasurement other = (DefaultMeasurement) obj;
+		if (dim != other.dim)
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
+	}
 
 }

@@ -28,6 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.ComponentOrienter;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
@@ -58,10 +59,6 @@ public class DefaultNucleus extends ProfileableCellularComponent
 		implements Nucleus, NuclearSignalAddedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultNucleus.class.getName());
-
-	private static final String XML_NUCLEUS_NUMBER = "number";
-
-	private static final String XML_SIGNAL_COLLECTION = "SignalCollection";
 
 	/** The number of the nucleus in its image, for display */
 	private int nucleusNumber;
@@ -132,15 +129,16 @@ public class DefaultNucleus extends ProfileableCellularComponent
 	 */
 	public DefaultNucleus(Element e) throws ComponentCreationException {
 		super(e);
-		nucleusNumber = Integer.valueOf(e.getAttributeValue(XML_NUCLEUS_NUMBER));
+		nucleusNumber = Integer.valueOf(e.getAttributeValue(XMLNames.XML_NUCLEUS_NUMBER));
 
-		signalCollection = new DefaultSignalCollection(e.getChild(XML_SIGNAL_COLLECTION));
+		signalCollection = new DefaultSignalCollection(e.getChild(XMLNames.XML_SIGNAL_COLLECTION));
 		signalCollection.addNuclearSignalAddedListener(this);
 	}
 
 	@Override
 	public Element toXmlElement() {
-		Element e = super.toXmlElement().setName("Nucleus").setAttribute(XML_NUCLEUS_NUMBER,
+		Element e = super.toXmlElement().setName(XMLNames.XML_NUCLEUS).setAttribute(
+				XMLNames.XML_NUCLEUS_NUMBER,
 				String.valueOf(nucleusNumber));
 
 		e.addContent(signalCollection.toXmlElement());

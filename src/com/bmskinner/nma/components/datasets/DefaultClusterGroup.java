@@ -26,6 +26,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 
@@ -61,15 +62,15 @@ public class DefaultClusterGroup implements IClusterGroup {
 	}
 
 	public DefaultClusterGroup(@NonNull Element e) {
-		id = UUID.fromString(e.getAttributeValue("id"));
-		name = e.getAttributeValue("name");
+		id = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
+		name = e.getAttributeValue(XMLNames.XML_NAME);
 
-		if (e.getChild("NewickTree") != null)
-			newickTree = e.getChildText("NewickTree");
+		if (e.getChild(XMLNames.XML_NEWICK) != null)
+			newickTree = e.getChildText(XMLNames.XML_NEWICK);
 
-		options = new DefaultOptions(e.getChild("Options"));
+		options = new DefaultOptions(e.getChild((XMLNames.XML_OPTIONS)));
 
-		for (Element el : e.getChildren("DatasetId"))
+		for (Element el : e.getChildren(XMLNames.XML_DATASET_ID))
 			ids.add(UUID.fromString(el.getText()));
 
 	}
@@ -116,16 +117,17 @@ public class DefaultClusterGroup implements IClusterGroup {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element("ClusterGroup").setAttribute("id", id.toString())
-				.setAttribute("name", name);
+		Element e = new Element(XMLNames.XML_CLUSTER_GROUP)
+				.setAttribute(XMLNames.XML_ID, id.toString())
+				.setAttribute(XMLNames.XML_NAME, name);
 
 		e.addContent(options.toXmlElement());
 
 		if (newickTree != null)
-			e.addContent(new Element("NewickTree").setText(newickTree));
+			e.addContent(new Element(XMLNames.XML_NEWICK).setText(newickTree));
 
 		for (UUID i : ids)
-			e.addContent(new Element("DatasetId").setText(i.toString()));
+			e.addContent(new Element(XMLNames.XML_DATASET_ID).setText(i.toString()));
 
 		return e;
 	}

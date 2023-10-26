@@ -31,6 +31,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -55,14 +56,15 @@ import com.bmskinner.nma.logging.Loggable;
  */
 public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 
-	private static final String XML_SAVE_FILE = "SaveFile";
-
 	private static final Logger LOGGER = Logger.getLogger(DefaultAnalysisDataset.class.getName());
 
 	/** The cell collection for this dataset */
 	protected ICellCollection cellCollection;
 
-	private File savePath; // the file to save this dataset to
+	/**
+	 * the file to save this dataset to
+	 */
+	private File savePath;
 
 	/**
 	 * Create a dataset from a cell collection, with a defined save file
@@ -78,8 +80,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	DefaultAnalysisDataset(@NonNull Element e)
 			throws ComponentCreationException, UnsupportedVersionException {
 		super(e);
-		savePath = new File(e.getChildText(XML_SAVE_FILE)).getAbsoluteFile();
-		cellCollection = new DefaultCellCollection(e.getChild("CellCollection"));
+		savePath = new File(e.getChildText(XMLNames.XML_SAVE_FILE)).getAbsoluteFile();
+		cellCollection = new DefaultCellCollection(e.getChild(XMLNames.XML_CELL_COLLECTION));
 
 	}
 
@@ -106,7 +108,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	@Override
 	public Element toXmlElement() {
 		Element e = super.toXmlElement();
-		e.addContent(new Element(XML_SAVE_FILE).setText(savePath.getPath()));
+		e.addContent(new Element(XMLNames.XML_SAVE_FILE).setText(savePath.getPath()));
 
 		e.addContent(cellCollection.toXmlElement());
 

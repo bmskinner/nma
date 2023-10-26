@@ -42,6 +42,7 @@ import org.jdom2.Element;
 import com.bmskinner.nma.components.ComponentMeasurer;
 import com.bmskinner.nma.components.Imageable;
 import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.DefaultMeasurement;
@@ -66,30 +67,6 @@ import ij.process.FloatPolygon;
  *
  */
 public abstract class DefaultCellularComponent implements CellularComponent {
-
-	private static final String XML_REVERSE = "reverse";
-
-	private static final String XML_YPOINTS = "ypoints";
-
-	private static final String XML_XPOINTS = "xpoints";
-
-	private static final String XML_SCALE = "Scale";
-
-	private static final String XML_CHANNEL = "Channel";
-
-	private static final String XML_SOURCE_FILE = "SourceFile";
-
-	private static final String XML_COMPONENT = "Component";
-
-	private static final String XML_ORIGINAL_CENTRE_OF_MASS = "OriginalCentreOfMass";
-
-	private static final String XML_Y = "y";
-
-	private static final String XML_X = "x";
-
-	private static final String XML_ID = "id";
-
-	private static final String XML_COM = "CoM";
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultCellularComponent.class.getName());
 
@@ -235,29 +212,31 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @param e the XML element containing the data.
 	 */
 	protected DefaultCellularComponent(Element e) {
-		id = UUID.fromString(e.getAttributeValue(XML_ID));
+		id = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
 
 		centreOfMass = new FloatPoint(
-				Float.parseFloat(e.getChild(XML_COM).getAttributeValue(XML_X)),
-				Float.parseFloat(e.getChild(XML_COM).getAttributeValue(XML_Y)));
+				Float.parseFloat(e.getChild(XMLNames.XML_COM).getAttributeValue(XMLNames.XML_X)),
+				Float.parseFloat(e.getChild(XMLNames.XML_COM).getAttributeValue(XMLNames.XML_Y)));
 
 		originalCentreOfMass = new FloatPoint(
-				Float.parseFloat(e.getChild(XML_ORIGINAL_CENTRE_OF_MASS).getAttributeValue(XML_X)),
-				Float.parseFloat(e.getChild(XML_COM).getAttributeValue(XML_Y)));
+				Float.parseFloat(e.getChild(XMLNames.XML_ORIGINAL_CENTRE_OF_MASS)
+						.getAttributeValue(XMLNames.XML_X)),
+				Float.parseFloat(e.getChild(XMLNames.XML_COM).getAttributeValue(XMLNames.XML_Y)));
 
 		// Add measurements
-		for (Element el : e.getChildren("Measurement")) {
+		for (Element el : e.getChildren(XMLNames.XML_MEASUREMENT)) {
 			Measurement m = new DefaultMeasurement(el);
-			measurements.put(m, Double.parseDouble(el.getAttributeValue("value")));
+			measurements.put(m, Double.parseDouble(el.getAttributeValue(XMLNames.XML_VALUE)));
 		}
 
-		sourceFile = new File(e.getChildText(XML_SOURCE_FILE));
-		channel = Integer.parseInt(e.getChildText(XML_CHANNEL));
-		scale = Double.parseDouble(e.getChildText(XML_SCALE));
+		sourceFile = new File(e.getChildText(XMLNames.XML_SOURCE_FILE));
+		channel = Integer.parseInt(e.getChildText(XMLNames.XML_CHANNEL));
+		scale = Double.parseDouble(e.getChildText(XMLNames.XML_SCALE));
 
-		xpoints = XMLReader.parseIntArray(e.getChildText(XML_XPOINTS));
-		ypoints = XMLReader.parseIntArray(e.getChildText(XML_YPOINTS));
-		isReversed = e.getChild(XML_XPOINTS).getAttributeValue(XML_REVERSE) != null;
+		xpoints = XMLReader.parseIntArray(e.getChildText(XMLNames.XML_XPOINTS));
+		ypoints = XMLReader.parseIntArray(e.getChildText(XMLNames.XML_YPOINTS));
+		isReversed = e.getChild(XMLNames.XML_XPOINTS)
+				.getAttributeValue(XMLNames.XML_REVERSE) != null;
 
 		makeBorderList();
 	}
@@ -282,12 +261,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		PolygonRoi roi = new PolygonRoi(xcopy, ycopy, xcopy.length, Roi.TRACED_ROI);
 
-		// Creating the border list will set everything to the original image
-		// position.
-		// Move the border list back over the CoM if needed.
-//		IPoint oldCoM = centreOfMass.duplicate();
-//		centreOfMass = originalCentreOfMass.duplicate();
-
 		// convert the roi positions to border points
 		roi.fitSplineForStraightening(); // this prevents the resulting border differing in length
 											// between invokations
@@ -298,7 +271,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		for (int i = 0; i < smoothed.npoints; i++)
 			borderList[i] = new FloatPoint(smoothed.xpoints[i], smoothed.ypoints[i]);
 
-//		moveCentreOfMass(oldCoM);
 		updateBounds();
 	}
 
@@ -952,31 +924,33 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element(XML_COMPONENT).setAttribute(XML_ID, id.toString());
+		Element e = new Element(XMLNames.XML_COMPONENT).setAttribute(XMLNames.XML_ID,
+				id.toString());
 
-		e.addContent(new Element(XML_COM).setAttribute(XML_X, String.valueOf(centreOfMass.getX()))
-				.setAttribute(XML_Y,
+		e.addContent(new Element(XMLNames.XML_COM)
+				.setAttribute(XMLNames.XML_X, String.valueOf(centreOfMass.getX()))
+				.setAttribute(XMLNames.XML_Y,
 						String.valueOf(centreOfMass.getY())));
 
-		e.addContent(new Element(XML_ORIGINAL_CENTRE_OF_MASS)
-				.setAttribute(XML_X, String.valueOf(originalCentreOfMass.getX()))
-				.setAttribute(XML_Y, String.valueOf(originalCentreOfMass.getY())));
+		e.addContent(new Element(XMLNames.XML_ORIGINAL_CENTRE_OF_MASS)
+				.setAttribute(XMLNames.XML_X, String.valueOf(originalCentreOfMass.getX()))
+				.setAttribute(XMLNames.XML_Y, String.valueOf(originalCentreOfMass.getY())));
 
 		for (Entry<Measurement, Double> entry : measurements.entrySet()) {
-			e.addContent(entry.getKey().toXmlElement().setAttribute("value",
+			e.addContent(entry.getKey().toXmlElement().setAttribute(XMLNames.XML_VALUE,
 					entry.getValue().toString()));
 		}
 
-		e.addContent(new Element(XML_SOURCE_FILE).setText(sourceFile.toString()));
-		e.addContent(new Element(XML_CHANNEL).setText(String.valueOf(channel)));
-		e.addContent(new Element(XML_SCALE).setText(String.valueOf(scale)));
+		e.addContent(new Element(XMLNames.XML_SOURCE_FILE).setText(sourceFile.toString()));
+		e.addContent(new Element(XMLNames.XML_CHANNEL).setText(String.valueOf(channel)));
+		e.addContent(new Element(XMLNames.XML_SCALE).setText(String.valueOf(scale)));
 
-		Element xEl = new Element(XML_XPOINTS).setText(Arrays.toString(xpoints));
+		Element xEl = new Element(XMLNames.XML_XPOINTS).setText(Arrays.toString(xpoints));
 		if (isReversed)
-			xEl.setAttribute(XML_REVERSE, "true"); // don't waste space
+			xEl.setAttribute(XMLNames.XML_REVERSE, "true"); // don't waste space if false
 		e.addContent(xEl);
 
-		e.addContent(new Element(XML_YPOINTS).setText(Arrays.toString(ypoints)));
+		e.addContent(new Element(XMLNames.XML_YPOINTS).setText(Arrays.toString(ypoints)));
 		return e;
 	}
 

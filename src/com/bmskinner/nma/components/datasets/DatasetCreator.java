@@ -36,7 +36,10 @@ public class DatasetCreator {
 	 */
 	public static IAnalysisDataset createRoot(Element e)
 			throws ComponentCreationException, UnsupportedVersionException {
+
+		// This is the timeconsuming part
 		IAnalysisDataset d = new DefaultAnalysisDataset(e);
+
 		try {
 			d.getCollection().getProfileCollection().calculateProfiles();
 
