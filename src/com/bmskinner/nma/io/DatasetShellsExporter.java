@@ -48,7 +48,7 @@ import com.bmskinner.nma.components.signals.SignalManager;
  * @since 1.13.8
  *
  */
-public class DatasetShellsExporter extends StatsExporter {
+public class DatasetShellsExporter extends MeasurementsExportMethod {
 
 	/**
 	 * Create specifying the file or directory profiles will be exported into

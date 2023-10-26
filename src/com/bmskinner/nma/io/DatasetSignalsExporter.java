@@ -38,7 +38,7 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 
-public class DatasetSignalsExporter extends StatsExporter {
+public class DatasetSignalsExporter extends MeasurementsExportMethod {
 
 	/**
 	 * Create specifying the file or directory profiles will be exported into

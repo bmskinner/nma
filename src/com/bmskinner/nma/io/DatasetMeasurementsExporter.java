@@ -60,7 +60,7 @@ import com.bmskinner.nma.utility.ArrayUtils;
  * @since 1.13.4
  *
  */
-public class DatasetMeasurementsExporter extends StatsExporter {
+public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(DatasetMeasurementsExporter.class.getName());
