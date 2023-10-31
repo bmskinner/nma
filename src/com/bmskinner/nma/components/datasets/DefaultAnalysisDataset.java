@@ -28,8 +28,10 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.analysis.ProgressListener;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
@@ -77,12 +79,11 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		this.savePath = saveFile;
 	}
 
-	DefaultAnalysisDataset(@NonNull Element e)
+	DefaultAnalysisDataset(@NonNull Element e, @Nullable ProgressListener l)
 			throws ComponentCreationException, UnsupportedVersionException {
 		super(e);
 		savePath = new File(e.getChildText(XMLNames.XML_SAVE_FILE)).getAbsoluteFile();
-		cellCollection = new DefaultCellCollection(e.getChild(XMLNames.XML_CELL_COLLECTION));
-
+		cellCollection = new DefaultCellCollection(e.getChild(XMLNames.XML_CELL_COLLECTION), l);
 	}
 
 	/**

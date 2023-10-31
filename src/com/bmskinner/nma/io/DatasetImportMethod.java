@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jdom2.Document;
@@ -29,6 +30,7 @@ import com.bmskinner.nma.analysis.AnalysisMethodException;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.components.Version;
+import com.bmskinner.nma.components.Version.UnsupportedVersionException;
 import com.bmskinner.nma.components.datasets.DatasetCreator;
 import com.bmskinner.nma.components.datasets.DatasetRepairer;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
@@ -100,19 +102,22 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
 		try {
 			fireIndeterminateState(); // TODO: hook the indeterminate state to the end of file
-										// reading,
+			// reading,
 			// rather than after the document is built - takes a long time with large
 			// datasets
-			dataset = DatasetCreator.createRoot(doc.getRootElement());
+			dataset = DatasetCreator.createRoot(doc.getRootElement(), this);
 
+			fireIndeterminateState();
 			if (dataset.getVersionLastSaved().isOlderThan(Version.currentVersion()))
 				DatasetConverter.convert(dataset);
 
 			validateDataset();
 
-		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error in dataset import", e);
+		} catch (UnsupportedVersionException e) {
+			LOGGER.warning("Invalid version detected");
 			throw new UnloadableDatasetException("Not valid XML dataset for this version", e);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Error in dataset import", e);
 		}
 	}
 

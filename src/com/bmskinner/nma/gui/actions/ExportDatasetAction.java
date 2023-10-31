@@ -32,6 +32,12 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.io.DatasetExportMethod;
 
+/**
+ * Export one or more datasets into nmd format
+ * 
+ * @author bs19022
+ *
+ */
 public class ExportDatasetAction extends SingleDatasetResultAction {
 
 	private static final Logger LOGGER = Logger.getLogger(ExportDatasetAction.class.getName());
@@ -46,7 +52,7 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 	 * 
 	 * @param dataset    the dataset to save
 	 * @param saveFile   the location to save to
-	 * @param mw         the main window, to access program logger
+	 * @param acceptor   an acceptor that can hold progress bars
 	 * @param doneSignal a latch to hold threads until the save is complete
 	 */
 	public ExportDatasetAction(@NonNull IAnalysisDataset dataset, File saveFile,
@@ -57,10 +63,10 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 	}
 
 	/**
-	 * Default constructor to save the current dataset
+	 * Construct with a dataset to save
 	 * 
 	 * @param dataset            the dataset to save
-	 * @param mw                 the main window, to access program logger
+	 * @param acceptor           an acceptor that can hold progress bars
 	 * @param doneSignal         a latch to hold threads until the save is complete
 	 * @param chooseSaveLocation save to the default dataset save file, or choose
 	 *                           another location
@@ -88,6 +94,13 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 
 	}
 
+	/**
+	 * Construct with a list of datasets to save
+	 * 
+	 * @param list       the datasets to save
+	 * @param acceptor   an acceptor that can hold progress bars
+	 * @param doneSignal a latch to hold threads until the save is complete
+	 */
 	public ExportDatasetAction(List<IAnalysisDataset> list,
 			@NonNull final ProgressBarAcceptor acceptor,
 			CountDownLatch doneSignal) {
@@ -100,21 +113,34 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 
 	@Override
 	public void run() {
-
-		if (saveFile != null) {
-			long length = saveFile.exists() ? saveFile.length() : 0;
-			IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile);
-			worker = new DefaultAnalysisWorker(m, length);
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
-		} else {
+		// Only run if there is a save file, and the dataset has changed since last save
+		if (saveFile == null) {
+			LOGGER.fine(
+					() -> "Dataset '%s' has no save file; skipping save"
+							.formatted(dataset.getName()));
 			this.finished();
+			return;
 		}
+
+		if (!DatasetListManager.getInstance().hashCodeChanged(dataset)) {
+			LOGGER.fine(
+					() -> "Dataset '%s' has not changed since last save; skipping write"
+							.formatted(dataset.getName()));
+			this.finished();
+			return;
+		}
+
+		// If there is already a save file, use the length for the progress bar
+		long length = saveFile.exists() ? saveFile.length() : 0;
+		IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile);
+		worker = new DefaultAnalysisWorker(m, length);
+		worker.addPropertyChangeListener(this);
+		ThreadManager.getInstance().submit(worker);
 	}
 
 	@Override
 	public void finished() {
-		LOGGER.info("Saved as '" + saveFile.getName() + "'");
+		LOGGER.info(() -> "Saved as '%s'".formatted(saveFile.getName()));
 		Thread thr = new Thread(() -> {
 
 			// update the stored hashcode for the dataset

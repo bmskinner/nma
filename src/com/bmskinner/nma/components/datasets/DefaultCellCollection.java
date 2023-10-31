@@ -48,6 +48,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.analysis.ProgressEvent;
+import com.bmskinner.nma.analysis.ProgressListener;
 import com.bmskinner.nma.components.MissingComponentException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.XMLNames;
@@ -188,10 +190,24 @@ public class DefaultCellCollection implements ICellCollection {
 	 * conform to the specification in {@link XmlSerializable}.
 	 * 
 	 * @param e the XML element containing the data.
+	 * @param l an optional listener for progress updates
 	 */
-	public DefaultCellCollection(@NonNull Element e) throws ComponentCreationException {
+	public DefaultCellCollection(@NonNull Element e, @Nullable ProgressListener l)
+			throws ComponentCreationException {
+
 		uuid = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
 		name = e.getAttributeValue(XMLNames.XML_NAME);
+
+		// Determine how many items in the progress bar
+		List<Element> cellElements = e.getChildren(XMLNames.XML_CELL);
+		List<Element> signalElements = e.getChildren(XMLNames.XML_SIGNAL_GROUP);
+
+		// Alert listeners how many elements need to be unpacked
+		long totalElements = cellElements.size() + signalElements.size();
+
+		if (l != null)
+			l.progressEventReceived(
+					new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalElements));
 
 		profileCollection = new DefaultProfileCollection(
 				e.getChild(XMLNames.XML_PROFILE_COLLECTION));
@@ -200,19 +216,22 @@ public class DefaultCellCollection implements ICellCollection {
 			consensusNucleus = new DefaultConsensusNucleus(
 					e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS));
 
-		for (Element el : e.getChildren(XMLNames.XML_CELL))
+		for (Element el : cellElements) {
 			cells.add(new DefaultCell(el));
 
-		for (Element el : e.getChildren(XMLNames.XML_SIGNAL_GROUP)) {
+			// Fire progress update if available
+			if (l != null)
+				l.progressEventReceived(new ProgressEvent(this));
+		}
+
+		for (Element el : signalElements) {
 			signalGroups.add(new DefaultSignalGroup(el));
+
+			// Fire progress update if available
+			if (l != null)
+				l.progressEventReceived(new ProgressEvent(this));
 		}
 		ruleSets = new RuleSetCollection(e.getChild(XMLNames.XML_RULESET_COLLECTION));
-
-		try {
-			profileCollection.calculateProfiles();
-		} catch (ProfileException | MissingLandmarkException | MissingProfileException e1) {
-			throw new ComponentCreationException(e1);
-		}
 	}
 
 	@Override

@@ -198,6 +198,8 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			warpedSignals.get(id).add(s);
 		}
 
+		// Note we cannot calculate profiles at this stage because the parent objects
+		// are not fully constructed yet
 	}
 
 	/**

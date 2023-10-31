@@ -50,7 +50,7 @@ public abstract class XMLReader {
 	public static IAnalysisDataset readDataset(File f)
 			throws XMLReadingException, ComponentCreationException, UnsupportedVersionException {
 		Document d = readDocument(f);
-		return DatasetCreator.createRoot(d.getRootElement());
+		return DatasetCreator.createRoot(d.getRootElement(), null);
 	}
 
 	public static RuleSetCollection readRulesetCollection(File f)
