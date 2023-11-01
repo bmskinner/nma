@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.stats.Stats;
 
@@ -33,24 +35,14 @@ import com.bmskinner.nma.stats.Stats;
  * @since 1.13.4
  *
  */
-public class StatsCache {
+public class MeasurementCache {
 
-	// Need to be able to store the same stat for different components of the
-	// cell.
-	// This requires keys on component and stat
-	public class Key {
-
-		private final Measurement stat;
-		private final String component;
-		private final MeasurementScale scale;
-		private final UUID id;
-
-		public Key(Measurement stat, String component, MeasurementScale scale, UUID id) {
-			this.stat = stat;
-			this.component = component;
-			this.scale = scale;
-			this.id = id;
-		}
+	// Need to be able to store the same measurement for different components of the
+	// cell. This requires keys on component and measurement.
+	private record Key(@NonNull Measurement stat,
+			@NonNull String component,
+			@NonNull MeasurementScale scale,
+			UUID id) {
 
 		@Override
 		public boolean equals(Object o) {
@@ -69,9 +61,8 @@ public class StatsCache {
 			if (!scale.equals(key.scale))
 				return false;
 
-			if (id != null)
-				if (!id.equals(key.id))
-					return false;
+			if (id != null && !id.equals(key.id))
+				return false;
 
 			if (id == null && key.id != null)
 				return false;
@@ -90,8 +81,9 @@ public class StatsCache {
 
 			result = prime * result + scale.hashCode();
 
-			if (id != null)
+			if (id != null) {
 				result = prime * result + id.hashCode();
+			}
 
 			return result;
 		}
@@ -102,7 +94,7 @@ public class StatsCache {
 	private Map<Key, Double> min = new HashMap<>(); // median values
 	private Map<Key, Double> max = new HashMap<>(); // median values
 
-	public StatsCache() {
+	public MeasurementCache() {
 		// no constructor
 	}
 

@@ -38,7 +38,7 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
-import com.bmskinner.nma.components.measure.StatsCache;
+import com.bmskinner.nma.components.measure.MeasurementCache;
 import com.bmskinner.nma.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
@@ -116,7 +116,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	private ProfileManager profileManager = new ProfileManager(this);
 	private SignalManager signalManager = new SignalManager(this);
-	private StatsCache statsCache = new StatsCache();
+	private MeasurementCache statsCache = new MeasurementCache();
 
 	/**
 	 * Construct from a parent dataset (of which this will be a child). The new

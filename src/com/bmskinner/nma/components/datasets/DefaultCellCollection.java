@@ -63,7 +63,7 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
-import com.bmskinner.nma.components.measure.StatsCache;
+import com.bmskinner.nma.components.measure.MeasurementCache;
 import com.bmskinner.nma.components.measure.VennCache;
 import com.bmskinner.nma.components.profiles.DefaultLandmark;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
@@ -136,7 +136,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * a cell is added or lost
 	 */
 	@NonNull
-	private final StatsCache statsCache = new StatsCache();
+	private final MeasurementCache statsCache = new MeasurementCache();
 
 	/** cache the number of shared cells with other datasets */
 	@NonNull
