@@ -72,7 +72,7 @@ public class DefaultSignalGroup implements ISignalGroup {
 	public DefaultSignalGroup(@NonNull Element e) throws ComponentCreationException {
 		id = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
 		groupName = e.getAttributeValue(XMLNames.XML_NAME);
-		isVisible = Boolean.parseBoolean(e.getAttributeValue(XMLNames.XML_IS_VISIBLE));
+		isVisible = Boolean.parseBoolean(e.getAttributeValue(XMLNames.XML_SIGNAL_IS_VISIBLE));
 
 		if (e.getAttribute(XMLNames.XML_SIGNAL_COLOUR) != null)
 			groupColour = Color.decode(e.getAttributeValue(XMLNames.XML_SIGNAL_COLOUR));
@@ -89,7 +89,7 @@ public class DefaultSignalGroup implements ISignalGroup {
 	public Element toXmlElement() {
 		Element e = new Element("SignalGroup").setAttribute(XMLNames.XML_ID, id.toString())
 				.setAttribute(XMLNames.XML_NAME, groupName)
-				.setAttribute(XMLNames.XML_IS_VISIBLE, String.valueOf(isVisible));
+				.setAttribute(XMLNames.XML_SIGNAL_IS_VISIBLE, String.valueOf(isVisible));
 
 		if (groupColour != null)
 			e = e.setAttribute(XMLNames.XML_SIGNAL_COLOUR, String.valueOf(groupColour.getRGB()));

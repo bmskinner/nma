@@ -18,6 +18,7 @@ package com.bmskinner.nma.components.signals;
 
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -104,7 +105,15 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 		pseudoColour = Color.decode(e.getAttributeValue(XMLNames.XML_SIGNAL_COLOUR));
 		displayThreshold = Integer
 				.parseInt(e.getAttributeValue(XMLNames.XML_WARPED_SIGNAL_DISPLAY_THRESHOLD));
-		image = StringUtils.hexToBytes(e.getChildText(XMLNames.XML_WARPED_SIGNAL_BYTES));
+
+		// Prior to 2.2.0, warped images were stored as byte arrays. From 2.2.0, we use
+		// base64
+		if (e.getChild(XMLNames.XML_WARPED_SIGNAL_BASE64) != null) {
+			image = Base64.getDecoder().decode(e.getChildText(XMLNames.XML_WARPED_SIGNAL_BASE64));
+		} else {
+			image = StringUtils.hexToBytes(e.getChildText(XMLNames.XML_WARPED_SIGNAL_BYTES));
+		}
+
 	}
 
 	@Override
@@ -135,9 +144,9 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 				String.valueOf(displayThreshold));
 		e.addContent(new Element(XMLNames.XML_WARPED_SIGNAL_TARGET_SHAPE)
 				.setContent(target.toXmlElement()));
-		e.addContent(new Element(XMLNames.XML_WARPED_SIGNAL_BYTES)
-				.setText(StringUtils.bytesToHex(image)));
 
+		e.addContent(new Element(XMLNames.XML_WARPED_SIGNAL_BASE64)
+				.setText(Base64.getEncoder().encodeToString(image)));
 		return e;
 	}
 

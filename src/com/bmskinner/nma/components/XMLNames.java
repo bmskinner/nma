@@ -59,8 +59,6 @@ public class XMLNames {
 
 	public static final String XML_SIGNAL_GROUP = "SignalGroup";
 
-	public static final String XML_RULESET_COLLECTION = "RuleSetCollection";
-
 	// From profile collections
 
 	/** XML identifier for mapping an orientation to a landmark */
@@ -180,6 +178,8 @@ public class XMLNames {
 	/** XML identifier for a rule version */
 	public static final String XML_RULE_VERSION = "version";
 
+	public static final String XML_RULESET_COLLECTION = "RuleSetCollection";
+
 	// From signals and shells
 
 	public static final String XML_SIGNAL = "Signal";
@@ -200,7 +200,7 @@ public class XMLNames {
 	public static final String XML_SIGNALS = "Signals";
 	public static final String XML_SIGNALGROUP_ID = "group";
 
-	public static final String XML_IS_VISIBLE = "isVisible";
+	public static final String XML_SIGNAL_IS_VISIBLE = "isVisible";
 
 	public static final String XML_SIGNAL_COLOUR = "colour";
 
@@ -219,5 +219,6 @@ public class XMLNames {
 	public static final String XML_WARPED_SIGNAL_DISPLAY_THRESHOLD = "displayThreshold";
 	public static final String XML_WARPED_SIGNAL_TARGET_SHAPE = "TargetShape";
 	public static final String XML_WARPED_SIGNAL_BYTES = "Bytes";
+	public static final String XML_WARPED_SIGNAL_BASE64 = "Base64";
 
 }
