@@ -192,6 +192,14 @@ public class CosmeticHandler {
 					.requestColor(Labels.Signals.CHOOSE_SIGNAL_COLOUR, oldColour);
 
 			d.getCollection().getSignalGroup(signalGroupId).get().setGroupColour(newColor);
+
+			// If we updated a child signal colour, we need to refresh the parent
+			// because they share the same signal group object
+			if (!d.isRoot()) {
+				d = DatasetListManager.getInstance().getRootParent(d);
+			}
+
+			UIController.getInstance().fireNuclearSignalUpdated(d);
 		} catch (RequestCancelledException e) {
 			return false;
 		}
@@ -214,6 +222,7 @@ public class CosmeticHandler {
 			String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL,
 					oldName);
 			group.setGroupName(newName);
+			UIController.getInstance().fireNuclearSignalUpdated(d);
 		} catch (RequestCancelledException e) {
 			// user cancelled, no action
 		}
@@ -227,18 +236,17 @@ public class CosmeticHandler {
 	 */
 	public void updateSignalSource(@NonNull IAnalysisDataset d, @NonNull UUID signalGroup) {
 
-		LOGGER.finest("Updating signal source for signal group " + signalGroup);
-
 		try {
 
 			File currentFolder = d.getAnalysisOptions().orElseThrow(MissingOptionException::new)
-					.getDetectionFolder(signalGroup.toString())
+					.getNuclearSignalDetectionFolder(signalGroup)
 					.orElseThrow(MissingOptionException::new);
 			File newFolder = parent.getInputSupplier()
 					.requestFolder(FileUtils.extantComponent(currentFolder));
 
 			d.getCollection().getSignalManager().updateSignalSourceFolder(signalGroup,
 					newFolder.getAbsoluteFile());
+			UIController.getInstance().fireNuclearSignalUpdated(d);
 		} catch (RequestCancelledException e) {
 			// user cancelled, ignore
 		} catch (MissingOptionException e) {

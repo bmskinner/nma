@@ -1,5 +1,6 @@
 package com.bmskinner.nma.visualisation.tables;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -43,6 +44,8 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 	private String[] colNames;
 	private Object[][] rowData;
 
+	private List<IAnalysisDataset> datasets = new ArrayList<>();
+
 	public AnalysisParametersTableModel(@Nullable List<IAnalysisDataset> datasets,
 			boolean recoverable) {
 
@@ -50,6 +53,8 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			makeEmptyTable();
 			return;
 		}
+
+		this.datasets.addAll(datasets);
 
 		colNames = makeColNames(datasets);
 		int colCount = colNames.length + 1;
@@ -68,15 +73,17 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 					rowData[r][c] = rowNames.get(r);
 					continue;
 				}
-				createRowData(r, c, datasets);
+				createRowData(r, c);
 			}
 		}
 	}
 
-	public void createRowData(int r, int c, List<IAnalysisDataset> datasets) {
+	private void createRowData(int r, int c) {
+
+		IAnalysisDataset d = datasets.get(c - 1);
+
 		// Skip datasets with missing options
-		Optional<IAnalysisOptions> optional = datasets.get(c - 1)
-				.getAnalysisOptions();
+		Optional<IAnalysisOptions> optional = d.getAnalysisOptions();
 		if (optional.isEmpty()) {
 			rowData[r][c] = Labels.NA;
 			return;
@@ -101,13 +108,13 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			case 2 -> createNucleusSizeFilterString(options);
 			case 3 -> createNucleusCircFilterString(options);
 			case 4 -> createAnalysisRunTimeString(mainOptions);
-			case 5 -> createSourceFolderString(datasets.get(c - 1), mainOptions);
+			case 5 -> createSourceFolderString(d, mainOptions);
 			case 6 -> mainOptions.getRuleSetCollection().getName() + " (version "
 					+ mainOptions.getRuleSetCollection().getRulesetVersion() + ")";
 			case 7 -> String.valueOf(mainOptions.getProfileWindowProportion());
-			case 8 -> createPixelScaleString(datasets.get(c - 1));
-			case 9 -> datasets.get(c - 1).getVersionCreated().toString();
-			case 10 -> datasets.get(c - 1); // only used in merge source table
+			case 8 -> createPixelScaleString(d);
+			case 9 -> d.getVersionCreated().toString();
+			case 10 -> d; // only used in merge source table
 			default -> EMPTY_STRING;
 			};
 		} catch (Exception e) {
@@ -224,12 +231,20 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 		if (dataset.hasMergeSources()) {
 			return dataset.getAllMergeSources().stream()
 					.map(d -> d.getAnalysisOptions().get())
-					.map(o -> o.getNucleusDetectionFolder().get().getAbsolutePath())
+					.map(o -> o.getNucleusDetectionFolder().isPresent()
+							? o.getNucleusDetectionFolder().get().getAbsolutePath()
+							: "No source folder present for merge source")
 					.collect(Collectors.joining(Io.NEWLINE)) + Io.NEWLINE;
 		}
 		// Note we add a newline so there is vertical room for word wrapping in the
 		// table
-		return options.getNucleusDetectionFolder().get().getAbsolutePath() + Io.NEWLINE;
+		Optional<File> optionalFile = options.getNucleusDetectionFolder();
+
+		if (optionalFile.isPresent()) {
+			return optionalFile.get().getAbsolutePath() + Io.NEWLINE;
+		}
+
+		return "No source folder present for " + dataset.getName() + Io.NEWLINE;
 	}
 
 	private String createPixelScaleString(@NonNull IAnalysisDataset dataset) {

@@ -105,7 +105,7 @@ public class CellStatsPanel extends TableDetailPanel
 						if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
 							SignalTableCell cell = (SignalTableCell) table.getModel()
 									.getValueAt(row + 1, 1);
-							ch.changeSignalColour(activeDataset(), cell.getID());
+							ch.changeSignalColour(activeDataset(), cell.id());
 						}
 					}
 				}
@@ -241,7 +241,7 @@ public class CellStatsPanel extends TableDetailPanel
 					// colour this cell preemptively based on the signal group in the next row
 					SignalTableCell tableCell = (SignalTableCell) table.getModel()
 							.getValueAt(nextRow, 1);
-					bg = tableCell.getColor();
+					bg = tableCell.color();
 				}
 			}
 			// Cells are by default rendered as a JLabel.

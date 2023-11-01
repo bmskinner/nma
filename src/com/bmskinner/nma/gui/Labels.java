@@ -24,6 +24,7 @@ package com.bmskinner.nma.gui;
  */
 public class Labels {
 
+	public static final String EMPTY_STRING = "";
 	public static final String DATASET = "Dataset";
 	public static final String NA = "N/A";
 	public static final String NA_MERGE = "N/A - dataset is a merge and sources have multiple values";

@@ -69,7 +69,8 @@ public class SignalManager {
 	 *                      cells without signals
 	 * @return the cells
 	 */
-	public List<ICell> getCellsWithNuclearSignals(@NonNull final UUID signalGroupId, boolean hasSignal) {
+	public List<ICell> getCellsWithNuclearSignals(@NonNull final UUID signalGroupId,
+			boolean hasSignal) {
 		return collection.streamCells().filter(c -> c.hasNuclearSignals(signalGroupId) == hasSignal)
 				.collect(Collectors.toList());
 	}
@@ -81,7 +82,8 @@ public class SignalManager {
 	 * @return the number of cells in the collection with a signal in the group
 	 */
 	public int getNumberOfCellsWithNuclearSignals(@NonNull final UUID signalGroupId) {
-		return (int) collection.streamCells().filter(c -> c.hasNuclearSignals(signalGroupId)).count();
+		return (int) collection.streamCells().filter(c -> c.hasNuclearSignals(signalGroupId))
+				.count();
 	}
 
 	/**
@@ -159,7 +161,8 @@ public class SignalManager {
 	 * @return the image processor for the image
 	 * @throws UnloadableImageException if the image cannot be found or opened
 	 */
-	public ImageProcessor getSignalSourceImage(@NonNull final UUID signalGroupId, @NonNull final ICell cell)
+	public ImageProcessor getSignalSourceImage(@NonNull final UUID signalGroupId,
+			@NonNull final ICell cell)
 			throws UnloadableImageException {
 		Nucleus n = cell.getPrimaryNucleus();
 		if (n.getSignalCollection().hasSignal(signalGroupId))
@@ -174,7 +177,8 @@ public class SignalManager {
 	 * @param signalGroupId the signal group
 	 * @param folder        the folder containing the images
 	 */
-	public void updateSignalSourceFolder(@NonNull final UUID signalGroupId, @NonNull final File folder) {
+	public void updateSignalSourceFolder(@NonNull final UUID signalGroupId,
+			@NonNull final File folder) {
 
 		if (!collection.hasSignalGroup(signalGroupId))
 			return;
@@ -189,6 +193,8 @@ public class SignalManager {
 				n.getSignalCollection().updateSourceFile(signalGroupId, newFile);
 			}
 		});
+		LOGGER.fine(() -> "Updated signal source folder for %s to '%s'".formatted(signalGroupId,
+				folder.getAbsolutePath()));
 	}
 
 	/**
@@ -215,7 +221,8 @@ public class SignalManager {
 			ISignalGroup existingGroup = collection.getSignalGroup(newID).get();
 
 			if (!oldGroup.getGroupName().equals(existingGroup.getGroupName())) {
-				existingGroup.setGroupName("Merged_" + oldGroup.getGroupName() + "_" + existingGroup.getGroupName());
+				existingGroup.setGroupName(
+						"Merged_" + oldGroup.getGroupName() + "_" + existingGroup.getGroupName());
 			}
 
 		} else { // the signal group does not exist, just copy the old group
@@ -271,7 +278,8 @@ public class SignalManager {
 			return 0;
 		}
 
-		return (double) getSignalCount(signalGroupId) / (double) getNumberOfCellsWithNuclearSignals(signalGroupId);
+		return (double) getSignalCount(signalGroupId)
+				/ (double) getNumberOfCellsWithNuclearSignals(signalGroupId);
 	}
 
 	/**
@@ -335,7 +343,8 @@ public class SignalManager {
 	 * @param signalGroupId the signal group
 	 * @return the median value
 	 */
-	public double getMedianSignalStatistic(@NonNull final Measurement stat, @NonNull final MeasurementScale scale,
+	public double getMedianSignalStatistic(@NonNull final Measurement stat,
+			@NonNull final MeasurementScale scale,
 			@NonNull final UUID signalGroupId) {
 
 		double[] values = null;
@@ -377,7 +386,8 @@ public class SignalManager {
 	 * @param signalGroupId the signal group
 	 * @return the values
 	 */
-	public double[] getSignalStatistics(@NonNull final Measurement stat, @NonNull final MeasurementScale scale,
+	public double[] getSignalStatistics(@NonNull final Measurement stat,
+			@NonNull final MeasurementScale scale,
 			@NonNull final UUID signalGroupId) {
 
 		if (!this.hasSignals(signalGroupId))
@@ -385,12 +395,14 @@ public class SignalManager {
 
 		if (Measurement.NUCLEUS_SIGNAL_COUNT.equals(stat)) {
 			return collection.getCells().stream().flatMap(c -> c.getNuclei().stream())
-					.mapToDouble(n -> n.getSignalCollection().numberOfSignals(signalGroupId)).toArray();
+					.mapToDouble(n -> n.getSignalCollection().numberOfSignals(signalGroupId))
+					.toArray();
 		}
 
 		List<ICell> cells = getCellsWithNuclearSignals(signalGroupId, true);
 		return cells.stream().flatMap(c -> c.getNuclei().stream())
-				.flatMap(n -> n.getSignalCollection().getStatistics(stat, scale, signalGroupId).stream())
+				.flatMap(n -> n.getSignalCollection().getStatistics(stat, scale, signalGroupId)
+						.stream())
 				.mapToDouble(Double::doubleValue).toArray();
 	}
 
@@ -405,7 +417,8 @@ public class SignalManager {
 	 */
 	public double getMeanSignalAngle(@NonNull final UUID signalGroupId) {
 
-		double[] values = getSignalStatistics(Measurement.ANGLE, MeasurementScale.PIXELS, signalGroupId);
+		double[] values = getSignalStatistics(Measurement.ANGLE, MeasurementScale.PIXELS,
+				signalGroupId);
 
 		double sumSin = 0;
 		double sumCos = 0;
@@ -432,7 +445,8 @@ public class SignalManager {
 	 */
 	public double[] getOffsetSignalAngles(@NonNull final UUID signalGroupId) {
 
-		double[] values = getSignalStatistics(Measurement.ANGLE, MeasurementScale.PIXELS, signalGroupId);
+		double[] values = getSignalStatistics(Measurement.ANGLE, MeasurementScale.PIXELS,
+				signalGroupId);
 
 		if (values.length == 0) {
 			return new double[0];
@@ -555,7 +569,8 @@ public class SignalManager {
 		PairwiseSignalDistanceCollection ps = new PairwiseSignalDistanceCollection();
 
 		for (Nucleus n : collection.getNuclei()) {
-			List<PairwiseSignalDistanceValue> list = n.getSignalCollection().calculateSignalColocalisation(scale);
+			List<PairwiseSignalDistanceValue> list = n.getSignalCollection()
+					.calculateSignalColocalisation(scale);
 
 			for (PairwiseSignalDistanceValue v : list) {
 				ps.addValue(v);
@@ -573,7 +588,8 @@ public class SignalManager {
 	 * @return a list of colocalising signals
 	 * @throws IllegalArgumentException if the UUIDs are the same
 	 */
-	public List<Colocalisation<INuclearSignal>> getColocalisingSignals(@NonNull final UUID signalGroup1,
+	public List<Colocalisation<INuclearSignal>> getColocalisingSignals(
+			@NonNull final UUID signalGroup1,
 			@NonNull final UUID signalGroup2) {
 
 		if (signalGroup1.equals(signalGroup2)) {
@@ -583,7 +599,8 @@ public class SignalManager {
 		List<Colocalisation<INuclearSignal>> result = new ArrayList<>();
 
 		for (Nucleus n : collection.getNuclei()) {
-			result.addAll(n.getSignalCollection().calculateColocalisation(signalGroup1, signalGroup2));
+			result.addAll(
+					n.getSignalCollection().calculateColocalisation(signalGroup1, signalGroup2));
 		}
 		return result;
 	}
