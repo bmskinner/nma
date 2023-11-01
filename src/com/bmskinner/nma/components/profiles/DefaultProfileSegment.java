@@ -30,12 +30,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
 
 /**
@@ -114,18 +116,21 @@ public class DefaultProfileSegment implements IProfileSegment {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element("Segment")
-				.setAttribute("id", uuid.toString())
-				.setAttribute("start", String.valueOf(startIndex))
-				.setAttribute("end", String.valueOf(endIndex))
-				.setAttribute("total", String.valueOf(totalLength));
+		Element e = new Element(XMLNames.XML_SEGMENT)
+				.setAttribute(XMLNames.XML_ID, uuid.toString())
+				.setAttribute(XMLNames.XML_SEGMENT_START, String.valueOf(startIndex))
+				.setAttribute(XMLNames.XML_SEGMENT_END, String.valueOf(endIndex))
+				.setAttribute(XMLNames.XML_SEGMENT_TOTAL, String.valueOf(totalLength));
 
 		if (isLocked)
-			e.setAttribute("lock", "true"); // don't waste space on unlocked segments
+			e.setAttribute(XMLNames.XML_SEGMENT_LOCK, "true"); // don't waste space on unlocked
+																// segments
 
 		if (mergeSourceA != null) {
-			e.addContent(new Element("MergeSource").setContent(mergeSourceA.toXmlElement()));
-			e.addContent(new Element("MergeSource").setContent(mergeSourceB.toXmlElement()));
+			e.addContent(new Element(XMLNames.XML_SEGMENT_MERGE_SOURCE)
+					.setContent(mergeSourceA.toXmlElement()));
+			e.addContent(new Element(XMLNames.XML_SEGMENT_MERGE_SOURCE)
+					.setContent(mergeSourceB.toXmlElement()));
 		}
 		return e;
 	}
@@ -133,21 +138,23 @@ public class DefaultProfileSegment implements IProfileSegment {
 	public DefaultProfileSegment(Element e) {
 
 		try {
-			uuid = UUID.fromString(e.getAttributeValue("id"));
-			startIndex = Integer.parseInt(e.getAttributeValue("start"));
-			endIndex = Integer.parseInt(e.getAttributeValue("end"));
-			totalLength = Integer.parseInt(e.getAttributeValue("total"));
+			uuid = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
+			startIndex = Integer.parseInt(e.getAttributeValue(XMLNames.XML_SEGMENT_START));
+			endIndex = Integer.parseInt(e.getAttributeValue((XMLNames.XML_SEGMENT_END)));
+			totalLength = Integer.parseInt(e.getAttributeValue(XMLNames.XML_SEGMENT_TOTAL));
 
-			isLocked = e.getAttributeValue("lock") != null;
+			isLocked = e.getAttributeValue(XMLNames.XML_SEGMENT_LOCK) != null;
 
-			List<Element> merges = e.getChildren("MergeSource");
+			List<Element> merges = e.getChildren(XMLNames.XML_SEGMENT_MERGE_SOURCE);
 			if (!merges.isEmpty()) {
-				mergeSourceA = new DefaultProfileSegment(merges.get(0).getChild("Segment"));
-				mergeSourceB = new DefaultProfileSegment(merges.get(1).getChild("Segment"));
+				mergeSourceA = new DefaultProfileSegment(
+						merges.get(0).getChild(XMLNames.XML_SEGMENT));
+				mergeSourceB = new DefaultProfileSegment(
+						merges.get(1).getChild(XMLNames.XML_SEGMENT));
 			}
 		} catch (NumberFormatException | NullPointerException e1) {
-			LOGGER.warning("Unable to parse segment XML: " + e1.getMessage());
-			LOGGER.fine(e.toString());
+			LOGGER.log(Level.SEVERE, "Unable to parse segment XML: %s".formatted(e1.getMessage()),
+					e1);
 			throw e1;
 		}
 

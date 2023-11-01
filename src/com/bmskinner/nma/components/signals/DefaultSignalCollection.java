@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
@@ -51,10 +52,6 @@ import ij.process.ImageProcessor;
  *
  */
 public class DefaultSignalCollection implements ISignalCollection {
-
-	private static final String XML_COLLECTION = "SignalCollection";
-	private static final String XML_SIGNALS = "Signals";
-	private static final String XML_SIGNALGROUP_ID = "group";
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultSignalCollection.class.getName());
 
@@ -88,8 +85,8 @@ public class DefaultSignalCollection implements ISignalCollection {
 	 * @param e the XML element containing the data.
 	 */
 	public DefaultSignalCollection(Element e) {
-		for (Element id : e.getChildren(XML_SIGNALS)) {
-			UUID uuid = UUID.fromString(id.getAttributeValue(XML_SIGNALGROUP_ID));
+		for (Element id : e.getChildren(XMLNames.XML_SIGNALS)) {
+			UUID uuid = UUID.fromString(id.getAttributeValue(XMLNames.XML_SIGNALGROUP_ID));
 			collection.computeIfAbsent(uuid, k -> new ArrayList<>());
 
 			for (Element s : id.getChildren()) {
@@ -100,13 +97,13 @@ public class DefaultSignalCollection implements ISignalCollection {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element(XML_COLLECTION);
+		Element e = new Element(XMLNames.XML_SIGNAL_COLLECTION);
 
 		for (Entry<UUID, List<INuclearSignal>> entry : collection.entrySet()) {
 
 			for (INuclearSignal s : entry.getValue()) {
-				e.addContent(new Element(XML_SIGNALS)
-						.setAttribute(XML_SIGNALGROUP_ID, entry.getKey().toString())
+				e.addContent(new Element(XMLNames.XML_SIGNALS)
+						.setAttribute(XMLNames.XML_SIGNALGROUP_ID, entry.getKey().toString())
 						.addContent(s.toXmlElement()));
 			}
 		}

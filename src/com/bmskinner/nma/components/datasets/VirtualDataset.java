@@ -184,7 +184,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 		// Shells are not stored in signal groups for child datasets
 		// becuase signal groups can only be added to root datasets
-		for (Element el : e.getChildren(XMLNames.XML_SHELL_RESULT)) {
+		for (Element el : e.getChildren(XMLNames.XML_SIGNAL_SHELL_RESULT)) {
 			UUID id = UUID.fromString(el.getAttributeValue(XMLNames.XML_ID));
 			IShellResult s = new DefaultShellResult(el);
 			shellResults.put(id, s);
@@ -562,7 +562,6 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		if (!parentDataset.getCollection().hasSignalGroup(signalGroup))
 			return Optional.empty();
 
-		@SuppressWarnings("serial")
 		ISignalGroup result = new DefaultSignalGroup(
 				parentDataset.getCollection().getSignalGroup(signalGroup).get()) {
 

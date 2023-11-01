@@ -24,6 +24,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.io.Io.Importer;
 
@@ -58,13 +59,13 @@ public class DefaultWorkspace implements IWorkspace {
 	}
 
 	public DefaultWorkspace(@NonNull File f, @NonNull Element e) {
-		name = e.getAttributeValue(IWorkspace.WORKSPACE_NAME);
+		name = e.getAttributeValue(XMLNames.XML_WORKSPACE_NAME);
 		saveFile = f;
 
-		Element datasetElement = e.getChild(IWorkspace.DATASETS_ELEMENT);
+		Element datasetElement = e.getChild(XMLNames.XML_DATASETS_ELEMENT);
 
 		for (Element dataset : datasetElement.getChildren()) {
-			String path = dataset.getChild(IWorkspace.DATASET_PATH).getText();
+			String path = dataset.getChild(XMLNames.XML_DATASET_PATH).getText();
 			add(new File(path));
 		}
 	}
@@ -72,14 +73,14 @@ public class DefaultWorkspace implements IWorkspace {
 	@Override
 	public Element toXmlElement() {
 		// root element
-		Element rootElement = new Element(IWorkspace.XML_WORKSPACE)
-				.setAttribute(IWorkspace.WORKSPACE_NAME, name);
+		Element rootElement = new Element(XMLNames.XML_WORKSPACE)
+				.setAttribute(XMLNames.XML_WORKSPACE_NAME, name);
 
 		// Add datasets
-		Element datasetsElement = new Element(IWorkspace.DATASETS_ELEMENT);
+		Element datasetsElement = new Element(XMLNames.XML_DATASETS_ELEMENT);
 		for (File f : getFiles()) {
-			Element dataset = new Element("dataset");
-			Element datasetPath = new Element(IWorkspace.DATASET_PATH);
+			Element dataset = new Element(XMLNames.XML_WORKSPACE_DATASET_ELEMENT);
+			Element datasetPath = new Element(XMLNames.XML_DATASET_PATH);
 
 			datasetPath.setText(f.getAbsolutePath());
 			dataset.addContent(datasetPath);

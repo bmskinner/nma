@@ -36,14 +36,6 @@ import com.bmskinner.nma.io.XmlSerializable;
  */
 public interface IWorkspace extends XmlSerializable {
 
-	static final String XML_WORKSPACE = "workspace";
-	static final String WORKSPACE_NAME = "name";
-	static final String DATASETS_ELEMENT = "datasets";
-	static final String DATASET_PATH = "path";
-//	static final String BIOSAMPLES_ELEMENT = "biosamples";
-//	static final String BIOSAMPLES_NAME_KEY = "name";
-//	static final String BIOSAMPLES_DATASET_KEY = "dataset";
-
 	/**
 	 * Get the UUID of the workspace
 	 * 

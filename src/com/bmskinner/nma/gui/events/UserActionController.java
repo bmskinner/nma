@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import com.bmskinner.nma.analysis.DatasetDeleter;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
@@ -639,17 +640,17 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	@Override
 	public void fileImported(FileImportEvent f) {
 
-		if (IAnalysisDataset.XML_ANALYSIS_DATASET.equals(f.type())) {
+		if (XMLNames.XML_ANALYSIS_DATASET.equals(f.type())) {
 			ThreadManager.getInstance()
 					.execute(new ImportDatasetAction(acceptor, f.document(), f.file(), null));
 		}
 
-		if (IWorkspace.XML_WORKSPACE.equals(f.type())) {
+		if (XMLNames.XML_WORKSPACE.equals(f.type())) {
 			ThreadManager.getInstance()
 					.execute(new ImportWorkspaceAction(acceptor, f.document(), f.file()));
 		}
 
-		if (IAnalysisOptions.XML_ANALYSIS_OPTIONS.equals(f.type())) {
+		if (XMLNames.XML_ANALYSIS_OPTIONS.equals(f.type())) {
 			ThreadManager.getInstance()
 					.execute(new ImportWorkflowAction(acceptor, f.file()));
 		}

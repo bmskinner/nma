@@ -51,9 +51,9 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
 import com.bmskinner.nma.components.Version;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.MeasurementScale;
-import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.ThreadManager;
@@ -203,7 +203,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 				ContextEnabled.ALWAYS_ACTIVE, OPEN_DATASET_TOOLTIP);
 		o1.addActionListener(e -> UserActionController.getInstance()
 				.fileImportRequested(new FileImportEvent(this, null,
-						IAnalysisDataset.XML_ANALYSIS_DATASET, null)));
+						XMLNames.XML_ANALYSIS_DATASET, null)));
 		o1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
 		openMenu.add(o1);
 
@@ -211,7 +211,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 				ContextEnabled.ALWAYS_ACTIVE, OPEN_WORKSPACE_TOOLTIP);
 		o2.addActionListener(e -> UserActionController.getInstance()
 				.fileImportRequested(new FileImportEvent(this, null,
-						IWorkspace.XML_WORKSPACE, null)));
+						XMLNames.XML_WORKSPACE, null)));
 		openMenu.add(o2);
 
 		menu.add(openMenu);

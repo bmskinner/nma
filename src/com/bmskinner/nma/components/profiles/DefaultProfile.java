@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.io.XmlSerializable;
 
@@ -37,8 +38,6 @@ import com.bmskinner.nma.io.XmlSerializable;
 public class DefaultProfile implements IProfile {
 
 	private static final String CANNOT_ADD_NAN_OR_INFINITY = "Cannot add NaN or infinity";
-
-	private static final String XML_PROFILE = "Profile";
 
 	protected final float[] array;
 
@@ -792,7 +791,7 @@ public class DefaultProfile implements IProfile {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element(XML_PROFILE);
+		Element e = new Element(XMLNames.XML_PROFILE);
 		e.setText(Arrays.toString(array));
 		return e;
 	}

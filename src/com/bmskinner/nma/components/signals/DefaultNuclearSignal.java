@@ -23,6 +23,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.DefaultCellularComponent;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.io.XmlSerializable;
@@ -37,10 +38,6 @@ import ij.gui.Roi;
  *
  */
 public class DefaultNuclearSignal extends DefaultCellularComponent implements INuclearSignal {
-
-	private static final String XML_SIGNAL = "Signal";
-
-	private static final String XML_CLOSEST_BORDER = "ClosestBorder";
 
 	private int closestNuclearBorderPoint;
 
@@ -72,7 +69,8 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 	 */
 	public DefaultNuclearSignal(Element e) {
 		super(e);
-		closestNuclearBorderPoint = Integer.valueOf(e.getChildText(XML_CLOSEST_BORDER));
+		closestNuclearBorderPoint = Integer
+				.valueOf(e.getChildText(XMLNames.XML_SIGNAL_CLOSEST_BORDER));
 	}
 
 	@Override
@@ -92,9 +90,10 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 
 	@Override
 	public Element toXmlElement() {
-		Element e = super.toXmlElement().setName(XML_SIGNAL);
+		Element e = super.toXmlElement().setName(XMLNames.XML_SIGNAL);
 		e.addContent(
-				new Element(XML_CLOSEST_BORDER).setText(String.valueOf(closestNuclearBorderPoint)));
+				new Element(XMLNames.XML_SIGNAL_CLOSEST_BORDER)
+						.setText(String.valueOf(closestNuclearBorderPoint)));
 		return e;
 	}
 

@@ -35,8 +35,6 @@ import com.bmskinner.nma.io.XmlSerializable;
  */
 public interface IAnalysisOptions extends XmlSerializable {
 
-	String XML_ANALYSIS_OPTIONS = "AnalysisOptions";
-
 	// Standard detection keys are in CellularComponent
 	String SIGNAL_GROUP = "SignalGroup_";
 
@@ -154,7 +152,8 @@ public interface IAnalysisOptions extends XmlSerializable {
 	double getProfileWindowProportion();
 
 	/**
-	 * Get the rulesets used to detect landmarks
+	 * Get the rulesets used to detect landmarks TODO - why do we store these in the
+	 * ICellCollection also? Decide on a single canonical source for the rulesets
 	 * 
 	 * @return
 	 */

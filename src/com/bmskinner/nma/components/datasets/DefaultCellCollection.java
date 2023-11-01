@@ -1119,15 +1119,15 @@ public class DefaultCellCollection implements ICellCollection {
 	 */
 	public class DefaultProfileCollection implements IProfileCollection {
 
-		private static final String XML_VALUE_ATTRIBUTE = "value";
-
-		private static final String XML_INDEX_ATTRIBUTE = "index";
-
-		private static final String XML_NAME_ATTRIBUTE = "name";
-
-		private static final String XML_LANDMARK = "Landmark";
-
-		private static final String XML_ORIENT = "Orient";
+//		private static final String XML_VALUE_ATTRIBUTE = "value";
+//
+//		private static final String XML_INDEX_ATTRIBUTE = "index";
+//
+//		private static final String XML_NAME_ATTRIBUTE = "name";
+//
+//		private static final String XML_LANDMARK = "Landmark";
+//
+//		private static final String XML_ORIENT = "Orient";
 
 		/** The indexes of landmarks in the profiles and border list */
 		private Map<Landmark, Integer> landmarks = new HashMap<>();
@@ -1155,22 +1155,22 @@ public class DefaultCellCollection implements ICellCollection {
 		 */
 		public DefaultProfileCollection(Element e) {
 
-			for (Element el : e.getChildren(XML_LANDMARK)) {
-				landmarks.put(new DefaultLandmark(el.getAttributeValue(XML_NAME_ATTRIBUTE)),
-						Integer.parseInt(el.getAttributeValue(XML_INDEX_ATTRIBUTE)));
+			for (Element el : e.getChildren(XMLNames.XML_LANDMARK)) {
+				landmarks.put(new DefaultLandmark(el.getAttributeValue(XMLNames.XML_NAME)),
+						Integer.parseInt(el.getAttributeValue(XMLNames.XML_INDEX)));
 			}
 
-			for (Element el : e.getChildren(XML_ORIENT)) {
+			for (Element el : e.getChildren(XMLNames.XML_ORIENT)) {
 				OrientationMark name = OrientationMark
-						.valueOf(el.getAttributeValue(XML_NAME_ATTRIBUTE));
+						.valueOf(el.getAttributeValue(XMLNames.XML_NAME));
 				Landmark l = landmarks.keySet().stream()
 						.filter(lm -> lm.getName()
-								.equals(el.getAttributeValue(XML_VALUE_ATTRIBUTE)))
+								.equals(el.getAttributeValue(XMLNames.XML_VALUE)))
 						.findFirst()
 						.get();
 			}
 
-			for (Element el : e.getChildren("Segment")) {
+			for (Element el : e.getChildren(XMLNames.XML_SEGMENT)) {
 				segments.add(new DefaultProfileSegment(el));
 			}
 
@@ -1547,9 +1547,9 @@ public class DefaultCellCollection implements ICellCollection {
 			}
 
 			for (Entry<Landmark, Integer> entry : landmarks.entrySet()) {
-				e.addContent(new Element(XML_LANDMARK)
-						.setAttribute(XML_NAME_ATTRIBUTE, entry.getKey().toString())
-						.setAttribute(XML_INDEX_ATTRIBUTE, String.valueOf(entry.getValue())));
+				e.addContent(new Element(XMLNames.XML_LANDMARK)
+						.setAttribute(XMLNames.XML_NAME, entry.getKey().toString())
+						.setAttribute(XMLNames.XML_INDEX, String.valueOf(entry.getValue())));
 			}
 			return e;
 		}

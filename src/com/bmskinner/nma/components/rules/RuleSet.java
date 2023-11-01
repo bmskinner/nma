@@ -23,6 +23,7 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.io.XmlSerializable;
 
@@ -35,10 +36,6 @@ import com.bmskinner.nma.io.XmlSerializable;
  *
  */
 public class RuleSet implements XmlSerializable {
-
-	private static final String XML_TYPE = "type";
-	private static final String XML_RULE = "Rule";
-	private static final String XML_RULESET = "Ruleset";
 
 	/** the type of profile to which the rules apply */
 	private final ProfileType type;
@@ -63,9 +60,9 @@ public class RuleSet implements XmlSerializable {
 	 * @param e the XML element containing the data.
 	 */
 	public RuleSet(@NonNull Element e) {
-		type = ProfileType.fromString(e.getAttributeValue(XML_TYPE));
+		type = ProfileType.fromString(e.getAttributeValue(XMLNames.XML_RULE_TYPE));
 
-		for (Element r : e.getChildren(XML_RULE)) {
+		for (Element r : e.getChildren(XMLNames.XML_RULE)) {
 			addRule(new Rule(r));
 		}
 	}
@@ -98,8 +95,8 @@ public class RuleSet implements XmlSerializable {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element(XML_RULESET)
-				.setAttribute(XML_TYPE, getType().toString());
+		Element e = new Element(XMLNames.XML_RULESET)
+				.setAttribute(XMLNames.XML_RULE_TYPE, getType().toString());
 
 		for (Rule r : getRules()) {
 			e.addContent(r.toXmlElement());

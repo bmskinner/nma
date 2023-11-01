@@ -23,6 +23,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.DefaultNucleus;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -78,7 +79,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 	public DefaultWarpedSignal(@NonNull Element e) throws ComponentCreationException {
 
 		Nucleus c = null;
-		for (Element el : e.getChild("TargetShape").getChildren()) {
+		for (Element el : e.getChild(XMLNames.XML_WARPED_SIGNAL_TARGET_SHAPE).getChildren()) {
 			c = new DefaultNucleus(el);
 		}
 
@@ -86,19 +87,24 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 			throw new IllegalArgumentException("Target shape is missing from warped signal key");
 
 		this.target = c;
-		targetName = e.getAttributeValue("targetName");
-		sourceDatasetId = UUID.fromString(e.getAttributeValue("source"));
-		sourceDatasetName = e.getAttributeValue("sourceDataset");
-		sourceSignalGroupName = e.getAttributeValue("sourceSignal");
+		targetName = e.getAttributeValue(XMLNames.XML_WARPED_SIGNAL_TARGET_NAME);
+		sourceDatasetId = UUID
+				.fromString(e.getAttributeValue(XMLNames.XML_WARPED_SIGNAL_SOURCE_DATASET_ID));
+		sourceDatasetName = e.getAttributeValue(XMLNames.XML_WARPED_SIGNAL_SOURCE_DATASET);
+		sourceSignalGroupName = e.getAttributeValue(XMLNames.XML_WARPED_SIGNAL_SOURCE_SIGNAL);
 
-		isCellsWithSignals = Boolean.valueOf(e.getAttributeValue("isSignalsOnly"));
-		threshold = Integer.valueOf(e.getAttributeValue("threshold"));
-		isNormalised = Boolean.valueOf(e.getAttributeValue("isNormalised"));
-		isBinarised = Boolean.valueOf(e.getAttributeValue("isBinarised"));
-		imageWidth = Integer.parseInt(e.getAttributeValue("width"));
-		pseudoColour = Color.decode(e.getAttributeValue("colour"));
-		displayThreshold = Integer.parseInt(e.getAttributeValue("displayThreshold"));
-		image = StringUtils.hexToBytes(e.getChildText("Bytes"));
+		isCellsWithSignals = Boolean
+				.valueOf(e.getAttributeValue(XMLNames.XML_WARPED_SIGNAL_IS_SIGNALS_ONLY));
+		threshold = Integer
+				.valueOf(e.getAttributeValue(XMLNames.XML_WARPED_SIGNAL_DETECTION_THRESHOLD));
+		isNormalised = Boolean
+				.valueOf(e.getAttributeValue(XMLNames.XML_WARPED_SIGNAL_IS_NORMALISED));
+		isBinarised = Boolean.valueOf(e.getAttributeValue(XMLNames.XML_WARPED_SIGNAL_IS_BINARISED));
+		imageWidth = Integer.parseInt(e.getAttributeValue(XMLNames.XML_WARPED_SIGNAL_IMAGE_WIDTH));
+		pseudoColour = Color.decode(e.getAttributeValue(XMLNames.XML_SIGNAL_COLOUR));
+		displayThreshold = Integer
+				.parseInt(e.getAttributeValue(XMLNames.XML_WARPED_SIGNAL_DISPLAY_THRESHOLD));
+		image = StringUtils.hexToBytes(e.getChildText(XMLNames.XML_WARPED_SIGNAL_BYTES));
 	}
 
 	@Override
@@ -113,20 +119,24 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element("WarpedSignal");
-		e.setAttribute("targetName", targetName);
-		e.setAttribute("sourceDataset", sourceDatasetName);
-		e.setAttribute("sourceSignal", sourceSignalGroupName);
-		e.setAttribute("source", sourceDatasetId.toString());
-		e.setAttribute("threshold", String.valueOf(threshold));
-		e.setAttribute("isSignalsOnly", String.valueOf(isCellsWithSignals));
-		e.setAttribute("isBinarised", String.valueOf(isBinarised));
-		e.setAttribute("isNormalised", String.valueOf(isNormalised));
-		e.setAttribute("width", String.valueOf(imageWidth));
-		e.setAttribute("colour", String.valueOf(pseudoColour.getRGB()));
-		e.setAttribute("displayThreshold", String.valueOf(displayThreshold));
-		e.addContent(new Element("TargetShape").setContent(target.toXmlElement()));
-		e.addContent(new Element("Bytes").setText(StringUtils.bytesToHex(image)));
+		Element e = new Element(XMLNames.XML_WARPED_SIGNAL);
+		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_TARGET_NAME, targetName);
+		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_SOURCE_DATASET, sourceDatasetName);
+		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_SOURCE_SIGNAL, sourceSignalGroupName);
+		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_SOURCE_DATASET_ID, sourceDatasetId.toString());
+		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_DETECTION_THRESHOLD, String.valueOf(threshold));
+		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_IS_SIGNALS_ONLY,
+				String.valueOf(isCellsWithSignals));
+		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_IS_BINARISED, String.valueOf(isBinarised));
+		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_IS_NORMALISED, String.valueOf(isNormalised));
+		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_IMAGE_WIDTH, String.valueOf(imageWidth));
+		e.setAttribute(XMLNames.XML_SIGNAL_COLOUR, String.valueOf(pseudoColour.getRGB()));
+		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_DISPLAY_THRESHOLD,
+				String.valueOf(displayThreshold));
+		e.addContent(new Element(XMLNames.XML_WARPED_SIGNAL_TARGET_SHAPE)
+				.setContent(target.toXmlElement()));
+		e.addContent(new Element(XMLNames.XML_WARPED_SIGNAL_BYTES)
+				.setText(StringUtils.bytesToHex(image)));
 
 		return e;
 	}

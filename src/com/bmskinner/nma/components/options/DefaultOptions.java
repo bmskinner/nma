@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XmlSerializable;
 
@@ -76,27 +77,29 @@ public class DefaultOptions implements HashOptions {
 	public DefaultOptions(Element e) {
 
 		// Add each map
-		for (Element i : e.getChildren(XML_INTEGER_KEY))
-			intMap.put(i.getAttributeValue(XML_NAME),
-					Integer.parseInt(i.getAttributeValue(XML_VALUE)));
+		for (Element i : e.getChildren(XMLNames.XML_INTEGER_KEY))
+			intMap.put(i.getAttributeValue(XMLNames.XML_NAME),
+					Integer.parseInt(i.getAttributeValue(XMLNames.XML_VALUE)));
 
-		for (Element i : e.getChildren(XML_FLOAT_KEY))
-			fltMap.put(i.getAttributeValue(XML_NAME),
-					Float.parseFloat(i.getAttributeValue(XML_VALUE)));
+		for (Element i : e.getChildren(XMLNames.XML_FLOAT_KEY))
+			fltMap.put(i.getAttributeValue(XMLNames.XML_NAME),
+					Float.parseFloat(i.getAttributeValue(XMLNames.XML_VALUE)));
 
-		for (Element i : e.getChildren(XML_DOUBLE_KEY))
-			dblMap.put(i.getAttributeValue(XML_NAME),
-					Double.parseDouble(i.getAttributeValue(XML_VALUE)));
+		for (Element i : e.getChildren(XMLNames.XML_DOUBLE_KEY))
+			dblMap.put(i.getAttributeValue(XMLNames.XML_NAME),
+					Double.parseDouble(i.getAttributeValue(XMLNames.XML_VALUE)));
 
-		for (Element i : e.getChildren(XML_BOOLEAN_KEY))
-			boolMap.put(i.getAttributeValue(XML_NAME),
-					Boolean.parseBoolean(i.getAttributeValue(XML_VALUE)));
+		for (Element i : e.getChildren(XMLNames.XML_BOOLEAN_KEY))
+			boolMap.put(i.getAttributeValue(XMLNames.XML_NAME),
+					Boolean.parseBoolean(i.getAttributeValue(XMLNames.XML_VALUE)));
 
-		for (Element i : e.getChildren(XML_STRING_KEY))
-			stringMap.put(i.getAttributeValue(XML_NAME), i.getAttributeValue(XML_VALUE));
+		for (Element i : e.getChildren(XMLNames.XML_STRING_KEY))
+			stringMap.put(i.getAttributeValue(XMLNames.XML_NAME),
+					i.getAttributeValue(XMLNames.XML_VALUE));
 
-		for (Element i : e.getChildren(XML_SUBOPTION_KEY))
-			subMap.put(i.getAttributeValue(XML_NAME), new DefaultOptions(i.getChild(XML_OPTIONS)));
+		for (Element i : e.getChildren(XMLNames.XML_SUBOPTION_KEY))
+			subMap.put(i.getAttributeValue(XMLNames.XML_NAME),
+					new DefaultOptions(i.getChild(XMLNames.XML_OPTIONS)));
 
 	}
 
@@ -434,43 +437,45 @@ public class DefaultOptions implements HashOptions {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element(XML_OPTIONS);
+		Element e = new Element(XMLNames.XML_OPTIONS);
 
 		// Add each map
 		for (Entry<String, Integer> entry : intMap.entrySet()) {
-			e.addContent(new Element(XML_INTEGER_KEY)
-					.setAttribute(XML_NAME, entry.getKey())
-					.setAttribute(XML_VALUE, entry.getValue().toString()));
+			e.addContent(new Element(XMLNames.XML_INTEGER_KEY)
+					.setAttribute(XMLNames.XML_NAME, entry.getKey())
+					.setAttribute(XMLNames.XML_VALUE, entry.getValue().toString()));
 		}
 
 		for (Entry<String, Float> entry : fltMap.entrySet()) {
-			e.addContent(new Element(XML_FLOAT_KEY)
-					.setAttribute(XML_NAME, entry.getKey())
-					.setAttribute(XML_VALUE, entry.getValue().toString()));
+			e.addContent(new Element(XMLNames.XML_FLOAT_KEY)
+					.setAttribute(XMLNames.XML_NAME, entry.getKey())
+					.setAttribute(XMLNames.XML_VALUE, entry.getValue().toString()));
 		}
 
 		for (Entry<String, Double> entry : dblMap.entrySet()) {
-			e.addContent(new Element(XML_DOUBLE_KEY)
-					.setAttribute(XML_NAME, entry.getKey())
-					.setAttribute(XML_VALUE, entry.getValue().toString()));
+			e.addContent(new Element(XMLNames.XML_DOUBLE_KEY)
+					.setAttribute(XMLNames.XML_NAME, entry.getKey())
+					.setAttribute(XMLNames.XML_VALUE, entry.getValue().toString()));
 		}
 
 		for (Entry<String, Boolean> entry : boolMap.entrySet()) {
-			e.addContent(new Element(XML_BOOLEAN_KEY)
-					.setAttribute(XML_NAME, entry.getKey())
-					.setAttribute(XML_VALUE, entry.getValue().toString()));
+			e.addContent(new Element(XMLNames.XML_BOOLEAN_KEY)
+					.setAttribute(XMLNames.XML_NAME, entry.getKey())
+					.setAttribute(XMLNames.XML_VALUE, entry.getValue().toString()));
 		}
 
 		for (Entry<String, String> entry : stringMap.entrySet()) {
-			e.addContent(new Element(XML_STRING_KEY)
-					.setAttribute(XML_NAME, entry.getKey())
-					.setAttribute(XML_VALUE, entry.getValue()));
+			e.addContent(new Element(XMLNames.XML_STRING_KEY)
+					.setAttribute(XMLNames.XML_NAME, entry.getKey())
+					.setAttribute(XMLNames.XML_VALUE, entry.getValue()));
 		}
 
 		// Add the sub-options
 		for (Entry<String, HashOptions> entry : subMap.entrySet()) {
-			e.addContent(new Element(XML_SUBOPTION_KEY).setAttribute(XML_NAME, entry.getKey())
-					.addContent(entry.getValue().toXmlElement()));
+			e.addContent(
+					new Element(XMLNames.XML_SUBOPTION_KEY)
+							.setAttribute(XMLNames.XML_NAME, entry.getKey())
+							.addContent(entry.getValue().toXmlElement()));
 		}
 		return e;
 	}
