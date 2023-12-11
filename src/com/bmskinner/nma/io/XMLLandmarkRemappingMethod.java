@@ -31,6 +31,9 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 	private final Document landmarkTarget;
 	private final File outputFile;
 
+	private int totalCells = 0;
+	private int remappedCells = 0;
+
 	/**
 	 * Construct with XMl documents containing equivalent datasets
 	 * 
@@ -73,10 +76,14 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 		// Write the updated XML to a new file
 		XMLWriter.writeXML(landmarkTarget, outputFile);
 
+		LOGGER.fine(() -> "Ramapped " + remappedCells + " of " + totalCells + " nuclei");
+
 		return new DefaultAnalysisResult((IAnalysisDataset) null);
 	}
 
 	private void updateLandmarkLocation(Element targetNucleus, List<Element> sourceNuclei) {
+
+		totalCells++;
 
 		Element com = targetNucleus.getChild("CoM");
 		Element xpoints = targetNucleus.getChild("xpoints");
@@ -110,7 +117,7 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 				List<Element> sourceLandmarks = sourceNucleus.getChildren("Landmark");
 				List<Element> sourceSegments = sourceNucleus.getChildren("Segment");
 
-				LOGGER.fine("Match found for target nucleus "
+				LOGGER.finer("Match found for target nucleus "
 						+ targetNucleus.getAttributeValue("id") + " with source "
 						+ sourceNucleus.getAttributeValue("id"));
 
@@ -149,22 +156,22 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 						// update the landmark index
 						if (!targetValue.equals(sourceValue)) {
 							match.get().setAttribute("index", sourceValue);
-							LOGGER.fine(
+							LOGGER.finer(
 									"Updated landmark " + match.get().getAttributeValue("name")
 											+ " from " + targetValue + " to " + sourceValue);
 						}
 
 					} else {
-						LOGGER.fine(
+						LOGGER.finer(
 								"Landmark " + lmElement.getAttributeValue("name") + " not found");
 					}
 				}
 
+				remappedCells++;
 				// Nucleus is done, stop
 				return;
 			}
 		}
-		LOGGER.fine("No match found for nucleus " + targetNucleus.getAttributeValue("id"));
 	}
 
 	private Map<String, String> matchSegmentIds(Element targetNucleus, Element sourceNucleus,

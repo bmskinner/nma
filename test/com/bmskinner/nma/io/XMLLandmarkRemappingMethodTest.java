@@ -1,6 +1,11 @@
 package com.bmskinner.nma.io;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,6 +14,9 @@ import org.jdom2.Document;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nma.components.cells.Nucleus;
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
 import com.bmskinner.nma.logging.Loggable;
@@ -39,23 +47,32 @@ public class XMLLandmarkRemappingMethodTest {
 	@Test
 	public void test() throws Exception {
 
-		File sourceFile = new File(
-				"D:\\git\\pig_sperm_shape\\data\\Joe analysis\\Pig_Merge_of_datasets.nmd");
-		File targetFile = new File("D:\\git\\pig_sperm_shape\\Fertile_subfertile_merged.nmd");
-
-		File outputFile = new File(
-				"D:\\git\\pig_sperm_shape\\Fertile_subfertile_manual_landmarks.nmd");
-
-//		File sourceFile = new File("test\\samples\\images\\Issues\\Mouse_with_clusters_source.nmd");
-//		File targetFile = new File("test\\samples\\images\\Issues\\Mouse_with_clusters_target.nmd");
+//		File sourceFile = new File(
+//				"D:\\git\\pig_sperm_shape\\data\\Joe analysis\\Pig_Merge_of_datasets.nmd");
+//		File targetFile = new File("D:\\git\\pig_sperm_shape\\Fertile_subfertile_merged.nmd");
 //
 //		File outputFile = new File(
-//				"test\\samples\\images\\Issues\\Mouse_with_clusters_updated.nmd");
+//				"D:\\git\\pig_sperm_shape\\Fertile_subfertile_manual_landmarks.nmd");
+
+		File sourceFile = new File("test/samples/datasets/Mouse_with_clusters_source.nmd");
+		File targetFile = new File("test/samples/datasets/Mouse_with_clusters_target.nmd");
+		File outputFile = new File("test/samples/datasets/Mouse_with_clusters_updated.nmd");
 
 		Document source = XMLReader.readDocument(sourceFile);
 		Document target = XMLReader.readDocument(targetFile);
 
 		new XMLLandmarkRemappingMethod(source, target, outputFile).call();
+
+		IAnalysisDataset d = SampleDatasetReader.openDataset(outputFile);
+
+		Optional<Nucleus> n = d.getCollection().getNucleus(UUID.fromString("217743d1-bacf-4b40-8381-7038bf2e9ec0"));
+
+		assertTrue(n.isPresent());
+
+		int rp = n.get().getBorderIndex(OrientationMark.REFERENCE);
+
+		assertEquals(190, rp);
+
 	}
 
 }
