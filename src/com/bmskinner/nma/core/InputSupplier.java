@@ -298,4 +298,12 @@ public interface InputSupplier {
 		private static final long serialVersionUID = 1L;
 	}
 
+	/**
+	 * Announce the given message. Does not provide a return value
+	 * 
+	 * @param message the message to provide to the user
+	 * @param title   a title to provide on dialog boxes
+	 */
+	void announceMessage(String message, String title);
+
 }

@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -50,6 +51,7 @@ import javax.swing.table.TableModel;
 import com.bmskinner.nma.analysis.detection.Finder;
 import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.core.ThreadManager;
+import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.Loggable;
@@ -144,8 +146,11 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 			finder.findInImage(imageFile);
 
 		} catch (ImageImportException e) { // end try
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			setImageLabel("Error probing " + imageFile.getAbsolutePath());
+			new DefaultInputSupplier().announceMessage(
+					"Unable to open " + imageFile.getName() + ": " + e.getMessage(),
+					"Cannot open image");
 
 		} finally {
 
@@ -189,11 +194,10 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 		((ProberTableModel) table.getModel()).setRowCount(0);
 		Runnable r = () -> {
 			try {
-				LOGGER.finer("Importing " + openImage);
 				importAndDisplayImage(openImage);
 			} catch (Exception e) {
-				LOGGER.warning("Error in prober");
-				LOGGER.log(Loggable.STACK, "Error in prober", e);
+				LOGGER.log(Level.SEVERE, "Error in image prober: " + e.getMessage(), e);
+
 			}
 		};
 		// Note that if only one method thread is available, this will hang when

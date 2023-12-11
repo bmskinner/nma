@@ -33,6 +33,7 @@ import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
@@ -375,6 +376,14 @@ public class ImageImporter implements Importer {
 
 		// otherwise ImageJ can do it alone
 		ImagePlus image = new ImagePlus(f.getAbsolutePath());
+
+		// Except there may be reading error if the file is malformed
+		// Check the ImageJ error log; null if last command succeeded
+		String potentialErrorMessage = IJ.getErrorMessage();
+		if (null != potentialErrorMessage) {
+			throw new ImageImportException(
+					"Error importing image file " + f.getName() + ": " + potentialErrorMessage);
+		}
 
 		ImageStack stack = convertToStack(image);
 		image.close();

@@ -247,4 +247,10 @@ public class DefaultInputSupplier implements InputSupplier {
 				"Overwrite file?");
 	}
 
+	@Override
+	public void announceMessage(String message, String title) {
+		JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
+
+	}
+
 }
