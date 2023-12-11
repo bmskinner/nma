@@ -1,0 +1,61 @@
+package com.bmskinner.nma.io;
+
+import java.io.File;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.jdom2.Document;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.bmskinner.nma.logging.ConsoleFormatter;
+import com.bmskinner.nma.logging.ConsoleHandler;
+import com.bmskinner.nma.logging.Loggable;
+
+import ij.Prefs;
+
+/**
+ * Test the remapping works
+ * 
+ * @author bs19022
+ *
+ */
+public class XMLLandmarkRemappingMethodTest {
+
+	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+
+	@Before
+	public void setUp() {
+		Prefs.setThreads(2); // Attempt to avoid issue 162
+		for (Handler h : LOGGER.getHandlers())
+			LOGGER.removeHandler(h);
+		Handler h = new ConsoleHandler(new ConsoleFormatter());
+		LOGGER.setLevel(Level.FINE);
+		h.setLevel(Level.FINE);
+		LOGGER.addHandler(h);
+	}
+
+	@Test
+	public void test() throws Exception {
+
+		File sourceFile = new File(
+				"D:\\git\\pig_sperm_shape\\data\\Joe analysis\\Pig_Merge_of_datasets.nmd");
+		File targetFile = new File("D:\\git\\pig_sperm_shape\\Fertile_subfertile_merged.nmd");
+
+		File outputFile = new File(
+				"D:\\git\\pig_sperm_shape\\Fertile_subfertile_manual_landmarks.nmd");
+
+//		File sourceFile = new File("test\\samples\\images\\Issues\\Mouse_with_clusters_source.nmd");
+//		File targetFile = new File("test\\samples\\images\\Issues\\Mouse_with_clusters_target.nmd");
+//
+//		File outputFile = new File(
+//				"test\\samples\\images\\Issues\\Mouse_with_clusters_updated.nmd");
+
+		Document source = XMLReader.readDocument(sourceFile);
+		Document target = XMLReader.readDocument(targetFile);
+
+		new XMLLandmarkRemappingMethod(source, target, outputFile).call();
+	}
+
+}
