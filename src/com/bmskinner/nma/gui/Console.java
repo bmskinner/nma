@@ -59,6 +59,7 @@ public class Console extends JPanel implements ActionListener {
 	private static final String TASKS_CMD = "tasks";
 	private static final String HASH_CMD = "hash";
 	private static final String EDGE_CMD = "edge";
+	private static final String REMAP_CMD = "remap";
 
 	private final List<Command> runnableCommands = new ArrayList<>();
 
@@ -176,6 +177,12 @@ public class Console extends JPanel implements ActionListener {
 		runnableCommands.add(new Command(LIST_CMD,
 				"list all open datasets",
 				this::listDatasets));
+
+		runnableCommands.add(new Command(REMAP_CMD,
+				"remap landmarks between nmd files",
+				() -> UserActionController.getInstance()
+						.userActionEventReceived(new UserActionEvent(this,
+								UserActionEvent.REMAP_LANDMARKS))));
 
 		runnableCommands.add(new Command(TASKS_CMD,
 				"list all queued tasks",

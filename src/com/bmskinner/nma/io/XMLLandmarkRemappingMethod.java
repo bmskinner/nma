@@ -69,14 +69,21 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 				.flatMap(c -> c.getChildren("Nucleus").stream())
 				.toList();
 
+		this.fireUpdateProgressTotalLength(targetCells.size());
+
 		for (Element nucleusElement : targetCells) {
 			updateLandmarkLocation(nucleusElement, sourceCells);
+
+			this.fireProgressEvent();
 		}
+
+		this.fireIndeterminateState();
 
 		// Write the updated XML to a new file
 		XMLWriter.writeXML(landmarkTarget, outputFile);
 
-		LOGGER.fine(() -> "Ramapped " + remappedCells + " of " + totalCells + " nuclei");
+		LOGGER.info(() -> "Remapped " + remappedCells + " of " + totalCells + " nuclei");
+		LOGGER.info(() -> "Remapped data saved to " + outputFile.getAbsolutePath());
 
 		return new DefaultAnalysisResult((IAnalysisDataset) null);
 	}
@@ -171,6 +178,7 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 				// Nucleus is done, stop
 				return;
 			}
+
 		}
 	}
 

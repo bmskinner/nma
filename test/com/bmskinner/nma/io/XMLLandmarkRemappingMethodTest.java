@@ -46,14 +46,6 @@ public class XMLLandmarkRemappingMethodTest {
 
 	@Test
 	public void test() throws Exception {
-
-//		File sourceFile = new File(
-//				"D:\\git\\pig_sperm_shape\\data\\Joe analysis\\Pig_Merge_of_datasets.nmd");
-//		File targetFile = new File("D:\\git\\pig_sperm_shape\\Fertile_subfertile_merged.nmd");
-//
-//		File outputFile = new File(
-//				"D:\\git\\pig_sperm_shape\\Fertile_subfertile_manual_landmarks.nmd");
-
 		File sourceFile = new File("test/samples/datasets/Mouse_with_clusters_source.nmd");
 		File targetFile = new File("test/samples/datasets/Mouse_with_clusters_target.nmd");
 		File outputFile = new File("test/samples/datasets/Mouse_with_clusters_updated.nmd");
@@ -65,7 +57,8 @@ public class XMLLandmarkRemappingMethodTest {
 
 		IAnalysisDataset d = SampleDatasetReader.openDataset(outputFile);
 
-		Optional<Nucleus> n = d.getCollection().getNucleus(UUID.fromString("217743d1-bacf-4b40-8381-7038bf2e9ec0"));
+		Optional<Nucleus> n = d.getCollection()
+				.getNucleus(UUID.fromString("217743d1-bacf-4b40-8381-7038bf2e9ec0"));
 
 		assertTrue(n.isPresent());
 
