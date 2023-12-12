@@ -13,6 +13,7 @@ import org.jdom2.Element;
 import com.bmskinner.nma.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.io.Io.Importer;
 
@@ -55,18 +56,18 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 
 		// Find all the nuclei in the source landmarks
 		List<Element> sourceCells = landmarkSource.getRootElement()
-				.getChild("CellCollection")
-				.getChildren("Cell")
+				.getChild(XMLNames.XML_CELL_COLLECTION)
+				.getChildren(XMLNames.XML_CELL)
 				.stream()
-				.flatMap(c -> c.getChildren("Nucleus").stream())
+				.flatMap(c -> c.getChildren(XMLNames.XML_NUCLEUS).stream())
 				.toList();
 
 		// Find all the nuclei in the target document
 		List<Element> targetCells = landmarkTarget.getRootElement()
-				.getChild("CellCollection")
-				.getChildren("Cell")
+				.getChild(XMLNames.XML_CELL_COLLECTION)
+				.getChildren(XMLNames.XML_CELL)
 				.stream()
-				.flatMap(c -> c.getChildren("Nucleus").stream())
+				.flatMap(c -> c.getChildren(XMLNames.XML_NUCLEUS).stream())
 				.toList();
 
 		this.fireUpdateProgressTotalLength(targetCells.size());
@@ -92,41 +93,42 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 
 		totalCells++;
 
-		Element com = targetNucleus.getChild("CoM");
-		Element xpoints = targetNucleus.getChild("xpoints");
-		Element ypoints = targetNucleus.getChild("ypoints");
+		Element com = targetNucleus.getChild(XMLNames.XML_COM);
+		Element xpoints = targetNucleus.getChild(XMLNames.XML_XPOINTS);
+		Element ypoints = targetNucleus.getChild(XMLNames.XML_YPOINTS);
 
 		// Check every source nucleus for a match
 		for (Element sourceNucleus : sourceNuclei) {
-			Element scom = sourceNucleus.getChild("CoM");
-			Element sxpoints = sourceNucleus.getChild("xpoints");
-			Element sypoints = sourceNucleus.getChild("ypoints");
+			Element scom = sourceNucleus.getChild(XMLNames.XML_COM);
+			Element sxpoints = sourceNucleus.getChild(XMLNames.XML_XPOINTS);
+			Element sypoints = sourceNucleus.getChild(XMLNames.XML_YPOINTS);
 
-			Optional<Element> rpElement = sourceNucleus.getChildren("Orientation")
+			Optional<Element> rpElement = sourceNucleus.getChildren(XMLNames.XML_ORIENTATION)
 					.stream()
-					.filter(e -> e.getAttributeValue("name").equals("REFERENCE"))
+					.filter(e -> e.getAttributeValue(XMLNames.XML_NAME).equals("REFERENCE"))
 					.findFirst();
 
 			if (rpElement.isEmpty()) // skip cells without defined RP, can't copy segments
 				continue;
 
-			String rpName = rpElement.get().getAttributeValue("value");
+			String rpName = rpElement.get().getAttributeValue(XMLNames.XML_VALUE);
 
 			// When a match is found, go through the landmarks
-			if (scom.getAttributeValue("x").equals(com.getAttributeValue("x"))
-					&& scom.getAttributeValue("y").equals(com.getAttributeValue("y"))
+			if (scom.getAttributeValue(XMLNames.XML_X).equals(com.getAttributeValue(XMLNames.XML_X))
+					&& scom.getAttributeValue(XMLNames.XML_Y)
+							.equals(com.getAttributeValue(XMLNames.XML_Y))
 					&& sxpoints.getText().equals(xpoints.getText())
 					&& sypoints.getText().equals(ypoints.getText())) {
 
 				// The cell coordinates match, proceed
 
-				List<Element> targetSegments = targetNucleus.getChildren("Segment");
-				List<Element> sourceLandmarks = sourceNucleus.getChildren("Landmark");
-				List<Element> sourceSegments = sourceNucleus.getChildren("Segment");
+				List<Element> targetSegments = targetNucleus.getChildren(XMLNames.XML_SEGMENT);
+				List<Element> sourceLandmarks = sourceNucleus.getChildren(XMLNames.XML_LANDMARK);
+				List<Element> sourceSegments = sourceNucleus.getChildren(XMLNames.XML_SEGMENT);
 
 				LOGGER.finer("Match found for target nucleus "
-						+ targetNucleus.getAttributeValue("id") + " with source "
-						+ sourceNucleus.getAttributeValue("id"));
+						+ targetNucleus.getAttributeValue(XMLNames.XML_ID) + " with source "
+						+ sourceNucleus.getAttributeValue(XMLNames.XML_ID));
 
 				// Match the segment IDs between cells. We start from the RP where we
 				// know the index
@@ -143,34 +145,36 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 				// Now use this map to update all the segment indexes
 				updateSegmentIds(targetNucleus, sourceNucleus, targetIds);
 
-				List<Element> landmarks = targetNucleus.getChildren("Landmark");
+				List<Element> landmarks = targetNucleus.getChildren(XMLNames.XML_LANDMARK);
 
 				// Find the equivalent landmark in the target nucleus
 				for (Element lmElement : sourceLandmarks) {
 
 					Optional<Element> match = landmarks.stream()
-							.filter(lm -> lm.getAttributeValue("name")
-									.equals(lmElement.getAttributeValue("name")))
+							.filter(lm -> lm.getAttributeValue(XMLNames.XML_NAME)
+									.equals(lmElement.getAttributeValue(XMLNames.XML_NAME)))
 							.findFirst();
 
 					// Update the landmark to match the index in the source nucleus
 					if (match.isPresent()) {
 
-						String lmName = match.get().getAttributeValue("name");
-						String targetValue = match.get().getAttributeValue("index");
-						String sourceValue = lmElement.getAttributeValue("index");
+						String lmName = match.get().getAttributeValue(XMLNames.XML_NAME);
+						String targetValue = match.get().getAttributeValue(XMLNames.XML_INDEX);
+						String sourceValue = lmElement.getAttributeValue(XMLNames.XML_INDEX);
 
 						// update the landmark index
 						if (!targetValue.equals(sourceValue)) {
-							match.get().setAttribute("index", sourceValue);
+							match.get().setAttribute(XMLNames.XML_INDEX, sourceValue);
 							LOGGER.finer(
-									"Updated landmark " + match.get().getAttributeValue("name")
+									"Updated landmark "
+											+ match.get().getAttributeValue(XMLNames.XML_NAME)
 											+ " from " + targetValue + " to " + sourceValue);
 						}
 
 					} else {
 						LOGGER.finer(
-								"Landmark " + lmElement.getAttributeValue("name") + " not found");
+								"Landmark " + lmElement.getAttributeValue(XMLNames.XML_NAME)
+										+ " not found");
 					}
 				}
 
@@ -185,32 +189,32 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 	private Map<String, String> matchSegmentIds(Element targetNucleus, Element sourceNucleus,
 			String rpName) {
 
-		List<Element> targetLandmarks = targetNucleus.getChildren("Landmark");
-		List<Element> sourceLandmarks = sourceNucleus.getChildren("Landmark");
+		List<Element> targetLandmarks = targetNucleus.getChildren(XMLNames.XML_LANDMARK);
+		List<Element> sourceLandmarks = sourceNucleus.getChildren(XMLNames.XML_LANDMARK);
 
 		// Find the RPs
 		Optional<Element> targetRpElement = targetLandmarks.stream()
-				.filter(e -> e.getAttributeValue("name").equals(rpName))
+				.filter(e -> e.getAttributeValue(XMLNames.XML_NAME).equals(rpName))
 				.findFirst();
 
 		Optional<Element> sourceRpElement = sourceLandmarks.stream()
-				.filter(e -> e.getAttributeValue("name").equals(rpName))
+				.filter(e -> e.getAttributeValue(XMLNames.XML_NAME).equals(rpName))
 				.findFirst();
 
 		// Note the indexes of the RPs - used to find the equivalent segments
-		String targetRpValue = targetRpElement.get().getAttributeValue("index");
-		String sourceRpValue = sourceRpElement.get().getAttributeValue("index");
+		String targetRpValue = targetRpElement.get().getAttributeValue(XMLNames.XML_INDEX);
+		String sourceRpValue = sourceRpElement.get().getAttributeValue(XMLNames.XML_INDEX);
 
 		// Create the map of segment ids
 		Map<String, String> targetIds = new HashMap<>();
-		List<Element> targetSegments = targetNucleus.getChildren("Segment");
-		List<Element> sourceSegments = sourceNucleus.getChildren("Segment");
+		List<Element> targetSegments = targetNucleus.getChildren(XMLNames.XML_SEGMENT);
+		List<Element> sourceSegments = sourceNucleus.getChildren(XMLNames.XML_SEGMENT);
 
 		Optional<Element> rpSegTarget = targetSegments.stream()
-				.filter(s -> s.getAttributeValue("start").equals(targetRpValue))
+				.filter(s -> s.getAttributeValue(XMLNames.XML_SEGMENT_START).equals(targetRpValue))
 				.findFirst();
 		Optional<Element> rpSegSource = sourceSegments.stream()
-				.filter(s -> s.getAttributeValue("start").equals(sourceRpValue))
+				.filter(s -> s.getAttributeValue(XMLNames.XML_SEGMENT_START).equals(sourceRpValue))
 				.findFirst();
 
 		LOGGER.finer(() -> "Looking for segments matching target index " + targetRpValue
@@ -218,12 +222,12 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 				+ sourceRpValue);
 
 		// Put the RP into the map - key is target, value is source
-		targetIds.put(rpSegTarget.get().getAttributeValue("id"),
-				rpSegSource.get().getAttributeValue("id"));
+		targetIds.put(rpSegTarget.get().getAttributeValue(XMLNames.XML_ID),
+				rpSegSource.get().getAttributeValue(XMLNames.XML_ID));
 
 		// Now iterate through all of them, following the links
-		String targetPrevEndIndex = rpSegTarget.get().getAttributeValue("end");
-		String sourcePrevEndIndex = rpSegSource.get().getAttributeValue("end");
+		String targetPrevEndIndex = rpSegTarget.get().getAttributeValue(XMLNames.XML_SEGMENT_END);
+		String sourcePrevEndIndex = rpSegSource.get().getAttributeValue(XMLNames.XML_SEGMENT_END);
 
 		// continue until all segments added
 		while (targetIds.size() < targetSegments.size()) {
@@ -233,17 +237,17 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 
 			// Find the segment whose start matches the previous end
 			Optional<Element> segTarget = targetSegments.stream()
-					.filter(s -> s.getAttributeValue("start").equals(tpi))
+					.filter(s -> s.getAttributeValue(XMLNames.XML_SEGMENT_START).equals(tpi))
 					.findFirst();
 			Optional<Element> segSource = sourceSegments.stream()
-					.filter(s -> s.getAttributeValue("start").equals(spi))
+					.filter(s -> s.getAttributeValue(XMLNames.XML_SEGMENT_START).equals(spi))
 					.findFirst();
 
-			targetIds.put(segTarget.get().getAttributeValue("id"),
-					segSource.get().getAttributeValue("id"));
+			targetIds.put(segTarget.get().getAttributeValue(XMLNames.XML_ID),
+					segSource.get().getAttributeValue(XMLNames.XML_ID));
 
-			targetPrevEndIndex = segTarget.get().getAttributeValue("end");
-			sourcePrevEndIndex = segSource.get().getAttributeValue("end");
+			targetPrevEndIndex = segTarget.get().getAttributeValue(XMLNames.XML_SEGMENT_END);
+			sourcePrevEndIndex = segSource.get().getAttributeValue(XMLNames.XML_SEGMENT_END);
 		}
 
 		return targetIds;
@@ -259,22 +263,22 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 	 */
 	private void updateSegmentIds(Element targetNucleus, Element sourceNucleus,
 			Map<String, String> segmentMap) {
-		List<Element> targetSegments = targetNucleus.getChildren("Segment");
-		List<Element> sourceSegments = sourceNucleus.getChildren("Segment");
+		List<Element> targetSegments = targetNucleus.getChildren(XMLNames.XML_SEGMENT);
+		List<Element> sourceSegments = sourceNucleus.getChildren(XMLNames.XML_SEGMENT);
 
 		for (Element targetSeg : targetSegments) {
-			String targetId = targetSeg.getAttributeValue("id");
+			String targetId = targetSeg.getAttributeValue(XMLNames.XML_ID);
 			String sourceId = segmentMap.get(targetId);
 
 			Optional<Element> sourceSeg = sourceSegments.stream()
-					.filter(s -> s.getAttributeValue("id").equals(sourceId))
+					.filter(s -> s.getAttributeValue(XMLNames.XML_ID).equals(sourceId))
 					.findFirst();
 
 			if (sourceSeg.isPresent()) {
-				String start = sourceSeg.get().getAttributeValue("start");
-				String end = sourceSeg.get().getAttributeValue("end");
-				targetSeg.setAttribute("start", start);
-				targetSeg.setAttribute("end", end);
+				String start = sourceSeg.get().getAttributeValue(XMLNames.XML_SEGMENT_START);
+				String end = sourceSeg.get().getAttributeValue(XMLNames.XML_SEGMENT_END);
+				targetSeg.setAttribute(XMLNames.XML_SEGMENT_START, start);
+				targetSeg.setAttribute(XMLNames.XML_SEGMENT_END, end);
 
 				LOGGER.finer(
 						() -> "Setting target segment " + sourceId + " to " + start + " - " + end);
