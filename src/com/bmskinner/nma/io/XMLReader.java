@@ -37,7 +37,7 @@ public abstract class XMLReader {
 	 * @return the XML representation of the file content
 	 * @throws XMLReadingException if the document could not be read or was not XML
 	 */
-	protected static Document readDocument(File file) throws XMLReadingException {
+	public static Document readDocument(File file) throws XMLReadingException {
 		SAXBuilder saxBuilder = new SAXBuilder();
 		try {
 			return saxBuilder.build(file);

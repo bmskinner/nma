@@ -114,6 +114,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	/** The object bounding box */
 	private Rectangle2D bounds;
 
+	private static UUID makeUUID(Roi roi, IPoint centreOfMass) {
+		int[] xpoints = Arrays.copyOfRange(roi.getPolygon().xpoints, 0, roi.getPolygon().npoints);
+		int[] ypoints = Arrays.copyOfRange(roi.getPolygon().ypoints, 0, roi.getPolygon().npoints);
+		return new UUID(Arrays.hashCode(xpoints) * Arrays.hashCode(ypoints), centreOfMass.hashCode());
+	}
+
 	/**
 	 * Construct with an ROI, a source image and channel, and the original position
 	 * in the source image. It sets the immutable original centre of mass, and the
@@ -128,7 +134,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 */
 	protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source,
 			int channel) {
-		this(roi, centreOfMass, source, channel, UUID.randomUUID());
+
+		// If we have no UUID given, can we create a deterministic UUID from the roi and
+		// CoM?
+		this(roi, centreOfMass, source, channel, makeUUID(roi, centreOfMass));
+//		this(roi, centreOfMass, source, channel, UUID.randomUUID());
 	}
 
 	/**
@@ -153,7 +163,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		this.originalCentreOfMass = new FloatPoint(centreOfMass);
 		this.centreOfMass = new FloatPoint(centreOfMass);
-		this.id = id == null ? UUID.randomUUID() : id;
+//		this.id = id == null ? UUID.randomUUID() : id;
+		this.id = id == null ? makeUUID(roi, centreOfMass) : id;
+
 		this.sourceFile = source;
 		this.channel = channel;
 

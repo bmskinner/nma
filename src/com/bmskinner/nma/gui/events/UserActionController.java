@@ -57,6 +57,7 @@ import com.bmskinner.nma.gui.actions.FishRemappingAction;
 import com.bmskinner.nma.gui.actions.ImportDatasetAction;
 import com.bmskinner.nma.gui.actions.ImportWorkflowAction;
 import com.bmskinner.nma.gui.actions.ImportWorkspaceAction;
+import com.bmskinner.nma.gui.actions.LandmarkRemappingAction;
 import com.bmskinner.nma.gui.actions.MergeCollectionAction;
 import com.bmskinner.nma.gui.actions.MergeSignalsAction;
 import com.bmskinner.nma.gui.actions.MergeSourceExtractionAction;
@@ -135,6 +136,10 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		final IAnalysisDataset selectedDataset = DatasetListManager.getInstance()
 				.getActiveDataset();
+
+		// Does not require selected dataset
+		if (event.type().equals(UserActionEvent.REMAP_LANDMARKS))
+			return new LandmarkRemappingAction(acceptor);
 
 		// The full pipeline for a new analysis
 		if (UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION.equals(event.type()))
