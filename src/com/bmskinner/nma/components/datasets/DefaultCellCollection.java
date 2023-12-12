@@ -48,9 +48,11 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.analysis.ProgressEvent;
+import com.bmskinner.nma.analysis.ProgressListener;
 import com.bmskinner.nma.components.MissingComponentException;
-import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.components.Taggable;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Consensus;
@@ -61,7 +63,7 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
-import com.bmskinner.nma.components.measure.StatsCache;
+import com.bmskinner.nma.components.measure.MeasurementCache;
 import com.bmskinner.nma.components.measure.VennCache;
 import com.bmskinner.nma.components.profiles.DefaultLandmark;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
@@ -134,7 +136,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * a cell is added or lost
 	 */
 	@NonNull
-	private final StatsCache statsCache = new StatsCache();
+	private final MeasurementCache statsCache = new MeasurementCache();
 
 	/** cache the number of shared cells with other datasets */
 	@NonNull
@@ -158,7 +160,7 @@ public class DefaultCellCollection implements ICellCollection {
 			@Nullable UUID id) {
 
 		this.uuid = id == null ? UUID.randomUUID() : id;
-		this.name = name == null ? "unnamed" : name;
+		this.name = name == null ? XMLNames.XML_UNNAMED : name;
 		this.ruleSets = ruleSets;
 		profileCollection = new DefaultProfileCollection();
 	}
@@ -188,35 +190,55 @@ public class DefaultCellCollection implements ICellCollection {
 	 * conform to the specification in {@link XmlSerializable}.
 	 * 
 	 * @param e the XML element containing the data.
+	 * @param l an optional listener for progress updates
 	 */
-	public DefaultCellCollection(@NonNull Element e) throws ComponentCreationException {
-		uuid = UUID.fromString(e.getAttributeValue("id"));
-		name = e.getAttributeValue("name");
+	public DefaultCellCollection(@NonNull Element e, @Nullable ProgressListener l)
+			throws ComponentCreationException {
 
-		profileCollection = new DefaultProfileCollection(e.getChild("ProfileCollection"));
+		uuid = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
+		name = e.getAttributeValue(XMLNames.XML_NAME);
 
-		if (e.getChild("ConsensusNucleus") != null)
-			consensusNucleus = new DefaultConsensusNucleus(e.getChild("ConsensusNucleus"));
+		// Determine how many items in the progress bar
+		List<Element> cellElements = e.getChildren(XMLNames.XML_CELL);
+		List<Element> signalElements = e.getChildren(XMLNames.XML_SIGNAL_GROUP);
 
-		for (Element el : e.getChildren("Cell"))
+		// Alert listeners how many elements need to be unpacked
+		long totalElements = cellElements.size() + signalElements.size();
+
+		if (l != null)
+			l.progressEventReceived(
+					new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalElements));
+
+		profileCollection = new DefaultProfileCollection(
+				e.getChild(XMLNames.XML_PROFILE_COLLECTION));
+
+		if (e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS) != null)
+			consensusNucleus = new DefaultConsensusNucleus(
+					e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS));
+
+		for (Element el : cellElements) {
 			cells.add(new DefaultCell(el));
 
-		for (Element el : e.getChildren("SignalGroup")) {
-			signalGroups.add(new DefaultSignalGroup(el));
+			// Fire progress update if available
+			if (l != null)
+				l.progressEventReceived(new ProgressEvent(this));
 		}
-		ruleSets = new RuleSetCollection(e.getChild("RuleSetCollection"));
 
-		try {
-			profileCollection.calculateProfiles();
-		} catch (ProfileException | MissingLandmarkException | MissingProfileException e1) {
-			throw new ComponentCreationException(e1);
+		for (Element el : signalElements) {
+			signalGroups.add(new DefaultSignalGroup(el));
+
+			// Fire progress update if available
+			if (l != null)
+				l.progressEventReceived(new ProgressEvent(this));
 		}
+		ruleSets = new RuleSetCollection(e.getChild(XMLNames.XML_RULESET_COLLECTION));
 	}
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element("CellCollection").setAttribute("id", uuid.toString())
-				.setAttribute("name", name);
+		Element e = new Element(XMLNames.XML_CELL_COLLECTION)
+				.setAttribute(XMLNames.XML_ID, uuid.toString())
+				.setAttribute(XMLNames.XML_NAME, name);
 		e.addContent(profileCollection.toXmlElement());
 
 		if (consensusNucleus != null)
@@ -238,7 +260,7 @@ public class DefaultCellCollection implements ICellCollection {
 		DefaultCellCollection result = new DefaultCellCollection(ruleSets, name, uuid);
 
 		for (ICell c : this)
-			result.addCell(c.duplicate());
+			result.add(c.duplicate());
 
 		result.consensusNucleus = consensusNucleus == null ? null : consensusNucleus.duplicate();
 		result.profileCollection = profileCollection.duplicate();
@@ -276,16 +298,23 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public boolean add(ICell e) {
-		return cells.add(e);
+		boolean b = cells.add(e);
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends ICell> c) {
-		return cells.addAll(c);
+		boolean b = cells.addAll(c);
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
 	public void clear() {
+		statsCache.clear();
 		cells.clear();
 	}
 
@@ -311,17 +340,26 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public boolean remove(Object o) {
-		return cells.remove(o);
+		boolean b = cells.remove(o);
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		return cells.removeAll(c);
+		boolean b = cells.removeAll(c);
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		return cells.retainAll(c);
+		boolean b = cells.retainAll(c);
+		if (b)
+			statsCache.clear();
+		return b;
 	}
 
 	@Override
@@ -337,35 +375,6 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public Set<UUID> getCellIDs() {
 		return cells.parallelStream().map(ICell::getId).collect(Collectors.toSet());
-	}
-
-	@Override
-	public void addCell(final @NonNull ICell r) {
-		cells.add(r);
-	}
-
-	@Override
-	public void replaceCell(@NonNull ICell r) {
-		boolean found = false;
-		Iterator<ICell> it = cells.iterator();
-		while (it.hasNext()) {
-			ICell test = it.next();
-
-			if (r.getId().equals(test.getId())) {
-				it.remove();
-				found = true;
-				break;
-			}
-		}
-
-		// only put the cell in if it was removed
-		if (found)
-			addCell(r);
-	}
-
-	@Override
-	public synchronized void removeCell(@NonNull ICell c) {
-		cells.removeIf(cell -> cell.getId().equals(c.getId()));
 	}
 
 	@Override
@@ -677,15 +686,7 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public synchronized double getMedian(@NonNull Measurement stat, String component,
 			MeasurementScale scale, UUID id) {
-
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
-			return getMedianStatistic(stat, component, scale, id);
-		}
-
-		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-			return getMedianStatistic(stat, component, scale, id);
-		}
-		return 0;
+		return getMedianStatistic(stat, component, scale, id);
 	}
 
 	@Override
@@ -709,24 +710,22 @@ public class DefaultCellCollection implements ICellCollection {
 		case CellularComponent.NUCLEAR_BORDER_SEGMENT:
 			return getSegmentStatistics(stat, scale, id);
 		default: {
-			LOGGER.warning("No component of type " + component + " can be handled");
+			LOGGER.warning(() -> "No component of type " + component + " can be handled");
 			return new double[0];
 		}
 		}
 	}
 
-	private synchronized double getMedianStatistic(Measurement stat, String component,
+	private synchronized double getMedianStatistic(@NonNull Measurement stat, String component,
 			MeasurementScale scale,
 			UUID id) {
 
-		if (!statsCache.hasMedian(stat, component, scale, id)) {
-			double median = Statistical.ERROR_CALCULATING_STAT;
-			if (this.hasCells()) {
-				double[] values = getRawValues(stat, component, scale, id);
-				median = Stats.quartile(values, Stats.MEDIAN);
-			}
-			statsCache.setMedian(stat, component, scale, id, median);
+		if (!statsCache.has(stat, component, scale, id)) {
+			double[] values = getRawValues(stat, component, scale, id);
+			statsCache.set(stat, component, scale, id, values);
+
 		}
+
 		return statsCache.getMedian(stat, component, scale, id);
 
 	}
@@ -740,15 +739,6 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public synchronized double getMin(@NonNull Measurement stat, String component,
 			MeasurementScale scale, UUID id) {
-
-		// Handle old segment and SignalStatistic enums
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
-			return getMinStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
-		}
-
-		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-			return getMinStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
-		}
 		return getMinStatistic(stat, component, scale, id);
 	}
 
@@ -756,8 +746,13 @@ public class DefaultCellCollection implements ICellCollection {
 			MeasurementScale scale,
 			UUID id) {
 
-		double[] values = getRawValues(stat, component, scale, id);
-		return Arrays.stream(values).min().orElse(Statistical.ERROR_CALCULATING_STAT);
+		if (!statsCache.has(stat, component, scale, id)) {
+			double[] values = getRawValues(stat, component, scale, id);
+			statsCache.set(stat, component, scale, id, values);
+
+		}
+
+		return statsCache.getMin(stat, component, scale, id);
 	}
 
 	@Override
@@ -769,12 +764,6 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public synchronized double getMax(@NonNull Measurement stat, String component,
 			MeasurementScale scale, UUID id) {
-
-		// Handle old segment andSignalStatistic enums
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
-			return getMaxStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
-		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
-			return getMaxStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
 		return getMaxStatistic(stat, component, scale, id);
 	}
 
@@ -782,15 +771,19 @@ public class DefaultCellCollection implements ICellCollection {
 			MeasurementScale scale,
 			UUID id) {
 
-		double[] values = getRawValues(stat, component, scale, id);
-		return Arrays.stream(values).max().orElse(Statistical.ERROR_CALCULATING_STAT);
+		if (!statsCache.has(stat, component, scale, id)) {
+			double[] values = getRawValues(stat, component, scale, id);
+			statsCache.set(stat, component, scale, id, values);
+		}
+
+		return statsCache.getMax(stat, component, scale, id);
 	}
 
 	/**
 	 * Get a sorted list of the given statistic values for each nucleus in the
-	 * collection
+	 * collection, and add summary to the cache
 	 * 
-	 * @param stat  the statistic to use
+	 * @param stat  the measurement to use
 	 * @param scale the measurement scale
 	 * @return a list of values
 	 * @throws Exception
@@ -798,21 +791,16 @@ public class DefaultCellCollection implements ICellCollection {
 	private synchronized double[] getCellStatistics(@NonNull Measurement stat,
 			@NonNull MeasurementScale scale) {
 
-		double[] result = null;
-
-		if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale, null))
-			return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale, null);
-		result = cells.parallelStream().mapToDouble(c -> c.getMeasurement(stat, scale)).sorted()
+		return cells.parallelStream()
+				.mapToDouble(c -> c.getMeasurement(stat, scale))
+				.sorted()
 				.toArray();
-		statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
-		return result;
-
 	}
 
 	/**
 	 * Get a list of the given statistic values for each nucleus in the collection
 	 * 
-	 * @param stat  the statistic to use
+	 * @param stat  the measurement to use
 	 * @param scale the measurement scale
 	 * @return a list of values
 	 * @throws Exception
@@ -822,19 +810,14 @@ public class DefaultCellCollection implements ICellCollection {
 
 		double[] result = null;
 
-		if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
-			return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
-		}
-
 		if (Measurement.VARIABILITY.equals(stat)) {
 			result = this.getNormalisedDifferencesToMedianFromPoint(OrientationMark.REFERENCE);
 		} else {
 			result = this.getNuclei().parallelStream()
-					.mapToDouble(n -> n.getMeasurement(stat, scale)).toArray();
+					.mapToDouble(n -> n.getMeasurement(stat, scale))
+					.sorted()
+					.toArray();
 		}
-		Arrays.sort(result);
-		statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
-
 		return result;
 	}
 
@@ -852,9 +835,7 @@ public class DefaultCellCollection implements ICellCollection {
 			@NonNull UUID id) {
 
 		double[] result = null;
-		if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
-			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
-		}
+
 		AtomicInteger errorCount = new AtomicInteger(0);
 		result = getNuclei().parallelStream().mapToDouble(n -> {
 			IProfileSegment segment;
@@ -880,7 +861,6 @@ public class DefaultCellCollection implements ICellCollection {
 
 		}).sorted().toArray();
 
-		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
 		if (errorCount.get() > 0)
 			LOGGER.warning(String.format(
 					"Problem calculating segment stats for segment %s: %d nuclei had errors getting this segment",
@@ -905,13 +885,6 @@ public class DefaultCellCollection implements ICellCollection {
 
 		});
 
-	}
-
-	@Override
-	public boolean contains(ICell c) {
-		if (c == null)
-			return false;
-		return contains(c.getId());
 	}
 
 	@Override
@@ -1146,15 +1119,15 @@ public class DefaultCellCollection implements ICellCollection {
 	 */
 	public class DefaultProfileCollection implements IProfileCollection {
 
-		private static final String XML_VALUE_ATTRIBUTE = "value";
-
-		private static final String XML_INDEX_ATTRIBUTE = "index";
-
-		private static final String XML_NAME_ATTRIBUTE = "name";
-
-		private static final String XML_LANDMARK = "Landmark";
-
-		private static final String XML_ORIENT = "Orient";
+//		private static final String XML_VALUE_ATTRIBUTE = "value";
+//
+//		private static final String XML_INDEX_ATTRIBUTE = "index";
+//
+//		private static final String XML_NAME_ATTRIBUTE = "name";
+//
+//		private static final String XML_LANDMARK = "Landmark";
+//
+//		private static final String XML_ORIENT = "Orient";
 
 		/** The indexes of landmarks in the profiles and border list */
 		private Map<Landmark, Integer> landmarks = new HashMap<>();
@@ -1182,22 +1155,22 @@ public class DefaultCellCollection implements ICellCollection {
 		 */
 		public DefaultProfileCollection(Element e) {
 
-			for (Element el : e.getChildren(XML_LANDMARK)) {
-				landmarks.put(new DefaultLandmark(el.getAttributeValue(XML_NAME_ATTRIBUTE)),
-						Integer.parseInt(el.getAttributeValue(XML_INDEX_ATTRIBUTE)));
+			for (Element el : e.getChildren(XMLNames.XML_LANDMARK)) {
+				landmarks.put(new DefaultLandmark(el.getAttributeValue(XMLNames.XML_NAME)),
+						Integer.parseInt(el.getAttributeValue(XMLNames.XML_INDEX)));
 			}
 
-			for (Element el : e.getChildren(XML_ORIENT)) {
+			for (Element el : e.getChildren(XMLNames.XML_ORIENT)) {
 				OrientationMark name = OrientationMark
-						.valueOf(el.getAttributeValue(XML_NAME_ATTRIBUTE));
+						.valueOf(el.getAttributeValue(XMLNames.XML_NAME));
 				Landmark l = landmarks.keySet().stream()
 						.filter(lm -> lm.getName()
-								.equals(el.getAttributeValue(XML_VALUE_ATTRIBUTE)))
+								.equals(el.getAttributeValue(XMLNames.XML_VALUE)))
 						.findFirst()
 						.get();
 			}
 
-			for (Element el : e.getChildren("Segment")) {
+			for (Element el : e.getChildren(XMLNames.XML_SEGMENT)) {
 				segments.add(new DefaultProfileSegment(el));
 			}
 
@@ -1574,9 +1547,9 @@ public class DefaultCellCollection implements ICellCollection {
 			}
 
 			for (Entry<Landmark, Integer> entry : landmarks.entrySet()) {
-				e.addContent(new Element(XML_LANDMARK)
-						.setAttribute(XML_NAME_ATTRIBUTE, entry.getKey().toString())
-						.setAttribute(XML_INDEX_ATTRIBUTE, String.valueOf(entry.getValue())));
+				e.addContent(new Element(XMLNames.XML_LANDMARK)
+						.setAttribute(XMLNames.XML_NAME, entry.getKey().toString())
+						.setAttribute(XMLNames.XML_INDEX, String.valueOf(entry.getValue())));
 			}
 			return e;
 		}

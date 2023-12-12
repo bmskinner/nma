@@ -45,30 +45,30 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
  */
 public class DefaultCellCollectionTest extends ComponentTester {
 
-    private ICellCollection c;
-    private IAnalysisDataset d;
-    
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
-    
+	private ICellCollection c;
+	private IAnalysisDataset d;
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
 	@Before
-    public void setUp() throws Exception {
-    	d = new TestDatasetBuilder(ComponentTester.RNG_SEED).cellCount(N_CELLS)
+	public void setUp() throws Exception {
+		d = new TestDatasetBuilder(ComponentTester.RNG_SEED).cellCount(N_CELLS)
 				.ofType(RuleSetCollection.roundRuleSetCollection())
 				.withMaxSizeVariation(10)
 				.randomOffsetProfiles(true)
 				.numberOfClusters(N_CHILD_DATASETS)
 				.segmented().build();
-    	c = d.getCollection();
-    }
-    
-    @Test
-    public void testDuplicate() throws Exception {
-    	ICellCollection dup = c.duplicate();
-    	testDuplicatesByField("Cell collection "+c.getName(), c, dup);
-    }
-        
-    @Test
+		c = d.getCollection();
+	}
+
+	@Test
+	public void testDuplicate() throws Exception {
+		ICellCollection dup = c.duplicate();
+		testDuplicatesByField("Cell collection " + c.getName(), c, dup);
+	}
+
+	@Test
 	public void testIsVirtual() {
 		assertFalse(c.isVirtual());
 	}
@@ -77,18 +77,18 @@ public class DefaultCellCollectionTest extends ComponentTester {
 	public void testIsReal() {
 		assertTrue(c.isReal());
 	}
-	
+
 	@Test
 	public void testXmlSerializes() throws Exception {
-		
+
 		Element e = c.toXmlElement();
-		
+
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
 
-		ICellCollection test = new DefaultCellCollection(e);
+		ICellCollection test = new DefaultCellCollection(e, null);
 
-		testDuplicatesByField("Cell collection "+c.getName(), c, test);
+		testDuplicatesByField("Cell collection " + c.getName(), c, test);
 		assertEquals(c, test);
 	}
 

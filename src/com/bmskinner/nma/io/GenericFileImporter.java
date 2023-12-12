@@ -17,9 +17,7 @@ import org.jdom2.Document;
 
 import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.components.Version;
-import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.options.IAnalysisOptions;
-import com.bmskinner.nma.components.workspaces.IWorkspace;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
@@ -91,7 +89,7 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 
 		try {
 			method = new XMLImportMethod(file);
-			worker = new DefaultAnalysisWorker(method);
+			worker = new DefaultAnalysisWorker(method, file.length());
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
 		} catch (Exception e) {
@@ -115,14 +113,14 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 		if (fileType != null) {
 
 			FileNameExtensionFilter filter = switch (fileType) {
-			case IWorkspace.XML_WORKSPACE -> new FileNameExtensionFilter(WORKSPACE_FILE_TYPE,
+			case XMLNames.XML_WORKSPACE -> new FileNameExtensionFilter(WORKSPACE_FILE_TYPE,
 					Io.WRK_FILE_EXTENSION_NODOT);
 
-			case IAnalysisDataset.XML_ANALYSIS_DATASET -> new FileNameExtensionFilter(
+			case XMLNames.XML_ANALYSIS_DATASET -> new FileNameExtensionFilter(
 					DATASET_FILE_TYPE,
 					Io.NMD_FILE_EXTENSION_NODOT);
 
-			case IAnalysisOptions.XML_ANALYSIS_OPTIONS -> new FileNameExtensionFilter(
+			case XMLNames.XML_ANALYSIS_OPTIONS -> new FileNameExtensionFilter(
 					OPTIONS_FILE_TYPE,
 					Io.XML_FILE_EXTENSION_NODOT);
 
@@ -202,17 +200,17 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 		String name = doc.getRootElement().getName();
 
 		// Choose what to do based on the root element name
-		if (IAnalysisDataset.XML_ANALYSIS_DATASET.equals(name))
+		if (XMLNames.XML_ANALYSIS_DATASET.equals(name))
 			UserActionController.getInstance().fileImported(
-					new FileImportEvent(this, file, IAnalysisDataset.XML_ANALYSIS_DATASET, doc));
+					new FileImportEvent(this, file, XMLNames.XML_ANALYSIS_DATASET, doc));
 
-		if (IWorkspace.XML_WORKSPACE.equals(name))
+		if (XMLNames.XML_WORKSPACE.equals(name))
 			UserActionController.getInstance().fileImported(
-					new FileImportEvent(this, file, IWorkspace.XML_WORKSPACE, doc));
+					new FileImportEvent(this, file, XMLNames.XML_WORKSPACE, doc));
 
-		if (IAnalysisOptions.XML_ANALYSIS_OPTIONS.equals(name))
+		if (XMLNames.XML_ANALYSIS_OPTIONS.equals(name))
 			UserActionController.getInstance().fileImported(
-					new FileImportEvent(this, file, IAnalysisOptions.XML_ANALYSIS_OPTIONS, doc));
+					new FileImportEvent(this, file, XMLNames.XML_ANALYSIS_OPTIONS, doc));
 
 		super.finished();
 	}

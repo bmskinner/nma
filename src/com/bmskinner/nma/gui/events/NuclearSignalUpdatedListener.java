@@ -26,4 +26,20 @@ public interface NuclearSignalUpdatedListener {
 	 */
 	void nuclearSignalUpdated(IAnalysisDataset dataset);
 
+//	/**
+//	 * Inform the listener that signals in the given dataset have has a colour
+//	 * change
+//	 * 
+//	 * @param dataset
+//	 */
+//	void nuclearSignalColourUpdated(IAnalysisDataset dataset);
+//
+//	/**
+//	 * Inform the listener that signals in the given datasets have has a colour
+//	 * change
+//	 * 
+//	 * @param dataset
+//	 */
+//	void nuclearSignalColourUpdated(List<IAnalysisDataset> datasets);
+
 }

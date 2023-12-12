@@ -37,7 +37,8 @@ public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
 	private static final Logger LOGGER = Logger.getLogger(SignalTableCellRenderer.class.getName());
 
 	@Override
-	public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+	public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table,
+			java.lang.Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 
 		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -56,9 +57,11 @@ public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
 					Object nextRowValue = table.getModel().getValueAt(nextRow, column);
 					// Check if the signal block has a signal group by
 					// looking at the next row
-					if (nextRowHeader.equals(Labels.Signals.SIGNAL_GROUP_LABEL) && nextRowValue != null
-							&& !nextRowValue.toString().equals("") && nextRowValue instanceof SignalTableCell cell) {
-						colour = cell.getColor();
+					if (nextRowHeader.equals(Labels.Signals.SIGNAL_GROUP_LABEL)
+							&& nextRowValue != null
+							&& !nextRowValue.toString().equals("")
+							&& nextRowValue instanceof SignalTableCell cell) {
+						colour = cell.color();
 					}
 
 				}

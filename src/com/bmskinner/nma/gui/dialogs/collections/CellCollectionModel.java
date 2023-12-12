@@ -177,7 +177,7 @@ public class CellCollectionModel extends DefaultTableModel {
 			if (c == null)
 				LOGGER.fine("Null cell encountered!");
 			else
-				newCollection.addCell(c);
+				newCollection.add(c);
 		}
 
 		LOGGER.info("Added " + cells.size() + " cells to new collection");

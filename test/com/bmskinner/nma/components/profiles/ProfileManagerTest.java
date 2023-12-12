@@ -89,7 +89,7 @@ public class ProfileManagerTest {
 			v.getProfileCollection().calculateProfiles();
 			d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(v);
 			for (ICell c : d.getCollection().getCells()) {
-				v.addCell(c);
+				v.add(c);
 			}
 			return v;
 		}

@@ -20,10 +20,11 @@ import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -31,16 +32,17 @@ import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.renderers.JTextAreaCellRenderer;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
-import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
-import com.bmskinner.nma.visualisation.datasets.SignalTableCell;
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
+import com.bmskinner.nma.visualisation.tables.NuclearSignalDetectionTableModel;
 import com.bmskinner.nma.visualisation.tables.NuclearSignalTableCreator;
 
 @SuppressWarnings("serial")
 public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSignalUpdatedListener {
+
+	private static final Logger LOGGER = Logger.getLogger(SignalsAnalysisPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Detection settings";
 	private static final String PANEL_DESC_LBL = "Settings used to detect signals";
@@ -60,50 +62,37 @@ public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSig
 			@Override
 			public void mouseClicked(MouseEvent e) {
 
+				if (e.getClickCount() != 2)
+					return;
+
+				if (!(table.getModel() instanceof NuclearSignalDetectionTableModel))
+					return;
+
 				int row = table.rowAtPoint(e.getPoint());
 				int column = table.columnAtPoint(e.getPoint());
-				IAnalysisDataset d = getDatasets().get(column - 1);
-				// double click
-				if (e.getClickCount() == 2) {
 
-					String rowName = table.getModel().getValueAt(row, 0).toString();
+				NuclearSignalDetectionTableModel model = (NuclearSignalDetectionTableModel) table
+						.getModel();
 
-					if (rowName.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
+				String rowName = model.getValueAt(row, 0).toString();
+				UUID signalGroupId = model.getSignalGroup(row, column);
 
-						SignalTableCell signalGroup = getSignalGroupFromTable(table, row - 2,
-								column);
-						if (signalGroup != null) {
+				if (signalGroupId == null)
+					return;
 
-							cosmeticHandler.updateSignalSource(d, signalGroup.getID());
-							UIController.getInstance().fireNuclearSignalUpdated(d);
-							SignalTableCell newValue = new SignalTableCell(signalGroup.getID(),
-									d.getAnalysisOptions().get()
-											.getDetectionFolder(signalGroup.getID().toString())
-											.get().getAbsolutePath(),
-									signalGroup.getColor());
-							table.getModel().setValueAt(newValue, row, column);
-							table.repaint();
-						}
-					}
+				IAnalysisDataset d = model.getDataset(column);
 
-					if (rowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-						SignalTableCell signalGroup = getSignalGroupFromTable(table, row, column);
-						if (signalGroup != null) {
-							cosmeticHandler.renameSignalGroup(d, signalGroup.getID());
-							UIController.getInstance().fireNuclearSignalUpdated(d);
-						}
-					}
+				if (rowName.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
+					cosmeticHandler.updateSignalSource(d, signalGroupId);
+				}
 
-					String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
-					if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
-						SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1,
-								column);
-						if (signalGroup != null) {
-							cosmeticHandler.changeSignalColour(d, signalGroup.getID());
-							UIController.getInstance().fireNuclearSignalUpdated(d);
-						}
-					}
+				if (rowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
+					cosmeticHandler.renameSignalGroup(d, signalGroupId);
+				}
 
+				// Empty string rowname has colour
+				if (rowName.equals(Labels.EMPTY_STRING)) {
+					cosmeticHandler.changeSignalColour(d, signalGroupId);
 				}
 
 			}
@@ -119,13 +108,6 @@ public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSig
 		tablePanel.add(table.getTableHeader(), BorderLayout.NORTH);
 
 		this.add(tablePanel, BorderLayout.CENTER);
-	}
-
-	private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
-		Object o = table.getModel().getValueAt(row, column);
-		if (o instanceof SignalTableCell stc)
-			return stc;
-		return null;
 	}
 
 	@Override

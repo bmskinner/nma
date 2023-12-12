@@ -34,8 +34,6 @@ public class SignalTablePanel extends TableDetailPanel
 
 	private static final long serialVersionUID = 1L;
 
-
-
 	private static final String PANEL_TITLE_LBL = "Signal stats";
 
 	/** signal stats */
@@ -96,7 +94,8 @@ public class SignalTablePanel extends TableDetailPanel
 		}
 
 		private boolean isSignalIdRow(JTable table, int row) {
-			return table.getModel().getValueAt(row, 0).toString().equals(Labels.Signals.SIGNAL_ID_LABEL);
+			return table.getModel().getValueAt(row, 0).toString()
+					.equals(Labels.Signals.SIGNAL_ID_LABEL);
 		}
 
 		private boolean isSignalColourRow(JTable table, int row) {
@@ -108,7 +107,8 @@ public class SignalTablePanel extends TableDetailPanel
 		private void offerToDeleteSignals(JTable table, int row, int col) {
 			IAnalysisDataset d = getDatasets().get(col - 1);
 			int signalGroupNameRow = row - 3;
-			String signalGroupRowName = table.getModel().getValueAt(signalGroupNameRow, 0).toString();
+			String signalGroupRowName = table.getModel().getValueAt(signalGroupNameRow, 0)
+					.toString();
 			String signalGroupName = table.getModel().getValueAt(row, col).toString();
 			if (signalGroupRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL))
 				signalGroupName = table.getModel().getValueAt(signalGroupNameRow, col).toString();
@@ -119,7 +119,8 @@ public class SignalTablePanel extends TableDetailPanel
 
 			try {
 				int result = getInputSupplier().requestOptionAllVisible(options,
-						String.format("Delete signal group %s in %s?", signalGroupName, d.getName()),
+						String.format("Delete signal group %s in %s?", signalGroupName,
+								d.getName()),
 						"Delete signal group?");
 				if (result != 0) {
 					d.getCollection().getSignalManager().removeSignalGroup(signalGroup);
@@ -145,7 +146,7 @@ public class SignalTablePanel extends TableDetailPanel
 
 				if (isSignalColourRow(table, row)) {
 					SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
-					cosmeticHandler.changeSignalColour(d, signalGroup.getID());
+					cosmeticHandler.changeSignalColour(d, signalGroup.id());
 					UIController.getInstance().fireNuclearSignalUpdated(d);
 				}
 
@@ -164,9 +165,12 @@ public class SignalTablePanel extends TableDetailPanel
 	@Override
 	protected synchronized void updateMultiple() {
 
-		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(statsTable)
+		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+				.setTarget(statsTable)
 				.setScale(GlobalOptions.getInstance().getScale())
-				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalTableCellRenderer()).build();
+				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN,
+						new SignalTableCellRenderer())
+				.build();
 		setTable(options);
 	}
 

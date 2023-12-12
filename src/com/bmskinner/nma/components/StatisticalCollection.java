@@ -33,118 +33,122 @@ import com.bmskinner.nma.components.measure.MeasurementScale;
  */
 public interface StatisticalCollection {
 
-    /**
-     * Force the given statistic to be recalculated
-     * 
-     * @param stat the statistic to recalculate
-     * @param component the cellular component to fetch from
-     */
-    void clear(@NonNull Measurement stat, @NonNull String component);
-    
-    /**
-     * Force the given statistic to be recalculated
-     * 
-     * @param stat the statistic to recalculate
-     * @param component the cellular component to fetch from
-     * @param id the sub-component id 
-     */
-    void clear(@NonNull Measurement stat, @NonNull String component, @NonNull UUID id);
+	/**
+	 * Clear the measurement, forcing the measurement to be recalculated on next
+	 * request
+	 * 
+	 * @param stat      the measurement to recalculate
+	 * @param component the cellular component to fetch from
+	 */
+	void clear(@NonNull Measurement stat, @NonNull String component);
 
-    /**
-     * Force the statistics at the given scale to be recalculated
-     * 
-     * @param scale the scale to recalculate
-     */
-    void clear(MeasurementScale scale);
+	/**
+	 * Force the given measurement to be recalculated
+	 * 
+	 * @param stat      the measurement to recalculate
+	 * @param component the cellular component to fetch from
+	 * @param id        the sub-component id
+	 */
+	void clear(@NonNull Measurement stat, @NonNull String component, @NonNull UUID id);
 
-    /**
-     * Get the median value of the given stat in the collection
-     * 
-     * @param stat the statistic to fetch
-     * @param component the cellular component to fetch from
-     * @param scale the scale to convert values to
-     * @return the median statistic value
-     * @throws Exception
-     */
-    double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale);
+	/**
+	 * Force the measurements at the given scale to be recalculated. Use when the
+	 * image scale has been changed.
+	 * 
+	 * @param scale the scale to recalculate
+	 */
+	void clear(MeasurementScale scale);
 
-    /**
-     * Get the median stat for a value with an ID - i.e. a nuclear signal or a
-     * segment
-     * 
-     * @param stat
-     * @param scale
-     * @param id
-     * @return
-     * @throws Exception
-     */
-    double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
-    
-    
-    /**
-     * Get the minimum value of the given stat in the collection
-     * @param stat
-     * @param component
-     * @param scale
-     * @param id
-     * @return the minumum or Statistical.ERROR_CALCULATING_STAT
-     */
-    double getMin(@NonNull Measurement stat, String component, MeasurementScale scale);
-    
-    /**
-     * Get the minimum value of the given stat in the collection
-     * @param stat
-     * @param component
-     * @param scale
-     * @param id
-     * @return the minumum or Statistical.ERROR_CALCULATING_STAT
-     */
-    double getMin(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
-    
-    /**
-     * Get the maximum value of the given stat in the collection
-     * @param stat
-     * @param component
-     * @param scale
-     * @param id
-     * @return the maxumum or Statistical.ERROR_CALCULATING_STAT
-     */
-    double getMax(@NonNull Measurement stat, String component, MeasurementScale scale);
-   
-    /**
-     * Get the maximum value of the given stat in the collection
-     * @param stat
-     * @param component
-     * @param scale
-     * @param id
-     * @return the maxumum or Statistical.ERROR_CALCULATING_STAT
-     */
-    double getMax(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
-    
-    
+	/**
+	 * Get the median value of the given measurement in the collection
+	 * 
+	 * @param stat      the measurement to fetch
+	 * @param component the cellular component to fetch from
+	 * 
+	 * @return the median value
+	 * @throws Exception
+	 */
+	double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale);
 
-    /**
-     * Get the raw values for the given stat for each object in the collection
-     * 
-     * @param stat the statistic to fetch
-     * @param component the cellular component to fetch from
-     * @param scale the scale to convert values to
-     * @return the values in the collection
-     */
-    double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale);
+	/**
+	 * Get the median value for a value with an ID - i.e. a nuclear signal or a
+	 * segment
+	 * 
+	 * @param stat      the measurement to fetch
+	 * @param component the cellular component to fetch from
+	 * @param scale     the scale to convert values to
+	 * @param id        the id of the component to fetch
+	 * @return the median value
+	 * @throws Exception
+	 */
+	double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
 
-    /**
-     * Get the raw values for the given stat for each object in the collectionw
-     * ith an ID - i.e. a nuclear signal or a segment
-     * 
-     * @param stat the statistic to fetch
-     * @param component the cellular component to fetch from
-     * @param scale the scale to convert values to
-     * @param id the id of the compenent to fetch
-     * @return the values in the collection
-     */
-    double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
-    
-    
-    
+	/**
+	 * Get the minimum value of the given measurement in the collection
+	 * 
+	 * @param stat
+	 * @param component
+	 * @param scale
+	 * @param id
+	 * @return the minimum or Statistical.ERROR_CALCULATING_STAT
+	 */
+	double getMin(@NonNull Measurement stat, String component, MeasurementScale scale);
+
+	/**
+	 * Get the minimum value of the given measurement in the collection
+	 * 
+	 * @param stat
+	 * @param component
+	 * @param scale
+	 * @param id
+	 * @return the minimum or Statistical.ERROR_CALCULATING_STAT
+	 */
+	double getMin(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
+
+	/**
+	 * Get the maximum value of the given measurement in the collection
+	 * 
+	 * @param stat
+	 * @param component
+	 * @param scale
+	 * @param id
+	 * @return the maxumum or Statistical.ERROR_CALCULATING_STAT
+	 */
+	double getMax(@NonNull Measurement stat, String component, MeasurementScale scale);
+
+	/**
+	 * Get the maximum value of the given measurement in the collection
+	 * 
+	 * @param stat
+	 * @param component
+	 * @param scale
+	 * @param id
+	 * @return the maxumum or Statistical.ERROR_CALCULATING_STAT
+	 */
+	double getMax(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
+
+	/**
+	 * Get the raw values for the given measurement for each object in the
+	 * collection
+	 * 
+	 * @param stat      the statistic to fetch
+	 * @param component the cellular component to fetch from
+	 * @param scale     the scale to convert values to
+	 * @return the values in the collection
+	 */
+	double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale);
+
+	/**
+	 * Get the raw values for the given measurement for each object in the
+	 * collection with an ID - i.e. a nuclear signal or a segment
+	 * 
+	 * @param stat      the statistic to fetch
+	 * @param component the cellular component to fetch from
+	 * @param scale     the scale to convert values to
+	 * @param id        the id of the compenent to fetch
+	 * @return the values in the collection
+	 */
+	double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale,
+			UUID id);
+
 }

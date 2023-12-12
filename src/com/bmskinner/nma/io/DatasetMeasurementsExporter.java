@@ -60,7 +60,7 @@ import com.bmskinner.nma.utility.ArrayUtils;
  * @since 1.13.4
  *
  */
-public class DatasetMeasurementsExporter extends StatsExporter {
+public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(DatasetMeasurementsExporter.class.getName());
@@ -192,6 +192,7 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 				.append("File").append(TAB)
 				.append("CellID").append(TAB)
 				.append("Component").append(TAB)
+				.append("ComponentID").append(TAB)
 				.append("Folder").append(TAB)
 				.append("Image").append(TAB)
 				.append("Centre_of_mass").append(TAB);
@@ -303,6 +304,7 @@ public class DatasetMeasurementsExporter extends StatsExporter {
 							.append(d.getSavePath() + TAB)
 							.append(cell.getId() + TAB)
 							.append(CellularComponent.NUCLEUS + "_" + n.getNameAndNumber() + TAB)
+							.append(n.getID() + TAB)
 							.append(n.getSourceFolder() + TAB)
 							.append(n.getSourceFileName() + TAB)
 							.append(n.getOriginalCentreOfMass().toString() + TAB);

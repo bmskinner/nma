@@ -31,6 +31,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nma.components.ComponentMeasurer;
 import com.bmskinner.nma.components.Taggable;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.measure.DefaultMeasurement;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
@@ -68,16 +69,16 @@ public class DefaultCell implements ICell {
 	 * @param e the XML element containing the data.
 	 */
 	public DefaultCell(@NonNull Element e) throws ComponentCreationException {
-		uuid = UUID.fromString(e.getAttributeValue("id"));
+		uuid = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
 
-		for (Element el : e.getChildren("Nucleus")) {
+		for (Element el : e.getChildren(XMLNames.XML_NUCLEUS)) {
 			nuclei.add(new DefaultNucleus(el));
 		}
 
 		// Add measurements
-		for (Element el : e.getChildren("Measurement")) {
+		for (Element el : e.getChildren(XMLNames.XML_MEASUREMENT)) {
 			Measurement m = new DefaultMeasurement(el);
-			statistics.put(m, Double.parseDouble(el.getAttributeValue("value")));
+			statistics.put(m, Double.parseDouble(el.getAttributeValue(XMLNames.XML_VALUE)));
 		}
 
 	}
@@ -155,7 +156,8 @@ public class DefaultCell implements ICell {
 	}
 
 	@Override
-	public synchronized double getMeasurement(@NonNull Measurement stat, @NonNull MeasurementScale scale) {
+	public synchronized double getMeasurement(@NonNull Measurement stat,
+			@NonNull MeasurementScale scale) {
 
 		// Get the scale of one of the components of the cell
 		double sc = chooseScale();
@@ -247,7 +249,8 @@ public class DefaultCell implements ICell {
 	}
 
 	private List<Taggable> getTaggables(List<? extends CellularComponent> l) {
-		return l.stream().filter(e -> e instanceof Taggable).map(e -> (Taggable) e).collect(Collectors.toList());
+		return l.stream().filter(e -> e instanceof Taggable).map(e -> (Taggable) e)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -289,9 +292,10 @@ public class DefaultCell implements ICell {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element("Cell").setAttribute("id", uuid.toString());
+		Element e = new Element(XMLNames.XML_CELL).setAttribute(XMLNames.XML_ID, uuid.toString());
 		for (Entry<Measurement, Double> entry : statistics.entrySet()) {
-			e.addContent(entry.getKey().toXmlElement().setAttribute("value", entry.getValue().toString()));
+			e.addContent(entry.getKey().toXmlElement().setAttribute(XMLNames.XML_VALUE,
+					entry.getValue().toString()));
 		}
 
 		if (cytoplasm != null)
@@ -324,7 +328,8 @@ public class DefaultCell implements ICell {
 
 	@Override
 	public String toString() {
-		return "Cell " + this.uuid.toString() + ":\n" + statistics.toString() + "\n" + nuclei.toString() + "\n";
+		return "Cell " + this.uuid.toString() + ":\n" + statistics.toString() + "\n"
+				+ nuclei.toString() + "\n";
 	}
 
 }

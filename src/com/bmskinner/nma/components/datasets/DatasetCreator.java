@@ -4,6 +4,8 @@ import java.util.logging.Logger;
 
 import org.jdom2.Element;
 
+import com.bmskinner.nma.analysis.ProgressEvent;
+import com.bmskinner.nma.analysis.ProgressListener;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
@@ -25,6 +27,11 @@ public class DatasetCreator {
 	private DatasetCreator() {
 	}
 
+	public static IAnalysisDataset createRoot(Element e)
+			throws UnsupportedVersionException, ComponentCreationException {
+		return createRoot(e, null);
+	}
+
 	/**
 	 * Create from a root XML element
 	 * 
@@ -34,9 +41,16 @@ public class DatasetCreator {
 	 * @throws UnsupportedVersionException
 	 * @throws ProfileException
 	 */
-	public static IAnalysisDataset createRoot(Element e)
+	public static IAnalysisDataset createRoot(Element e, ProgressListener l)
 			throws ComponentCreationException, UnsupportedVersionException {
-		IAnalysisDataset d = new DefaultAnalysisDataset(e);
+
+		// This is the timeconsuming part
+		IAnalysisDataset d = new DefaultAnalysisDataset(e, l);
+
+		// Signal listeners we are nearly done
+		if (l != null)
+			l.progressEventReceived(new ProgressEvent(e, ProgressEvent.SET_INDETERMINATE, 0));
+
 		try {
 			d.getCollection().getProfileCollection().calculateProfiles();
 

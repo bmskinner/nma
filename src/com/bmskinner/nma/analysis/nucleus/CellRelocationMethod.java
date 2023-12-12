@@ -191,7 +191,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 			/* No header line, so must be a cell for the current dataset */
 			Optional<ICell> cell = getCellFromLine(line);
 			if (cell.isPresent()) {
-				map.get(activeID).getCollection().addCell(cell.get());
+				map.get(activeID).getCollection().add(cell.get());
 				cellCount++;
 			} else {
 				LOGGER.fine("Cell not found: " + line);

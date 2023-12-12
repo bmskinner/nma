@@ -31,7 +31,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
 import com.bmskinner.nma.TestResources;
-import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.NuclearMorphologyAnalysis;
 import com.bmskinner.nma.gui.events.FileImportEventListener.FileImportEvent;
@@ -143,7 +143,7 @@ public class Screenshotter {
 		Thread.sleep(LOAD_TIME_MILLIS);
 
 		uac.fileImportRequested(new FileImportEvent(this,
-				file, IAnalysisDataset.XML_ANALYSIS_DATASET, null));
+				file, XMLNames.XML_ANALYSIS_DATASET, null));
 
 		// Wait for the dataset to load
 		Thread.sleep(LOAD_TIME_MILLIS);
@@ -160,13 +160,13 @@ public class Screenshotter {
 		Thread.sleep(LOAD_TIME_MILLIS);
 
 		uac.fileImportRequested(new FileImportEvent(this,
-				file1, IAnalysisDataset.XML_ANALYSIS_DATASET, null));
+				file1, XMLNames.XML_ANALYSIS_DATASET, null));
 
 		// Wait for the dataset to load
 		Thread.sleep(LOAD_TIME_MILLIS);
 
 		uac.fileImportRequested(new FileImportEvent(this,
-				file2, IAnalysisDataset.XML_ANALYSIS_DATASET, null));
+				file2, XMLNames.XML_ANALYSIS_DATASET, null));
 
 		// Wait for the dataset to load
 		Thread.sleep(LOAD_TIME_MILLIS);

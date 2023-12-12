@@ -29,6 +29,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -42,21 +43,6 @@ import com.bmskinner.nma.io.Io;
  *
  */
 public class DefaultAnalysisOptions implements IAnalysisOptions {
-
-	private static final String XML_SECONDARY = "Secondary";
-
-	private static final String XML_RULE_SET_COLLECTION = "RuleSetCollection";
-
-	private static final String XML_PROFILE_WINDOW = "ProfileWindow";
-
-	private static final String XML_OPTIONS = "Options";
-
-	private static final String XML_NAME = "name";
-
-	private static final String XML_DETECTION = "Detection";
-	private static final String XML_FOLDER = "folder";
-
-	private static final String XML_ANALYSIS_TIME = "runtime";
 
 	/** Store the options used to detect objects */
 	private Map<String, HashOptions> detectionOptions = new HashMap<>();
@@ -108,34 +94,34 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	public DefaultAnalysisOptions(@NonNull Element e) throws ComponentCreationException {
 
 		// Add the detection folders
-		for (Element i : e.getChildren(XML_FOLDER))
-			detectionFolders.put(i.getAttributeValue(XML_NAME),
+		for (Element i : e.getChildren(XMLNames.XML_FOLDER))
+			detectionFolders.put(i.getAttributeValue(XMLNames.XML_NAME),
 					new File(i.getText()));
 
 		// Add the detection options
-		for (Element i : e.getChildren(XML_DETECTION)) {
-			String name = i.getAttributeValue(XML_NAME);
+		for (Element i : e.getChildren(XMLNames.XML_DETECTION)) {
+			String name = i.getAttributeValue(XMLNames.XML_NAME);
 			detectionOptions.put(name,
-					new DefaultOptions(i.getChild(XML_OPTIONS)));
+					new DefaultOptions(i.getChild(XMLNames.XML_OPTIONS)));
 
-			if (i.getAttribute(XML_FOLDER) != null)
+			if (i.getAttribute(XMLNames.XML_FOLDER) != null)
 				detectionFolders.put(name,
-						new File(i.getAttributeValue(XML_FOLDER)));
+						new File(i.getAttributeValue(XMLNames.XML_FOLDER)));
 		}
 
-		windowProp = Double.valueOf(e.getAttributeValue(XML_PROFILE_WINDOW));
+		windowProp = Double.valueOf(e.getAttributeValue(XMLNames.XML_PROFILE_WINDOW));
 
-		if (e.getAttribute(XML_ANALYSIS_TIME) != null)
-			analysisTime = Long.valueOf(e.getAttributeValue(XML_ANALYSIS_TIME));
+		if (e.getAttribute(XMLNames.XML_ANALYSIS_TIME) != null)
+			analysisTime = Long.valueOf(e.getAttributeValue(XMLNames.XML_ANALYSIS_TIME));
 		else
 			analysisTime = System.currentTimeMillis(); // if no time set, assume it's new
 
-		rulesets = new RuleSetCollection(e.getChild(XML_RULE_SET_COLLECTION));
+		rulesets = new RuleSetCollection(e.getChild(XMLNames.XML_RULE_SET_COLLECTION));
 
 		// Add the secondary options
-		for (Element i : e.getChildren(XML_SECONDARY))
-			secondaryOptions.put(i.getAttributeValue(XML_NAME),
-					new DefaultOptions(i.getChild(XML_OPTIONS)));
+		for (Element i : e.getChildren(XMLNames.XML_SECONDARY))
+			secondaryOptions.put(i.getAttributeValue(XMLNames.XML_NAME),
+					new DefaultOptions(i.getChild(XMLNames.XML_OPTIONS)));
 	}
 
 	@Override
@@ -350,21 +336,21 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element(XML_ANALYSIS_OPTIONS)
-				.setAttribute(XML_PROFILE_WINDOW,
+		Element e = new Element(XMLNames.XML_ANALYSIS_OPTIONS)
+				.setAttribute(XMLNames.XML_PROFILE_WINDOW,
 						String.valueOf(windowProp));
 
 		if (analysisTime > -1)
-			e.setAttribute(XML_ANALYSIS_TIME, String.valueOf(analysisTime));
+			e.setAttribute(XMLNames.XML_ANALYSIS_TIME, String.valueOf(analysisTime));
 
 		e.addContent(rulesets.toXmlElement());
 
 		// Add the detection options, including folder if set
 		for (Entry<String, HashOptions> entry : detectionOptions.entrySet()) {
-			Element el = new Element(XML_DETECTION)
-					.setAttribute(XML_NAME, entry.getKey());
+			Element el = new Element(XMLNames.XML_DETECTION)
+					.setAttribute(XMLNames.XML_NAME, entry.getKey());
 			if (detectionFolders.get(entry.getKey()) != null) {
-				el.setAttribute(XML_FOLDER,
+				el.setAttribute(XMLNames.XML_FOLDER,
 						detectionFolders.get(entry.getKey()).getAbsolutePath());
 			}
 			el.addContent(entry.getValue().toXmlElement());
@@ -373,8 +359,8 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
 		// Add the secondary options
 		for (Entry<String, HashOptions> entry : secondaryOptions.entrySet()) {
-			e.addContent(new Element(XML_SECONDARY)
-					.setAttribute(XML_NAME, entry.getKey())
+			e.addContent(new Element(XMLNames.XML_SECONDARY)
+					.setAttribute(XMLNames.XML_NAME, entry.getKey())
 					.addContent(entry.getValue().toXmlElement()));
 		}
 

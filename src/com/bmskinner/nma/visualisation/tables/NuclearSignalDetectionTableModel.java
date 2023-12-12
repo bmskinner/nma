@@ -2,6 +2,7 @@ package com.bmskinner.nma.visualisation.tables;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,12 +38,16 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 	private String[] colNames;
 	private Object[][] rowData;
 
+	private List<IAnalysisDataset> datasets = new ArrayList<>();
+
 	public NuclearSignalDetectionTableModel(@Nullable List<IAnalysisDataset> datasets) {
 
 		if (datasets == null) {
 			makeEmptyTable();
 			return;
 		}
+
+		this.datasets.addAll(datasets);
 
 		// find the collection with the most channels
 		// this defines the number of rows
@@ -221,15 +226,6 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 		}
 		if (d.hasMergeSources()) {
 			return Labels.NA_MERGE + " and sources have multiple values";
-
-			// Note - this does not work because the merged signal group has a different id
-			// to the sources
-//			return "Merge:" + Io.NEWLINE + d.getMergeSources().stream()
-//					.filter(c -> c.getAnalysisOptions().get()
-//							.hasNuclearSignalDetectionOptions(signalGroup))
-//					.map(c -> c.getAnalysisOptions().get().getNuclearSignalOptions(signalGroup))
-//					.map(o -> String.valueOf(o.get().getInt(HashOptions.THRESHOLD)))
-//					.collect(Collectors.joining(Io.NEWLINE));
 		}
 
 		return VALUE_MISSING_LBL;
@@ -262,6 +258,21 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		return rowData[rowIndex][columnIndex];
+	}
+
+	public UUID getSignalGroup(int rowIndex, int columnIndex) {
+		if (rowIndex == 0)
+			return null;
+
+		int block = (rowIndex / ROW_NAMES.size()) + 1; // which block of rows for signal
+		int resultRow = block * ROW_NAMES.size() - 8; // find the row with the cell
+
+		SignalTableCell cell = (SignalTableCell) getValueAt(resultRow, columnIndex);
+		return cell.id();
+	}
+
+	public IAnalysisDataset getDataset(int colIndex) {
+		return datasets.get(colIndex - 1);
 	}
 
 }

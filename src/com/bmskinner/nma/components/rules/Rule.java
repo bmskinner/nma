@@ -25,6 +25,7 @@ import java.util.stream.IntStream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.io.XmlSerializable;
 
 /**
@@ -34,12 +35,6 @@ import com.bmskinner.nma.io.XmlSerializable;
  *
  */
 public class Rule implements XmlSerializable {
-
-	private static final String XML_VALUE = "Value";
-
-	private static final String XML_RULE = "Rule";
-
-	private static final String XML_TYPE = "type";
 
 	private final RuleType type;
 
@@ -71,10 +66,10 @@ public class Rule implements XmlSerializable {
 	 * @param e the XML element containing the data.
 	 */
 	public Rule(@NonNull Element e) {
-		RuleType rt = RuleType.valueOf(e.getAttributeValue(XML_TYPE));
+		RuleType rt = RuleType.valueOf(e.getAttributeValue(XMLNames.XML_RULE_TYPE));
 		this.type = rt;
 
-		for (Element c : e.getChildren(XML_VALUE)) {
+		for (Element c : e.getChildren(XMLNames.XML_RULE_VALUE)) {
 			addValue(Double.parseDouble(c.getValue()));
 		}
 	}
@@ -151,10 +146,11 @@ public class Rule implements XmlSerializable {
 	@Override
 	public Element toXmlElement() {
 
-		Element e = new Element(XML_RULE).setAttribute(XML_TYPE, getType().toString());
+		Element e = new Element(XMLNames.XML_RULE).setAttribute(XMLNames.XML_RULE_TYPE,
+				getType().toString());
 
 		for (int i = 0; i < valueCount(); i++) {
-			e.addContent(new Element(XML_VALUE).setText(String.valueOf(getValue(i))));
+			e.addContent(new Element(XMLNames.XML_RULE_VALUE).setText(String.valueOf(getValue(i))));
 		}
 		return e;
 	}

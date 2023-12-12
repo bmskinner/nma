@@ -174,7 +174,7 @@ public class ICellCollectionTest {
 		when(cell.getId()).thenReturn(id);
 		if (collection.isVirtual())
 			exception.expect(IllegalArgumentException.class);
-		collection.addCell(cell);
+		collection.add(cell);
 		assertTrue(collection.contains(id));
 	}
 
@@ -188,7 +188,7 @@ public class ICellCollectionTest {
 	public void testRemoveCell() {
 		ICell c = collection.streamCells().findFirst().get();
 		assertTrue(collection.contains(c));
-		collection.removeCell(c);
+		collection.remove(c);
 
 		List<ICell> cells = collection.getCells();
 		assertEquals(N_CELLS - 1, cells.size());

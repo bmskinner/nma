@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.io.XmlSerializable;
@@ -39,18 +40,6 @@ import com.bmskinner.nma.io.XmlSerializable;
  *
  */
 public class DefaultSignalGroup implements ISignalGroup {
-
-	private static final String XML_NAME = "name";
-
-	private static final String XML_IS_VISIBLE = "isVisible";
-
-	private static final String XML_ID = "id";
-
-	private static final String XML_WARPED_SIGNAL = "WarpedSignal";
-
-	private static final String XML_SHELL_RESULT = "ShellResult";
-
-	private static final String XML_COLOUR = "colour";
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultSignalGroup.class.getName());
 
@@ -81,32 +70,33 @@ public class DefaultSignalGroup implements ISignalGroup {
 	 * @throws ComponentCreationException
 	 */
 	public DefaultSignalGroup(@NonNull Element e) throws ComponentCreationException {
-		id = UUID.fromString(e.getAttributeValue(XML_ID));
-		groupName = e.getAttributeValue(XML_NAME);
-		isVisible = Boolean.parseBoolean(e.getAttributeValue(XML_IS_VISIBLE));
+		id = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
+		groupName = e.getAttributeValue(XMLNames.XML_NAME);
+		isVisible = Boolean.parseBoolean(e.getAttributeValue(XMLNames.XML_SIGNAL_IS_VISIBLE));
 
-		if (e.getAttribute(XML_COLOUR) != null)
-			groupColour = Color.decode(e.getAttributeValue(XML_COLOUR));
+		if (e.getAttribute(XMLNames.XML_SIGNAL_COLOUR) != null)
+			groupColour = Color.decode(e.getAttributeValue(XMLNames.XML_SIGNAL_COLOUR));
 
-		if (e.getChild(XML_SHELL_RESULT) != null)
-			shellResult = new DefaultShellResult(e.getChild(XML_SHELL_RESULT));
+		if (e.getChild(XMLNames.XML_SIGNAL_SHELL_RESULT) != null)
+			shellResult = new DefaultShellResult(e.getChild(XMLNames.XML_SIGNAL_SHELL_RESULT));
 
-		for (Element e1 : e.getChildren(XML_WARPED_SIGNAL)) {
+		for (Element e1 : e.getChildren(XMLNames.XML_WARPED_SIGNAL)) {
 			warpedSignals.add(new DefaultWarpedSignal(e1));
 		}
 	}
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element("SignalGroup").setAttribute(XML_ID, id.toString())
-				.setAttribute(XML_NAME, groupName)
-				.setAttribute(XML_IS_VISIBLE, String.valueOf(isVisible));
+		Element e = new Element("SignalGroup").setAttribute(XMLNames.XML_ID, id.toString())
+				.setAttribute(XMLNames.XML_NAME, groupName)
+				.setAttribute(XMLNames.XML_SIGNAL_IS_VISIBLE, String.valueOf(isVisible));
 
 		if (groupColour != null)
-			e = e.setAttribute(XML_COLOUR, String.valueOf(groupColour.getRGB()));
+			e = e.setAttribute(XMLNames.XML_SIGNAL_COLOUR, String.valueOf(groupColour.getRGB()));
 
 		if (shellResult != null)
-			e = e.addContent(shellResult.toXmlElement().setAttribute(XML_ID, id.toString()));
+			e = e.addContent(
+					shellResult.toXmlElement().setAttribute(XMLNames.XML_ID, id.toString()));
 
 		for (IWarpedSignal s : warpedSignals) {
 			e.addContent(s.toXmlElement());

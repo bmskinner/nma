@@ -50,8 +50,7 @@ public class XMLImportMethod extends AbstractAnalysisMethod implements Importer 
 			cis.addCountListener((l) -> fireProgressEvent(l));
 			SAXBuilder saxBuilder = new SAXBuilder();
 			doc = saxBuilder.build(cis);
-			fireIndeterminateState(); // TODO: hook the indeterminate state to the end of file
-										// reading,
+			fireIndeterminateState();
 		} catch (IOException | JDOMException e) {
 			LOGGER.log(Loggable.STACK,
 					"Could not parse file as XML: " + file.getName() + ": " + e.getMessage(), e);

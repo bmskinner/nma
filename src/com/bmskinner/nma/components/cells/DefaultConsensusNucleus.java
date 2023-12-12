@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
@@ -82,20 +83,24 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 	public DefaultConsensusNucleus(Element e) throws ComponentCreationException {
 		super(e);
 
-		if (e.getChild("Offset") != null) {
-			xOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("x"));
-			yOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("y"));
-			rOffset = Double.valueOf(e.getChild("Offset").getAttributeValue("r"));
+		if (e.getChild(XMLNames.XML_OFFSET) != null) {
+			xOffset = Double
+					.valueOf(e.getChild(XMLNames.XML_OFFSET).getAttributeValue(XMLNames.XML_X));
+			yOffset = Double
+					.valueOf(e.getChild(XMLNames.XML_OFFSET).getAttributeValue(XMLNames.XML_Y));
+			rOffset = Double
+					.valueOf(e.getChild(XMLNames.XML_OFFSET).getAttributeValue(XMLNames.XML_R));
 		}
 	}
 
 	@Override
 	public Element toXmlElement() {
-		Element e = super.toXmlElement().setName("ConsensusNucleus");
+		Element e = super.toXmlElement().setName(XMLNames.XML_CONSENSUS_NUCLEUS);
 
-		e.addContent(new Element("Offset").setAttribute("x", String.valueOf(xOffset))
-				.setAttribute("y", String.valueOf(yOffset))
-				.setAttribute("r", String.valueOf(rOffset)));
+		e.addContent(new Element(XMLNames.XML_OFFSET)
+				.setAttribute(XMLNames.XML_X, String.valueOf(xOffset))
+				.setAttribute(XMLNames.XML_Y, String.valueOf(yOffset))
+				.setAttribute(XMLNames.XML_R, String.valueOf(rOffset)));
 		return e;
 	}
 

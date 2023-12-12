@@ -26,7 +26,7 @@ import com.bmskinner.nma.components.rules.OrientationMark;
  * @since 1.17.2
  *
  */
-public class DatasetProfileExporter extends StatsExporter {
+public class DatasetProfileExporter extends MeasurementsExportMethod {
 
 	private static final Logger LOGGER = Logger.getLogger(DatasetProfileExporter.class.getName());
 

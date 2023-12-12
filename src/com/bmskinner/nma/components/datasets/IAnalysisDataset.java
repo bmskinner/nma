@@ -48,8 +48,6 @@ public interface IAnalysisDataset extends XmlSerializable {
 
 	static final Logger LOGGER = Logger.getLogger(IAnalysisDataset.class.getName());
 
-	String XML_ANALYSIS_DATASET = "AnalysisDataset";
-
 	/**
 	 * Get the ID of the dataset
 	 * 

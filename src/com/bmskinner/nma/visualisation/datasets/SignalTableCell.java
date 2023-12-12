@@ -26,47 +26,10 @@ import java.util.UUID;
  * @author bms41
  *
  */
-public class SignalTableCell {
+public record SignalTableCell(UUID id, String name, Color color) {
 
-    private UUID   id;
-    private String name;
-    private Color  color = Color.WHITE;
-
-    /**
-     * Construct with a signal ID, a signal name and the signal display colour
-     * 
-     * @param id
-     * @param name
-     * @param color
-     */
-    public SignalTableCell(UUID id, String name, Color color) {
-
-        if (id == null || name == null) {
-            throw new IllegalArgumentException("ID or name is null");
-        }
-        this.id = id;
-        this.name = name;
-
-        if (color != null) {
-            this.color = color;
-        }
-
-    }
-
-    public UUID getID() {
-        return id;
-    }
-
-    public String toString() {
-        return name;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
+	@Override
+	public String toString() {
+		return name;
+	}
 }

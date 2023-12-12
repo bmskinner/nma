@@ -55,7 +55,7 @@ import com.bmskinner.nma.io.DatasetShellsExporter;
 import com.bmskinner.nma.io.DatasetSignalsExporter;
 
 /**
- * The base action for exporting stats from datasets
+ * The base action for exporting measurements from datasets
  * 
  * @author bms41
  * @since 1.13.8
@@ -80,7 +80,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 	 */
 	public static class ExportNuclearStatsAction extends ExportMeasurementsAction {
 
-		private static final @NonNull String PROGRESS_LBL = "Exporting nuclear stats";
+		private static final @NonNull String PROGRESS_LBL = "Exporting nuclear measurements";
 
 		public ExportNuclearStatsAction(@NonNull final List<IAnalysisDataset> datasets,
 				@NonNull final ProgressBarAcceptor acceptor) {
@@ -101,7 +101,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 								optionsPanel.getOptions());
 						worker = new DefaultAnalysisWorker(m, datasets.size());
 						worker.addPropertyChangeListener(this);
-						this.setProgressMessage("Exporting stats");
+						this.setProgressMessage(PROGRESS_LBL);
 						ThreadManager.getInstance().submit(worker);
 					} else {
 						cancel();

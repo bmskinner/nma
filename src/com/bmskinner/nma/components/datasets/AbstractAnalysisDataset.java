@@ -32,6 +32,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
@@ -51,24 +52,6 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 	private static final Logger LOGGER = Logger.getLogger(AbstractAnalysisDataset.class.getName());
-
-	private static final String XML_PARENT = "Parent";
-
-	private static final String XML_MERGE_SOURCE = "MergeSource";
-
-	private static final String XML_OTHER_DATASETS = "OtherDatasets";
-
-	private static final String XML_CHILD_DATASETS = "ChildDatasets";
-
-	private static final String XML_ANALYSIS_OPTIONS = "AnalysisOptions";
-
-	private static final String XML_CLUSTER_GROUP = "ClusterGroup";
-
-	private static final String XML_COLOUR = "Colour";
-
-	private static final String XML_VERSION_LAST_SAVED = "VersionLastSaved";
-
-	private static final String XML_VERSION_CREATED = "VersionCreated";
 
 	/** The software version in which the dataset was created */
 	protected final Version versionCreated;
@@ -114,40 +97,40 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 	protected AbstractAnalysisDataset(@NonNull Element e)
 			throws ComponentCreationException, UnsupportedVersionException {
-		versionCreated = Version.fromString(e.getChildText(XML_VERSION_CREATED));
-		versionLastSaved = Version.fromString(e.getChildText(XML_VERSION_LAST_SAVED));
+		versionCreated = Version.fromString(e.getChildText(XMLNames.XML_VERSION_CREATED));
+		versionLastSaved = Version.fromString(e.getChildText(XMLNames.XML_VERSION_LAST_SAVED));
 
 		if (!Version.versionIsSupported(versionLastSaved))
 			throw new UnsupportedVersionException(versionLastSaved);
 
-		if (e.getAttribute(XML_COLOUR) != null)
-			datasetColour = Color.decode(e.getAttributeValue(XML_COLOUR));
+		if (e.getAttribute(XMLNames.XML_COLOUR) != null)
+			datasetColour = Color.decode(e.getAttributeValue(XMLNames.XML_COLOUR));
 
-		for (Element el : e.getChildren(XML_CLUSTER_GROUP)) {
+		for (Element el : e.getChildren(XMLNames.XML_CLUSTER_GROUP)) {
 			clusterGroups.add(new DefaultClusterGroup(el));
 		}
 
-		if (e.getChild(XML_ANALYSIS_OPTIONS) != null)
-			analysisOptions = new DefaultAnalysisOptions(e.getChild(XML_ANALYSIS_OPTIONS));
+		if (e.getChild(XMLNames.XML_ANALYSIS_OPTIONS) != null)
+			analysisOptions = new DefaultAnalysisOptions(e.getChild(XMLNames.XML_ANALYSIS_OPTIONS));
 
 		// Restore parent relationships for children
-		if (e.getChild(XML_CHILD_DATASETS) != null) {
-			for (Element el : e.getChild(XML_CHILD_DATASETS).getChildren()) {
+		if (e.getChild(XMLNames.XML_CHILD_DATASETS) != null) {
+			for (Element el : e.getChild(XMLNames.XML_CHILD_DATASETS).getChildren()) {
 				VirtualDataset v = new VirtualDataset(el);
 				v.parentDataset = this;
 				childDatasets.add(v);
 			}
 		}
 		// Restore parent relationships for merge sources
-		if (e.getChild(XML_OTHER_DATASETS) != null) {
-			for (Element el : e.getChild(XML_OTHER_DATASETS).getChildren()) {
+		if (e.getChild(XMLNames.XML_OTHER_DATASETS) != null) {
+			for (Element el : e.getChild(XMLNames.XML_OTHER_DATASETS).getChildren()) {
 				VirtualDataset v = new VirtualDataset(el);
 				v.parentDataset = this;
 				otherDatasets.add(v);
 			}
 		}
 
-		for (Element el : e.getChildren(XML_MERGE_SOURCE)) {
+		for (Element el : e.getChildren(XMLNames.XML_MERGE_SOURCE)) {
 			mergeSources.add(UUID.fromString(el.getText()));
 		}
 	}
@@ -183,32 +166,34 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element(XML_ANALYSIS_DATASET);
+		Element e = new Element(XMLNames.XML_ANALYSIS_DATASET);
 
 		if (datasetColour != null)
-			e.setAttribute(XML_COLOUR, String.valueOf(datasetColour.getRGB()));
+			e.setAttribute(XMLNames.XML_COLOUR, String.valueOf(datasetColour.getRGB()));
 
-		e.addContent(new Element(XML_VERSION_CREATED).setText(versionCreated.toString()));
+		e.addContent(new Element(XMLNames.XML_VERSION_CREATED).setText(versionCreated.toString()));
 		e.addContent(
-				new Element(XML_VERSION_LAST_SAVED).setText(Version.currentVersion().toString()));
+				new Element(XMLNames.XML_VERSION_LAST_SAVED)
+						.setText(Version.currentVersion().toString()));
 
 		if (analysisOptions != null)
 			e.addContent(analysisOptions.toXmlElement());
 
 		if (!mergeSources.isEmpty()) {
 			for (UUID i : mergeSources)
-				e.addContent(new Element(XML_MERGE_SOURCE).setText(i.toString()));
+				e.addContent(new Element(XMLNames.XML_MERGE_SOURCE).setText(i.toString()));
 		}
 
 		if (parentDataset != null)
-			e.addContent(new Element(XML_PARENT).setText(parentDataset.getId().toString()));
+			e.addContent(
+					new Element(XMLNames.XML_PARENT).setText(parentDataset.getId().toString()));
 
 		for (IClusterGroup c : clusterGroups) {
 			e.addContent(c.toXmlElement());
 		}
 
 		if (!childDatasets.isEmpty()) {
-			Element el = new Element(XML_CHILD_DATASETS);
+			Element el = new Element(XMLNames.XML_CHILD_DATASETS);
 			for (IAnalysisDataset c : childDatasets) {
 				el.addContent(c.toXmlElement());
 			}
@@ -216,7 +201,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 		}
 
 		if (!otherDatasets.isEmpty()) {
-			Element el = new Element(XML_OTHER_DATASETS);
+			Element el = new Element(XMLNames.XML_OTHER_DATASETS);
 			for (IAnalysisDataset c : otherDatasets) {
 				el.addContent(c.toXmlElement());
 			}

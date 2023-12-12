@@ -17,7 +17,10 @@
 package com.bmskinner.nma.io;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.logging.Level;
@@ -30,9 +33,6 @@ import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.MultipleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.logging.Loggable;
-
-import ij.IJ;
 
 /**
  * Abstract exporter
@@ -41,9 +41,9 @@ import ij.IJ;
  * @since 1.13.8
  *
  */
-public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implements Io {
+public abstract class MeasurementsExportMethod extends MultipleDatasetAnalysisMethod implements Io {
 
-	private static final Logger LOGGER = Logger.getLogger(StatsExporter.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(MeasurementsExportMethod.class.getName());
 
 	private File exportFile;
 	private static final String DEFAULT_MULTI_FILE_NAME = "Stats_export" + Io.TAB_FILE_EXTENSION;
@@ -60,7 +60,7 @@ public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implem
 	 * @param list    the datasets to export
 	 * @param options other options for the export
 	 */
-	protected StatsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
+	protected MeasurementsExportMethod(@NonNull File file, @NonNull List<IAnalysisDataset> list,
 			@NonNull HashOptions options) {
 		super(list);
 		this.options = options;
@@ -74,7 +74,7 @@ public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implem
 	 * @param dataset the dataset to export
 	 * @param options other options for the export
 	 */
-	protected StatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
+	protected MeasurementsExportMethod(@NonNull File file, @NonNull IAnalysisDataset dataset,
 			@NonNull HashOptions options) {
 		super(dataset);
 		this.options = options;
@@ -102,8 +102,7 @@ public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implem
 		try {
 			Files.deleteIfExists(exportFile.toPath());
 		} catch (IOException e) {
-			LOGGER.log(Level.WARNING, "Unable to delete file: " + exportFile);
-			LOGGER.log(Loggable.STACK, "Unable to delete existing file", e);
+			LOGGER.log(Level.SEVERE, "Unable to delete file: %s".formatted(exportFile), e);
 		}
 	}
 
@@ -119,11 +118,23 @@ public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implem
 		for (@NonNull
 		IAnalysisDataset d : list) {
 			append(d, outLine);
+			// Update the progress bar length with ~correct value.
+			// Should be bytes, but similar enough over ~20k cells
+			fireUpdateProgressTotalLength(outLine.length());
 			fireProgressEvent();
 		}
 
+		try (
+				OutputStream os = new FileOutputStream(exportFile);
+				CountedOutputStream cos = new CountedOutputStream(os);
+				PrintWriter p = new PrintWriter(cos);) {
+			cos.addCountListener((l) -> fireProgressEvent(l));
+			p.write(outLine.toString());
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE, "Unable to write to file: %s".formatted(e.getMessage()), e);
+		}
+
 		fireIndeterminateState();
-		IJ.append(outLine.toString(), exportFile.getAbsolutePath());
 	}
 
 	/**

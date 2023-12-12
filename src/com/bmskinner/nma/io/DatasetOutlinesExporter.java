@@ -31,7 +31,7 @@ import com.bmskinner.nma.utility.ArrayUtils;
  * @since 1.18.0
  *
  */
-public class DatasetOutlinesExporter extends StatsExporter {
+public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 
 	private static final Logger LOGGER = Logger.getLogger(DatasetOutlinesExporter.class.getName());
 

@@ -37,6 +37,7 @@ import com.bmskinner.nma.analysis.profiles.ProfileCreator;
 import com.bmskinner.nma.analysis.profiles.SegmentFitter;
 import com.bmskinner.nma.components.MissingComponentException;
 import com.bmskinner.nma.components.Taggable;
+import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
@@ -71,10 +72,6 @@ import ij.gui.Roi;
  */
 public abstract class ProfileableCellularComponent extends DefaultCellularComponent
 		implements Taggable {
-
-	private static final String XML_WINDOW_PROPORTION = "window";
-	private static final String XML_ORIENTATION = "Orientation";
-	private static final String XML_PRIORITY_AXIS = "axis";
 
 	private static final Logger LOGGER = Logger
 			.getLogger(ProfileableCellularComponent.class.getName());
@@ -196,26 +193,27 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	protected ProfileableCellularComponent(Element e) throws ComponentCreationException {
 		super(e);
-		windowProportion = Double.parseDouble(e.getAttributeValue(XML_WINDOW_PROPORTION));
+		windowProportion = Double.parseDouble(e.getAttributeValue(XMLNames.XML_WINDOW_PROPORTION));
 
-		isLocked = e.getAttributeValue("locked") != null;
+		isLocked = e.getAttributeValue(XMLNames.XML_LOCKED) != null;
 
-		for (Element el : e.getChildren("Landmark")) {
-			profileLandmarks.put(new DefaultLandmark(el.getAttributeValue("name")),
-					Integer.parseInt(el.getAttributeValue("index")));
+		for (Element el : e.getChildren(XMLNames.XML_LANDMARK)) {
+			profileLandmarks.put(new DefaultLandmark(el.getAttributeValue(XMLNames.XML_NAME)),
+					Integer.parseInt(el.getAttributeValue(XMLNames.XML_INDEX)));
 		}
 
-		for (Element el : e.getChildren(XML_ORIENTATION)) {
-			OrientationMark name = OrientationMark.valueOf(el.getAttributeValue("name"));
+		for (Element el : e.getChildren(XMLNames.XML_ORIENTATION)) {
+			OrientationMark name = OrientationMark.valueOf(el.getAttributeValue(XMLNames.XML_NAME));
 			Landmark l = profileLandmarks.keySet().stream()
-					.filter(lm -> lm.getName().equals(el.getAttributeValue("value"))).findFirst()
+					.filter(lm -> lm.getName().equals(el.getAttributeValue(XMLNames.XML_VALUE)))
+					.findFirst()
 					.get();
 			orientationMarks.put(name, l);
 		}
-		priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XML_PRIORITY_AXIS));
+		priorityAxis = PriorityAxis.valueOf(e.getAttributeValue(XMLNames.XML_PRIORITY_AXIS));
 
 		try {
-			for (Element el : e.getChildren("Segment")) {
+			for (Element el : e.getChildren(XMLNames.XML_SEGMENT)) {
 				segments.add(new DefaultProfileSegment(el));
 			}
 			IProfileSegment.linkSegments(segments);
@@ -630,25 +628,27 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	@Override
 	public Element toXmlElement() {
 		Element e = super.toXmlElement()
-				.setAttribute(XML_WINDOW_PROPORTION, String.valueOf(windowProportion))
-				.setAttribute(XML_PRIORITY_AXIS, priorityAxis.toString());
+				.setAttribute(XMLNames.XML_WINDOW_PROPORTION, String.valueOf(windowProportion))
+				.setAttribute(XMLNames.XML_PRIORITY_AXIS, priorityAxis.toString());
 
 		if (isLocked)
-			e.setAttribute("locked", "true");
+			e.setAttribute(XMLNames.XML_LOCKED, "true");
 
 		for (IProfileSegment s : segments) {
 			e.addContent(s.toXmlElement());
 		}
 
 		for (Entry<Landmark, Integer> entry : profileLandmarks.entrySet()) {
-			e.addContent(new Element("Landmark").setAttribute("name", entry.getKey().toString())
-					.setAttribute("index", String.valueOf(entry.getValue())));
+			e.addContent(new Element(XMLNames.XML_LANDMARK)
+					.setAttribute(XMLNames.XML_NAME, entry.getKey().toString())
+					.setAttribute(XMLNames.XML_INDEX, String.valueOf(entry.getValue())));
 		}
 
 		for (@NonNull
 		Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
-			e.addContent(new Element(XML_ORIENTATION).setAttribute("name", entry.getKey().name())
-					.setAttribute("value",
+			e.addContent(new Element(XMLNames.XML_ORIENTATION)
+					.setAttribute(XMLNames.XML_NAME, entry.getKey().name())
+					.setAttribute(XMLNames.XML_VALUE,
 							entry.getValue().toString()));
 		}
 

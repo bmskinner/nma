@@ -78,7 +78,7 @@ public class SignalDetectionSettingsTableCellRenderer extends ConsistentRowTable
 							SignalTableCell cell = (SignalTableCell) table.getModel()
 									.getValueAt(row + 1, column);
 
-							bg = cell.getColor();
+							bg = cell.color();
 						}
 
 					} else {

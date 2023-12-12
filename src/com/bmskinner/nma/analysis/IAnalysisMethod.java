@@ -32,50 +32,51 @@ import org.eclipse.jdt.annotation.NonNull;
  * @since 1.13.3
  *
  */
-public interface IAnalysisMethod extends Callable<IAnalysisResult> {
+public interface IAnalysisMethod extends Callable<IAnalysisResult>, Progressable {
 
-    /**
-     * Add a listener for progress through an analysis. Use e.g. to update
-     * progress bars
-     * 
-     * @param l the listener
-     */
-    void addProgressListener(ProgressListener l);
+	/**
+	 * Add a listener for progress through an analysis. Use e.g. to update progress
+	 * bars
+	 * 
+	 * @param l the listener
+	 */
+	void addProgressListener(ProgressListener l);
 
-    /**
-     * Remove a progress listener if present
-     * 
-     * @param l the listener
-     */
-    void removeProgressListener(ProgressListener l);
-    
-    
-    /**
-     * Call this method and specify a method to be run. It returns the same
-     * method that is given, so methods can be chained. The final method in the 
-     * chain must have {@code call()} invoked as normal
-     * @param nextMethod the next method to be run.
-     * @return the next method to be run
-     * @throws Exception if an error occurs in the called method
-     */
-    IAnalysisMethod then(@NonNull IAnalysisMethod nextMethod) throws Exception;
-    
-    /**
-     * Call this method and specify a method to be run if a condition is met. 
-     * If the condition is true, it returns the same method that is given.
-     * If  the condition is false, it returns this method.
-     * @param nextMethod the next method to be run.
-     * @return the next method to be run
-     * @throws Exception if an error occurs in the called method
-     */
-    IAnalysisMethod thenIf(boolean condition, @NonNull IAnalysisMethod nextMethod) throws Exception;
-    
-    /**
-     * Attempt to cancel the current task.
-     * 
-     */
-    default void cancel(){
-        Thread.currentThread().interrupt();
-    }
+	/**
+	 * Remove a progress listener if present
+	 * 
+	 * @param l the listener
+	 */
+	void removeProgressListener(ProgressListener l);
+
+	/**
+	 * Call this method and specify a method to be run. It returns the same method
+	 * that is given, so methods can be chained. The final method in the chain must
+	 * have {@code call()} invoked as normal
+	 * 
+	 * @param nextMethod the next method to be run.
+	 * @return the next method to be run
+	 * @throws Exception if an error occurs in the called method
+	 */
+	IAnalysisMethod then(@NonNull IAnalysisMethod nextMethod) throws Exception;
+
+	/**
+	 * Call this method and specify a method to be run if a condition is met. If the
+	 * condition is true, it returns the same method that is given. If the condition
+	 * is false, it returns this method.
+	 * 
+	 * @param nextMethod the next method to be run.
+	 * @return the next method to be run
+	 * @throws Exception if an error occurs in the called method
+	 */
+	IAnalysisMethod thenIf(boolean condition, @NonNull IAnalysisMethod nextMethod) throws Exception;
+
+	/**
+	 * Attempt to cancel the current task.
+	 * 
+	 */
+	default void cancel() {
+		Thread.currentThread().interrupt();
+	}
 
 }

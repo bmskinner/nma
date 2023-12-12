@@ -428,7 +428,7 @@ public class TestDatasetBuilder {
 
 			ICell cell = createCell(width, height, degreeRot, borderOffset, rsc);
 
-			collection.addCell(cell);
+			collection.add(cell);
 
 			if (redSignals) {
 				INuclearSignal s = TestComponentFactory.createSignal(cell.getPrimaryNucleus(), 0.2,
