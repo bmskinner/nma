@@ -1,6 +1,7 @@
 package com.bmskinner.nma.io;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,9 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 				.stream()
 				.flatMap(c -> c.getChildren(XMLNames.XML_NUCLEUS).stream())
 				.toList();
+
+		// Copy to a mutable list so we can prune
+		sourceCells = new ArrayList<>(sourceCells);
 
 		// Find all the nuclei in the target document
 		List<Element> targetCells = landmarkTarget.getRootElement()
@@ -142,6 +146,7 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 							"Cannot update segment indexes, different number between nmds");
 					continue;
 				}
+
 				// Now use this map to update all the segment indexes
 				updateSegmentIds(targetNucleus, sourceNucleus, targetIds);
 
@@ -179,6 +184,9 @@ public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implement
 				}
 
 				remappedCells++;
+
+				sourceNuclei.remove(sourceNucleus);
+
 				// Nucleus is done, stop
 				return;
 			}
