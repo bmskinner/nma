@@ -192,6 +192,7 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 				.append("File").append(TAB)
 				.append("CellID").append(TAB)
 				.append("Component").append(TAB)
+				.append("ComponentID").append(TAB)
 				.append("Folder").append(TAB)
 				.append("Image").append(TAB)
 				.append("Centre_of_mass").append(TAB);
@@ -303,6 +304,7 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 							.append(d.getSavePath() + TAB)
 							.append(cell.getId() + TAB)
 							.append(CellularComponent.NUCLEUS + "_" + n.getNameAndNumber() + TAB)
+							.append(n.getID() + TAB)
 							.append(n.getSourceFolder() + TAB)
 							.append(n.getSourceFileName() + TAB)
 							.append(n.getOriginalCentreOfMass().toString() + TAB);
