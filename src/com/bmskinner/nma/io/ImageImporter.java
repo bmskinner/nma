@@ -64,7 +64,8 @@ public class ImageImporter implements Importer {
 			ImagePlus.GRAY16 };
 
 	// The file types that the program will try to open
-	protected static final String[] IMPORTABLE_FILE_TYPES = { ".tif", ".tiff", ".jpg", ".nd2" };
+	protected static final String[] IMPORTABLE_FILE_TYPES = { ".tif", ".tiff", ".jpg", ".nd2",
+			".png" };
 
 	// The prefix to use when exporting images
 	public static final String IMAGE_PREFIX = "export.";

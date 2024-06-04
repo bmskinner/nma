@@ -470,8 +470,10 @@ public final class DatasetListManager implements DatasetAddedListener {
 			if (datasetHashcodeMap.containsKey(d.getId())) {
 				return d.hashCode() != datasetHashcodeMap.get(d.getId());
 			}
-			LOGGER.warning("Missing root dataset hashcode");
-
+			// No hashcode present, presumably a new dataset. Compute and return
+			LOGGER.fine("Missing root dataset hashcode, computing");
+			datasetHashcodeMap.put(d.getId(), d.hashCode());
+			return true;
 		}
 		return false;
 	}
@@ -487,9 +489,9 @@ public final class DatasetListManager implements DatasetAddedListener {
 		if (workspaceHashcodeMap.containsKey(w.getId())) {
 			return w.hashCode() != workspaceHashcodeMap.get(w.getId());
 		}
-		LOGGER.warning("Missing workspace hashcode");
-
-		return false;
+		LOGGER.fine("Missing workspace hashcode");
+		workspaceHashcodeMap.put(w.getId(), w.hashCode());
+		return true;
 	}
 
 	/**
