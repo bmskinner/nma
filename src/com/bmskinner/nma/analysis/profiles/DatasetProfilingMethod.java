@@ -109,6 +109,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			return;
 		}
 
+		this.fireUpdateProgressTotalLength(dataset.getCollection().size());
+
 		RuleApplicationType ruleType = dataset.getAnalysisOptions()
 				.orElseThrow(MissingOptionException::new)
 				.getRuleSetCollection()
@@ -427,6 +429,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 			// Update measurements - many are based on orientation
 			n.clearMeasurements();
+			fireProgressEvent();
 		}
 
 		// Update the consensus nucleus

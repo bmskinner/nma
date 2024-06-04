@@ -136,10 +136,12 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 
 	private String createImagePreprocessingString(@NonNull HashOptions options) {
 		StringBuilder builder = new StringBuilder();
-		if (options.getBoolean(HashOptions.IS_USE_KUWAHARA))
+		if (options.hasBoolean(HashOptions.IS_USE_KUWAHARA)
+				&& options.getBoolean(HashOptions.IS_USE_KUWAHARA))
 			builder.append("Kuwahara kernel: " + options.getInt(HashOptions.KUWAHARA_RADIUS_INT)
 					+ Io.NEWLINE);
-		if (options.getBoolean(HashOptions.IS_USE_FLATTENING))
+		if (options.hasBoolean(HashOptions.IS_USE_FLATTENING)
+				&& options.getBoolean(HashOptions.IS_USE_FLATTENING))
 			builder.append("Flattening threshold: "
 					+ options.getInt(HashOptions.FLATTENING_THRESHOLD_INT));
 		return builder.toString();
@@ -149,7 +151,8 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 
 		StringBuilder builder = new StringBuilder();
 
-		boolean isCanny = options.getBoolean(HashOptions.IS_USE_CANNY);
+		boolean isCanny = options.hasBoolean(HashOptions.IS_USE_CANNY)
+				&& options.getBoolean(HashOptions.IS_USE_CANNY);
 		if (isCanny) {
 			builder.append("Canny edge detection" + Io.NEWLINE);
 
@@ -173,14 +176,17 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			if (options.getBoolean(HashOptions.IS_RULESET_EDGE_FILTER))
 				builder.append("Poor edge detection filter applied");
 
-		} else {
+		}
+
+		if (options.hasInt(HashOptions.THRESHOLD)) {
 			builder.append("Threshold: " + options.getInt(HashOptions.THRESHOLD));
 			if (options.getBoolean(HashOptions.IS_USE_GAP_CLOSING))
 				builder.append(Io.NEWLINE + "Closing radius: "
 						+ options.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
 		}
 
-		if (options.getBoolean(HashOptions.IS_USE_WATERSHED)) {
+		if (options.hasBoolean(HashOptions.IS_USE_WATERSHED)
+				&& options.getBoolean(HashOptions.IS_USE_WATERSHED)) {
 			builder.append(Io.NEWLINE + "Watershed applied");
 		}
 
@@ -190,10 +196,11 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 	private String createNucleusSizeFilterString(@NonNull HashOptions options) {
 
 		StringBuilder builder = new StringBuilder();
-
-		builder.append("Min pixels: " + options.getInt(HashOptions.MIN_SIZE_PIXELS) + Io.NEWLINE
-				+ "Max pixels: "
-				+ options.getInt(HashOptions.MAX_SIZE_PIXELS));
+		if (options.hasInt(HashOptions.MIN_SIZE_PIXELS)) {
+			builder.append("Min pixels: " + options.getInt(HashOptions.MIN_SIZE_PIXELS) + Io.NEWLINE
+					+ "Max pixels: "
+					+ options.getInt(HashOptions.MAX_SIZE_PIXELS));
+		}
 		return builder.toString();
 	}
 
@@ -201,10 +208,11 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 
 		StringBuilder builder = new StringBuilder();
 		DecimalFormat formatter = new DecimalFormat("#.##");
-
-		builder.append("Min: " + formatter.format(options.getDouble(HashOptions.MIN_CIRC))
-				+ Io.NEWLINE + "Max: "
-				+ formatter.format(options.getDouble(HashOptions.MAX_CIRC)));
+		if (options.hasDouble(HashOptions.MIN_CIRC)) {
+			builder.append("Min: " + formatter.format(options.getDouble(HashOptions.MIN_CIRC))
+					+ Io.NEWLINE + "Max: "
+					+ formatter.format(options.getDouble(HashOptions.MAX_CIRC)));
+		}
 		return builder.toString();
 	}
 

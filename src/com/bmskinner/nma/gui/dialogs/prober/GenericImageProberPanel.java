@@ -143,7 +143,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 			nextButton.setEnabled(false);
 			prevButton.setEnabled(false);
 
-			finder.findInImage(imageFile);
+			finder.findInFile(imageFile);
 
 		} catch (ImageImportException e) { // end try
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);

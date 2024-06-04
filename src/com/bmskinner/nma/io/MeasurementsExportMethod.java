@@ -33,6 +33,7 @@ import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.MultipleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.utility.DatasetUtils;
 
 /**
  * Abstract exporter
@@ -109,27 +110,32 @@ public abstract class MeasurementsExportMethod extends MultipleDatasetAnalysisMe
 	/**
 	 * Export stats from all datasets in the list to the same file
 	 * 
-	 * @param list
+	 * @param list the datasets to export
 	 */
 	protected void export(@NonNull List<IAnalysisDataset> list) throws Exception {
-		StringBuilder outLine = new StringBuilder();
-		appendHeader(outLine);
-
-		for (@NonNull
-		IAnalysisDataset d : list) {
-			append(d, outLine);
-			// Update the progress bar length with ~correct value.
-			// Should be bytes, but similar enough over ~20k cells
-			fireUpdateProgressTotalLength(outLine.length());
-			fireProgressEvent();
-		}
 
 		try (
 				OutputStream os = new FileOutputStream(exportFile);
 				CountedOutputStream cos = new CountedOutputStream(os);
 				PrintWriter p = new PrintWriter(cos);) {
 			cos.addCountListener((l) -> fireProgressEvent(l));
+
+			StringBuilder outLine = new StringBuilder();
+			appendHeader(outLine);
+
+			// Update the progress bar length with ~correct value.
+			// Estimate from the header line size and number of cells
+			// Should be a slight overestimate
+			fireUpdateProgressTotalLength(
+					DatasetUtils.size(list) * outLine.toString().getBytes().length);
+
 			p.write(outLine.toString());
+
+			for (@NonNull
+			IAnalysisDataset d : list) {
+				append(d, p);
+			}
+
 		} catch (IOException e) {
 			LOGGER.log(Level.SEVERE, "Unable to write to file: %s".formatted(e.getMessage()), e);
 		}
@@ -151,7 +157,7 @@ public abstract class MeasurementsExportMethod extends MultipleDatasetAnalysisMe
 	 * @param outLine
 	 * @throws Exception
 	 */
-	protected abstract void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine)
+	protected abstract void append(@NonNull IAnalysisDataset d, @NonNull PrintWriter pw)
 			throws Exception;
 
 }

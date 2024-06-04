@@ -13,6 +13,21 @@ public class ArrayUtils {
 	}
 
 	/**
+	 * Convert a Float array to a float array
+	 * 
+	 * @param arr the array to be converted
+	 * @return
+	 */
+	public static float[] toFloat(Float[] arr) {
+		float[] f = new float[arr.length];
+		for (int i = 0; i < arr.length; i++) {
+			f[i] = arr[i];
+
+		}
+		return f;
+	}
+
+	/**
 	 * Convert a long array to a float array
 	 * 
 	 * @param arr the array to be converted

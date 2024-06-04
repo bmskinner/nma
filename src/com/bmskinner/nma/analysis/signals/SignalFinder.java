@@ -98,7 +98,7 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 		for (File f : folder.listFiles()) {
 			if (ImageImporter.isFileImportable(f)) {
 				try {
-					list.addAll(findInImage(f));
+					list.addAll(findInFile(f));
 				} catch (ImageImportException e) {
 					LOGGER.log(Loggable.STACK, "Error searching image", e);
 				}
@@ -109,7 +109,7 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 	}
 
 	@Override
-	public List<INuclearSignal> findInImage(@NonNull File imageFile) throws ImageImportException {
+	public List<INuclearSignal> findInFile(@NonNull File imageFile) throws ImageImportException {
 		List<INuclearSignal> list = new ArrayList<>();
 		try {
 			if (FinderDisplayType.PREVIEW.equals(displayType)) {

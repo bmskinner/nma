@@ -122,7 +122,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 	}
 
 	@Override
-	public List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException {
+	public List<ICell> findInFile(@NonNull final File imageFile) throws ImageImportException {
 		List<ICell> list = new ArrayList<>();
 
 		try {
