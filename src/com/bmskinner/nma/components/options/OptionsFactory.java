@@ -220,6 +220,8 @@ public class OptionsFactory {
 				.withValue(HashOptions.MAX_CIRC, 0.9).build();
 
 		op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
+
+		op.getProfilingOptions().setBoolean(HashOptions.IS_SEGMENT_PROFILES, false);
 		return op;
 	}
 

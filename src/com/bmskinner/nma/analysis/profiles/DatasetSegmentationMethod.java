@@ -32,6 +32,7 @@ import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
@@ -123,6 +124,14 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 	@Override
 	public IAnalysisResult call() throws Exception {
+
+		if (!dataset.getAnalysisOptions().get().getProfilingOptions()
+				.getBoolean(HashOptions.IS_SEGMENT_PROFILES)) {
+			LOGGER.fine(() -> "Segmentation is skipped for dataset %s"
+					.formatted(dataset.getName()));
+			return new DefaultAnalysisResult(dataset);
+		}
+
 		result = switch (mode) {
 		case COPY_FROM_OTHER_DATASET -> runCopyAnalysis();
 		case SEGMENT_FROM_SCRATCH -> runNewAnalysis();

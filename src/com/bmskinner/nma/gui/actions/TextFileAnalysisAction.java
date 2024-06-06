@@ -22,6 +22,7 @@ import com.bmskinner.nma.analysis.detection.TextFileDetectionMethod;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.DefaultOptions;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -80,7 +81,8 @@ public class TextFileAnalysisAction extends VoidResultAction {
 		IAnalysisOptions options = OptionsFactory
 				.makeAnalysisOptions(RuleSetCollection.roundRuleSetCollection());
 
-		options.setAngleWindowProportion(0.05);
+		options.setAngleWindowProportion(HashOptions.DEFAULT_PROFILE_WINDOW);
+		options.getProfilingOptions().setBoolean(HashOptions.IS_SEGMENT_PROFILES, false);
 		options.setDetectionFolder(CellularComponent.NUCLEUS, this.folder);
 
 //		HashOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions()
@@ -127,7 +129,7 @@ public class TextFileAnalysisAction extends VoidResultAction {
 				LOGGER.info("No datasets returned");
 			} else {
 				UserActionController.getInstance().userActionEventReceived(
-						new UserActionEvent(this, UserActionEvent.PROFILE_AND_CONSENSUS_ACTION,
+						new UserActionEvent(this, UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION,
 								datasets));
 			}
 

@@ -56,20 +56,23 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 	 * @param mode     the type of morphology analysis to carry out
 	 * @param downFlag the next analyses to perform
 	 */
-	public RunSegmentationAction(IAnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag,
+	public RunSegmentationAction(IAnalysisDataset dataset, MorphologyAnalysisMode mode,
+			int downFlag,
 			@NonNull final ProgressBarAcceptor acceptor, CountDownLatch latch) {
 		super(dataset, PROGRESS_LBL, acceptor, downFlag);
 		this.mode = mode;
 		setLatch(latch);
 	}
 
-	public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag,
+	public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode,
+			int downFlag,
 			@NonNull final ProgressBarAcceptor acceptor) {
 		super(list, PROGRESS_LBL, acceptor, downFlag);
 		this.mode = mode;
 	}
 
-	public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag,
+	public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode,
+			int downFlag,
 			@NonNull final ProgressBarAcceptor acceptor, CountDownLatch latch) {
 		super(list, PROGRESS_LBL, acceptor, downFlag);
 		this.mode = mode;
@@ -173,7 +176,8 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 					countdownLatch();
 					UIController.getInstance().fireProfilesUpdated(dataset);
 					UserActionController.getInstance().userActionEventReceived(
-							new UserActionEvent(this, UserActionEvent.SELECT_ONE_DATASET, List.of(dataset)));
+							new UserActionEvent(this, UserActionEvent.SELECT_ONE_DATASET,
+									List.of(dataset)));
 					RunSegmentationAction.super.finished();
 
 				} else {
@@ -182,9 +186,11 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 					cancel(); // remove progress bar
 
 					Runnable task = mode.equals(MorphologyAnalysisMode.COPY_FROM_OTHER_DATASET)
-							? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag,
+							? new RunSegmentationAction(getRemainingDatasetsToProcess(), source,
+									downFlag,
 									progressAcceptors.get(0), getLatch().get())
-							: new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag,
+							: new RunSegmentationAction(getRemainingDatasetsToProcess(), mode,
+									downFlag,
 									progressAcceptors.get(0), getLatch().get());
 
 					task.run();

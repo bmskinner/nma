@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -64,12 +65,15 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
 	private static final String TYPE_LBL = "Ruleset";
 	private static final String PROFILE_WINDOW_LBL = "Profile window";
+	private static final String IS_SEGMENT_LBL = "Segment profiles";
 
 	private IAnalysisOptions options;
 
 	private JSpinner profileWindow;
 
 	private JComboBox<RulesetEntry> typeBox;
+
+	private JCheckBox segmentBox;
 
 	private RulesetEntry[] availableRules = getAvailableRulesets();
 
@@ -175,6 +179,12 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 			}
 
 		});
+
+		segmentBox = new JCheckBox("", true);
+		segmentBox.addChangeListener(e -> {
+			options.getProfilingOptions().setBoolean(HashOptions.IS_SEGMENT_PROFILES,
+					segmentBox.isSelected());
+		});
 	}
 
 	private JPanel createPanel() {
@@ -186,11 +196,13 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 		List<JLabel> labels = new ArrayList<>();
 		labels.add(new JLabel(TYPE_LBL));
 		labels.add(new JLabel(PROFILE_WINDOW_LBL));
+		labels.add(new JLabel(IS_SEGMENT_LBL));
 
 		List<Component> fields = new ArrayList<>();
 
 		fields.add(typeBox);
 		fields.add(profileWindow);
+		fields.add(segmentBox);
 
 		addLabelTextRows(labels, fields, panel);
 
