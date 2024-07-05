@@ -137,6 +137,8 @@ public class UserActionEvent extends EventObject {
 	public static final String RUN_GLCM_ANALYSIS = "Run GLCM analysis";
 	public static final String RUN_HISTOGRAM_CALC = "Run histogram calculations";
 
+	public static final String PRINT_DATASET_HASH_CMD = "Print dataset hashes";
+
 	private static final long serialVersionUID = 1L;
 	private String message;
 

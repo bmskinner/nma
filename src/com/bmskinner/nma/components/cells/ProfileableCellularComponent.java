@@ -660,8 +660,16 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result
-				+ Objects.hash(isLocked, profileLandmarks, profileMap, segments, orientationMarks,
+				+ Objects.hash(isLocked, profileLandmarks, profileMap, segments,
 						priorityAxis, windowProportion);
+
+		// Orientation mark enum hashcodes depend on memory location, so are not
+		// deterministic. Use ordinals instead
+		for (Entry<OrientationMark, Landmark> entry : orientationMarks.entrySet()) {
+			result = prime * result
+					+ Objects.hash(entry.getKey().ordinal(), entry.getValue());
+		}
+
 		return result;
 	}
 

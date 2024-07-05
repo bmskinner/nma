@@ -115,17 +115,22 @@ public class MergeSourceExtracterTest {
 						+ dv.getErrors().stream().collect(Collectors.joining("\n")));
 		}
 
+		// Ensure dataset names match
 		IAnalysisDataset r1 = extracted.stream().filter(d -> d.getName().equals(d1.getName()))
 				.findFirst().orElseThrow(Exception::new);
 		IAnalysisDataset r2 = extracted.stream().filter(d -> d.getName().equals(d2.getName()))
 				.findFirst().orElseThrow(Exception::new);
 
+		// Don't test segment and landmark placement - these may alter from rounding
+		// when profiles are recalculated
+
+		// Ensure cells have the same IDs
 		for (ICell c : d1.getCollection()) {
-			assertTrue(r1.getCollection().contains(c));
+			assertTrue(r1.getCollection().contains(c.getId()));
 		}
 
 		for (ICell c : d2.getCollection()) {
-			assertTrue(r2.getCollection().contains(c));
+			assertTrue(r2.getCollection().contains(c.getId()));
 		}
 
 		assertEquals(d1.getCollection().size(), r1.getCollection().size());

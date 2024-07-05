@@ -402,16 +402,11 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * 
 	 * @param d
 	 */
-	public final synchronized void addDataset(@NonNull IAnalysisDataset d) {
+	public final void addDataset(@NonNull IAnalysisDataset d) {
 		if (d.isRoot() && !rootDatasets.contains(d)) {
 			rootDatasets.add(d);
 			LOGGER.fine(() -> "Added dataset %s".formatted(d.getName()));
-
-			// Calculating the hash can take time, ensure it is not on the EDT
-			Runnable r = () -> datasetHashcodeMap.put(d.getId(), d.hashCode());
-
-			ThreadManager.getInstance().submit(r);
-
+			datasetHashcodeMap.put(d.getId(), d.hashCode());
 		}
 	}
 
@@ -427,7 +422,8 @@ public final class DatasetListManager implements DatasetAddedListener {
 		if (rootDatasets.stream().noneMatch(e -> e.getId().equals(d.getId())))
 			return;
 
-		rootDatasets = rootDatasets.stream().filter(e -> !e.getId().equals(d.getId()))
+		rootDatasets = rootDatasets.stream()
+				.filter(e -> !e.getId().equals(d.getId()))
 				.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
 
 		datasetHashcodeMap.remove(d.getId());
@@ -460,7 +456,8 @@ public final class DatasetListManager implements DatasetAddedListener {
 
 	/**
 	 * Check if the stored hashcode for the given dataset is different to the actual
-	 * dataset hashcode
+	 * dataset hashcode. We only store root dataset hashcodes, since child datasets
+	 * are not independent of a root.
 	 * 
 	 * @param d
 	 * @return true if the hashcode is different to the stored value

@@ -73,20 +73,35 @@ public class DatasetMergeTest {
 		IAnalysisMethod m = new DatasetMergeMethod(toMerge, BooleanOperation.OR, saveFile);
 
 		IAnalysisResult r = m.call();
-		IAnalysisDataset d = r.getFirstDataset();
-		assertNotNull("Dataset should be returned from merge method", d);
+		IAnalysisDataset mergedDataset = r.getFirstDataset();
+		assertNotNull("Dataset should be returned from merge method", mergedDataset);
 
-		assertEquals(d.getCollection().getNucleusCount(), cells);
+		assertEquals("Dataset merge should have the same cell count as input datasets",
+				mergedDataset.getCollection().getNucleusCount(), cells);
 
-		for (ICell c : d1.getCollection().getCells()) {
-			if (!d.getCollection().contains(c))
-				fail("Missing dataset 1 cell " + c.toString());
+		// Check all the cells in input dataset one were copied
+		// Do not check all fields; that is a test for the CellCollectionFilterer
+		// Since segments must be accounted for, we don't worry about equality testing
+		// here, just if the same cell ids are present
+		for (ICell originalCell : d1.getCollection().getCells()) {
+
+			// Is there a cell with the same ID?
+			if (!mergedDataset.getCollection().getCellIDs().contains(originalCell.getId())) {
+				fail("Cell from input dataset 1 is not present in merged dataset: "
+						+ originalCell.toString());
+			}
+
 		}
 
-		for (ICell c : d2.getCollection().getCells()) {
-			if (!d.getCollection().contains(c))
-				fail("Missing dataset 2 cell " + c.toString());
+		// Now do the same for the cells in input dataset 2
+		for (ICell originalCell : d2.getCollection().getCells()) {
+			// Is there a cell with the same ID?
+			if (!mergedDataset.getCollection().getCellIDs().contains(originalCell.getId())) {
+				fail("Cell from input dataset 2 is not present in merged dataset: "
+						+ originalCell.toString());
+			}
 		}
+
 	}
 
 }

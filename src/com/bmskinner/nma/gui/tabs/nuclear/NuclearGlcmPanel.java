@@ -79,15 +79,23 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel
 
 	@Override
 	protected synchronized void updateSingle() {
-		super.updateSingle();
-		LOGGER.finest("Passing to update multiple in " + this.getClass().getName());
 		updateMultiple();
 
 	}
 
 	@Override
 	protected synchronized void updateMultiple() {
-		super.updateMultiple();
+
+		// TODO: when GlobalOptions.IS_GLCM_INTERFACE_KEY is true, we try to visualise
+		// GLCM values when a dataset is selected.
+		// If GLCM has not yet been calculated manually, this will give a default value
+		// of -1 (ERROR_CALCULATING_STAT)
+		// This adds a series of -1s to the nucleus measurements
+		// This changes the nucleus hashcode
+		// This triggers a "Do you want to save the dataset" message on exit, even
+		// though the dataset should not have changed just because we selected it.
+		// This needs to only trigger displaying values if GLCM is
+		// available
 
 		for (Measurement stat : Measurement.getGlcmStats()) {
 
@@ -106,7 +114,6 @@ public class NuclearGlcmPanel extends BoxplotsTabPanel
 
 	@Override
 	protected synchronized void updateNull() {
-		super.updateNull();
 		LOGGER.finest("Passing to update multiple in " + this.getClass().getName());
 		updateMultiple();
 	}

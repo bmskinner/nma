@@ -102,11 +102,15 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * 
 	 * @param original
 	 * @param dup
-	 * @param fieldsToSkip skip fields in the object with these names
+	 * @param fieldsToSkip      the names of fields in the objects that should not
+	 *                          be compared
+	 * @param includeEqualsTest should we run a test of equals methods of the
+	 *                          objects? If some fields are skipped, the equals
+	 *                          method may be false, but not in a relevant manner.
 	 * @throws Exception
 	 */
 	public static void testDuplicatesByField(String msg, Object original, Object dup,
-			Set<String> fieldsToSkip)
+			Set<String> fieldsToSkip, boolean includeEqualsTest)
 			throws Exception {
 
 		for (Field f : getInheritedPrivateFields(dup.getClass())) {
@@ -136,8 +140,6 @@ public abstract class ComponentTester extends FloatArrayTester {
 				continue;
 			if (f.getType().equals(WeakReference.class))
 				continue;
-//			if(f.getType().equals(Class.forName("com.bmskinner.nma.components.cells.DefaultCellularComponent$ShapeCache")))
-//				continue;
 			if (f.getType().equals(Class.forName(
 					"com.bmskinner.nma.components.datasets.DefaultCellCollection$DefaultProfileCollection$ProfileCache")))
 				continue;
@@ -145,7 +147,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 					"com.bmskinner.nma.components.datasets.VirtualDataset$DefaultProfileCollection$ProfileCache")))
 				continue;
 			if (f.getType()
-					.equals(Class.forName("com.bmskinner.nma.components.measure.StatsCache")))
+					.equals(Class.forName("com.bmskinner.nma.components.measure.MeasurementCache")))
 				continue;
 			if (f.getType().equals(Class.forName("com.bmskinner.nma.components.measure.VennCache")))
 				continue;
@@ -181,7 +183,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 					if (oClass.equals(ArrayList.class)) {
 						testListEqualityByField(msg + "->" + f.getName(), f, (List<?>) oValue,
 								(List<?>) dValue,
-								fieldsToSkip);
+								fieldsToSkip, includeEqualsTest);
 					}
 
 				} else {
@@ -193,7 +195,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 							&& !f.getType().isEnum()) {
 						try {
 							testDuplicatesByField(msg + "->" + f.getName(), oValue, dValue,
-									fieldsToSkip);
+									fieldsToSkip, includeEqualsTest);
 						} catch (StackOverflowError e) {
 							String msg2 = "Field '" + f.getName() + "' of type "
 									+ f.getType().getName() + " and class "
@@ -216,8 +218,9 @@ public abstract class ComponentTester extends FloatArrayTester {
 
 		}
 
-		assertEquals(msg + " Equals method in " + original.getClass().getSimpleName(), original,
-				dup);
+		if (includeEqualsTest)
+			assertEquals(msg + " Equals method in " + original.getClass().getSimpleName(), original,
+					dup);
 	}
 
 	// Issue with arrays in hashmaps: Object.hashcode()
@@ -294,13 +297,17 @@ public abstract class ComponentTester extends FloatArrayTester {
 	/**
 	 * Test if two lists are equal, item by item
 	 * 
-	 * @param f the field to test
-	 * @param o the original list
-	 * @param d the duplicate list
+	 * @param f                 the field to test
+	 * @param o                 the original list
+	 * @param d                 the duplicate list
+	 * @param fieldsToSkip      the names of fields in the objects that should not
+	 *                          be compared
+	 * @param includeEqualsTest should we run a test of o.containsAll(d) (which uses
+	 *                          the equals methods of objects in o and d)
 	 * @throws Exception
 	 */
 	private static void testListEqualityByField(String msg, Field f, List<?> o, List<?> d,
-			Set<String> fieldsToSkip)
+			Set<String> fieldsToSkip, boolean includeEqualsTest)
 			throws Exception {
 		assertTrue(msg + " Field '" + f.getName() + "' lists should not both be null",
 				o != null && d != null);
@@ -312,15 +319,17 @@ public abstract class ComponentTester extends FloatArrayTester {
 		fieldsToSkip.add("nextSegment");
 		for (int i = 0; i < o.size(); i++) {
 			if (o.get(i).getClass().getName().startsWith("com.bmskinner.nma")) {
-				testDuplicatesByField(msg, o.get(i), d.get(i), fieldsToSkip);
+				testDuplicatesByField(msg, o.get(i), d.get(i), fieldsToSkip, includeEqualsTest);
 			} else {
 				assertEquals(msg + " Field '" + f.getName() + "' element " + i + " should be equal",
 						o.get(i),
 						d.get(i));
 			}
 		}
-		assertTrue(msg + " Field '" + f.getName() + "' all elements should be shared in list",
-				o.containsAll(d));
+
+		if (includeEqualsTest)
+			assertTrue(msg + " Field '" + f.getName() + "' all elements should be shared in list",
+					o.containsAll(d));
 	}
 
 	/**
@@ -335,7 +344,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	public static void testDuplicatesByField(String msg, Object original, Object dup)
 			throws Exception {
 		Set<String> fieldsToSkip = new HashSet<>();
-		testDuplicatesByField(msg, original, dup, fieldsToSkip);
+		testDuplicatesByField(msg, original, dup, fieldsToSkip, true);
 	}
 
 	public static boolean shapesEqual(Shape s, Shape d) {

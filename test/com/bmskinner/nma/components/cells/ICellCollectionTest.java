@@ -172,8 +172,6 @@ public class ICellCollectionTest {
 		ICell cell = mock(ICell.class);
 		UUID id = UUID.fromString("00000000-0000-0000-0000-000000000001");
 		when(cell.getId()).thenReturn(id);
-		if (collection.isVirtual())
-			exception.expect(IllegalArgumentException.class);
 		collection.add(cell);
 		assertTrue(collection.contains(id));
 	}

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -234,11 +235,28 @@ public class DatasetMergeMethodTest {
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.call().getFirstDataset();
 
-		for (ICell c : d1.getCollection())
-			assertTrue(merged.getCollection().contains(c));
+		// Check all the cells in input dataset one were copied
+		// Do not check all fields; that is a test for the CellCollectionFilterer
+		// Since segments must be accounted for, we don't worry about equality testing
+		// here, just if the same cell ids are present
+		for (ICell originalCell : d1.getCollection().getCells()) {
 
-		for (ICell c : d2.getCollection())
-			assertTrue(merged.getCollection().contains(c));
+			// Is there a cell with the same ID?
+			if (!merged.getCollection().getCellIDs().contains(originalCell.getId())) {
+				fail("Cell from input dataset 1 is not present in merged dataset: "
+						+ originalCell.toString());
+			}
+
+		}
+
+		// Now do the same for the cells in input dataset 2
+		for (ICell originalCell : d2.getCollection().getCells()) {
+			// Is there a cell with the same ID?
+			if (!merged.getCollection().getCellIDs().contains(originalCell.getId())) {
+				fail("Cell from input dataset 2 is not present in merged dataset: "
+						+ originalCell.toString());
+			}
+		}
 
 		assertTrue("Merged dataset should have options", merged.hasAnalysisOptions());
 

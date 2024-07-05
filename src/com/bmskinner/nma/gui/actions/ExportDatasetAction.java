@@ -116,11 +116,14 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 		// Only run if there is a save file, and the dataset has changed since last save
 		if (saveFile == null) {
 			LOGGER.fine(
-					() -> "Dataset '%s' has no save file; skipping save"
+					() -> "Dataset '%s' has no designated save file; skipping save"
 							.formatted(dataset.getName()));
 			this.finished();
 			return;
 		}
+
+		LOGGER.fine(() -> "Dataset '%s' has hashcode before save '%s'".formatted(dataset.getName(),
+				dataset.hashCode()));
 
 		if (!DatasetListManager.getInstance().hashCodeChanged(dataset)) {
 			LOGGER.fine(
@@ -141,10 +144,13 @@ public class ExportDatasetAction extends SingleDatasetResultAction {
 	@Override
 	public void finished() {
 		LOGGER.info(() -> "Saved as '%s'".formatted(saveFile.getName()));
-		Thread thr = new Thread(() -> {
+		// update the stored hashcode for the dataset
+		DatasetListManager.getInstance().updateHashCode(dataset);
 
-			// update the stored hashcode for the dataset
-			DatasetListManager.getInstance().updateHashCode(dataset);
+		LOGGER.fine(() -> "Dataset '%s' has hashcode after save '%s'".formatted(dataset.getName(),
+				dataset.hashCode()));
+
+		Thread thr = new Thread(() -> {
 
 			// if no list was provided, or no more entries remain, finish
 			if (!hasRemainingDatasetsToProcess()) {

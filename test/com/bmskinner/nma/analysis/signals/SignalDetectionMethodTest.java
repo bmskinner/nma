@@ -1,6 +1,7 @@
 package com.bmskinner.nma.analysis.signals;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -66,8 +67,8 @@ public class SignalDetectionMethodTest extends ComponentTester {
 		// Get the new hash
 		long newHash = d.hashCode();
 
-//    	hashs should not be the same
-		assertFalse(hash == newHash);
+//    	hashes should not be the same
+		assertNotEquals(hash, newHash);
 		assertTrue(DatasetListManager.getInstance().hasRootDataset(d.getId()));
 		assertTrue(DatasetListManager.getInstance().hashCodeChanged());
 	}

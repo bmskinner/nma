@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
@@ -153,14 +152,10 @@ public class Console extends JPanel implements ActionListener {
 
 		runnableCommands.add(new Command(HASH_CMD,
 				"display the hashes of all open datasets",
-				() -> {
-					Set<IAnalysisDataset> datasets = DatasetListManager.getInstance()
-							.getAllDatasets();
-
-					for (IAnalysisDataset d : datasets)
-						LOGGER.info(d.getName() + ": " + d.hashCode());
-
-				}));
+				() -> UserActionController.getInstance()
+						.userActionEventReceived(new UserActionEvent(this,
+								UserActionEvent.PRINT_DATASET_HASH_CMD,
+								DatasetListManager.getInstance().getSelectedDatasets()))));
 
 		runnableCommands.add(new Command(CHECK_CMD,
 				"check all datasets are valid, quietly",

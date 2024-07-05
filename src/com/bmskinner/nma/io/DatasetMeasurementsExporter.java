@@ -109,12 +109,18 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 					.allMatch(d -> d.getCollection().getProfileManager()
 							.getSegmentCount() == segCount);
 		}
-		profileSamples = options.get(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
-		outlineSamples = options.get(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY);
 
 		isIncludeMeasurements = options.get(HashOptions.EXPORT_MEASUREMENTS_KEY);
 		isIncludeOutlines = options.get(HashOptions.EXPORT_OUTLINES_KEY);
 		isIncludeProfiles = options.get(HashOptions.EXPORT_PROFILES_KEY);
+
+		if (isIncludeProfiles) {
+			profileSamples = options.get(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH);
+		}
+
+		if (isIncludeOutlines) {
+			outlineSamples = options.get(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY);
+		}
 
 		// Only include if present in all cells of all datasets
 		isIncludeGlcm = list.stream()

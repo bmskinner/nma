@@ -37,8 +37,9 @@ import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
-import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.measure.MeasurementCache;
+import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.measure.VennCache;
 import com.bmskinner.nma.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
@@ -112,7 +113,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	 * TRANSIENT FIELDS
 	 */
 
-	protected Map<UUID, Integer> vennCache = new HashMap<>();
+	protected VennCache vennCache = new VennCache();
 
 	private ProfileManager profileManager = new ProfileManager(this);
 	private SignalManager signalManager = new SignalManager(this);
@@ -710,18 +711,18 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public int countShared(@NonNull ICellCollection d2) {
-		if (this.vennCache.containsKey(d2.getId())) {
-			return vennCache.get(d2.getId());
-		}
+		if (vennCache.hasCount(d2))
+			return vennCache.getCount(d2);
 		int shared = countSharedNuclei(d2);
-		vennCache.put(d2.getId(), shared);
 		d2.setSharedCount(this, shared);
+		vennCache.addCount(d2, shared);
+
 		return shared;
 	}
 
 	@Override
 	public void setSharedCount(@NonNull ICellCollection d2, int i) {
-		vennCache.put(d2.getId(), i);
+		vennCache.addCount(d2, i);
 	}
 
 	/**

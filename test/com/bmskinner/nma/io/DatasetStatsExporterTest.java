@@ -58,8 +58,7 @@ public class DatasetStatsExporterTest {
 
 		File outFile = new File("test");
 
-		DatasetMeasurementsExporter dse = new DatasetMeasurementsExporter(outFile, d, op);
-		StringBuilder outLine = new StringBuilder();
-//		dse.append(d, outLine);
+		// No exceptions should occur here
+		new DatasetMeasurementsExporter(outFile, d, op);
 	}
 }

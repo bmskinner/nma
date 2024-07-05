@@ -57,6 +57,12 @@ public class MainWindowCloseAdapter extends WindowAdapter {
 
 		if (DatasetListManager.getInstance().hashCodeChanged()) {
 			LOGGER.fine("Found changed hashcode for at least one dataset");
+			for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
+				LOGGER.fine(() -> "Dataset '%s' has hashcode in close adapter '%s'".formatted(
+						d.getName(),
+						d.hashCode()));
+			}
+
 			String[] options = { "Save and exit", "Exit without saving", "Do not exit" };
 
 			try {

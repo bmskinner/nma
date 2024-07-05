@@ -234,7 +234,8 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
 	/**
 	 * Merge the given datasets, copying each cell into the new collection and
-	 * removing existing segmentation patterns.
+	 * removing existing segmentation patterns. We can't keep segments because they
+	 * may differ between the input datasets.
 	 * 
 	 * @param newCollection the new collection to copy cells into
 	 * @return the merged dataset

@@ -114,16 +114,27 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	/** The object bounding box */
 	private Rectangle2D bounds;
 
+	/**
+	 * Create a UUID from an ROI and centre of mass. This hashes shapes to
+	 * repoducible UUIDs, allowing the same cells to be identified across different
+	 * analysis runs
+	 * 
+	 * @param roi          the ROI
+	 * @param centreOfMass the centre of mass
+	 * @return a UUID created from the hashes of the inputs
+	 */
 	private static UUID makeUUID(Roi roi, IPoint centreOfMass) {
 		int[] xpoints = Arrays.copyOfRange(roi.getPolygon().xpoints, 0, roi.getPolygon().npoints);
 		int[] ypoints = Arrays.copyOfRange(roi.getPolygon().ypoints, 0, roi.getPolygon().npoints);
-		return new UUID(Arrays.hashCode(xpoints) * Arrays.hashCode(ypoints), centreOfMass.hashCode());
+		return new UUID(Arrays.hashCode(xpoints) * Arrays.hashCode(ypoints),
+				centreOfMass.hashCode());
 	}
 
 	/**
 	 * Construct with an ROI, a source image and channel, and the original position
 	 * in the source image. It sets the immutable original centre of mass, and the
-	 * mutable current centre of mass. It also assigns a random ID to the component.
+	 * mutable current centre of mass. It also assigns an ID to the component
+	 * calculated from its outline
 	 * 
 	 * @param roi          the roi of the object
 	 * @param centerOfMass the original centre of mass of the component
@@ -138,7 +149,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		// If we have no UUID given, can we create a deterministic UUID from the roi and
 		// CoM?
 		this(roi, centreOfMass, source, channel, makeUUID(roi, centreOfMass));
-//		this(roi, centreOfMass, source, channel, UUID.randomUUID());
 	}
 
 	/**
@@ -163,7 +173,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		this.originalCentreOfMass = new FloatPoint(centreOfMass);
 		this.centreOfMass = new FloatPoint(centreOfMass);
-//		this.id = id == null ? UUID.randomUUID() : id;
 		this.id = id == null ? makeUUID(roi, centreOfMass) : id;
 
 		this.sourceFile = source;
