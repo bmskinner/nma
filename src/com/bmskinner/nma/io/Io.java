@@ -74,6 +74,9 @@ public interface Io {
 	String TIFF_FILE_EXTENSION_NODOT = "tiff";
 	String TIFF_FILE_EXTENSION = DOT + TIFF_FILE_EXTENSION_NODOT;
 
+	String TEXT_FILE_EXTENSION_NODOT = "txt";
+	String TEXT_FILE_EXTENSION = DOT + TEXT_FILE_EXTENSION_NODOT;
+
 	String INVALID_FILE_ERROR = "File is not valid for importing";
 	String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0";
 

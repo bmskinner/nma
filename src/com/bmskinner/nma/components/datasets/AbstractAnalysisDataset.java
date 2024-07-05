@@ -222,6 +222,11 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	}
 
 	@Override
+	public int size() {
+		return this.getCollection().size();
+	}
+
+	@Override
 	public void setDatasetColour(Color colour) {
 		datasetColour = colour;
 

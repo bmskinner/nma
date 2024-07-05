@@ -109,6 +109,9 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 			return;
 		}
 
+		this.fireUpdateProgressTotalLength(dataset.size() * 3); // Sized assuming VIA_MEDIAN
+																// selected
+
 		RuleApplicationType ruleType = dataset.getAnalysisOptions()
 				.orElseThrow(MissingOptionException::new)
 				.getRuleSetCollection()
@@ -219,8 +222,10 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 					.getMeasurableValues()) {
 				n.setMeasurement(m, ComponentMeasurer.calculate(m, n));
 			}
+			fireProgressEvent();
 		}
 
+		fireIndeterminateState();
 		// Clear all calculated median values in the collection and
 		// recalculate. This ensures any values dependent on landmarks
 		// (e.g. bounding dimensions) are correct
@@ -427,6 +432,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 			// Update measurements - many are based on orientation
 			n.clearMeasurements();
+			fireProgressEvent();
 		}
 
 		// Update the consensus nucleus

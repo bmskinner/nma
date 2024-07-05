@@ -18,12 +18,15 @@ package com.bmskinner.nma.analysis.detection;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * An implementation of the Finder for analyses that don't return values. For
@@ -37,28 +40,29 @@ public abstract class VoidFinder extends AbstractFinder<Void> {
 
 	private static final Logger LOGGER = Logger.getLogger(VoidFinder.class.getName());
 
-	public VoidFinder(IAnalysisOptions op) {
+	protected VoidFinder(@NonNull IAnalysisOptions op) {
 		super(op);
 	}
 
 	@Override
-	public Collection<Void> findInFolder(File folder) throws ImageImportException {
+	public Collection<Void> findInFolder(@NonNull File folder) throws ImageImportException {
 
 		File[] files = folder.listFiles();
 		if (files == null)
-			return null;
+			return Collections.emptyList();
 
 		for (File f : files) {
 			if (ImageImporter.isFileImportable(f)) {
 				try {
-					findInImage(f);
+					findInFile(f);
 				} catch (ImageImportException e) {
-					LOGGER.log(Loggable.STACK, "Error searching image", e);
+					LOGGER.log(Level.SEVERE, "Error searching image: %s".formatted(e.getMessage()),
+							e);
 				}
 			}
 
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 }

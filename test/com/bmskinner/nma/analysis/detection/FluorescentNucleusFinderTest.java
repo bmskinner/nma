@@ -61,7 +61,7 @@ public class FluorescentNucleusFinderTest {
 
 		FluorescentNucleusFinder f = new FluorescentNucleusFinder(op, FinderDisplayType.PIPELINE);
 
-		List<ICell> cells = f.findInImage(new File(TestResources.MOUSE_SIGNALS_INPUT_FOLDER, "P110.tiff"));
+		List<ICell> cells = f.findInFile(new File(TestResources.MOUSE_SIGNALS_INPUT_FOLDER, "P110.tiff"));
 				
 		for(ICell c : cells) {
 			Element e = c.toXmlElement();

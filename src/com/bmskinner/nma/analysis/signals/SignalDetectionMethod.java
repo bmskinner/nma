@@ -154,7 +154,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		try {
 
 			// Get all the signals in the image
-			List<INuclearSignal> signals = finder.findInImage(imageFile);
+			List<INuclearSignal> signals = finder.findInFile(imageFile);
 
 			// Restrict to signals in the current nucleus of interest
 			List<INuclearSignal> signalsInNucleus = signals.stream()

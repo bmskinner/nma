@@ -82,6 +82,13 @@ public class Stats {
 		return max;
 	}
 
+	public static float min(float[] array) {
+		float min = Float.MAX_VALUE;
+		for (float f : array)
+			min = Math.min(min, f);
+		return min;
+	}
+
 	/**
 	 * Calculate the standard error of an array of values
 	 * 
@@ -276,7 +283,8 @@ public class Stats {
 	 *                     Bonnferroni correction
 	 * @return
 	 */
-	public static WilcoxonRankSumResult runWilcoxonTest(double[] values0, double[] values1, int nComparisons) {
+	public static WilcoxonRankSumResult runWilcoxonTest(double[] values0, double[] values1,
+			int nComparisons) {
 
 		MannWhitneyUTest test = new MannWhitneyUTest(); // default, NaN's are
 														// left in place and
@@ -342,18 +350,6 @@ public class Stats {
 		for (int d : values)
 			ds.addValue(d);
 		return (int) ds.getPercentile(quartile);
-
-//        // Rank order the values
-//        int[] v = new int[values.length];
-//        System.arraycopy(values, 0, v, 0, values.length);
-//        Arrays.sort(v);
-//        
-//        if (values.length == 2)
-//            return quartile < MEDIAN ? v[0] : v[1];
-//
-//        int n = Math.round(((float) v.length * quartile) / 100);
-//
-//        return v[n];
 	}
 
 	/**
@@ -375,16 +371,66 @@ public class Stats {
 		for (double d : values)
 			ds.addValue(d);
 		return ds.getPercentile(quartile);
+	}
 
-//        // Rank order the values
-//        double[] v = new double[values.length];
-//        System.arraycopy(values, 0, v, 0, values.length);
-//        Arrays.sort(v);
-//        
-//        if (values.length == 2)
-//            return quartile < MEDIAN ? v[0] : v[1];
-//        int n = Math.round(((float) v.length * quartile) / 100);
-//        return v[n];
+	/**
+	 * Get the mean for a int array
+	 * 
+	 * @param values the values
+	 * @return the mean value
+	 */
+	public static int mean(int[] values) {
+
+		if (values == null || values.length == 0)
+			throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+
+		if (values.length == 1)
+			return values[0];
+
+		DescriptiveStatistics ds = new DescriptiveStatistics();
+		for (int d : values)
+			ds.addValue(d);
+		return (int) ds.getMean();
+	}
+
+	/**
+	 * Get the mean for a float array
+	 * 
+	 * @param values the values
+	 * @return the mean value
+	 */
+	public static float mean(float[] values) {
+
+		if (values == null || values.length == 0)
+			throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+
+		if (values.length == 1)
+			return values[0];
+
+		DescriptiveStatistics ds = new DescriptiveStatistics();
+		for (float d : values)
+			ds.addValue(d);
+		return (float) ds.getMean();
+	}
+
+	/**
+	 * Get the mean for a double array
+	 * 
+	 * @param values the values
+	 * @return the mean value
+	 */
+	public static double mean(double[] values) {
+
+		if (values == null || values.length == 0)
+			throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+
+		if (values.length == 1)
+			return values[0];
+
+		DescriptiveStatistics ds = new DescriptiveStatistics();
+		for (double d : values)
+			ds.addValue(d);
+		return ds.getMean();
 	}
 
 	/**

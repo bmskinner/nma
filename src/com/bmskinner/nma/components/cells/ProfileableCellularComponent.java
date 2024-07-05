@@ -40,7 +40,7 @@ import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
-import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.DefaultLandmark;
 import com.bmskinner.nma.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nma.components.profiles.DefaultSegmentedProfile;
@@ -77,7 +77,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			.getLogger(ProfileableCellularComponent.class.getName());
 
 	/** The proportion of the perimeter to use for profiling */
-	private double windowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
+	private double windowProportion = HashOptions.DEFAULT_PROFILE_WINDOW;
 
 	/** The segmentation pattern for the object */
 	private final List<IProfileSegment> segments = new ArrayList<>();

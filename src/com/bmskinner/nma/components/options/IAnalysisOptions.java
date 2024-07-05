@@ -41,10 +41,10 @@ public interface IAnalysisOptions extends XmlSerializable {
 	// Standard secondary options
 	String TSNE = "t-SNE";
 	String UMAP = "UMAP";
+	String PROFILING_OPTIONS = "Profiling";
 
 	boolean DEFAULT_REFOLD = true;
 	boolean DEFAULT_KEEP_FAILED = false;
-	double DEFAULT_WINDOW_PROPORTION = 0.05;
 
 	/**
 	 * Duplicate this options object
@@ -150,6 +150,13 @@ public interface IAnalysisOptions extends XmlSerializable {
 	 * @return the profile proportion
 	 */
 	double getProfileWindowProportion();
+
+	/**
+	 * Get the options for profiling and segmenting
+	 * 
+	 * @return
+	 */
+	HashOptions getProfilingOptions();
 
 	/**
 	 * Get the rulesets used to detect landmarks TODO - why do we store these in the

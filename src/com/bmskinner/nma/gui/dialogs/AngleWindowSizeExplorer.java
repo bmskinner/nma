@@ -47,6 +47,7 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DefaultCellCollection;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
@@ -113,7 +114,7 @@ public class AngleWindowSizeExplorer extends MessagingDialog implements ChangeLi
 		Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
 		// default if analysis options are not present - e.g. a merge
 		double windowSizeActual = op.isPresent() ? op.get().getProfileWindowProportion()
-				: IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
+				: HashOptions.DEFAULT_PROFILE_WINDOW;
 
 		Dimension dim = new Dimension(80, 20);
 

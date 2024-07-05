@@ -55,6 +55,8 @@ public class UserActionEvent extends EventObject {
 	public static final String IMPORT_DATASET_PREFIX = "Open|";
 	public static final String IMPORT_WORKFLOW_PREFIX = "Flow|";
 
+	public static final String NEW_TEXT_FILE_ANALYSIS = "NewTextFileAnalysis";
+
 	public static final String IMPORT_WORKSPACE_PREFIX = "Wrk|";
 	public static final String SAVE_WORKSPACE = "ExportWorkspace";
 	public static final String NEW_WORKSPACE = "NewWorkspace";
@@ -90,6 +92,7 @@ public class UserActionEvent extends EventObject {
 
 	/** Profile and segment */
 	public static final String MORPHOLOGY_ANALYSIS_ACTION = "Morphology analysis action";
+	public static final String PROFILE_AND_CONSENSUS_ACTION = "ProfileAndConsensus";
 	public static final String REMAP_LANDMARKS = "RemapLandmarks";
 
 	public static final String PROFILING_ACTION = "Profiling action";

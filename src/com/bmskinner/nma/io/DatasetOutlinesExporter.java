@@ -1,6 +1,7 @@
 package com.bmskinner.nma.io;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -77,10 +78,12 @@ public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 	 * @throws ProfileException
 	 */
 	@Override
-	protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine)
+	protected void append(@NonNull IAnalysisDataset d, @NonNull PrintWriter pw)
 			throws Exception {
 
 		for (ICell cell : d.getCollection().getCells()) {
+
+			StringBuilder outLine = new StringBuilder();
 
 			if (cell.hasNucleus()) {
 
@@ -106,6 +109,8 @@ public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 
 				appendCytoplasmOutline(outLine, cell.getCytoplasm());
 			}
+
+			pw.write(outLine.toString());
 		}
 	}
 

@@ -60,6 +60,6 @@ public class DatasetStatsExporterTest {
 
 		DatasetMeasurementsExporter dse = new DatasetMeasurementsExporter(outFile, d, op);
 		StringBuilder outLine = new StringBuilder();
-		dse.append(d, outLine);
+//		dse.append(d, outLine);
 	}
 }

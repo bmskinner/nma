@@ -127,6 +127,8 @@ public class TestResources {
 	public static final File WARPING_NORMALISATION_IMAGE = new File(WARPING_FOLDER,
 			"Gradient.tiff");
 
+	public static final File TEXT_OUTLINES_FOLDER = new File(IMAGE_FOLDER_BASE, "Text");
+
 	/**
 	 * Return the unit test folder name for the given version
 	 * 

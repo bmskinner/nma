@@ -17,6 +17,7 @@
 package com.bmskinner.nma.io;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -129,7 +130,7 @@ public class DatasetShellsExporter extends MeasurementsExportMethod {
 	 * @throws ProfileException
 	 */
 	@Override
-	protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine)
+	protected void append(@NonNull IAnalysisDataset d, @NonNull PrintWriter pw)
 			throws MissingOptionException {
 
 		for (@NonNull
@@ -150,6 +151,8 @@ public class DatasetShellsExporter extends MeasurementsExportMethod {
 			IShellResult shellResult = oShellResult.get();
 
 			for (ICell cell : d.getCollection().getCells()) {
+
+				StringBuilder outLine = new StringBuilder();
 
 				if (!cell.hasNucleus())
 					continue;
@@ -254,6 +257,7 @@ public class DatasetShellsExporter extends MeasurementsExportMethod {
 					}
 				}
 
+				pw.write(outLine.toString());
 			}
 		}
 	}

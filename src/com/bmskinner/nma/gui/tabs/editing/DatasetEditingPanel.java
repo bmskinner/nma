@@ -42,6 +42,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
@@ -406,7 +407,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 
 	private void updateCollectionWindowSize() {
 
-		double windowSizeActual = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
+		double windowSizeActual = HashOptions.DEFAULT_PROFILE_WINDOW;
 		Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
 		if (op.isPresent())
 			windowSizeActual = op.get().getProfileWindowProportion();

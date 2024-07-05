@@ -21,6 +21,16 @@ public class DatasetUtils {
 	}
 
 	/**
+	 * Calculate the total number of cells in the given datasets
+	 * 
+	 * @param datasets the datasets to count
+	 * @return the number of cells in the datasets
+	 */
+	public static int size(@NonNull List<IAnalysisDataset> datasets) {
+		return datasets.stream().mapToInt(IAnalysisDataset::size).sum();
+	}
+
+	/**
 	 * Test if any of the given datasets are merge sources.
 	 * 
 	 * @return true if any of the datasets are a merge source, false otherwise

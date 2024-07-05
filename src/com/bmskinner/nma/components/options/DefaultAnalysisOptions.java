@@ -50,8 +50,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	/** Store the folders used to detect objects - keys mirror detectionOptions */
 	private Map<String, File> detectionFolders = new HashMap<>();
 
-	private double windowProp;
-
 	private RuleSetCollection rulesets;
 
 	private long analysisTime;
@@ -67,8 +65,16 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	 * IAnalysisOptions
 	 */
 	public DefaultAnalysisOptions() {
-		windowProp = DEFAULT_WINDOW_PROPORTION;
 		analysisTime = System.currentTimeMillis();
+
+		HashOptions profilingOptions = new DefaultOptions();
+		profilingOptions.setBoolean(HashOptions.IS_SEGMENT_PROFILES,
+				HashOptions.DEFAULT_IS_SEGMENT_PROFILES);
+
+		profilingOptions.setDouble(HashOptions.PROFILE_WINDOW_SIZE,
+				HashOptions.DEFAULT_PROFILE_WINDOW);
+
+		secondaryOptions.put(IAnalysisOptions.PROFILING_OPTIONS, profilingOptions);
 	}
 
 	/**
@@ -109,8 +115,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 						new File(i.getAttributeValue(XMLNames.XML_FOLDER)));
 		}
 
-		windowProp = Double.valueOf(e.getAttributeValue(XMLNames.XML_PROFILE_WINDOW));
-
 		if (e.getAttribute(XMLNames.XML_ANALYSIS_TIME) != null)
 			analysisTime = Long.valueOf(e.getAttributeValue(XMLNames.XML_ANALYSIS_TIME));
 		else
@@ -122,6 +126,14 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 		for (Element i : e.getChildren(XMLNames.XML_SECONDARY))
 			secondaryOptions.put(i.getAttributeValue(XMLNames.XML_NAME),
 					new DefaultOptions(i.getChild(XMLNames.XML_OPTIONS)));
+
+		// Legacy: if the profile window is in the top level, move to secondary options
+		if (e.getAttribute(XMLNames.XML_PROFILE_WINDOW) != null) {
+			HashOptions profilingOptions = secondaryOptions.computeIfAbsent(PROFILING_OPTIONS,
+					k -> new DefaultOptions());
+			profilingOptions.setDouble(HashOptions.PROFILE_WINDOW_SIZE,
+					Double.valueOf(e.getAttributeValue(XMLNames.XML_PROFILE_WINDOW)));
+		}
 	}
 
 	@Override
@@ -135,6 +147,11 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 			return Optional.of(detectionOptions.get(key));
 		}
 		return Optional.empty();
+	}
+
+	@Override
+	public HashOptions getProfilingOptions() {
+		return secondaryOptions.get(PROFILING_OPTIONS);
 	}
 
 	@Override
@@ -210,7 +227,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
 	@Override
 	public double getProfileWindowProportion() {
-		return windowProp;
+		return secondaryOptions.get(PROFILING_OPTIONS).getDouble(HashOptions.PROFILE_WINDOW_SIZE);
 	}
 
 	@Override
@@ -276,7 +293,8 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
 	@Override
 	public void setAngleWindowProportion(double proportion) {
-		windowProp = proportion;
+		secondaryOptions.get(PROFILING_OPTIONS).setDouble(HashOptions.PROFILE_WINDOW_SIZE,
+				proportion);
 
 	}
 
@@ -289,13 +307,19 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 			}
 		}
 
-		windowProp = template.getProfileWindowProportion();
+		for (String key : template.getSecondaryOptionKeys()) {
+			Optional<HashOptions> op = template.getSecondaryOptions(key);
+			if (op.isPresent()) {
+				setSecondaryOptions(key, op.get().duplicate());
+			}
+		}
+
 		rulesets = template.getRuleSetCollection().duplicate();
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(detectionOptions, detectionFolders, windowProp, rulesets,
+		return Objects.hash(detectionOptions, detectionFolders, rulesets,
 				secondaryOptions);
 	}
 
@@ -313,8 +337,6 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 			return false;
 		DefaultAnalysisOptions other = (DefaultAnalysisOptions) obj;
 		return Objects.equals(detectionOptions, other.detectionOptions)
-				&& Double.doubleToLongBits(windowProp) == Double
-						.doubleToLongBits(other.windowProp)
 				&& Objects.equals(rulesets, other.rulesets)
 				&& Objects.equals(detectionFolders, other.detectionFolders)
 				&& Objects.equals(secondaryOptions, other.secondaryOptions);
@@ -329,16 +351,13 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 			b.append(detectionFolders.get(e.getKey()) + Io.NEWLINE);
 			b.append(e.getValue().toString());
 		}
-		b.append(Io.NEWLINE + windowProp);
 		b.append(Io.NEWLINE + rulesets.getName());
 		return b.toString();
 	}
 
 	@Override
 	public Element toXmlElement() {
-		Element e = new Element(XMLNames.XML_ANALYSIS_OPTIONS)
-				.setAttribute(XMLNames.XML_PROFILE_WINDOW,
-						String.valueOf(windowProp));
+		Element e = new Element(XMLNames.XML_ANALYSIS_OPTIONS);
 
 		if (analysisTime > -1)
 			e.setAttribute(XMLNames.XML_ANALYSIS_TIME, String.valueOf(analysisTime));

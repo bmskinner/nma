@@ -65,7 +65,7 @@ public interface Finder<E> {
 	 * @throws ImageImportException
 	 * @throws ComponentCreationException
 	 */
-	Collection<E> findInImage(@NonNull File imageFile) throws ImageImportException;
+	Collection<E> findInFile(@NonNull File imageFile) throws ImageImportException;
 
 	/**
 	 * Test if the given entity is valid for this finder based on the option used to

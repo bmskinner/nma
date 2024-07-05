@@ -73,6 +73,7 @@ import com.bmskinner.nma.gui.actions.SegmentUnmergeAction;
 import com.bmskinner.nma.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nma.gui.actions.SignalWarpingAction;
 import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
+import com.bmskinner.nma.gui.actions.TextFileAnalysisAction;
 import com.bmskinner.nma.gui.actions.UpdateLandmarkAction;
 import com.bmskinner.nma.gui.actions.UpdateSegmentIndexAction;
 import com.bmskinner.nma.gui.dialogs.collections.AbstractCellCollectionDialog;
@@ -145,6 +146,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 		if (UserActionEvent.MORPHOLOGY_ANALYSIS_ACTION.equals(event.type()))
 			return new MorphologyAnalysis(event.getDatasets(), acceptor);
 
+		// When DnD is parsed
 		if (event.type().startsWith(UserActionEvent.NEW_ANALYSIS_PREFIX)) {
 			return () -> {
 				String s = event.type().replace(UserActionEvent.NEW_ANALYSIS_PREFIX, "");
@@ -154,6 +156,10 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 				new NewAnalysisAction(acceptor, f).run();
 			};
+		}
+
+		if (event.type().equals(UserActionEvent.NEW_TEXT_FILE_ANALYSIS)) {
+			new TextFileAnalysisAction(acceptor).run();
 		}
 
 		if (event.type().equals(UserActionEvent.NEW_WORKSPACE)) {

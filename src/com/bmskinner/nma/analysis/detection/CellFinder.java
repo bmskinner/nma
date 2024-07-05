@@ -87,7 +87,7 @@ public abstract class CellFinder extends AbstractFinder<ICell> {
 				continue;
 
 			try {
-				list.addAll(findInImage(f));
+				list.addAll(findInFile(f));
 				LOGGER.finer(() -> "Found images in %s".formatted(f.getName()));
 			} catch (ImageImportException e) {
 				LOGGER.log(Loggable.STACK, "Error searching image", e);
@@ -117,7 +117,7 @@ public abstract class CellFinder extends AbstractFinder<ICell> {
 			if (!ImageImporter.isFileImportable(f))
 				return;
 			try {
-				list.addAll(findInImage(f));
+				list.addAll(findInFile(f));
 				LOGGER.finer(() -> "Found images in %s".formatted(f.getName()));
 			} catch (ImageImportException e) {
 				LOGGER.log(Loggable.STACK, "Error searching image", e);

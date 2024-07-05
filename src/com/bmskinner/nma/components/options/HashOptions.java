@@ -58,7 +58,11 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	String EROSION = "Erosion";
 	String IS_USE_WATERSHED = "Use watershed";
 	String TOP_HAT_RADIUS = "Top hat radius";
+	String IS_SEGMENT_PROFILES = "Segment profiles";
+	String PROFILE_WINDOW_SIZE = "Profile window";
 
+	boolean DEFAULT_IS_SEGMENT_PROFILES = true;
+	double DEFAULT_PROFILE_WINDOW = 0.05;
 	double DEFAULT_SCALE = GlobalOptions.getInstance().getImageScale();
 	double DEFAULT_MIN_CIRC = 0;
 	double DEFAULT_MAX_CIRC = 1;

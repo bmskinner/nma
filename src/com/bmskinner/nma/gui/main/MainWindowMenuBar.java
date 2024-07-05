@@ -97,6 +97,10 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	private static final String NEW_ANALYSIS_CUSTOM_TOOLTIP = "Configure the nucleus detection options yourself";
 	private static final String NEW_ANALYSIS_SAVED_LBL = "Use saved detection options";
 	private static final String NEW_ANALYSIS_SAVED_TOOLTIP = "Use options saved in a file for automatic nucleus detection";
+
+	private static final String NEW_TEXT_ANALYSIS_LBL = "Use text file of nucleus coordinates";
+	private static final String NEW_TEXT_ANALYSIS_TOOLTIP = "Use text file containing nucleus outlines";
+
 	private static final String NEW_WORKSPACE_LBL = "New workspace";
 	private static final String NEW_WORKSPACE_TOOLTIP = "Create a new workspace";
 
@@ -189,6 +193,11 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		newMenu.add(fact.makeItem(NEW_ANALYSIS_SAVED_LBL, UserActionEvent.IMPORT_WORKFLOW_PREFIX,
 				ContextEnabled.ALWAYS_ACTIVE, NEW_ANALYSIS_SAVED_TOOLTIP));
 		menu.add(newMenu);
+
+		newMenu.add(fact.makeItem(NEW_TEXT_ANALYSIS_LBL, UserActionEvent.NEW_TEXT_FILE_ANALYSIS,
+				ContextEnabled.ALWAYS_ACTIVE, NEW_TEXT_ANALYSIS_TOOLTIP));
+		menu.add(newMenu);
+
 		// End of File>New
 
 		menu.add(fact.makeItem(NEW_WORKSPACE_LBL, UserActionEvent.NEW_WORKSPACE,

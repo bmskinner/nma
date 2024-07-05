@@ -55,7 +55,7 @@ public class FishRemappingFinder extends VoidFinder {
 	}
 
 	@Override
-	public Collection<Void> findInImage(@NonNull File imageFile) throws ImageImportException {
+	public Collection<Void> findInFile(@NonNull File imageFile) throws ImageImportException {
 
 		String imageName = imageFile.getName();
 

@@ -79,6 +79,13 @@ public interface IAnalysisDataset extends XmlSerializable {
 	Version getVersionLastSaved();
 
 	/**
+	 * Shortcut to ICellCollection::size for convenience
+	 * 
+	 * @return the number of cells in the dataset
+	 */
+	int size();
+
+	/**
 	 * Add the given cell collection as a child to this dataset. A new dataset is
 	 * contructed to hold it.
 	 * 
