@@ -12,6 +12,7 @@ Option | Action
 -------|--------
 New analysis > Use custom detection options  | Select a folder of images and start a [new morphology analysis](#new-analysis)
 New analysis > Use saved detection options  | Select detection options from a file, and a folder of images to start a new morphology analysis
+New analysis > Use text file of nucleus coordinates | Select a text file containing nucleus outlines to [analyse outlines identified by other methods](#text-analysis). 
 New workspace | Create a [workspace](#workspace-methods) to enable opening datasets in one batch. 
 Open > Open dataset | Select a saved dataset in `.nmd` format to open. Note that you can also drag and drop an `.nmd` file into the software to open it.
 Open > Open workspace | Select a saved  [workspace ](#workspace-methods) in `.wrk` format to open. Note that you can also drag and drop a `.wrk` file into the software to open it.

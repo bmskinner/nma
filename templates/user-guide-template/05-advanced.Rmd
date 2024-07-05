@@ -101,3 +101,20 @@ Note above you can list multiple nmd files after the `--input` argument. You can
 ```
 java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar merge --output /path/to/new.nmd --input *.nmd
 ```
+
+## Detection of nuclei from text files {#text-analysis}
+
+This is available from the File menu 'New analysis' > 'Use text file of nucleus coordinates'. You will be asked to choose a folder containing one or more text files that describe the outlines of objects to analyse.
+
+A separate text file should be present for each source image to be analysed. The files should contain tab separated values with columns `Image`, `Object`, `x` and `y`. `Image` contains the path to the source image. `Object` is an integer containing the object to which an outline coordinate belongs. `x` and `y` contain the floating point pixel coordinates of a point in the object outline.
+
+
+For example, this shows the first three points in the outline of the first object within the file `image_a.jpg`:
+```
+Image	Object	x	y
+/path/to/image_a.jpg	0	204.525	907.2
+/path/to/image_a.jpg	0	202.5	909.225
+/path/to/image_a.jpg	0	202.5	984.14996
+```
+
+Profiles will be calculated, but no segmentation will be applied. 
