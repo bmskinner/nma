@@ -94,7 +94,7 @@ Area | Area | | the two dimensional area of the nucleus
 Perimeter | Length | | the length of the nuclear perimeter
 Max feret | Length | | the maximum caliper diameter across the nucleus
 Min diameter | Length | | the shortest diameter through the centre of mass of the nucleus
-Variability | Angle | | the square root of the sum-of-squares difference at each index between between the nuclear profile and the dataset median profile, normalised to the length of the median profile.
+Difference from median | Angle | | the square root of the sum-of-squares difference at each index between between the nuclear profile and the dataset median profile, normalised to the length of the median profile. See below for a more detailed explanation.
 Ellipticity | None | `H/W` | the height divided by width of the nuclear bounding box in the vertically oriented nucleus
 Aspect ratio | None | `W/H` | the inverse of ellipticity
 Elongation | None | (`H-W`)/(`H+W`) | the bounding height minus the bounding width, divided by the bounding height plus the bounding width
@@ -108,6 +108,18 @@ Width of body [rodent sperm only] | Length | | the distance from the vertical re
 ```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
 knitr::include_graphics("img/Parameters.png")
 ```
+
+### Difference from median
+
+The difference from median is a measure of how variable the shapes of the nuclei in a dataset are.
+
+All of the nuclei have slightly different profile lengths (some may have *e.g.* 300 angle measurements, some may have 310); this is because they are different sizes, so their perimeters are longer or shorter, and the angle profile is generated from measurements around the perimeter. This also depends on the magnification and camera pixel density on the microscope.
+When generating the median profile, we interpolate (normalise) the individual cell profiles to a consistent length. In the normalised profile charts shown in the Profiles tab, this is 1000.
+The median angle profile for a dataset is calculated as the median of the real cell angles at each position.
+
+For each cell, we can now calculate the difference between the median profile and the cell profile at any position. If we do this along the entire profile, we can calculate the root-mean-square difference between the nucleus profile and the median profile. (square the differences so that nucleus values greater than the median or less than the median do not cancel out; take the mean of these because we care about the average difference across the whole nucleus; square root that mean to reverse the squaring step earlier). This gives us the difference to median value for a single nucleus.
+
+One thing to note - since this is calculated against the median profile of a dataset, the measurement is relative, not absolute. If you filter the dataset to remove all the outlier nuclei, the median profile of that filtered dataset would change slightly, and so the differences to median in that filtered dataset would also change. This means that if you have distinct populations of shapes in a dataset, and you then cluster the nuclei into these groups, the difference from median can be used to assess how consistent or variable each group is.
 
 ## What we measure in FISH signals {#signal-measurements}
 
