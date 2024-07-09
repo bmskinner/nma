@@ -22,6 +22,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JComboBox;
@@ -36,12 +37,14 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.signals.shells.ShellAnalysisMethod;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
@@ -114,24 +117,31 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 	 */
 	private boolean datasetParametersOk(int shells) {
 
-		double area = dataset.getCollection().getMin(Measurement.AREA, CellularComponent.NUCLEUS,
-				MeasurementScale.PIXELS);
-		double minArea = ShellAnalysisMethod.MINIMUM_AREA_PER_SHELL * (double) shells;
-		if (area < minArea) {
-			JOptionPane.showMessageDialog(null, AREA_ERROR_MESSAGE);
+		try {
+
+			double area = dataset.getCollection().getMin(Measurement.AREA,
+					CellularComponent.NUCLEUS,
+					MeasurementScale.PIXELS);
+			double minArea = ShellAnalysisMethod.MINIMUM_AREA_PER_SHELL * (double) shells;
+			if (area < minArea) {
+				JOptionPane.showMessageDialog(null, AREA_ERROR_MESSAGE);
+				return false;
+			}
+
+			double circ = dataset.getCollection().getMin(Measurement.CIRCULARITY,
+					CellularComponent.NUCLEUS,
+					MeasurementScale.PIXELS);
+
+			if (circ < ShellAnalysisMethod.MINIMUM_CIRCULARITY) {
+				JOptionPane.showMessageDialog(null, CIRC_ERROR_MESSAGE);
+				return false;
+			}
+
+			return true;
+		} catch (MissingDataException | SegmentUpdateException e) {
+			LOGGER.log(Level.SEVERE, "Missing measurement in dataset", e);
 			return false;
 		}
-
-		double circ = dataset.getCollection().getMin(Measurement.CIRCULARITY,
-				CellularComponent.NUCLEUS,
-				MeasurementScale.PIXELS);
-
-		if (circ < ShellAnalysisMethod.MINIMUM_CIRCULARITY) {
-			JOptionPane.showMessageDialog(null, CIRC_ERROR_MESSAGE);
-			return false;
-		}
-
-		return true;
 
 	}
 

@@ -32,6 +32,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.analysis.ProgressListener;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
@@ -41,9 +42,7 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.logging.Loggable;
 
@@ -142,7 +141,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 			VirtualDataset v = new VirtualDataset(this, collection.getName(), collection.getId(),
 					collection);
 			return addChildDataset(v);
-		} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK, "Unable to add child collection: " + e.getMessage(), e);
 		}
 		return null;

@@ -27,7 +27,7 @@ import com.bmskinner.nma.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 
 /**
  * Divide a profile into segments of interest based on minima and maxima.
@@ -101,8 +101,9 @@ public class ProfileSegmenter {
 	 * 
 	 * @param splitIndex an index point that must be segmented on
 	 * @return a list of segments
+	 * @throws SegmentUpdateException
 	 */
-	public List<IProfileSegment> segment() {
+	public List<IProfileSegment> segment() throws SegmentUpdateException {
 		/* Prepare segment start index */
 		int segmentStart = 0;
 
@@ -137,11 +138,7 @@ public class ProfileSegmenter {
 		if (segments.size() == 1) // We were unable to detect more than a single segment
 			createSingleSegment();
 
-		try {
-			IProfileSegment.linkSegments(segments);
-		} catch (ProfileException e) {
-			LOGGER.warning("Cannot link segments in profile");
-		}
+		IProfileSegment.linkSegments(segments);
 
 		return segments;
 	}

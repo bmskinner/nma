@@ -18,35 +18,40 @@ package com.bmskinner.nma.components.profiles;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
+
 /**
  * Store aggregated profile data.
+ * 
  * @author bms41
  *
  */
 public interface IProfileAggregate {
-	
-    /**
-     * Add the values from the given profile to the aggregate. The profile
-     * length will be adjusted via interpolation
-     * @param values
-     * @throws ProfileException
-     */
-    void addValues(@NonNull IProfile values) throws ProfileException;
 
-    /**
-     * Get the median profile of the aggregate. Shortcut for
-     * getQuartile(50)
-     * @return
-     * @throws ProfileException
-     */
-    IProfile getMedian() throws ProfileException;
+	/**
+	 * Add the values from the given profile to the aggregate. The profile length
+	 * will be adjusted via interpolation
+	 * 
+	 * @param values
+	 * @throws SegmentUpdateException
+	 */
+	void addValues(@NonNull IProfile values) throws SegmentUpdateException;
 
-    /**
-     * Get the profile corresponding to the given quartile 
-     * of the values in the aggregate
-     * @param quartile - the quartile (0-100)
-     * @return
-     * @throws ProfileException
-     */
-    IProfile getQuartile(int quartile) throws ProfileException;
+	/**
+	 * Get the median profile of the aggregate. Shortcut for getQuartile(50)
+	 * 
+	 * @return
+	 * @throws SegmentUpdateException
+	 */
+	IProfile getMedian() throws SegmentUpdateException;
+
+	/**
+	 * Get the profile corresponding to the given quartile of the values in the
+	 * aggregate
+	 * 
+	 * @param quartile - the quartile (0-100)
+	 * @return
+	 * @throws SegmentUpdateException
+	 */
+	IProfile getQuartile(int quartile) throws SegmentUpdateException;
 }

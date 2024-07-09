@@ -31,6 +31,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.nucleus.PoorEdgeDetectionProfilePredicate;
 import com.bmskinner.nma.components.ComponentBuilderFactory;
 import com.bmskinner.nma.components.ComponentBuilderFactory.NucleusBuilderFactory;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.DefaultCell;
 import com.bmskinner.nma.components.cells.ICell;
@@ -40,6 +41,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
@@ -94,18 +96,24 @@ public class FluorescentNucleusFinder extends CellFinder {
 
 			boolean result = true;
 
-			for (Nucleus n : t.getNuclei()) {
-				result &= n.getMeasurement(Measurement.AREA) > nuclOptions
-						.getInt(HashOptions.MIN_SIZE_PIXELS);
+			try {
 
-				result &= n.getMeasurement(Measurement.AREA) < nuclOptions
-						.getInt(HashOptions.MAX_SIZE_PIXELS);
+				for (Nucleus n : t.getNuclei()) {
+					result &= n.getMeasurement(Measurement.AREA) > nuclOptions
+							.getInt(HashOptions.MIN_SIZE_PIXELS);
 
-				result &= n.getMeasurement(Measurement.CIRCULARITY) > nuclOptions
-						.getDouble(HashOptions.MIN_CIRC);
+					result &= n.getMeasurement(Measurement.AREA) < nuclOptions
+							.getInt(HashOptions.MAX_SIZE_PIXELS);
 
-				result &= n.getMeasurement(Measurement.CIRCULARITY) < nuclOptions
-						.getDouble(HashOptions.MAX_CIRC);
+					result &= n.getMeasurement(Measurement.CIRCULARITY) > nuclOptions
+							.getDouble(HashOptions.MIN_CIRC);
+
+					result &= n.getMeasurement(Measurement.CIRCULARITY) < nuclOptions
+							.getDouble(HashOptions.MAX_CIRC);
+				}
+			} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+				LOGGER.log(Level.SEVERE, "Missing measurement creating nucleus predicate", e);
+				result = false;
 			}
 
 			// Only use the predicate if the box was ticked and the options are present

@@ -42,11 +42,14 @@ import com.bmskinner.nma.analysis.detection.Finder.DetectedObjectEvent;
 import com.bmskinner.nma.analysis.detection.Finder.DetectedObjectListener;
 import com.bmskinner.nma.analysis.detection.FinderDisplayType;
 import com.bmskinner.nma.analysis.detection.FluorescentNucleusFinder;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.gui.dialogs.prober.settings.ConstructableSettingsPanel;
 import com.bmskinner.nma.logging.Loggable;
 
@@ -222,9 +225,15 @@ public class NucleusImageProber extends IntegratedImageProber
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Nucleus n = cells[rowIndex].getPrimaryNucleus();
 
-			if (columnIndex == 0)
-				return n.getMeasurement(Measurement.AREA);
-			return n.getMeasurement(Measurement.CIRCULARITY);
+			try {
+
+				if (columnIndex == 0)
+					return n.getMeasurement(Measurement.AREA);
+				return n.getMeasurement(Measurement.CIRCULARITY);
+
+			} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+				return Double.NaN;
+			}
 		}
 
 	}

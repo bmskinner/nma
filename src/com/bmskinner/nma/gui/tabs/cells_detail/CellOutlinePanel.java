@@ -47,6 +47,7 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.ui.RectangleEdge;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
@@ -56,10 +57,9 @@ import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.gui.RotationMode;
@@ -314,7 +314,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 			// Get the relevant segments
 			IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegmentContaining(index);
-//			LOGGER.fine("Index " + index + " Clicked in segment " + seg);
 			IProfileSegment prev = seg.prevSegment();
 			IProfileSegment next = seg.nextSegment();
 
@@ -352,8 +351,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 			});
 			popupMenu.add(nextItem);
-		} catch (MissingProfileException | MissingLandmarkException | ProfileException
-				| ComponentCreationException e) {
+		} catch (MissingDataException
+				| ComponentCreationException | SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK, "Cannot create segment popup", e);
 		}
 	}
@@ -381,7 +380,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 				// Colour the menu item by tag colour
 				JMenuItem item = new JMenuItem("Move " + lm.toString().toLowerCase() + " here");
-//				item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 2));
 				item.setBackground(Color.DARK_GRAY);
 				item.setBorderPainted(true);
 				item.setForeground(Color.WHITE);
@@ -391,8 +389,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 					try {
 						getCellModel().getCell().getPrimaryNucleus().setLandmark(lm, rawIndex);
 						update();
-					} catch (IndexOutOfBoundsException | MissingProfileException
-							| MissingLandmarkException | ProfileException e) {
+					} catch (IndexOutOfBoundsException | MissingDataException
+							| SegmentUpdateException e) {
 						LOGGER.log(Loggable.STACK, "Cannot update landmark", e);
 					}
 				});

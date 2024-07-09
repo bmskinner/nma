@@ -36,7 +36,7 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.XYDataset;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -46,11 +46,10 @@ import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.BooleanProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.gui.components.ColourSelecter;
@@ -210,7 +209,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				ISegmentedProfile profile = n.getProfile(options.getType(),
 						options.getOrientationMark());
 				addSegmentTextAnnotations(profile, chart.getXYPlot());
-			} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
+			} catch (MissingDataException | SegmentUpdateException e) {
 				LOGGER.log(Loggable.STACK, "Error adding segment annotations", e);
 				return createErrorChart();
 			}
@@ -285,8 +284,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 				}
 			}
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException
-				| MissingOptionException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			LOGGER.fine("Landmark not present in profile");
 		}
 		// Add segment name annotations
@@ -296,7 +294,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 						options.getType(),
 						options.getOrientationMark(), Stats.MEDIAN);
 				addSegmentTextAnnotations(profile, plot);
-			} catch (ProfileException | MissingComponentException e) {
+			} catch (MissingDataException | SegmentUpdateException e) {
 				LOGGER.log(Loggable.STACK, "Error adding segment annotations", e);
 				return createErrorChart();
 			}
@@ -499,8 +497,10 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @param profile
 	 * @param plot
+	 * @throws SegmentUpdateException
 	 */
-	protected void addSegmentTextAnnotations(ISegmentedProfile profile, XYPlot plot) {
+	protected void addSegmentTextAnnotations(ISegmentedProfile profile, XYPlot plot)
+			throws SegmentUpdateException {
 		double range = plot.getRangeAxis().getRange().getLength();
 		double minY = plot.getRangeAxis().getRange().getLowerBound();
 		double xMax = plot.getDomainAxis().getRange().getUpperBound();

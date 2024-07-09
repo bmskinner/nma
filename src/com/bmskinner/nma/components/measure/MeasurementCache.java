@@ -24,7 +24,6 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.stats.Stats;
 
 /**
@@ -110,36 +109,39 @@ public class MeasurementCache {
 	public void set(Measurement measurement, String component, MeasurementScale scale, UUID id,
 			double[] values) {
 		Key key = new Key(measurement, component, scale, id);
-		min.put(key, Arrays.stream(values).min().orElse(Statistical.ERROR_CALCULATING_STAT));
-		max.put(key, Arrays.stream(values).max().orElse(Statistical.ERROR_CALCULATING_STAT));
+		min.put(key, Arrays.stream(values).min().getAsDouble());
+		max.put(key, Arrays.stream(values).max().getAsDouble());
 		median.put(key, Stats.quartile(values, Stats.MEDIAN));
 	}
 
-	public double getMedian(Measurement stat, String component, MeasurementScale scale, UUID id) {
+	public double getMedian(Measurement stat, String component, MeasurementScale scale, UUID id)
+			throws MissingMeasurementException {
 
 		if (this.has(stat, component, scale, id)) {
 			Key key = new Key(stat, component, scale, id);
 			return median.get(key);
 		}
-		return Statistical.VALUE_NOT_PRESENT;
+		throw new MissingMeasurementException("Measurement '%s' is not present".formatted(stat));
 	}
 
-	public double getMin(Measurement stat, String component, MeasurementScale scale, UUID id) {
+	public double getMin(Measurement stat, String component, MeasurementScale scale, UUID id)
+			throws MissingMeasurementException {
 
 		if (this.has(stat, component, scale, id)) {
 			Key key = new Key(stat, component, scale, id);
 			return min.get(key);
 		}
-		return Statistical.VALUE_NOT_PRESENT;
+		throw new MissingMeasurementException("Measurement '%s' is not present".formatted(stat));
 	}
 
-	public double getMax(Measurement stat, String component, MeasurementScale scale, UUID id) {
+	public double getMax(Measurement stat, String component, MeasurementScale scale, UUID id)
+			throws MissingMeasurementException {
 
 		if (this.has(stat, component, scale, id)) {
 			Key key = new Key(stat, component, scale, id);
 			return max.get(key);
 		}
-		return Statistical.VALUE_NOT_PRESENT;
+		throw new MissingMeasurementException("Measurement '%s' is not present".formatted(stat));
 	}
 
 	/**

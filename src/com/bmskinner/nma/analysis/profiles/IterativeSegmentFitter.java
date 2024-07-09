@@ -17,22 +17,21 @@
 package com.bmskinner.nma.analysis.profiles;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.profiles.BooleanProfile;
 import com.bmskinner.nma.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nma.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.ProfileException;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Carry out iterative fitting of segments from a target profile to match a
@@ -54,10 +53,10 @@ public class IterativeSegmentFitter {
 	 * modified.
 	 * 
 	 * @param profile the template profile with segments to be fitted
-	 * @throws ProfileException if the template profile cannot be copied
+	 * @throws SegmentUpdateException
 	 */
 	public IterativeSegmentFitter(@NonNull final ISegmentedProfile template)
-			throws ProfileException {
+			throws SegmentUpdateException {
 		templateProfile = template.duplicate();
 	}
 
@@ -67,22 +66,17 @@ public class IterativeSegmentFitter {
 	 * 
 	 * @param target the profile to fit to the current template profile
 	 * @return the profile with fitted segments, or on error, the original profile
+	 * @throws SegmentUpdateException
 	 */
-	public ISegmentedProfile fit(@NonNull final IProfile target) throws ProfileException {
+	public ISegmentedProfile fit(@NonNull final IProfile target)
+			throws SegmentUpdateException, MissingDataException {
 		LOGGER.finer("Beginning segment fitting");
 
 		if (templateProfile.getSegmentCount() == 1)
 			return new DefaultSegmentedProfile(target);
 
-		try {
-			return remapSegmentEndpoints(target);
-		} catch (MissingComponentException e) {
-			LOGGER.log(Loggable.STACK,
-					"Could not segment target profile: unable to remap segments in profile: %s"
-							.formatted(e.getMessage()),
-					e);
-			throw new ProfileException("Could not segment target profile", e);
-		}
+		return remapSegmentEndpoints(target);
+
 	}
 
 	/**
@@ -90,10 +84,11 @@ public class IterativeSegmentFitter {
 	 * @param profile the profile to fit against the template profile
 	 * @return a profile with best-fit segmentation to the median
 	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private ISegmentedProfile remapSegmentEndpoints(@NonNull IProfile profile)
-			throws ProfileException, MissingComponentException {
+			throws MissingDataException, SegmentUpdateException {
 
 		List<IProfileSegment> newSegments = new ArrayList<>();
 
@@ -116,11 +111,12 @@ public class IterativeSegmentFitter {
 	 * @param id      the segment to test
 	 * @return
 	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private List<IProfileSegment> bestFitSegment(@NonNull IProfile profile,
 			List<IProfileSegment> segmentsSoFar, @NonNull UUID id)
-			throws ProfileException, MissingComponentException {
+			throws MissingDataException, SegmentUpdateException {
 
 		// Start by adding locked segments back to the profile
 		List<IProfileSegment> newSegments = new ArrayList<>();
@@ -169,11 +165,6 @@ public class IterativeSegmentFitter {
 		newSeg.setLocked(true);
 		newSegments.add(newSeg);
 
-		if (templateSegment.getPosition() == 0) {
-			LOGGER.finer("Adding first segment " + newSeg.getDetail());
-		} else {
-			LOGGER.finer("Adding interior segment " + newSeg.getDetail());
-		}
 		return newSegments;
 	}
 
@@ -187,12 +178,13 @@ public class IterativeSegmentFitter {
 	 * @param posOffset   the greatest positive offset to the segmnet end index
 	 * @param stepSize    the amount to change the offset in each iteration
 	 * @return
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
 	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
 	private int findBestScoringSegmentEndpoint(@NonNull IProfile testProfile, @NonNull UUID segId,
 			int startIndex, int minIndex, int maxIndex, int stepSize)
-			throws MissingComponentException, ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 
 		IProfile tempProfile = testProfile.duplicate();
 		IProfileSegment templateSegment = templateProfile.getSegment(segId);
@@ -201,20 +193,12 @@ public class IterativeSegmentFitter {
 		double templateSegmentProportion = (double) templateSegment.length()
 				/ (double) templateProfile.size();
 
-		LOGGER.finer("Template end index: " + templateProfile.get(templateSegment.getEndIndex()));
-		LOGGER.finer(String.format("Template segment length %s, profile length %s, from %s",
-				templateSegment.length(), template.size(), templateSegment.toString()));
-		LOGGER.finest(String.format("Target profile length %s", tempProfile.size()));
-
 		// Find indexes that are minima or maxima.
 		// If these are clear, they should be retained
 		BooleanProfile minimaMaxima = tempProfile.getLocalMaxima(5, 180)
 				.or(tempProfile.getLocalMinima(5, 180));
 		double bestScore = Double.MAX_VALUE;
 		int bestIndex = 0;
-
-		LOGGER.finest(
-				String.format("Testing variation of end index from %s to %s", minIndex, maxIndex));
 
 		for (int endIndex = minIndex; endIndex < maxIndex; endIndex += stepSize) {
 
@@ -240,9 +224,6 @@ public class IterativeSegmentFitter {
 				bestScore = score;
 			}
 		}
-		LOGGER.finest(
-				Arrays.toString(testProfile.getSubregion(startIndex, bestIndex).toFloatArray()));
-		LOGGER.finest(String.format("Best end index is %s with score %s", bestIndex, bestScore));
 		return bestIndex;
 	}
 }

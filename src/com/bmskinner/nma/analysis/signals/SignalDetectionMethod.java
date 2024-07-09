@@ -30,6 +30,7 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.analysis.detection.FinderDisplayType;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -38,8 +39,8 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.signals.DefaultSignalGroup;
 import com.bmskinner.nma.components.signals.INuclearSignal;
@@ -185,11 +186,11 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param collection
 	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	private IAnalysisDataset makeSignalChildDataset()
-			throws MissingProfileException, ProfileException, MissingLandmarkException {
+			throws MissingDataException, SegmentUpdateException {
 
 		Optional<ISignalGroup> og = dataset.getCollection()
 				.getSignalGroup(options.getUUID(HashOptions.SIGNAL_GROUP_ID));

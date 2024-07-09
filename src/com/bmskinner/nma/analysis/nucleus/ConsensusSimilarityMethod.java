@@ -10,7 +10,7 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.ComponentBuilderFactory;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Consensus;
 import com.bmskinner.nma.components.cells.DefaultConsensusNucleus;
@@ -24,8 +24,6 @@ import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.profiles.UnprofilableObjectException;
@@ -58,7 +56,7 @@ public class ConsensusSimilarityMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	private void run() throws MissingComponentException, UnprofilableObjectException,
+	private void run() throws MissingDataException, UnprofilableObjectException,
 			ComponentCreationException,
 			ProfileException, MissingOptionException, SegmentUpdateException {
 		LOGGER.finer("Running consensus similarity on " + dataset.getName());
@@ -100,11 +98,11 @@ public class ConsensusSimilarityMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param n
 	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	private void setLandmarks(Nucleus n)
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws ProfileException, MissingDataException, SegmentUpdateException {
 		// Add all landmarks from the profile collection
 
 		// Landmarks were originally found via rulesets when the nucleus was created in
@@ -140,13 +138,12 @@ public class ConsensusSimilarityMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param n
 	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
 	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	private void setSegments(Nucleus n)
-			throws MissingLandmarkException, MissingProfileException, ProfileException,
-			SegmentUpdateException {
+			throws ProfileException,
+			SegmentUpdateException, MissingDataException {
 		// Add segments to the new nucleus profile
 		if (dataset.getCollection().getProfileCollection().hasSegments()) {
 			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);

@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -41,14 +42,14 @@ import org.jdom2.Element;
 
 import com.bmskinner.nma.components.ComponentMeasurer;
 import com.bmskinner.nma.components.Imageable;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.DefaultMeasurement;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.io.XmlSerializable;
 import com.bmskinner.nma.utility.ArrayUtils;
@@ -73,7 +74,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	/** The pixel spacing between border points after roi interpolation */
 	private static final int INTERPOLATION_INTERVAL_PIXELS = 1;
 
-	private final UUID id;
+	private final UUID uuid;
 
 	/** The current centre of the object. */
 	private IPoint centreOfMass;
@@ -173,7 +174,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		this.originalCentreOfMass = new FloatPoint(centreOfMass);
 		this.centreOfMass = new FloatPoint(centreOfMass);
-		this.id = id == null ? makeUUID(roi, centreOfMass) : id;
+		this.uuid = id == null ? makeUUID(roi, centreOfMass) : id;
 
 		this.sourceFile = source;
 		this.channel = channel;
@@ -203,7 +204,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 					"Input is incorrect class: " + a.getClass().getName());
 		DefaultCellularComponent other = (DefaultCellularComponent) a;
 
-		this.id = UUID.fromString(a.getID().toString());
+		this.uuid = UUID.fromString(a.getId().toString());
 		this.originalCentreOfMass = a.getOriginalCentreOfMass().duplicate();
 		this.centreOfMass = a.getCentreOfMass().duplicate();
 		this.sourceFile = new File(a.getSourceFile().getPath());
@@ -211,7 +212,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		this.scale = a.getScale();
 
 		for (Measurement stat : a.getMeasurements()) {
-			setMeasurement(stat, a.getMeasurement(stat, MeasurementScale.PIXELS));
+
+			try {
+				setMeasurement(stat, a.getMeasurement(stat, MeasurementScale.PIXELS));
+			} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+				LOGGER.log(Level.SEVERE,
+						"Unable to copy measurement '%s'; value is not present".formatted(stat),
+						e);
+			}
 		}
 
 		this.xpoints = Arrays.copyOf(other.xpoints, other.xpoints.length);
@@ -233,7 +241,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @param e the XML element containing the data.
 	 */
 	protected DefaultCellularComponent(Element e) {
-		id = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
+		uuid = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
 
 		centreOfMass = new FloatPoint(
 				Float.parseFloat(e.getChild(XMLNames.XML_COM).getAttributeValue(XMLNames.XML_X)),
@@ -328,8 +336,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public @NonNull UUID getID() {
-		return id;
+	public @NonNull UUID getId() {
+		return uuid;
 	}
 
 	@Override
@@ -429,14 +437,18 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public synchronized double getMeasurement(@NonNull final Measurement stat) {
+	public synchronized double getMeasurement(@NonNull final Measurement stat)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		return this.getMeasurement(stat, MeasurementScale.PIXELS);
 	}
 
 	@Override
 	public synchronized double getMeasurement(@NonNull final Measurement stat,
-			@NonNull final MeasurementScale measurementScale) {
+			@NonNull final MeasurementScale measurementScale)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		if (!this.measurements.containsKey(stat)) {
+//			throw new MissingMeasurementException(
+//					"Measurement '%s' is not present".formatted(stat));
 			setMeasurement(stat, ComponentMeasurer.calculate(stat, this));
 		}
 		return stat.convert(measurements.get(stat), this.scale, measurementScale);
@@ -445,6 +457,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public synchronized void setMeasurement(@NonNull final Measurement stat, double d) {
 		measurements.put(stat, d);
+	}
+
+	@Override
+	public synchronized boolean hasMeasurement(@NonNull final Measurement measurement) {
+		return measurements.containsKey(measurement);
 	}
 
 	@Override
@@ -681,7 +698,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public void reverse() throws MissingComponentException, ProfileException {
+	public void reverse()
+			throws MissingDataException, SegmentUpdateException, ComponentCreationException {
 		isReversed = !isReversed;
 		makeBorderList(); // Recreate the border list from the new key points
 	}
@@ -899,7 +917,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public String toString() {
 		String newLine = System.getProperty("line.separator");
-		StringBuilder builder = new StringBuilder("ID: " + id.toString() + newLine);
+		StringBuilder builder = new StringBuilder("ID: " + uuid.toString() + newLine);
 		builder.append(
 				String.format("X bounds: %s-%s", this.getBase().getX(),
 						this.getBase().getX() + this.getWidth()));
@@ -946,7 +964,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_COMPONENT).setAttribute(XMLNames.XML_ID,
-				id.toString());
+				uuid.toString());
 
 		e.addContent(new Element(XMLNames.XML_COM)
 				.setAttribute(XMLNames.XML_X, String.valueOf(centreOfMass.getX()))
@@ -983,7 +1001,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		result = prime * result + Arrays.hashCode(ypoints);
 
 		result = prime * result
-				+ Objects.hash(centreOfMass, sourceFile, channel, id, originalCentreOfMass, scale,
+				+ Objects.hash(centreOfMass, sourceFile, channel, uuid, originalCentreOfMass, scale,
 						measurements);
 		return result;
 	}
@@ -1017,7 +1035,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		return Objects.equals(centreOfMass, other.centreOfMass) && isSameFile
 				&& channel == other.channel
-				&& Objects.equals(id, other.id)
+				&& Objects.equals(uuid, other.uuid)
 				&& Objects.equals(originalCentreOfMass, other.originalCentreOfMass)
 				&& Double.doubleToLongBits(scale) == Double.doubleToLongBits(other.scale)
 				&& Arrays.equals(xpoints, other.xpoints) && Arrays.equals(ypoints, other.ypoints);

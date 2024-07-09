@@ -15,6 +15,7 @@ import org.junit.Test;
 import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.components.TestComponentFactory;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
@@ -53,7 +54,8 @@ public class ProfilableCellularComponentTest {
 	@Test
 	public void testProfilesOffsetCorrectlyOnceWhenFetchingFromLandmark() throws Exception {
 		// Make a cell
-		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
+		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10,
+				RuleSetCollection.roundRuleSetCollection());
 		Nucleus n = c.getPrimaryNucleus();
 
 		// Test setting RP to every position in the profile on an existing cell
@@ -64,7 +66,8 @@ public class ProfilableCellularComponentTest {
 			// One segment should start at index 0
 			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			boolean rpIsOk = isRPOnSegmentBoundary(profile, rpIndex);
-			assertTrue("One segment should start at zero in a profile offset to start at RP", rpIsOk);
+			assertTrue("One segment should start at zero in a profile offset to start at RP",
+					rpIsOk);
 		}
 	}
 
@@ -77,12 +80,14 @@ public class ProfilableCellularComponentTest {
 	 */
 	@Test
 	public void testProfilesOffsetCorrectlyRepeatedlyWhenFetchingFromLandmark() throws Exception {
-		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
+		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10,
+				RuleSetCollection.roundRuleSetCollection());
 		Nucleus n = c.getPrimaryNucleus();
 
 		// Test setting RP to every position in the profile on a fresh cell
 		for (int rpIndex = 0; rpIndex < n.getBorderLength(); rpIndex++) {
-			c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
+			c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10,
+					RuleSetCollection.roundRuleSetCollection());
 			n = c.getPrimaryNucleus();
 			n.setOrientationMark(OrientationMark.REFERENCE, rpIndex);
 
@@ -90,7 +95,8 @@ public class ProfilableCellularComponentTest {
 			// One segment should start at index 0
 			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			boolean rpIsOk = isRPOnSegmentBoundary(profile, rpIndex);
-			assertTrue("One segment should start at zero in a profile offset to start at RP", rpIsOk);
+			assertTrue("One segment should start at zero in a profile offset to start at RP",
+					rpIsOk);
 		}
 	}
 
@@ -103,12 +109,14 @@ public class ProfilableCellularComponentTest {
 	 */
 	@Test
 	public void testProfilesOffsetCorrectlyReversiblyWhenFetchingFromLandmark() throws Exception {
-		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
+		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10,
+				RuleSetCollection.roundRuleSetCollection());
 		Nucleus n = c.getPrimaryNucleus();
 
 		// Test setting RP to every position in the profile on a fresh cell
 		for (int rpIndex = 1; rpIndex < n.getBorderLength(); rpIndex++) {
-			c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
+			c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10,
+					RuleSetCollection.roundRuleSetCollection());
 			n = c.getPrimaryNucleus();
 			int oldRpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
 
@@ -118,7 +126,8 @@ public class ProfilableCellularComponentTest {
 			// One segment should start at index 0
 			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			boolean rpIsOk = isRPOnSegmentBoundary(profile, rpIndex);
-			assertTrue("One segment should start at zero in a profile offset to start at RP", rpIsOk);
+			assertTrue("One segment should start at zero in a profile offset to start at RP",
+					rpIsOk);
 
 			// Set back to zero landmark
 			n.setOrientationMark(OrientationMark.REFERENCE, oldRpIndex);
@@ -126,12 +135,14 @@ public class ProfilableCellularComponentTest {
 			// One segment should start at index 0
 			profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			rpIsOk = isRPOnSegmentBoundary(profile, oldRpIndex);
-			assertTrue("One segment should start at zero in a profile offset to start at RP", rpIsOk);
+			assertTrue("One segment should start at zero in a profile offset to start at RP",
+					rpIsOk);
 
 		}
 	}
 
-	private boolean isRPOnSegmentBoundary(ISegmentedProfile profile, int rpIndex) {
+	private boolean isRPOnSegmentBoundary(ISegmentedProfile profile, int rpIndex)
+			throws SegmentUpdateException {
 		for (IProfileSegment s : profile.getSegments()) {
 			if (s.getStartIndex() == 0)
 				return (true);
@@ -144,7 +155,8 @@ public class ProfilableCellularComponentTest {
 	 */
 	@Test
 	public void testSetSegmentStartLock() throws Exception {
-		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
+		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10,
+				RuleSetCollection.roundRuleSetCollection());
 		Nucleus n = c.getPrimaryNucleus();
 		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 
@@ -169,7 +181,8 @@ public class ProfilableCellularComponentTest {
 	 */
 	@Test
 	public void testGetProfileReturnsLinkedSegments() throws Exception {
-		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
+		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10,
+				RuleSetCollection.roundRuleSetCollection());
 		Nucleus n = c.getPrimaryNucleus();
 		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 
@@ -185,7 +198,8 @@ public class ProfilableCellularComponentTest {
 
 	@Test
 	public void testDuplicateWithSingleDefaultSegment() throws Exception {
-		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10, RuleSetCollection.roundRuleSetCollection());
+		ICell c = TestComponentFactory.roundCell(50, 50, 50, 50, 0, 10,
+				RuleSetCollection.roundRuleSetCollection());
 		Nucleus n = c.getPrimaryNucleus();
 
 		Nucleus dup = n.duplicate();

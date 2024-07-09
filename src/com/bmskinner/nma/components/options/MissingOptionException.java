@@ -16,28 +16,30 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.options;
 
+import com.bmskinner.nma.components.MissingDataException;
+
 /**
  * Thrown when an expected option is not found
  * 
  * @author ben
  *
  */
-public class MissingOptionException extends Exception {
-    private static final long serialVersionUID = 1L;
+public class MissingOptionException extends MissingDataException {
+	private static final long serialVersionUID = 1L;
 
-    public MissingOptionException() {
-        super();
-    }
+	public MissingOptionException() {
+		super();
+	}
 
-    public MissingOptionException(String message) {
-        super(message);
-    }
+	public MissingOptionException(String message) {
+		super(message);
+	}
 
-    public MissingOptionException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public MissingOptionException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public MissingOptionException(Throwable cause) {
-        super(cause);
-    }
+	public MissingOptionException(Throwable cause) {
+		super(cause);
+	}
 }

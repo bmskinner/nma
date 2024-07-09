@@ -27,6 +27,7 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.ComponentMeasurer;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -37,9 +38,9 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.IProfile;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
@@ -129,13 +130,14 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * Detect border tags in nuclei using the dataset rulesets, and also apply rules
 	 * to the median profile. The median is not used for back-propogation of tags.
 	 * 
-	 * @throws MissingOptionException
-	 * 
+	 * @throws ComponentCreationException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 * @throws Exception
 	 */
 	private void runPerNucleus()
-			throws ProfileException, MissingProfileException, MissingLandmarkException,
-			MissingOptionException {
+			throws ProfileException, ComponentCreationException, MissingDataException,
+			SegmentUpdateException {
 		ICellCollection collection = dataset.getCollection();
 
 		collection.getProfileCollection().calculateProfiles();
@@ -177,7 +179,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 						.orElseThrow(MissingOptionException::new)
 						.getRuleSetCollection()
 						.getMeasurableValues()) {
-					n.setMeasurement(m, ComponentMeasurer.calculate(m, n));
+					double value = ComponentMeasurer.calculate(m, n);
+					n.setMeasurement(m, value);
 				}
 			}
 
@@ -244,16 +247,17 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * in each nucleus.
 	 * 
 	 * @param collection
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 * @throws NoDetectedIndexException
 	 * @throws ComponentCreationException
 	 * @throws IndexOutOfBoundsException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	private synchronized void identifyRP(@NonNull ICellCollection collection)
-			throws MissingLandmarkException, MissingProfileException, ProfileException,
-			NoDetectedIndexException, IndexOutOfBoundsException {
+			throws ProfileException,
+			NoDetectedIndexException, IndexOutOfBoundsException, MissingDataException,
+			SegmentUpdateException {
 		// Build the profile collection based on the current RP
 		// positions in each nucleus
 		collection.getProfileCollection().calculateProfiles();
@@ -307,16 +311,16 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param collection the collection to work on
 	 * @throws NoDetectedIndexException
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 * @throws ComponentCreationException
 	 * @throws IndexOutOfBoundsException
-	 * @throws MissingOptionException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	private synchronized void identifyOtherLandmarks(ICellCollection collection)
-			throws MissingLandmarkException, MissingProfileException, ProfileException,
-			NoDetectedIndexException, IndexOutOfBoundsException, MissingOptionException {
+			throws ProfileException,
+			NoDetectedIndexException, IndexOutOfBoundsException, MissingDataException,
+			SegmentUpdateException {
 		// Identify the border tags in the median profile
 
 		// Which landmarks do we care about? Those defined in the dataset options.
@@ -356,15 +360,15 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @param collection
 	 * @return
 	 * @throws NoDetectedIndexException
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
 	 * @throws ProfileException
 	 * @throws ComponentCreationException
 	 * @throws IndexOutOfBoundsException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	private int coerceRPToZero(ICellCollection collection)
-			throws NoDetectedIndexException, MissingLandmarkException,
-			MissingProfileException, ProfileException, IndexOutOfBoundsException {
+			throws NoDetectedIndexException, ProfileException, IndexOutOfBoundsException,
+			MissingDataException, SegmentUpdateException {
 
 		Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
 				.orElseThrow(MissingLandmarkException::new);
@@ -406,18 +410,18 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * @param type   the profile type to fit against
 	 * @param median the template profile to offset against
 	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
 	 * @throws ComponentCreationException
 	 * @throws IndexOutOfBoundsException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 * @throws
 	 */
 	private void updateLandmarkToMedianBestFit(@NonNull ICellCollection collection,
 			@NonNull Landmark lm,
 			@NonNull ProfileType type,
 			@NonNull IProfile median)
-			throws MissingProfileException, ProfileException, MissingLandmarkException,
-			IndexOutOfBoundsException {
+			throws ProfileException, IndexOutOfBoundsException, SegmentUpdateException,
+			MissingDataException {
 
 		for (Nucleus n : collection.getNuclei()) {
 			if (n.isLocked())

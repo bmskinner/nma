@@ -21,7 +21,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.Statistical;
+import com.bmskinner.nma.components.Measurable;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.io.XmlSerializable;
 
@@ -33,7 +33,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * @since 1.13.3
  *
  */
-public interface ICell extends XmlSerializable, Statistical, Comparable<ICell> {
+public interface ICell extends XmlSerializable, Measurable, Comparable<ICell> {
 
 	/**
 	 * Create a copy of this cell

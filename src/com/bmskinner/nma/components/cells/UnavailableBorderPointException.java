@@ -16,7 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.cells;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 
 /**
  * Thrown when the requested border point is not present in a cellular component
@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.MissingComponentException;
  * @since 1.13.4
  *
  */
-public class UnavailableBorderPointException extends MissingComponentException {
+public class UnavailableBorderPointException extends MissingDataException {
     private static final long serialVersionUID = 1L;
 
     public UnavailableBorderPointException() {

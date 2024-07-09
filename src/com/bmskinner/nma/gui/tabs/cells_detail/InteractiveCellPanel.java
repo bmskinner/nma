@@ -39,6 +39,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 
 import com.bmskinner.nma.components.Imageable;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -46,9 +47,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.ThreadManager;
@@ -236,15 +235,13 @@ public class InteractiveCellPanel extends JPanel {
 
 				try {
 					cell.getPrimaryNucleus().setOrientationMark(tag, newIndex);
-				} catch (IndexOutOfBoundsException | MissingProfileException
-						| MissingLandmarkException
-						| ProfileException e) {
+				} catch (IndexOutOfBoundsException | MissingDataException
+						| SegmentUpdateException e) {
 					LOGGER.log(Level.SEVERE, "Unable to set landmark in cell", e);
 				}
 
 				cell.getPrimaryNucleus().clearMeasurements();
 				cell.getPrimaryNucleus().setLocked(true);
-//				cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 				createImage();
 			});
 		}
@@ -309,11 +306,10 @@ public class InteractiveCellPanel extends JPanel {
 					LOGGER.fine(
 							String.format("Updating segment %s start to %d", next.getID(), index));
 					fireSegmentStartIndexUpdateEvent(next.getID(), index);
-//					cellUpdateHandler.fireCelllUpdateEvent(cell, dataset);
 					createImage();
 				});
 				popupMenu.add(nextItem);
-			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
+			} catch (MissingDataException | SegmentUpdateException e) {
 				LOGGER.log(Loggable.STACK, "Cannot get border tag index", e);
 			}
 		}

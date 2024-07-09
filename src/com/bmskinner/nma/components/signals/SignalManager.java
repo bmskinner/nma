@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,7 @@ import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nma.io.UnloadableImageException;
 import com.bmskinner.nma.stats.Stats;
+import com.bmskinner.nma.utility.StreamUtils;
 
 import ij.process.ImageProcessor;
 
@@ -401,9 +403,18 @@ public class SignalManager {
 
 		List<ICell> cells = getCellsWithNuclearSignals(signalGroupId, true);
 		return cells.stream().flatMap(c -> c.getNuclei().stream())
-				.flatMap(n -> n.getSignalCollection().getStatistics(stat, scale, signalGroupId)
+				.flatMap(n -> StreamUtils
+						.uncheckCall(getMeasurementCallable(n, stat, scale, signalGroupId))
 						.stream())
 				.mapToDouble(Double::doubleValue).toArray();
+	}
+
+	private Callable<List<Double>> getMeasurementCallable(Nucleus n, Measurement stat,
+			MeasurementScale scale,
+			UUID signalGroupId) {
+		return () -> {
+			return n.getSignalCollection().getMeasurements(stat, scale, signalGroupId);
+		};
 	}
 
 	/**

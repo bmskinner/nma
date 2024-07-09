@@ -42,13 +42,13 @@ import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.FilteringOptions;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.gui.components.ColourSelecter;
@@ -170,8 +170,8 @@ public class DefaultAnalysisDatasetTest extends ComponentTester {
 	}
 
 	@Test
-	public void testGetChildCount() throws CollectionFilteringException, MissingProfileException,
-			MissingLandmarkException, ProfileException {
+	public void testGetChildCount() throws CollectionFilteringException, ProfileException,
+			MissingDataException, SegmentUpdateException {
 		assertEquals(N_CHILD_DATASETS, d.getChildCount());
 
 		double defaultArea = d.getCollection().getMedian(Measurement.AREA,

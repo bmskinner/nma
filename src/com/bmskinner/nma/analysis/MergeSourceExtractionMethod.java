@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -38,9 +39,8 @@ import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.signals.DefaultSignalGroup;
 import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.ISignalGroup;
@@ -92,7 +92,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 				}
 
 				output.add(extracted);
-			} catch (MissingOptionException | MissingLandmarkException e) {
+			} catch (MissingDataException | SegmentUpdateException e) {
 				LOGGER.warning("Missing analysis options or landmark; skipping "
 						+ virtualMergeSource.getName());
 				LOGGER.log(Loggable.STACK,
@@ -109,14 +109,14 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 	 * 
 	 * @param template
 	 * @return
-	 * @throws MissingOptionException
-	 * @throws MissingLandmarkException
 	 * @throws ComponentCreationException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 * @throws NoSuchElementException     if the template analysis options are not
 	 *                                    present
 	 */
 	private IAnalysisDataset extractMergeSource(@NonNull IAnalysisDataset template)
-			throws MissingOptionException, MissingLandmarkException, ComponentCreationException {
+			throws ComponentCreationException, MissingDataException, SegmentUpdateException {
 
 		ICellCollection templateCollection = template.getCollection();
 
@@ -148,7 +148,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 
 			// Child datasets are not present in merge sources
 
-		} catch (ProfileException | MissingProfileException e) {
+		} catch (MissingProfileException e) {
 			LOGGER.log(Loggable.STACK, "Cannot copy profile offsets to recovered merge source", e);
 		}
 

@@ -26,9 +26,13 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
+import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 import weka.estimators.KernelEstimator;
@@ -120,12 +124,17 @@ public abstract class HistogramDatasetCreator extends AbstractDatasetCreator<Cha
 	 * @param list the datasets
 	 * @param stat the statistic to use
 	 * @return an array with the min and max of the range
+	 * @throws MissingDataException
+	 * @throws ProfileException
+	 * @throws MissingMeasurementException
+	 * @throws SegmentUpdateException
 	 * @throws Exception
 	 */
 	protected static int[] calculateMinAndMaxRange(@NonNull List<IAnalysisDataset> list,
 			@NonNull Measurement stat,
 			String component,
-			MeasurementScale scale) {
+			MeasurementScale scale)
+			throws MissingDataException, SegmentUpdateException {
 
 		int[] result = new int[2];
 		result[0] = Integer.MAX_VALUE; // holds min

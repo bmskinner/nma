@@ -34,19 +34,19 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nma.components.Imageable;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
-import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.signals.INuclearSignal;
@@ -180,8 +180,7 @@ public class ImageAnnotator extends ImageFilterer {
 					}
 				}
 			}
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException
-				| UnavailableBorderPointException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK, "Error annotating nucleus", e);
 		}
 		return this;
@@ -209,8 +208,7 @@ public class ImageAnnotator extends ImageFilterer {
 					}
 				}
 			}
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException
-				| UnavailableBorderPointException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK, "Error annotating nucleus", e);
 		}
 		return this;
@@ -494,20 +492,29 @@ public class ImageAnnotator extends ImageFilterer {
 		double circ;
 		double area;
 
-		if (n instanceof INuclearSignal) {
+		String label;
 
-			area = n.getMeasurement(Measurement.AREA);
-			double perim2 = Math.pow(n.getMeasurement(Measurement.PERIMETER), 2);
-			circ = (4 * Math.PI) * (area / perim2);
+		try {
 
-		} else {
-			area = n.getMeasurement(Measurement.AREA);
-			circ = n.getMeasurement(Measurement.CIRCULARITY);
+			if (n instanceof INuclearSignal) {
+
+				area = n.getMeasurement(Measurement.AREA);
+				double perim2 = Math.pow(n.getMeasurement(Measurement.PERIMETER), 2);
+				circ = (4 * Math.PI) * (area / perim2);
+
+			} else {
+				area = n.getMeasurement(Measurement.AREA);
+				circ = n.getMeasurement(Measurement.CIRCULARITY);
+			}
+
+			areaLbl = "Area: " + df.format(area);
+			perimLbl = "Circ: " + df.format(circ);
+			label = areaLbl + "\n" + perimLbl;
+
+		} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+			LOGGER.log(Level.FINE, "Missing measurement in annotator", e);
+			label = "";
 		}
-
-		areaLbl = "Area: " + df.format(area);
-		perimLbl = "Circ: " + df.format(circ);
-		String label = areaLbl + "\n" + perimLbl;
 
 		return this.annotateString(n.getOriginalCentreOfMass().getXAsInt(),
 				n.getOriginalCentreOfMass().getYAsInt(),
@@ -533,22 +540,31 @@ public class ImageAnnotator extends ImageFilterer {
 		double circ = 0;
 		double area = 0;
 		double fraction;
+		String label;
 
-		if (signal instanceof INuclearSignal) {
+		try {
 
-			area = signal.getMeasurement(Measurement.AREA);
-			double perim2 = Math.pow(signal.getMeasurement(Measurement.PERIMETER), 2);
-			circ = (4 * Math.PI) * (area / perim2);
+			if (signal instanceof INuclearSignal) {
 
+				area = signal.getMeasurement(Measurement.AREA);
+				double perim2 = Math.pow(signal.getMeasurement(Measurement.PERIMETER), 2);
+				circ = (4 * Math.PI) * (area / perim2);
+
+			}
+
+			fraction = area / parent.getMeasurement(Measurement.AREA);
+
+			areaLbl = "Area: " + df.format(area);
+			perimLbl = "Circ: " + df.format(circ);
+			String fractLabel = "Fract: " + df.format(fraction);
+
+			label = areaLbl + "\n" + perimLbl + "\n" + fractLabel;
+
+		} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+			LOGGER.log(Level.FINE, "Missing measurement in annotator: %s".formatted(e.getMessage()),
+					e);
+			label = "";
 		}
-
-		fraction = area / parent.getMeasurement(Measurement.AREA);
-
-		areaLbl = "Area: " + df.format(area);
-		perimLbl = "Circ: " + df.format(circ);
-		String fractLabel = "Fract: " + df.format(fraction);
-
-		String label = areaLbl + "\n" + perimLbl + "\n" + fractLabel;
 
 		return this.annotateString(signal.getOriginalCentreOfMass().getXAsInt(),
 				signal.getOriginalCentreOfMass().getYAsInt(), label, text, back);
@@ -720,7 +736,7 @@ public class ImageAnnotator extends ImageFilterer {
 	 */
 	private static synchronized boolean isCommonTargetSelected(List<IWarpedSignal> signals) {
 		Nucleus t = signals.stream().findFirst().get().target();
-		return signals.stream().allMatch(s -> s.target().getID().equals(t.getID()));
+		return signals.stream().allMatch(s -> s.target().getId().equals(t.getId()));
 	}
 
 	private static synchronized List<ImageProcessor> recolourImagesWithSameTarget(

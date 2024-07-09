@@ -9,17 +9,17 @@ import com.bmskinner.nma.analysis.AnalysisMethodException;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
-import com.bmskinner.nma.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
@@ -63,7 +63,7 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	private void run() throws ProfileException, MissingComponentException {
+	private void run() throws MissingDataException, SegmentUpdateException {
 		if (!dataset.isRoot()) {
 			LOGGER.fine(() -> String.format("'%s': Cannot split segments in a virtual dataset",
 					dataset.getName()));
@@ -119,15 +119,15 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 	 * @param newID1 the id for the first new segment. Can be null.
 	 * @param newID2 the id for the second new segment. Can be null.
 	 * @return true if the split succeeded, false otherwise
-	 * @throws UnsegmentedProfileException
 	 * @throws ProfileException
-	 * @throws MissingComponentException   if the reference point tag is missing, or
-	 *                                     the segment is missing
+	 * @throws MissingDataException   if the reference point tag is missing, or the
+	 *                                segment is missing
+	 * @throws SegmentUpdateException
 	 */
 	private boolean splitSegment(@NonNull ICellCollection collection, @NonNull IProfileSegment seg,
 			@NonNull UUID newID1,
 			@NonNull UUID newID2)
-			throws ProfileException, UnsegmentedProfileException, MissingComponentException {
+			throws MissingDataException, SegmentUpdateException {
 
 		ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(
 				ProfileType.ANGLE,
@@ -187,11 +187,13 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 	 * @param newId1     the first new segment id
 	 * @param newId2     the second new segment id
 	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private void splitNucleusSegment(@NonNull Nucleus n, @NonNull UUID segId, double proportion,
 			@NonNull UUID newId1,
-			@NonNull UUID newId2) throws ProfileException, MissingComponentException {
+			@NonNull UUID newId2)
+			throws MissingDataException, SegmentUpdateException {
 		boolean wasLocked = n.isLocked();
 		n.setLocked(false); // not destructive
 		splitSegment(n, segId, proportion, newId1, newId2);
@@ -208,12 +210,12 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 	 * @return true if the segment can be split at the index equivalent to the
 	 *         proportion, false otherwise
 	 * @throws ProfileException
-	 * @throws MissingComponentException
-	 * @throws UnsegmentedProfileException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private boolean isCollectionSplittable(@NonNull ICellCollection collection, @NonNull UUID id,
 			double proportion)
-			throws ProfileException, MissingComponentException {
+			throws MissingDataException, SegmentUpdateException {
 
 		if (collection.isVirtual())
 			return false;
@@ -247,7 +249,7 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 			IProfileSegment nSeg = profile.getSegment(id);
 			int targetIndex = nSeg.getProportionalIndex(proportion);
 			return profile.isSplittable(id, targetIndex);
-		} catch (MissingComponentException | ProfileException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK, "Error getting profile", e);
 			return false;
 		}
@@ -264,11 +266,13 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 	 * @param newID1     the id for the first new segment
 	 * @param newID2     the id for the second new segment
 	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private void splitSegment(@NonNull Taggable t, @NonNull UUID idToSplit, double proportion,
 			@NonNull UUID newID1,
-			@NonNull UUID newID2) throws ProfileException, MissingComponentException {
+			@NonNull UUID newID2)
+			throws MissingDataException, SegmentUpdateException {
 
 		ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 		IProfileSegment nSeg = profile.getSegment(idToSplit);

@@ -28,6 +28,8 @@ import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.ICytoplasm;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -38,6 +40,7 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.ProfileType;
@@ -49,7 +52,6 @@ import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ColourSelecter;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.datasets.AbstractCellDatasetCreator;
 import com.bmskinner.nma.visualisation.datasets.SignalTableCell;
 import com.bmskinner.nma.visualisation.options.DisplayOptions;
@@ -115,8 +117,8 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 			model.addColumn("Info", rowData.toArray(new Object[0]));
 
 			return model;
-		} catch (MissingOptionException e) {
-			LOGGER.log(Loggable.STACK, "Error creating table model", e);
+		} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+			LOGGER.log(Level.SEVERE, "Error creating table model", e);
 			return AbstractTableCreator.createBlankTable();
 		}
 	}
@@ -197,7 +199,9 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * 
 	 */
 
-	private void addCytoplasmDataToTable(List<Object> fieldNames, List<Object> rowData, ICell c, IAnalysisDataset d) {
+	private void addCytoplasmDataToTable(List<Object> fieldNames, List<Object> rowData, ICell c,
+			IAnalysisDataset d)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		fieldNames.add("Cytoplasm");
 		rowData.add("");
 
@@ -212,8 +216,9 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 	}
 
-	private void addNuclearDataToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n, IAnalysisDataset d)
-			throws MissingOptionException {
+	private void addNuclearDataToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n,
+			IAnalysisDataset d)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 
 		fieldNames.add(Labels.Cells.SOURCE_FILE_LABEL);
 		rowData.add(n.getSourceFile());
@@ -261,7 +266,8 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 				try {
 					IPoint p = n.getBorderPoint(tag);
-					int index = n.getIndexRelativeTo(OrientationMark.REFERENCE, n.getBorderIndex(tag));
+					int index = n.getIndexRelativeTo(OrientationMark.REFERENCE,
+							n.getBorderIndex(tag));
 					rowData.add(p.toString() + " at profile index " + index);
 				} catch (MissingLandmarkException e) {
 					LOGGER.fine("Tag not present: " + tag);
@@ -294,8 +300,13 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * @param fieldNames
 	 * @param rowData
 	 * @param n
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
-	private void addNuclearStatisticsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n) {
+	private void addNuclearStatisticsToTable(List<Object> fieldNames, List<Object> rowData,
+			Nucleus n)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 
 		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 		for (Measurement stat : Measurement.getNucleusStats()) {
@@ -319,10 +330,13 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * @param rowData
 	 * @param n          the nucleus
 	 * @param d          the source dataset for the nucleus
-	 * @throws MissingOptionException
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
-	private void addNuclearSignalsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n, IAnalysisDataset d)
-			throws MissingOptionException {
+	private void addNuclearSignalsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n,
+			IAnalysisDataset d)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 
 		int j = 0;
 
@@ -338,7 +352,8 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 				Optional<IAnalysisOptions> datasetOptionsOptional = d.getAnalysisOptions();
 				if (!datasetOptionsOptional.isPresent())
 					continue;
-				HashOptions signalOptions = datasetOptionsOptional.get().getNuclearSignalOptions(signalGroup)
+				HashOptions signalOptions = datasetOptionsOptional.get()
+						.getNuclearSignalOptions(signalGroup)
 						.orElseThrow(MissingOptionException::new);
 
 				fieldNames.add("");
@@ -346,7 +361,8 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 				Optional<Color> c = g.get().getGroupColour();
 				Color colour = c.isPresent() ? c.get() : ColourSelecter.getColor(j);
 
-				SignalTableCell tableCell = new SignalTableCell(signalGroup, g.get().getGroupName(), colour);
+				SignalTableCell tableCell = new SignalTableCell(signalGroup, g.get().getGroupName(),
+						colour);
 
 				fieldNames.add("Signal group");
 				rowData.add(tableCell);
@@ -355,7 +371,8 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 				rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
 
 				fieldNames.add("Source channel");
-				rowData.add(signalOptions == null ? Labels.NA : signalOptions.getInt(HashOptions.CHANNEL));
+				rowData.add(signalOptions == null ? Labels.NA
+						: signalOptions.getInt(HashOptions.CHANNEL));
 
 				fieldNames.add("Number of signals");
 				rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
@@ -377,8 +394,13 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * @param fieldNames
 	 * @param rowData
 	 * @param s
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
-	private void addSignalStatisticsToTable(List<Object> fieldNames, List<Object> rowData, INuclearSignal s) {
+	private void addSignalStatisticsToTable(List<Object> fieldNames, List<Object> rowData,
+			INuclearSignal s)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 		for (Measurement stat : Measurement.getSignalStats()) {
 
@@ -394,10 +416,6 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 		fieldNames.add("Original CoM");
 		rowData.add(s.getOriginalCentreOfMass().toString());
-
-		// fieldNames.add("First border point");
-		// rowData.add(s.getBorderPoint(0).toString());
-
 	}
 
 }

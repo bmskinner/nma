@@ -169,7 +169,7 @@ public class DatasetMergeMethodTest {
 
 		// Are OrientationMark positions properly restored?
 		for (Nucleus n : d1.getCollection().getNuclei()) {
-			Nucleus test = result.getCollection().getNucleus(n.getID()).get();
+			Nucleus test = result.getCollection().getNucleus(n.getId()).get();
 			for (OrientationMark tag : n.getOrientationMarks())
 				assertTrue(test.hasLandmark(tag));
 		}

@@ -7,11 +7,12 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.TestDatasetBuilder;
-import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
@@ -28,6 +29,9 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
  *
  */
 public class PrincipalComponentAnalysisTest extends ComponentTester {
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 
 	private static final Logger LOGGER = Logger
 			.getLogger(PrincipalComponentAnalysisTest.class.getName());
@@ -52,9 +56,9 @@ public class PrincipalComponentAnalysisTest extends ComponentTester {
 		for (int i = 0; i < 10; i++) {
 			final int j = i;
 			boolean anyPresent = dataset.getCollection().getNuclei().stream()
-					.anyMatch(m -> m.getMeasurement(Measurement
+					.anyMatch(m -> m.hasMeasurement(Measurement
 							.makePrincipalComponent(j + 1,
-									clusterId)) != Statistical.ERROR_CALCULATING_STAT);
+									clusterId)));
 			assertFalse(anyPresent);
 		}
 
@@ -73,11 +77,11 @@ public class PrincipalComponentAnalysisTest extends ComponentTester {
 		// Test that PCs have been set
 		for (int i = 0; i < nPcs; i++) {
 			final int j = i;
-			boolean isPresent = dataset.getCollection().getNuclei().stream()
-					.allMatch(m -> m.getMeasurement(Measurement
+			boolean allPresent = dataset.getCollection().getNuclei().stream()
+					.allMatch(m -> m.hasMeasurement(Measurement
 							.makePrincipalComponent(j + 1,
-									clusterId)) != Statistical.ERROR_CALCULATING_STAT);
-			assertTrue(isPresent);
+									clusterId)));
+			assertTrue(allPresent);
 		}
 	}
 

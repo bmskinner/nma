@@ -30,7 +30,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -38,9 +40,7 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.IProfile;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 
@@ -179,9 +179,8 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 			for (Nucleus n : c.getNuclei()) {
 				try {
 					addNucleus(n, attributes, instances, windowProportion);
-				} catch (MissingLandmarkException
-						| MissingProfileException
-						| ProfileException e) {
+				} catch (MissingDataException | SegmentUpdateException
+						| ComponentCreationException e) {
 					LOGGER.log(Level.SEVERE, "Unable to add nucleus to instances", e);
 				}
 			}
@@ -191,8 +190,8 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 	}
 
 	private void addNucleus(Nucleus n, ArrayList<Attribute> attributes, Instances instances,
-			double windowProportion) throws MissingLandmarkException, MissingProfileException,
-			ProfileException {
+			double windowProportion)
+			throws SegmentUpdateException, MissingDataException, ComponentCreationException {
 
 		Instance inst = new SparseInstance(attributes.size());
 
@@ -221,7 +220,7 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 
 		instances.add(inst);
 		int index = instances.numInstances();
-		nucleusToInstanceMap.put(index - 1, n.getID());
+		nucleusToInstanceMap.put(index - 1, n.getId());
 		fireProgressEvent();
 	}
 

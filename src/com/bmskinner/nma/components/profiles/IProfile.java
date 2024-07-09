@@ -18,6 +18,8 @@ package com.bmskinner.nma.components.profiles;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.analysis.profiles.NoDetectedIndexException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.io.XmlSerializable;
 
 /**
@@ -72,18 +74,18 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
 	 * 
 	 * @param limits indexes that should be included or excluded from the search
 	 * @return the index of the first maximum value
-	 * @throws ProfileException
+	 * @throws IllegalArgumentException if the limits are not valid
 	 */
-	int getIndexOfMax(@NonNull BooleanProfile limits) throws ProfileException;
+	int getIndexOfMax(@NonNull BooleanProfile limits) throws NoDetectedIndexException;
 
 	/**
 	 * Get the index of the maximum value in the profile If there are multiple
 	 * values at maximum, this returns the first only
 	 * 
 	 * @return the index of the first maximum value
-	 * @throws ProfileException
+	 * @throws IllegalArgumentException
 	 */
-	int getIndexOfMax() throws ProfileException;
+	int getIndexOfMax() throws NoDetectedIndexException;;
 
 	/**
 	 * Get the index closest to the fraction of the way through the profile
@@ -115,17 +117,18 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
 	 * 
 	 * @param limits indexes that should be included or excluded from the search
 	 * @return the index
-	 * @throws ProfileException
+	 * @throws NoDetectedIndexException if indexes are not found
 	 */
-	int getIndexOfMin(@NonNull BooleanProfile limits) throws ProfileException;
+	int getIndexOfMin(@NonNull BooleanProfile limits) throws NoDetectedIndexException;
 
 	/**
 	 * Get the index of the minimum value in the profile
 	 * 
 	 * @return the index
-	 * @throws ProfileException
+	 * @throws NoDetectedIndexException
+	 * @throws IllegalArgumentException
 	 */
-	int getIndexOfMin() throws ProfileException;
+	int getIndexOfMin() throws NoDetectedIndexException;
 
 	/**
 	 * Calculate the sum-of-squares difference between this profile and a given
@@ -160,7 +163,7 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
 	 * @return the sum-of-squares difference
 	 * @throws ProfileException if interpolation cannot be performed
 	 */
-	double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException;
+	double absoluteSquareDifference(@NonNull IProfile testProfile);
 
 	/**
 	 * Calculate the absolute square difference between profiles, but interpolate
@@ -171,16 +174,15 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
 	 * @return
 	 * @throws ProfileException
 	 */
-	double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength)
-			throws ProfileException;
+	double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength);
 
 	/**
 	 * Alternative to the constructor from profile
 	 * 
 	 * @return a new profile of the same class with the same values as this profile
-	 * @throws ProfileException if the copy failed
+	 * @throws SegmentUpdateException if the copy failed
 	 */
-	IProfile duplicate() throws ProfileException;
+	IProfile duplicate() throws SegmentUpdateException;
 
 	/**
 	 * Create a profile starting at the given index. For example, a profile
@@ -194,9 +196,9 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
 	 * 
 	 * @param newStartIndex the index to set as the new start
 	 * @return a new profile starting from the desired index
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
-	IProfile startFrom(int newStartIndex) throws ProfileException;
+	IProfile startFrom(int newStartIndex) throws SegmentUpdateException;
 
 	/**
 	 * Perform a window-averaging smooth of the profile with the given window size.
@@ -210,17 +212,19 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
 
 	/**
 	 * Reverse the profile. Does not copy.
+	 * 
+	 * @throws SegmentUpdateException
 	 */
-	void reverse();
+	void reverse() throws SegmentUpdateException;
 
 	/**
 	 * Interpolate this profile to the length specified and return as a new profile.
 	 * 
 	 * @param newLength the new profile length
 	 * @return the profile interpolated to the new length
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
-	IProfile interpolate(int newLength) throws ProfileException;
+	IProfile interpolate(int newLength) throws SegmentUpdateException;
 
 	/**
 	 * Find the offset that best matches this profile to the test profile.
@@ -233,7 +237,7 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
 	 *         profile
 	 * @throws ProfileException
 	 */
-	int findBestFitOffset(@NonNull IProfile testProfile) throws ProfileException;
+	int findBestFitOffset(@NonNull IProfile testProfile) throws SegmentUpdateException;
 
 	/**
 	 * Find the offset that best matches this profile to the test profile, within a
@@ -247,7 +251,7 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
 	 * @throws ProfileException
 	 */
 	int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset)
-			throws ProfileException;
+			throws SegmentUpdateException;
 
 	/**
 	 * For each point in the array, test for a local minimum. The values of the
@@ -316,7 +320,7 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
 	 * @return a profile with the selected region
 	 * @throws ProfileException
 	 */
-	IProfile getSubregion(@NonNull IProfileSegment segment) throws ProfileException;
+	IProfile getSubregion(@NonNull IProfileSegment segment) throws SegmentUpdateException;
 
 	/**
 	 * Sum the difference between between each pair of values across a given window

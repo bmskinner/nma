@@ -25,17 +25,17 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.profiles.IProfileCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.stats.Stats;
@@ -253,7 +253,11 @@ public class DatasetValidator {
 			errorList.add(String.format("Nucleus %s does not have an angle profile",
 					n.getNameAndNumber()));
 			errorCells.add(c);
-		} catch (ProfileException e) {
+		} catch (MissingDataException e) {
+			errorList.add(String.format("Nucleus %s is missing data",
+					n.getNameAndNumber()));
+			errorCells.add(c);
+		} catch (SegmentUpdateException e) {
 			errorList.add(String.format("Nucleus %s had an error finding segments: %s",
 					n.getNameAndNumber(),
 					e.getMessage()));
@@ -291,8 +295,7 @@ public class DatasetValidator {
 				for (Nucleus n : c.getNuclei()) {
 					try {
 						n.getProfile(type);
-					} catch (MissingProfileException | ProfileException
-							| MissingLandmarkException e) {
+					} catch (MissingDataException | SegmentUpdateException e) {
 						errorList.add(String.format("Nucleus %s does not have %s profile",
 								n.getNameAndNumber(), type));
 						errorCells.add(c);
@@ -312,7 +315,7 @@ public class DatasetValidator {
 		for (ProfileType type : ProfileType.values()) {
 			try {
 				pc.getProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
-			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
+			} catch (MissingDataException | SegmentUpdateException e) {
 				summaryList
 						.add(String.format("Root dataset %s does not have %s", d.getName(), type));
 				withErrors++;
@@ -320,7 +323,7 @@ public class DatasetValidator {
 
 			try {
 				pc.getSegmentedProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
-			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
+			} catch (MissingDataException | SegmentUpdateException e) {
 				summaryList.add(String.format("Root dataset %s does not have segmented %s",
 						d.getName(), type));
 				withErrors++;
@@ -330,7 +333,7 @@ public class DatasetValidator {
 				IProfileCollection childPc = child.getCollection().getProfileCollection();
 				try {
 					childPc.getProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
-				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
+				} catch (MissingDataException | SegmentUpdateException e) {
 					summaryList.add(String.format("Child dataset %s does not have %s",
 							child.getName(), type));
 					withErrors++;
@@ -338,7 +341,7 @@ public class DatasetValidator {
 
 				try {
 					childPc.getSegmentedProfile(type, OrientationMark.REFERENCE, Stats.MEDIAN);
-				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
+				} catch (MissingDataException | SegmentUpdateException e) {
 					summaryList
 							.add(String.format("Child dataset %s does not have segmented %s",
 									child.getName(), type));
@@ -471,7 +474,13 @@ public class DatasetValidator {
 							n.getNameAndNumber()));
 					errorCells.add(c);
 					allErrors++;
-				} catch (ProfileException e) {
+				} catch (MissingDataException e) {
+					errorList.add(String.format("Nucleus %s is missing data",
+							n.getNameAndNumber()));
+					errorCells.add(c);
+					allErrors++;
+
+				} catch (SegmentUpdateException e) {
 					errorList.add(String.format("Nucleus %s had an error finding segments: %s",
 							n.getNameAndNumber(),
 							e.getMessage()));
@@ -552,7 +561,7 @@ public class DatasetValidator {
 		try {
 			medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
 					OrientationMark.REFERENCE, Stats.MEDIAN);
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			errorList.add("Unable to fetch median profile for collection");
 			return 1;
 		}
@@ -624,9 +633,9 @@ public class DatasetValidator {
 
 			// Check all nucleus segments are in root dataset
 			for (UUID id : childList) {
-				if (!expectedSegments.contains(id) && !id.equals(n.getID())) {
+				if (!expectedSegments.contains(id) && !id.equals(n.getId())) {
 					errorList.add(String.format("Nucleus %s has segment %s not found in parent",
-							n.getID(), id));
+							n.getId(), id));
 					errorCount++;
 				}
 			}
@@ -636,7 +645,7 @@ public class DatasetValidator {
 			for (UUID id : expectedSegments) {
 				if (!childList.contains(id)) {
 					errorList.add(String.format(
-							"Profile collection segment %s not found in object %s", id, n.getID()));
+							"Profile collection segment %s not found in object %s", id, n.getId()));
 					errorCount++;
 				}
 			}
@@ -651,7 +660,7 @@ public class DatasetValidator {
 					if (s1.overlapsBeyondEndpoints(s2)) {
 						errorList.add(String.format("%s overlaps %s in object %s", s1.getDetail(),
 								s2.getDetail(),
-								n.getID()));
+								n.getId()));
 						errorCount++;
 					}
 
@@ -667,7 +676,7 @@ public class DatasetValidator {
 					if (!objectSeg.hasMergeSource(mge.getID())) {
 						errorList.add(String.format(
 								"Object segment %s does not have expected median merge source in object %s",
-								mge.getName(), n.getID()));
+								mge.getName(), n.getId()));
 						errorCount++;
 					}
 				}
@@ -675,14 +684,14 @@ public class DatasetValidator {
 					if (!medianSeg.hasMergeSource(obj.getID())) {
 						errorList.add(String.format(
 								"Median segment %s does not have merge source %s from nucleus %s",
-								medianSeg.getName(), obj.getID(), n.getID()));
+								medianSeg.getName(), obj.getID(), n.getId()));
 						errorCount++;
 					}
 				}
 			}
 
-		} catch (ProfileException | MissingComponentException e) {
-			errorList.add(String.format("Error getting segments for object %s: %s", n.getID(),
+		} catch (MissingDataException | SegmentUpdateException e) {
+			errorList.add(String.format("Error getting segments for object %s: %s", n.getId(),
 					e.getMessage()));
 			errorCount++;
 		}

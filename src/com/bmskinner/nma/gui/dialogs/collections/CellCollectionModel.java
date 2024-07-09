@@ -11,15 +11,13 @@ import java.util.stream.Collectors;
 
 import javax.swing.table.DefaultTableModel;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.gui.components.SelectableCellIcon;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Track cell selections and allow for creation of new child collections based
@@ -184,9 +182,8 @@ public class CellCollectionModel extends DefaultTableModel {
 		try {
 			IAnalysisDataset newDataset = dataset.addChildCollection(newCollection);
 			return Optional.of(newDataset);
-		} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
-			LOGGER.log(Level.WARNING, "Unable to copy profiles to new child collection");
-			LOGGER.log(Loggable.STACK, "Error copying profiles to new child collection", e);
+		} catch (MissingDataException | SegmentUpdateException e) {
+			LOGGER.log(Level.SEVERE, "Unable to copy profiles to new child collection", e);
 			return Optional.empty();
 		}
 	}

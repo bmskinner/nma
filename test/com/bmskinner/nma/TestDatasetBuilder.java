@@ -12,7 +12,7 @@ import com.bmskinner.nma.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.TestComponentFactory;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
@@ -360,12 +360,12 @@ public class TestDatasetBuilder {
 	 * @return
 	 * @throws ComponentCreationException
 	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
 	 */
 	private IAnalysisDataset createRectangularDataset(int nCells, RuleSetCollection rsc,
 			int maxSizeVariation, int baseWidth, int baseHeight, int xBase, int yBase,
 			int maxRotationDegrees, boolean randomOffsetStart, int fixedStartOffset)
-			throws ComponentCreationException, MissingComponentException, ProfileException {
+			throws ComponentCreationException, MissingDataException, ProfileException {
 
 		ICellCollection collection = new DefaultCellCollection(rsc, TEST_DATASET_NAME,
 				TEST_DATASET_UUID);

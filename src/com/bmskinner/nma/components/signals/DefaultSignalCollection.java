@@ -27,20 +27,23 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.XMLNames;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.io.UnloadableImageException;
 import com.bmskinner.nma.io.XmlSerializable;
-import com.bmskinner.nma.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
@@ -269,8 +272,9 @@ public class DefaultSignalCollection implements ISignalCollection {
 	}
 
 	@Override
-	public List<Double> getStatistics(@NonNull Measurement stat, MeasurementScale scale,
-			@NonNull UUID signalGroup) {
+	public List<Double> getMeasurements(@NonNull Measurement stat, MeasurementScale scale,
+			@NonNull UUID signalGroup)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		List<INuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
 		for (int i = 0; i < list.size(); i++) {
@@ -295,7 +299,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 		try {
 			return ImageImporter.importImageAndInvert(f, c);
 		} catch (ImageImportException e) {
-			LOGGER.log(Loggable.STACK, "Error importing image source file " + f.getAbsolutePath(),
+			LOGGER.log(Level.SEVERE, "Error importing image source file " + f.getAbsolutePath(),
 					e);
 			throw new UnloadableImageException("Unable to load signal image", e);
 		}

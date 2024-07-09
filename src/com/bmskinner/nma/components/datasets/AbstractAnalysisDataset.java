@@ -30,15 +30,14 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 
 /**
  * This is the most primitive information an analysis dataset requires. This
@@ -454,7 +453,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 		// Ensure profile collection copied over
 		try {
 			dataset.getCollection().getProfileManager().copySegmentsAndLandmarksTo(mergeSource);
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			LOGGER.fine("Error copying profile collection when virtualising merge source");
 		}
 

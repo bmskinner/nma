@@ -27,8 +27,8 @@ import javax.swing.table.TableModel;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ExportableTable;
@@ -90,7 +90,7 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
 			try {
 				segments = activeDataset().getCollection().getProfileCollection()
 						.getSegments(OrientationMark.REFERENCE);
-			} catch (MissingLandmarkException | ProfileException e) {
+			} catch (MissingLandmarkException | SegmentUpdateException e) {
 				LOGGER.warning("Cannot get segments");
 				LOGGER.log(Loggable.STACK, "Cannot get segments", e);
 				return;

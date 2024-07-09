@@ -36,6 +36,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.Layer;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.DefaultCell;
 import com.bmskinner.nma.components.cells.ICell;
@@ -52,9 +53,8 @@ import com.bmskinner.nma.components.mesh.MeshImageCreationException;
 import com.bmskinner.nma.components.mesh.MeshVertex;
 import com.bmskinner.nma.components.mesh.UncomparableMeshImageException;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.signals.INuclearSignal;
@@ -400,7 +400,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					UUID signalId = (UUID) ds.getSeriesKey(series);
 					Optional<UUID> signalGroup = sc.getSignalGroupIds().stream()
 							.filter(sg -> sc.getSignals(sg).stream()
-									.anyMatch(s -> s.getID().equals(signalId)))
+									.anyMatch(s -> s.getId().equals(signalId)))
 							.findFirst();
 
 					UUID seriesGroup = signalGroup.get();
@@ -441,7 +441,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			// Add signal CoMs
 			PointDataset comData = new PointDataset();
 			for (INuclearSignal s : n.getSignalCollection().getAllSignals())
-				comData.addPoint(s.getID().toString(), s.getCentreOfMass());
+				comData.addPoint(s.getId().toString(), s.getCentreOfMass());
 
 			int comDataIndex = plot.getDatasetCount() + 1;
 			plot.setDataset(plot.getDatasetCount() + 1, comData);
@@ -554,8 +554,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					}
 				}
 
-			} catch (MissingLandmarkException | MissingProfileException | ProfileException
-					| ComponentCreationException e) {
+			} catch (MissingDataException
+					| ComponentCreationException | SegmentUpdateException e) {
 				LOGGER.log(Loggable.STACK, "Error getting segments for mesh", e);
 				LOGGER.log(Loggable.STACK, "Falling back to old mesh face annotation");
 

@@ -39,7 +39,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,7 +50,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nma.analysis.ProgressEvent;
 import com.bmskinner.nma.analysis.ProgressListener;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
@@ -62,8 +62,9 @@ import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
-import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.measure.MeasurementCache;
+import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
 import com.bmskinner.nma.components.measure.VennCache;
 import com.bmskinner.nma.components.profiles.DefaultLandmark;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
@@ -74,14 +75,13 @@ import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileAggregate;
 import com.bmskinner.nma.components.profiles.IProfileCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileManager;
 import com.bmskinner.nma.components.profiles.ProfileType;
-import com.bmskinner.nma.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.components.signals.DefaultSignalGroup;
@@ -91,6 +91,7 @@ import com.bmskinner.nma.components.signals.SignalManager;
 import com.bmskinner.nma.io.XmlSerializable;
 import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
+import com.bmskinner.nma.utility.StreamUtils;
 
 /**
  * Store cells and their profiles
@@ -263,7 +264,11 @@ public class DefaultCellCollection implements ICellCollection {
 			result.add(c.duplicate());
 
 		result.consensusNucleus = consensusNucleus == null ? null : consensusNucleus.duplicate();
-		result.profileCollection = profileCollection.duplicate();
+		try {
+			result.profileCollection = profileCollection.duplicate();
+		} catch (SegmentUpdateException e) {
+			throw new ComponentCreationException("Unable to duplicate profile collection", e);
+		}
 
 		// copy the signals
 		for (ISignalGroup s : getSignalGroups())
@@ -413,7 +418,7 @@ public class DefaultCellCollection implements ICellCollection {
 	public Optional<Nucleus> getNucleus(@NonNull UUID id) {
 		for (ICell c : this) {
 			for (Nucleus n : c.getNuclei()) {
-				if (n.getID().equals(id))
+				if (n.getId().equals(id))
 					return Optional.ofNullable(n);
 			}
 		}
@@ -555,20 +560,14 @@ public class DefaultCellCollection implements ICellCollection {
 	 * 
 	 * @param om the tag to zero profiles against
 	 * @return an array of normalised differences
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
-	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(OrientationMark om) {
-		IProfile medianProfile;
-		try {
-			medianProfile = this.getProfileCollection()
-					.getProfile(ProfileType.ANGLE, om, Stats.MEDIAN)
-					.interpolate(FIXED_PROFILE_LENGTH);
-		} catch (MissingComponentException | ProfileException e) {
-			LOGGER.warning("Cannot get median profile for collection");
-			LOGGER.log(Loggable.STACK, "Error getting median profile", e);
-			double[] result = new double[size()];
-			Arrays.fill(result, Double.MAX_VALUE);
-			return result;
-		}
+	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(OrientationMark om)
+			throws SegmentUpdateException, MissingDataException {
+		IProfile medianProfile = this.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, om, Stats.MEDIAN)
+				.interpolate(FIXED_PROFILE_LENGTH);
 
 		return getNuclei().stream().mapToDouble(n -> {
 			try {
@@ -579,7 +578,7 @@ public class DefaultCellCollection implements ICellCollection {
 				return Math.sqrt(diff / FIXED_PROFILE_LENGTH); // differences in degrees, rather
 																// than square degrees
 
-			} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
+			} catch (MissingDataException | SegmentUpdateException e) {
 				LOGGER.log(Loggable.STACK, "Error getting nucleus profile", e);
 				return Double.NaN;
 			}
@@ -593,27 +592,26 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param om the tag to use as index 0
 	 * @param c  the cell to test
 	 * @return the variabililty score of the nucleus
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 * @throws Exception
 	 */
 	@Override
-	public double getNormalisedDifferenceToMedian(@NonNull OrientationMark om, Taggable t) {
+	public double getNormalisedDifferenceToMedian(@NonNull OrientationMark om, Taggable t)
+			throws SegmentUpdateException, MissingDataException {
 
-		try {
-			IProfile medianProfile = profileCollection
-					.getProfile(ProfileType.ANGLE, om, Stats.MEDIAN)
-					.interpolate(FIXED_PROFILE_LENGTH);
+		IProfile medianProfile = profileCollection
+				.getProfile(ProfileType.ANGLE, om, Stats.MEDIAN)
+				.interpolate(FIXED_PROFILE_LENGTH);
 
-			IProfile angleProfile = t.getProfile(ProfileType.ANGLE, om);
+		IProfile angleProfile = t.getProfile(ProfileType.ANGLE, om);
 
-			double diff = angleProfile.absoluteSquareDifference(medianProfile,
-					FIXED_PROFILE_LENGTH);
-			return Math.sqrt(diff / FIXED_PROFILE_LENGTH); // use the differences in degrees divided
-															// by the pixel
-															// interplation length
-		} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
-			LOGGER.log(Loggable.STACK, "Error getting median profile for collection", e);
-			return 0;
-		}
+		double diff = angleProfile.absoluteSquareDifference(medianProfile,
+				FIXED_PROFILE_LENGTH);
+		return Math.sqrt(diff / FIXED_PROFILE_LENGTH); // use the differences in degrees divided
+														// by the pixel
+														// interplation length
+
 	}
 
 	/**
@@ -621,18 +619,18 @@ public class DefaultCellCollection implements ICellCollection {
 	 * 
 	 * @param pointType the point to compare profiles from
 	 * @return the best nucleus
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	@Override
 	public Nucleus getNucleusMostSimilarToMedian(OrientationMark pointType)
-			throws ProfileException, MissingLandmarkException, MissingProfileException {
+			throws SegmentUpdateException, MissingDataException {
 
 		List<Nucleus> list = this.getNuclei();
 
 		// No need to check profiles if there is only one nucleus
 		if (this.size() == 1)
-			return list.stream().findFirst().orElseThrow(ProfileException::new);
+			return list.stream().findFirst().orElseThrow(MissingDataException::new);
 
 		IProfile medianProfile = profileCollection
 				.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN)
@@ -652,7 +650,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		if (result == null)
-			throw new ProfileException("Error finding nucleus similar to median");
+			throw new MissingDataException("Cannot find nucleus similar to median");
 		return result;
 	}
 
@@ -679,28 +677,30 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public synchronized double getMedian(@NonNull Measurement stat, String component,
-			MeasurementScale scale) {
+			MeasurementScale scale)
+			throws MissingDataException, SegmentUpdateException {
 		return getMedianStatistic(stat, component, scale, null);
 	}
 
 	@Override
 	public synchronized double getMedian(@NonNull Measurement stat, String component,
-			MeasurementScale scale, UUID id) {
+			MeasurementScale scale, UUID id)
+			throws MissingDataException, SegmentUpdateException {
 		return getMedianStatistic(stat, component, scale, id);
 	}
 
 	@Override
 	public synchronized double[] getRawValues(@NonNull Measurement stat, String component,
-			MeasurementScale scale) {
-
+			MeasurementScale scale)
+			throws MissingDataException, SegmentUpdateException {
 		return getRawValues(stat, component, scale, null);
-
 	}
 
 	@Override
 	public synchronized double[] getRawValues(@NonNull Measurement stat, String component,
 			MeasurementScale scale,
-			UUID id) {
+			UUID id)
+			throws MissingDataException, SegmentUpdateException {
 
 		switch (component) {
 		case CellularComponent.WHOLE_CELL:
@@ -718,7 +718,8 @@ public class DefaultCellCollection implements ICellCollection {
 
 	private synchronized double getMedianStatistic(@NonNull Measurement stat, String component,
 			MeasurementScale scale,
-			UUID id) {
+			UUID id)
+			throws MissingDataException, SegmentUpdateException {
 
 		if (!statsCache.has(stat, component, scale, id)) {
 			double[] values = getRawValues(stat, component, scale, id);
@@ -732,19 +733,22 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public synchronized double getMin(@NonNull Measurement stat, String component,
-			MeasurementScale scale) {
+			MeasurementScale scale)
+			throws MissingDataException, SegmentUpdateException {
 		return getMinStatistic(stat, component, scale, null);
 	}
 
 	@Override
 	public synchronized double getMin(@NonNull Measurement stat, String component,
-			MeasurementScale scale, UUID id) {
+			MeasurementScale scale, UUID id)
+			throws MissingDataException, SegmentUpdateException {
 		return getMinStatistic(stat, component, scale, id);
 	}
 
 	private synchronized double getMinStatistic(@NonNull Measurement stat, String component,
 			MeasurementScale scale,
-			UUID id) {
+			UUID id)
+			throws MissingDataException, SegmentUpdateException {
 
 		if (!statsCache.has(stat, component, scale, id)) {
 			double[] values = getRawValues(stat, component, scale, id);
@@ -757,19 +761,23 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public synchronized double getMax(@NonNull Measurement stat, String component,
-			MeasurementScale scale) {
+			MeasurementScale scale)
+			throws MissingDataException, SegmentUpdateException {
 		return getMaxStatistic(stat, component, scale, null);
 	}
 
 	@Override
 	public synchronized double getMax(@NonNull Measurement stat, String component,
-			MeasurementScale scale, UUID id) {
+			MeasurementScale scale, UUID id)
+			throws MissingDataException, SegmentUpdateException {
 		return getMaxStatistic(stat, component, scale, id);
 	}
 
 	private synchronized double getMaxStatistic(@NonNull Measurement stat, String component,
 			MeasurementScale scale,
-			UUID id) {
+			UUID id)
+			throws MissingDataException,
+			SegmentUpdateException {
 
 		if (!statsCache.has(stat, component, scale, id)) {
 			double[] values = getRawValues(stat, component, scale, id);
@@ -786,13 +794,27 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param stat  the measurement to use
 	 * @param scale the measurement scale
 	 * @return a list of values
+	 * @throws MissingMeasurementException
 	 * @throws Exception
 	 */
 	private synchronized double[] getCellStatistics(@NonNull Measurement stat,
-			@NonNull MeasurementScale scale) {
+			@NonNull MeasurementScale scale) throws MissingMeasurementException {
+
+		if (!cells.parallelStream().allMatch(c -> c.hasMeasurement(stat))) {
+			throw new MissingMeasurementException("Missing '%s' in at least one cell");
+		}
 
 		return cells.parallelStream()
-				.mapToDouble(c -> c.getMeasurement(stat, scale))
+				.mapToDouble(c -> {
+					try {
+						return c.getMeasurement(stat, scale);
+					} catch (MissingDataException | ComponentCreationException
+							| SegmentUpdateException e) {
+						// should never be reached, we checked earlier
+						return Double.NaN;
+					}
+
+				})
 				.sorted()
 				.toArray();
 	}
@@ -803,10 +825,12 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param stat  the measurement to use
 	 * @param scale the measurement scale
 	 * @return a list of values
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 * @throws Exception
 	 */
 	private synchronized double[] getNuclearStatistics(@NonNull Measurement stat,
-			@NonNull MeasurementScale scale) {
+			@NonNull MeasurementScale scale) throws SegmentUpdateException, MissingDataException {
 
 		double[] result = null;
 
@@ -814,7 +838,11 @@ public class DefaultCellCollection implements ICellCollection {
 			result = this.getNormalisedDifferencesToMedianFromPoint(OrientationMark.REFERENCE);
 		} else {
 			result = this.getNuclei().parallelStream()
-					.mapToDouble(n -> n.getMeasurement(stat, scale))
+					.mapToDouble(n -> {
+						return StreamUtils.uncheckCall(() -> {
+							return n.getMeasurement(stat, scale);
+						});
+					})
 					.sorted()
 					.toArray();
 		}
@@ -825,30 +853,35 @@ public class DefaultCellCollection implements ICellCollection {
 	 * Calculate the length of the segment with the given name in each nucleus of
 	 * the collection
 	 * 
-	 * @param segName the segment name
-	 * @param scale   the scale to use
-	 * @return a list of segment lengths
-	 * @throws Exception
+	 * @param stat  the measurement to fetch
+	 * @param scale the scale to use
+	 * @param id    the segment id to fetch
+	 * @return the segment measurements for each nucleus in the collection
+	 * @throws MissingMeasurementException via the unchecked stream
+	 * @throws ProfileException            via the unchecked stream
+	 * @throws MissingDataException        via the unchecked stream
 	 */
 	private synchronized double[] getSegmentStatistics(@NonNull Measurement stat,
 			@NonNull MeasurementScale scale,
-			@NonNull UUID id) {
+			@NonNull UUID id)
+			throws MissingDataException, SegmentUpdateException {
 
 		double[] result = null;
 
-		AtomicInteger errorCount = new AtomicInteger(0);
 		result = getNuclei().parallelStream().mapToDouble(n -> {
+			return StreamUtils.uncheckCall(callSegMeasurement(stat, scale, id, n));
+		}).sorted().toArray();
+
+		return result;
+	}
+
+	private Callable<Double> callSegMeasurement(@NonNull Measurement stat,
+			@NonNull MeasurementScale scale,
+			@NonNull UUID id, Nucleus n) {
+
+		return () -> {
 			IProfileSegment segment;
-			try {
-				segment = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegment(id);
-			} catch (ProfileException | MissingComponentException e) {
-				LOGGER.log(Loggable.STACK, String.format(
-						"Error getting segment %s from nucleus %s in DefaultCellCollection::getSegmentStatistics",
-						id,
-						n.getNameAndNumber()), e);
-				errorCount.incrementAndGet();
-				return 0;
-			}
+			segment = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegment(id);
 			double perimeterLength = 0;
 			if (segment != null) {
 				int indexLength = segment.length();
@@ -858,15 +891,8 @@ public class DefaultCellCollection implements ICellCollection {
 						* n.getMeasurement(Measurement.PERIMETER, scale);
 			}
 			return perimeterLength;
+		};
 
-		}).sorted().toArray();
-
-		if (errorCount.get() > 0)
-			LOGGER.warning(String.format(
-					"Problem calculating segment stats for segment %s: %d nuclei had errors getting this segment",
-					id,
-					errorCount.get()));
-		return result;
 	}
 
 	@Override
@@ -893,7 +919,7 @@ public class DefaultCellCollection implements ICellCollection {
 			return false;
 
 		for (Nucleus n : getNuclei()) {
-			if (n.getID().equals(nucleus.getID()))
+			if (n.getId().equals(nucleus.getId()))
 				return true;
 		}
 
@@ -1180,8 +1206,9 @@ public class DefaultCellCollection implements ICellCollection {
 		 * Used for duplicating
 		 * 
 		 * @param p
+		 * @throws SegmentUpdateException
 		 */
-		private DefaultProfileCollection(DefaultProfileCollection p) {
+		private DefaultProfileCollection(DefaultProfileCollection p) throws SegmentUpdateException {
 			for (Landmark l : p.landmarks.keySet())
 				landmarks.put(l, p.landmarks.get(l));
 
@@ -1192,7 +1219,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public IProfileCollection duplicate() {
+		public IProfileCollection duplicate() throws SegmentUpdateException {
 			return new DefaultProfileCollection(this);
 		}
 
@@ -1252,7 +1279,7 @@ public class DefaultCellCollection implements ICellCollection {
 		@Override
 		public synchronized IProfile getProfile(@NonNull ProfileType type,
 				@NonNull OrientationMark om, int quartile)
-				throws MissingLandmarkException, ProfileException, MissingProfileException {
+				throws MissingDataException, SegmentUpdateException {
 			if (!this.hasLandmark(om))
 				throw new MissingLandmarkException(
 						"Orientation point is not present: " + om.toString());
@@ -1265,7 +1292,7 @@ public class DefaultCellCollection implements ICellCollection {
 		@Override
 		public synchronized IProfile getProfile(@NonNull ProfileType type,
 				@NonNull Landmark lm, int quartile)
-				throws MissingLandmarkException, ProfileException, MissingProfileException {
+				throws MissingDataException, SegmentUpdateException {
 
 			if (!cache.hasProfile(type, quartile, lm)) {
 				IProfileAggregate agg = createProfileAggregate(type,
@@ -1284,7 +1311,7 @@ public class DefaultCellCollection implements ICellCollection {
 		public ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type,
 				@NonNull OrientationMark tag,
 				int quartile)
-				throws MissingLandmarkException, ProfileException, MissingProfileException {
+				throws MissingDataException, SegmentUpdateException {
 
 			if (quartile < 0 || quartile > 100)
 				throw new IllegalArgumentException("Quartile must be between 0-100");
@@ -1292,14 +1319,14 @@ public class DefaultCellCollection implements ICellCollection {
 			// get the profile array
 			IProfile p = getProfile(type, tag, quartile);
 			if (segments.isEmpty())
-				throw new UnsegmentedProfileException("No segments assigned to profile collection");
+				throw new MissingDataException("No segments assigned to profile collection");
 
 			return new DefaultSegmentedProfile(p, getSegments(tag));
 		}
 
 		@Override
 		public void calculateProfiles()
-				throws MissingLandmarkException, MissingProfileException, ProfileException {
+				throws MissingDataException, SegmentUpdateException {
 			cache.clear();
 			for (ProfileType t : ProfileType.values()) {
 				for (Landmark lm : landmarks.keySet()) {
@@ -1323,13 +1350,13 @@ public class DefaultCellCollection implements ICellCollection {
 
 		@Override
 		public synchronized IProfileSegment getSegmentAt(@NonNull OrientationMark tag, int position)
-				throws MissingLandmarkException {
+				throws MissingLandmarkException, SegmentUpdateException {
 			return this.getSegments(tag).get(position);
 		}
 
 		@Override
 		public synchronized List<IProfileSegment> getSegments(@NonNull OrientationMark tag)
-				throws MissingLandmarkException {
+				throws MissingLandmarkException, SegmentUpdateException {
 
 			// this must be negative offset for segments
 			// since we are moving the pointIndex back to the beginning
@@ -1342,19 +1369,14 @@ public class DefaultCellCollection implements ICellCollection {
 				result.add(s.duplicate().offset(offset));
 			}
 
-			try {
-				IProfileSegment.linkSegments(result);
-				return result;
-			} catch (ProfileException e) {
-				LOGGER.log(Loggable.STACK, "Could not get segments from " + tag, e);
-				e.printStackTrace();
-				return new ArrayList<>();
-			}
+			IProfileSegment.linkSegments(result);
+			return result;
+
 		}
 
 		@Override
 		public IProfileSegment getSegmentContaining(@NonNull OrientationMark tag)
-				throws ProfileException, MissingLandmarkException {
+				throws SegmentUpdateException, MissingLandmarkException {
 			List<IProfileSegment> segs = this.getSegments(tag);
 
 			IProfileSegment result = null;
@@ -1409,7 +1431,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		private IProfileAggregate createProfileAggregate(@NonNull ProfileType type, int length)
-				throws ProfileException, MissingLandmarkException, MissingProfileException {
+				throws MissingDataException, SegmentUpdateException {
 			if (length <= 0)
 				throw new IllegalArgumentException(
 						"Requested profile aggregate length is zero or negative");
@@ -1446,12 +1468,12 @@ public class DefaultCellCollection implements ICellCollection {
 		 * 
 		 * @param collection
 		 * @param length
-		 * @throws MissingProfileException
-		 * @throws MissingLandmarkException
+		 * @throws SegmentUpdateException
+		 * @throws MissingDataException
 		 */
 		private IProfileAggregate createProfileAggregateOfDifferentLength(@NonNull ProfileType type,
 				int length)
-				throws ProfileException, MissingLandmarkException, MissingProfileException {
+				throws MissingDataException, SegmentUpdateException {
 			cache.clear();
 			Landmark lm = getLandmark(OrientationMark.REFERENCE);
 			landmarks.put(lm, ZERO_INDEX);
@@ -1506,16 +1528,16 @@ public class DefaultCellCollection implements ICellCollection {
 
 		@Override
 		public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
-				throws MissingLandmarkException, ProfileException, MissingProfileException {
+				throws MissingDataException, SegmentUpdateException {
 
 			IProfile q25 = getProfile(type, om, Stats.LOWER_QUARTILE);
 			IProfile q75 = getProfile(type, om, Stats.UPPER_QUARTILE);
 
 			if (q25 == null)
-				throw new ProfileException("Could not create q25 profile; was null");
+				throw new MissingDataException("Could not create q25 profile; was null");
 
 			if (q75 == null)
-				throw new ProfileException("Could not create q75 profile; was null");
+				throw new MissingDataException("Could not create q75 profile; was null");
 
 			return q75.subtract(q25);
 		}
@@ -1674,16 +1696,12 @@ public class DefaultCellCollection implements ICellCollection {
 			public ProfileCache() { // no default data
 			}
 
-			public ProfileCache duplicate() {
+			public ProfileCache duplicate() throws SegmentUpdateException {
 				ProfileCache result = new ProfileCache();
-				try {
-					for (ProfileKey k : map.keySet()) {
-						IProfile p = map.get(k);
-						if (p != null)
-							result.map.put(k, p.duplicate());
-					}
-				} catch (ProfileException e) {
-
+				for (ProfileKey k : map.keySet()) {
+					IProfile p = map.get(k);
+					if (p != null)
+						result.map.put(k, p.duplicate());
 				}
 				return result;
 			}

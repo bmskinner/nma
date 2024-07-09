@@ -20,6 +20,7 @@ import java.awt.Paint;
 import java.awt.Shape;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -106,26 +107,30 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * @return
 	 */
 	public JFreeChart createNucleusStatisticScatterChart() throws ChartDatasetCreationException {
+		try {
+			XYDataset ds = new ScatterChartDatasetCreator(options)
+					.createScatterDataset(CellularComponent.NUCLEUS);
 
-		XYDataset ds = new ScatterChartDatasetCreator(options)
-				.createScatterDataset(CellularComponent.NUCLEUS);
+			String xLabel = options.getStat(0).label(options.getScale());
+			String yLabel = options.getStat(1).label(options.getScale());
 
-		String xLabel = options.getStat(0).label(options.getScale());
-		String yLabel = options.getStat(1).label(options.getScale());
+			JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
 
-		JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
+			XYPlot plot = chart.getXYPlot();
 
-		XYPlot plot = chart.getXYPlot();
+			NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+			yAxis.setAutoRangeIncludesZero(false);
 
-		NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-		yAxis.setAutoRangeIncludesZero(false);
+			XYItemRenderer renderer = new ScatterChartRenderer();
+			plot.setRenderer(renderer);
 
-		XYItemRenderer renderer = new ScatterChartRenderer();
-		plot.setRenderer(renderer);
+			applySingleXYDatasetColours(plot);
 
-		applySingleXYDatasetColours(plot);
-
-		return chart;
+			return chart;
+		} catch (ChartDatasetCreationException e) {
+			LOGGER.log(Level.SEVERE, "Error creating scatter dataset", e);
+			return createErrorChart();
+		}
 	}
 
 	/**
@@ -141,7 +146,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			ds = (SignalXYDataset) new ScatterChartDatasetCreator(options)
 					.createScatterDataset(CellularComponent.NUCLEAR_SIGNAL);
 		} catch (ChartDatasetCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error creating scatter dataset", e);
+			LOGGER.log(Level.SEVERE, "Error creating scatter dataset", e);
 			return createErrorChart();
 		}
 

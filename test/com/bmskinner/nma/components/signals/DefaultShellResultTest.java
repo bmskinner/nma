@@ -59,10 +59,10 @@ public class DefaultShellResultTest {
         when(c.getId()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         
         n = mock(Nucleus.class);
-        when(n.getID()).thenReturn(UUID.fromString("00000000-0000-0000-0001-000000000001"));
+        when(n.getId()).thenReturn(UUID.fromString("00000000-0000-0000-0001-000000000001"));
 
         s = mock(INuclearSignal.class);
-        when(s.getID()).thenReturn(UUID.fromString("00000000-0000-0001-0000-000000000001"));
+        when(s.getId()).thenReturn(UUID.fromString("00000000-0000-0001-0000-000000000001"));
     }
 
     @Test

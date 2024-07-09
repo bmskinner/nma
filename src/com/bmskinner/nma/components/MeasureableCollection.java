@@ -22,6 +22,9 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
+import com.bmskinner.nma.components.profiles.ProfileException;
 
 /**
  * Describes the methods for retrieving aggregate stats from collections of
@@ -31,7 +34,7 @@ import com.bmskinner.nma.components.measure.MeasurementScale;
  * @since 1.13.4
  *
  */
-public interface StatisticalCollection {
+public interface MeasureableCollection {
 
 	/**
 	 * Clear the measurement, forcing the measurement to be recalculated on next
@@ -66,9 +69,12 @@ public interface StatisticalCollection {
 	 * @param component the cellular component to fetch from
 	 * 
 	 * @return the median value
-	 * @throws Exception
+	 * @throws MissingMeasurementException
+	 * @throws MissingDataException
+	 * @throws ProfileException
 	 */
-	double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale);
+	double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale)
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the median value for a value with an ID - i.e. a nuclear signal or a
@@ -79,9 +85,12 @@ public interface StatisticalCollection {
 	 * @param scale     the scale to convert values to
 	 * @param id        the id of the component to fetch
 	 * @return the median value
-	 * @throws Exception
+	 * @throws MissingMeasurementException
+	 * @throws MissingDataException
+	 * @throws ProfileException
 	 */
-	double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
+	double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id)
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the minimum value of the given measurement in the collection
@@ -90,9 +99,13 @@ public interface StatisticalCollection {
 	 * @param component
 	 * @param scale
 	 * @param id
-	 * @return the minimum or Statistical.ERROR_CALCULATING_STAT
+	 * @return the minimum
+	 * @throws MissingMeasurementException
+	 * @throws MissingDataException
+	 * @throws ProfileException
 	 */
-	double getMin(@NonNull Measurement stat, String component, MeasurementScale scale);
+	double getMin(@NonNull Measurement stat, String component, MeasurementScale scale)
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the minimum value of the given measurement in the collection
@@ -101,9 +114,13 @@ public interface StatisticalCollection {
 	 * @param component
 	 * @param scale
 	 * @param id
-	 * @return the minimum or Statistical.ERROR_CALCULATING_STAT
+	 * @return the minimum
+	 * @throws MissingMeasurementException
+	 * @throws MissingDataException
+	 * @throws ProfileException
 	 */
-	double getMin(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
+	double getMin(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id)
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the maximum value of the given measurement in the collection
@@ -112,9 +129,13 @@ public interface StatisticalCollection {
 	 * @param component
 	 * @param scale
 	 * @param id
-	 * @return the maxumum or Statistical.ERROR_CALCULATING_STAT
+	 * @return the maxumum
+	 * @throws MissingMeasurementException
+	 * @throws MissingDataException
+	 * @throws ProfileException
 	 */
-	double getMax(@NonNull Measurement stat, String component, MeasurementScale scale);
+	double getMax(@NonNull Measurement stat, String component, MeasurementScale scale)
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the maximum value of the given measurement in the collection
@@ -123,9 +144,13 @@ public interface StatisticalCollection {
 	 * @param component
 	 * @param scale
 	 * @param id
-	 * @return the maxumum or Statistical.ERROR_CALCULATING_STAT
+	 * @return the maxumum
+	 * @throws MissingMeasurementException
+	 * @throws MissingDataException
+	 * @throws ProfileException
 	 */
-	double getMax(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id);
+	double getMax(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id)
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the raw values for the given measurement for each object in the
@@ -135,8 +160,12 @@ public interface StatisticalCollection {
 	 * @param component the cellular component to fetch from
 	 * @param scale     the scale to convert values to
 	 * @return the values in the collection
+	 * @throws MissingMeasurementException
+	 * @throws MissingDataException
+	 * @throws ProfileException
 	 */
-	double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale);
+	double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale)
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the raw values for the given measurement for each object in the
@@ -147,8 +176,12 @@ public interface StatisticalCollection {
 	 * @param scale     the scale to convert values to
 	 * @param id        the id of the compenent to fetch
 	 * @return the values in the collection
+	 * @throws MissingMeasurementException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale,
-			UUID id);
+			UUID id)
+			throws MissingDataException, SegmentUpdateException;
 
 }

@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -30,11 +31,14 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.ComponentMeasurer;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.measure.DefaultMeasurement;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.io.XmlSerializable;
 
 /**
@@ -53,7 +57,7 @@ public class DefaultCell implements ICell {
 	protected List<Nucleus> nuclei = new ArrayList<>();
 
 	/** The statistical values stored for this object */
-	private Map<Measurement, Double> statistics = new HashMap<>();
+	private Map<Measurement, Double> measurements = new HashMap<>();
 
 	/**
 	 * Create a new cell with a random ID
@@ -78,7 +82,7 @@ public class DefaultCell implements ICell {
 		// Add measurements
 		for (Element el : e.getChildren(XMLNames.XML_MEASUREMENT)) {
 			Measurement m = new DefaultMeasurement(el);
-			statistics.put(m, Double.parseDouble(el.getAttributeValue(XMLNames.XML_VALUE)));
+			measurements.put(m, Double.parseDouble(el.getAttributeValue(XMLNames.XML_VALUE)));
 		}
 
 	}
@@ -108,7 +112,7 @@ public class DefaultCell implements ICell {
 	 * @param c the cell to duplicate
 	 * @throws ComponentCreationException
 	 */
-	public DefaultCell(@NonNull ICell c) throws ComponentCreationException {
+	public DefaultCell(@NonNull ICell c) {
 
 		this.uuid = c.getId();
 
@@ -120,19 +124,18 @@ public class DefaultCell implements ICell {
 		if (c.hasCytoplasm())
 			this.cytoplasm = c.getCytoplasm().duplicate();
 
-		statistics = new HashMap<>();
+		measurements = new HashMap<>();
 		for (Measurement stat : c.getMeasurements())
-			statistics.put(stat, c.getMeasurement(stat));
+			try {
+				measurements.put(stat, c.getMeasurement(stat));
+			} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+				LOGGER.log(Level.SEVERE, "Error copying measurement to new cell", e);
+			}
 	}
 
 	@Override
 	public ICell duplicate() {
-		try {
-			return new DefaultCell(this);
-		} catch (ComponentCreationException e) {
-			LOGGER.severe("Could not duplicate cell: " + e.getMessage());
-		}
-		return null;
+		return new DefaultCell(this);
 	}
 
 	@Override
@@ -151,21 +154,27 @@ public class DefaultCell implements ICell {
 	}
 
 	@Override
-	public synchronized double getMeasurement(@NonNull Measurement stat) {
+	public boolean hasMeasurement(@NonNull Measurement measurement) {
+		return measurements.containsKey(measurement);
+	}
+
+	@Override
+	public synchronized double getMeasurement(@NonNull Measurement stat)
+			throws MissingMeasurementException {
 		return this.getMeasurement(stat, MeasurementScale.PIXELS);
 	}
 
 	@Override
 	public synchronized double getMeasurement(@NonNull Measurement stat,
-			@NonNull MeasurementScale scale) {
+			@NonNull MeasurementScale scale) throws MissingMeasurementException {
 
 		// Get the scale of one of the components of the cell
 		double sc = chooseScale();
 
-		if (!statistics.containsKey(stat))
-			statistics.put(stat, ComponentMeasurer.calculate(stat, this));
+		if (!measurements.containsKey(stat))
+			throw new MissingMeasurementException("Measurement '%s' not present".formatted(stat));
 
-		double result = statistics.get(stat);
+		double result = measurements.get(stat);
 		return stat.convert(result, sc, scale);
 	}
 
@@ -183,33 +192,35 @@ public class DefaultCell implements ICell {
 
 	@Override
 	public void setMeasurement(@NonNull Measurement stat, double d) {
-
-		// All cell measurements can be calculated when needed without
-		// a long wait - no need to manually store
-
+		measurements.put(stat, d);
 	}
 
 	@Override
 	public void clearMeasurement(@NonNull Measurement stat) {
-		statistics.remove(stat);
+		measurements.remove(stat);
 	}
 
 	@Override
 	public void clearMeasurements() {
-		statistics.clear();
+		measurements.clear();
 	}
 
 	@Override
 	public List<Measurement> getMeasurements() {
-		return new ArrayList<>(statistics.keySet());
+		return new ArrayList<>(measurements.keySet());
 	}
 
 	@Override
 	public void addNucleus(Nucleus nucleus) {
 		nuclei.add(nucleus);
-		statistics.clear();
+		measurements.clear();
 		for (Measurement m : Measurement.getCellStats())
-			getMeasurement(m);
+			try {
+				measurements.put(m, ComponentMeasurer.calculate(m, this));
+			} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+				LOGGER.log(Level.SEVERE,
+						"Unable to calculate cell measurements when adding new nucleus", e);
+			}
 
 	}
 
@@ -293,7 +304,7 @@ public class DefaultCell implements ICell {
 	@Override
 	public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_CELL).setAttribute(XMLNames.XML_ID, uuid.toString());
-		for (Entry<Measurement, Double> entry : statistics.entrySet()) {
+		for (Entry<Measurement, Double> entry : measurements.entrySet()) {
 			e.addContent(entry.getKey().toXmlElement().setAttribute(XMLNames.XML_VALUE,
 					entry.getValue().toString()));
 		}
@@ -318,17 +329,18 @@ public class DefaultCell implements ICell {
 			return false;
 		DefaultCell other = (DefaultCell) obj;
 		return Objects.equals(cytoplasm, other.cytoplasm) && Objects.equals(nuclei, other.nuclei)
-				&& Objects.equals(statistics, other.statistics) && Objects.equals(uuid, other.uuid);
+				&& Objects.equals(measurements, other.measurements)
+				&& Objects.equals(uuid, other.uuid);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cytoplasm, nuclei, statistics, uuid);
+		return Objects.hash(cytoplasm, nuclei, measurements, uuid);
 	}
 
 	@Override
 	public String toString() {
-		return "Cell " + this.uuid.toString() + ":\n" + statistics.toString() + "\n"
+		return "Cell " + this.uuid.toString() + ":\n" + measurements.toString() + "\n"
 				+ nuclei.toString() + "\n";
 	}
 

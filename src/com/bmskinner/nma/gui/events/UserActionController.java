@@ -11,7 +11,7 @@ import javax.swing.JOptionPane;
 
 import com.bmskinner.nma.analysis.DatasetDeleter;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -19,9 +19,7 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nma.core.DatasetListManager;
@@ -646,7 +644,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					event.dataset.getCollection().getProfileManager()
 							.updateCellSegmentStartIndex(event.cell, event.id, event.index);
 
-				} catch (ProfileException | MissingComponentException e) {
+				} catch (MissingDataException | SegmentUpdateException e) {
 					LOGGER.warning("Cannot update this segment start index");
 				} finally {
 					UIController.getInstance().fireCellUpdatedEvent(event.dataset, event.cell);
@@ -696,7 +694,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					op.get().setAngleWindowProportion(event.window);
 
 				UIController.getInstance().fireProfilesUpdated(event.dataset);
-			} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
+			} catch (MissingDataException | SegmentUpdateException e) {
 				LOGGER.warning("Unable to update profile window proportion: " + e.getMessage());
 			}
 		};

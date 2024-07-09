@@ -40,6 +40,7 @@ import org.jfree.data.Range;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
@@ -48,9 +49,7 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.FilteringOptions;
 import com.bmskinner.nma.components.options.FilteringOptions.FilterMatchType;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.components.ExportableTable;
@@ -270,8 +269,8 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 									child));
 
 					UIController.getInstance().fireDatasetAdded(child);
-				} catch (CollectionFilteringException | ProfileException | MissingProfileException
-						| MissingLandmarkException e1) {
+				} catch (CollectionFilteringException | MissingDataException
+						| SegmentUpdateException e1) {
 					LOGGER.log(Loggable.STACK, e1,
 							() -> "Unable to filter collection for '%s'".formatted(d.getName()));
 				}

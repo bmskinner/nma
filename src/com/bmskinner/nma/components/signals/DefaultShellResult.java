@@ -162,8 +162,8 @@ public class DefaultShellResult implements IShellResult {
 		}
 
 		ShellKey k = signal == null
-				? new ShellKey(cell.getId(), nucleus.getID())
-				: new ShellKey(cell.getId(), nucleus.getID(), signal.getID());
+				? new ShellKey(cell.getId(), nucleus.getId())
+				: new ShellKey(cell.getId(), nucleus.getId(), signal.getId());
 
 		map.get(countType).putValues(k, shellData);
 	}
@@ -172,8 +172,8 @@ public class DefaultShellResult implements IShellResult {
 	public long[] getPixelValues(@NonNull CountType countType, @NonNull ICell cell,
 			@NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
 		ShellKey k = signal == null
-				? new ShellKey(cell.getId(), nucleus.getID())
-				: new ShellKey(cell.getId(), nucleus.getID(), signal.getID());
+				? new ShellKey(cell.getId(), nucleus.getId())
+				: new ShellKey(cell.getId(), nucleus.getId(), signal.getId());
 		return map.get(countType).getPixelIntensities(k);
 	}
 
@@ -181,8 +181,8 @@ public class DefaultShellResult implements IShellResult {
 	public double[] getProportions(@NonNull CountType countType, @NonNull ICell cell,
 			@NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
 		ShellKey k = signal == null
-				? new ShellKey(cell.getId(), nucleus.getID())
-				: new ShellKey(cell.getId(), nucleus.getID(), signal.getID());
+				? new ShellKey(cell.getId(), nucleus.getId())
+				: new ShellKey(cell.getId(), nucleus.getId(), signal.getId());
 
 		long[] intensities = map.get(countType).getPixelIntensities(k);
 		if (intensities == null)

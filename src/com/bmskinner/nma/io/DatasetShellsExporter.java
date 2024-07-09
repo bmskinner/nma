@@ -165,7 +165,7 @@ public class DatasetShellsExporter extends MeasurementsExportMethod {
 					// Append random signal
 					outLine.append(d.getName() + TAB)
 							.append(cell.getId() + TAB)
-							.append(n.getID() + TAB)
+							.append(n.getId() + TAB)
 							.append(CellularComponent.NUCLEUS + TAB)
 							.append(n.getSourceFolder() + TAB)
 							.append(n.getSourceFileName() + TAB)
@@ -198,7 +198,7 @@ public class DatasetShellsExporter extends MeasurementsExportMethod {
 
 					outLine.append(d.getName() + TAB)
 							.append(cell.getId() + TAB)
-							.append(n.getID() + TAB)
+							.append(n.getId() + TAB)
 							.append(CellularComponent.NUCLEUS + TAB)
 							.append(n.getSourceFolder() + TAB)
 							.append(n.getSourceFileName() + TAB)
@@ -229,7 +229,7 @@ public class DatasetShellsExporter extends MeasurementsExportMethod {
 
 						outLine.append(d.getName() + TAB)
 								.append(cell.getId() + TAB)
-								.append(n.getID() + TAB)
+								.append(n.getId() + TAB)
 								.append(CellularComponent.NUCLEUS + TAB)
 								.append(n.getSourceFolder() + TAB)
 								.append(n.getSourceFileName() + TAB)

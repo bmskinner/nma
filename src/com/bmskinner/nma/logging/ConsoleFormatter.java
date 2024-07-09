@@ -8,57 +8,62 @@ import java.util.logging.LogRecord;
 
 /**
  * Log format for the system console
+ * 
  * @author ben
  * @since 1.16.0
  *
  */
 public class ConsoleFormatter extends Formatter {
 
-    private static final String SEPARATOR = "\t";
-    private static final String NEWLINE   = System.getProperty("line.separator");
-    private static final String STACK     = "STACK";
+	private static final String SEPARATOR = "\t";
+	private static final String NEWLINE = System.getProperty("line.separator");
+	private static final String STACK = "STACK";
 
-    @Override
-    public String format(LogRecord record) {
+	@Override
+	public String format(LogRecord record) {
 
-    	StringBuilder buffer = new StringBuilder();
+		StringBuilder buffer = new StringBuilder();
 
-    	String date = calcDate(record.getMillis());
-    	
-    	String formattedMsg = formatMessage(record);
+		String date = calcDate(record.getMillis());
 
-    	buffer.append(date);
-    	buffer.append(SEPARATOR);
-    	buffer.append(record.getLevel());
-    	buffer.append(SEPARATOR);
-    	buffer.append(record.getMessage());
-    	
+		String formattedMsg = formatMessage(record);
 
-    	if (record.getLevel() == Level.SEVERE || record.getLevel() == Loggable.STACK) {
+		buffer.append(date);
+		buffer.append(SEPARATOR);
+		buffer.append(record.getLevel());
+		buffer.append(SEPARATOR);
+		buffer.append(record.getMessage());
 
-    		if (record.getThrown() != null) {
-    			Throwable t = record.getThrown();
-    			buffer.append(NEWLINE)
-    			.append(date)
-    			.append(SEPARATOR)
-    			.append(STACK)
-    			.append(SEPARATOR)
-    			.append(formattedMsg)
-    			.append(NEWLINE);
+		if (record.getLevel() == Level.SEVERE || record.getLevel() == Loggable.STACK) {
 
-    			for (StackTraceElement el : t.getStackTrace()) {
-    				buffer.append(date).append(SEPARATOR).append(STACK).append(SEPARATOR).append(el.toString())
-    				.append(NEWLINE);
-    			}
-    		}
+			if (record.getThrown() != null) {
+				Throwable t = record.getThrown();
+				buffer.append(NEWLINE)
+						.append(date)
+						.append(SEPARATOR)
+						.append(STACK)
+						.append(SEPARATOR)
+						.append(formattedMsg)
+						.append(NEWLINE);
 
-    	}
-    	return buffer.toString();
-    }
+				// check if the throwable was rethrown; if so, get the original stack trace
+				StackTraceElement[] st = t.getCause() == null ? t.getStackTrace()
+						: t.getCause().getStackTrace();
 
-    private String calcDate(long millisecs) {
-        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
-        Date date = new Date(millisecs);
-        return df.format(date);
-    }
+				for (StackTraceElement el : st) {
+					buffer.append(date).append(SEPARATOR).append(STACK).append(SEPARATOR)
+							.append(el.toString())
+							.append(NEWLINE);
+				}
+			}
+
+		}
+		return buffer.toString();
+	}
+
+	private String calcDate(long millisecs) {
+		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+		Date date = new Date(millisecs);
+		return df.format(date);
+	}
 }

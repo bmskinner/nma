@@ -41,6 +41,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -52,10 +53,8 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileCollection;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.Landmark;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.ThreadManager;
@@ -244,8 +243,8 @@ public class AngleWindowSizeExplorer extends MessagingDialog implements ChangeLi
 				// add to the chart
 				updateChart(median, i);
 			}
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException
-				| ComponentCreationException e) {
+		} catch (MissingDataException
+				| ComponentCreationException | SegmentUpdateException e) {
 			LOGGER.warning("Error making profile collections");
 			LOGGER.log(Loggable.STACK, e.getMessage(), e);
 		}

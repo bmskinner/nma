@@ -105,7 +105,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 					IWarpedSignal w1 = model.getWarpedSignal(selectedRow[1]);
 
 					// Only compare images with the same target
-					if (w0.target().getID().equals(w1.target().getID())) {
+					if (w0.target().getId().equals(w1.target().getId())) {
 						MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
 						MSSIMScore values = msi.calculateMSSIM(w0.toImage(), w1.toImage());
 						ssimLabel.setText("MS-SSIM*: " + values.toString());

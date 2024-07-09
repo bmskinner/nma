@@ -20,7 +20,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nma.ComponentTester;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.samples.dummy.DummySegmentedCellularComponent;
@@ -79,7 +79,7 @@ public class ISegmentedProfileTest {
 		throw new Exception("Unable to create instance of " + source);
 	}
 
-	private static List<IProfileSegment> makeTestSegments() throws ProfileException {
+	private static List<IProfileSegment> makeTestSegments() throws SegmentUpdateException {
 		List<IProfileSegment> list = new ArrayList<>();
 		list.add(new DefaultProfileSegment(10, 20, PROFILE_LENGTH, UUID.fromString(SEG_0)));
 		list.add(new DefaultProfileSegment(20, 100, PROFILE_LENGTH, UUID.fromString(SEG_1)));
@@ -126,7 +126,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testGetSegments() throws ProfileException {
+	public void testGetSegments() throws SegmentUpdateException {
 		List<IProfileSegment> test = makeTestSegments();
 		List<IProfileSegment> result = profile.getSegments();
 
@@ -138,7 +138,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testGetSegmentUUID() throws ProfileException, MissingComponentException {
+	public void testGetSegmentUUID() throws SegmentUpdateException, MissingDataException {
 		List<IProfileSegment> test = makeTestSegments();
 
 		for (IProfileSegment s : test) {
@@ -149,14 +149,14 @@ public class ISegmentedProfileTest {
 
 	@Test
 	public void testGetSegmentUUIDExceptsOnInvalidId()
-			throws ProfileException, MissingComponentException {
+			throws SegmentUpdateException, MissingDataException {
 		UUID notPresent = UUID.fromString("00000001-1000-1000-1000-100000000000");
-		exception.expect(MissingComponentException.class);
+		exception.expect(MissingDataException.class);
 		IProfileSegment seg = profile.getSegment(notPresent);
 	}
 
 	@Test
-	public void testHasSegment() throws ProfileException, MissingComponentException {
+	public void testHasSegment() throws SegmentUpdateException, MissingDataException {
 		List<IProfileSegment> test = makeTestSegments();
 
 		for (IProfileSegment s : test) {
@@ -176,13 +176,13 @@ public class ISegmentedProfileTest {
 	@Test
 	public void testGetSegmentsFromExceptsOnInvalidId() throws Exception {
 		UUID notPresent = UUID.fromString("00000001-1000-1000-1000-100000000000");
-		exception.expect(MissingComponentException.class);
+		exception.expect(MissingDataException.class);
 		profile.getSegmentsFrom(notPresent);
 	}
 
 	@Test
 	public void testGetOrderedSegmentsSucceedsWhenProfileHasOneSegmentStartingAndEndingAtIndexZero()
-			throws ProfileException {
+			throws SegmentUpdateException {
 		ISegmentedProfile testProfile = profile.duplicate();
 		List<IProfileSegment> segments = new ArrayList<>();
 		segments.add(new DefaultProfileSegment(0, 0, profile.size(), UUID.fromString(SEG_0)));
@@ -195,7 +195,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testGetOrderedSegmentsSucceedsWhenProfileIsOffset() throws ProfileException {
+	public void testGetOrderedSegmentsSucceedsWhenProfileIsOffset() throws SegmentUpdateException {
 
 		// Get ordered segments should return the segments from the profile start
 		// The segments wrap, so an offset of zero begins with Seg_3.
@@ -246,7 +246,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testGetSegmentString() throws MissingComponentException {
+	public void testGetSegmentString() throws MissingDataException {
 		IProfileSegment test = new DefaultProfileSegment(10, 20, PROFILE_LENGTH,
 				UUID.fromString(SEG_0));
 		String name = "Seg_0";
@@ -257,13 +257,13 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testGetSegmentStringExceptsWithInvalidInput() throws MissingComponentException {
-		exception.expect(MissingComponentException.class);
+	public void testGetSegmentStringExceptsWithInvalidInput() throws MissingDataException {
+		exception.expect(MissingDataException.class);
 		profile.getSegment("Not present");
 	}
 
 	@Test
-	public void testGetSegmentIBorderSegment() throws ProfileException {
+	public void testGetSegmentIBorderSegment() throws SegmentUpdateException {
 		IProfileSegment test = new DefaultProfileSegment(10, 20, PROFILE_LENGTH,
 				UUID.fromString(SEG_0));
 		IProfileSegment result = profile.getSegment(test);
@@ -273,7 +273,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testGetSegmentsOrder() throws ProfileException {
+	public void testGetSegmentsOrder() throws SegmentUpdateException {
 		assertEquals(UUID.fromString(SEG_0), profile.getSegments().get(0).getID());
 		assertEquals(UUID.fromString(SEG_1), profile.getSegments().get(1).getID());
 		assertEquals(UUID.fromString(SEG_2), profile.getSegments().get(2).getID());
@@ -281,19 +281,19 @@ public class ISegmentedProfileTest {
 	}
 
 //	@Test
-//	public void testgetSegments().getExceptsWithInvalidInputLow() throws ProfileException{
+//	public void testgetSegments().getExceptsWithInvalidInputLow() throws SegmentUpdateException{
 //	    exception.expect(IllegalArgumentException.class);
 //	    profile.getSegments().get(-1);
 //	}
 //	
 //	@Test
-//	public void testgetSegments().getExceptsWithInvalidInputHigh() throws ProfileException{
+//	public void testgetSegments().getExceptsWithInvalidInputHigh() throws SegmentUpdateException{
 //	    exception.expect(IllegalArgumentException.class);
 //	    profile.getSegments().get(4);
 //	}
 
 	@Test
-	public void testGetSegmentContaining() throws ProfileException {
+	public void testGetSegmentContaining() throws SegmentUpdateException {
 //		10-20-45-89-10
 		IProfileSegment s = profile.getSegmentContaining(0);
 		assertEquals(UUID.fromString(SEG_3), s.getID());
@@ -317,7 +317,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testSetNonWrappingSegments() throws ProfileException {
+	public void testSetNonWrappingSegments() throws SegmentUpdateException {
 
 		List<IProfileSegment> list = new ArrayList<>();
 		list.add(new DefaultProfileSegment(0, 10, profile.size(), UUID.randomUUID()));
@@ -334,7 +334,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testSetWrappingSegments() throws ProfileException {
+	public void testSetWrappingSegments() throws SegmentUpdateException {
 
 		List<IProfileSegment> list = new ArrayList<>();
 		list.add(new DefaultProfileSegment(5, 10, profile.size(), UUID.randomUUID()));
@@ -357,7 +357,8 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testSetSegmentsExceptsOnListWithDifferentProfileLength() throws ProfileException {
+	public void testSetSegmentsExceptsOnListWithDifferentProfileLength()
+			throws SegmentUpdateException {
 		List<IProfileSegment> list = new ArrayList<>();
 		list.add(new DefaultProfileSegment(5, 10, 110, UUID.randomUUID()));
 		list.add(new DefaultProfileSegment(10, 20, 110, UUID.randomUUID()));
@@ -386,14 +387,14 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testGetSegmentNamesReturnsEmptyListWhenNoSegments() throws ProfileException {
+	public void testGetSegmentNamesReturnsEmptyListWhenNoSegments() throws SegmentUpdateException {
 		profile.clearSegments();
 		List<String> result = profile.getSegmentNames();
 		assertTrue(result.size() == 1); // A profile always has a default segment
 	}
 
 	@Test
-	public void testGetSegmentIDs() throws ProfileException {
+	public void testGetSegmentIDs() throws SegmentUpdateException {
 		List<IProfileSegment> test = makeTestSegments();
 		List<UUID> result = profile.getSegmentIDs();
 		assertEquals(test.size(), result.size());
@@ -403,13 +404,13 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testGetSegmentCount() throws ProfileException {
+	public void testGetSegmentCount() throws SegmentUpdateException {
 		List<IProfileSegment> list = makeTestSegments();
 		assertEquals(list.size(), profile.getSegmentCount());
 	}
 
 	@Test
-	public void testClearSegments() throws ProfileException {
+	public void testClearSegments() throws SegmentUpdateException {
 		profile.clearSegments();
 		// A profile always has a default segment
 		assertEquals(1, profile.getSegmentCount());
@@ -417,7 +418,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testGetDisplacement() throws ProfileException {
+	public void testGetDisplacement() throws SegmentUpdateException {
 		IProfileSegment s1 = profile.getSegments().get(1);
 		double d = profile.getDisplacement(s1);
 		assertEquals(0, d, 0);
@@ -431,7 +432,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testContains() throws ProfileException {
+	public void testContains() throws SegmentUpdateException {
 		IProfileSegment s1 = profile.getSegments().get(1);
 		assertTrue(profile.contains(s1));
 	}
@@ -444,31 +445,31 @@ public class ISegmentedProfileTest {
 
 	@Test
 	public void testNudgeSegmentsWithZeroOffset()
-			throws ProfileException, MissingComponentException {
+			throws SegmentUpdateException, MissingDataException {
 		testSegmentOffset(0);
 	}
 
 	@Test
 	public void testNudgeSegmentsWithPositiveOffset()
-			throws ProfileException, MissingComponentException {
+			throws SegmentUpdateException, MissingDataException {
 		testSegmentOffset(10);
 	}
 
 	@Test
 	public void testNudgeSegmentsWithNegativeOffset()
-			throws ProfileException, MissingComponentException {
+			throws SegmentUpdateException, MissingDataException {
 		testSegmentOffset(-10);
 	}
 
 	@Test
 	public void testNudgeSegmentsWithPositiveOffsetLargerThanProfile()
-			throws ProfileException, MissingComponentException {
+			throws SegmentUpdateException, MissingDataException {
 		testSegmentOffset(profile.size() + 1);
 	}
 
 	@Test
 	public void testNudgeSegmentsWithNegativeOffsetLargerThanProfile()
-			throws ProfileException, MissingComponentException {
+			throws SegmentUpdateException, MissingDataException {
 		testSegmentOffset(-(profile.size() + 1));
 	}
 
@@ -476,10 +477,10 @@ public class ISegmentedProfileTest {
 	 * Test if the given offset is successfully applied during a nudge
 	 * 
 	 * @param offset
-	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
-	private void testSegmentOffset(int offset) throws ProfileException, MissingComponentException {
+	private void testSegmentOffset(int offset) throws SegmentUpdateException, MissingDataException {
 		List<IProfileSegment> test = makeTestSegments();
 		profile.moveSegments(offset);
 		for (IProfileSegment s : test) {
@@ -488,7 +489,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testMoveSegmentsLinksSegments() throws ProfileException {
+	public void testMoveSegmentsLinksSegments() throws SegmentUpdateException {
 
 		List<IProfileSegment> segs = profile.getSegments();
 		for (int i = 0; i < profile.getSegmentCount(); i++) {
@@ -508,7 +509,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testMoveSegmentsPreservesSegmentLocks() throws ProfileException {
+	public void testMoveSegmentsPreservesSegmentLocks() throws SegmentUpdateException {
 		List<IProfileSegment> segs = profile.getSegments();
 		for (IProfileSegment s : segs)
 			s.setLocked(true);
@@ -672,7 +673,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testStartFromLinksSegments() throws ProfileException {
+	public void testStartFromLinksSegments() throws SegmentUpdateException {
 
 		List<IProfileSegment> segs = profile.getSegments();
 		for (int i = 0; i < profile.getSegmentCount(); i++) {
@@ -689,7 +690,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testStartFromPreservesSegmentLocks() throws ProfileException {
+	public void testStartFromPreservesSegmentLocks() throws SegmentUpdateException {
 		List<IProfileSegment> segs = profile.getSegments();
 		for (IProfileSegment s : segs)
 			s.setLocked(true);
@@ -705,14 +706,14 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testSegmentTotalLengthsMatchProfileSize() {
+	public void testSegmentTotalLengthsMatchProfileSize() throws SegmentUpdateException {
 		for (IProfileSegment s : profile.getSegments()) {
 			assertEquals(s.getName(), profile.size(), s.getProfileLength());
 		}
 	}
 
 	@Test
-	public void testMergeSegments() throws ProfileException, MissingComponentException {
+	public void testMergeSegments() throws SegmentUpdateException, MissingDataException {
 
 		int expCount = profile.getSegmentCount() - 1;
 		UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
@@ -782,7 +783,7 @@ public class ISegmentedProfileTest {
 
 	@Test
 	public void testMergeSegmentsExceptsWhenSegment1NotInProfile()
-			throws ProfileException, MissingComponentException {
+			throws SegmentUpdateException, MissingDataException {
 
 		UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
 		IProfileSegment s1 = new DefaultProfileSegment(5, 10, 110, UUID.randomUUID());
@@ -794,7 +795,7 @@ public class ISegmentedProfileTest {
 
 	@Test
 	public void testMergeSegmentsExceptsWhenSegment2NotInProfile()
-			throws ProfileException, MissingComponentException {
+			throws SegmentUpdateException, MissingDataException {
 
 		UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
 		IProfileSegment s1 = profile.getSegments().get(1);
@@ -810,7 +811,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testUnmergeSegment() throws ProfileException, MissingComponentException {
+	public void testUnmergeSegment() throws SegmentUpdateException, MissingDataException {
 
 		UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
 		IProfileSegment s1 = profile.getSegments().get(1);
@@ -843,43 +844,43 @@ public class ISegmentedProfileTest {
 
 	@Test
 	public void testUnmergeSegmentDoesNothingWhenNoMergedSegments()
-			throws MissingComponentException, ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		IProfileSegment s1 = profile.getSegments().get(1);
 		profile.unmergeSegment(s1);
 	}
 
 	@Test
-	public void testIsSplittable() throws ProfileException {
+	public void testIsSplittable() throws SegmentUpdateException {
 		IProfileSegment s1 = profile.getSegments().get(1);
 		assertTrue(profile.isSplittable(s1.getID(), s1.getMidpointIndex()));
 	}
 
 	@Test
-	public void testIsSplittableReturnsFalseWhenTooCloseToStart() throws ProfileException {
+	public void testIsSplittableReturnsFalseWhenTooCloseToStart() throws SegmentUpdateException {
 		IProfileSegment s1 = profile.getSegments().get(1);
 		assertFalse(profile.isSplittable(s1.getID(), s1.getStartIndex() + 1));
 	}
 
 	@Test
-	public void testIsSplittableReturnsFalseWhenTooCloseToEnd() throws ProfileException {
+	public void testIsSplittableReturnsFalseWhenTooCloseToEnd() throws SegmentUpdateException {
 		IProfileSegment s1 = profile.getSegments().get(1);
 		assertFalse(profile.isSplittable(s1.getID(), s1.getEndIndex() - 1));
 	}
 
 	@Test
-	public void testIsSplittableReturnsFalseOnOutOfBoundsIndex() throws ProfileException {
+	public void testIsSplittableReturnsFalseOnOutOfBoundsIndex() throws SegmentUpdateException {
 		IProfileSegment s1 = profile.getSegments().get(1);
 		assertFalse(profile.isSplittable(s1.getID(), s1.getEndIndex() + 1));
 	}
 
 	@Test
-	public void testIsSplittableExceptsOnOutOfBoundsProfileIndex() throws ProfileException {
+	public void testIsSplittableExceptsOnOutOfBoundsProfileIndex() throws SegmentUpdateException {
 		IProfileSegment s1 = profile.getSegments().get(1);
 		assertFalse(profile.isSplittable(s1.getID(), profile.size() + 1));
 	}
 
 	@Test
-	public void testSplitSegment() throws ProfileException {
+	public void testSplitSegment() throws SegmentUpdateException {
 		IProfileSegment s1 = profile.getSegments().get(1);
 
 		int start = s1.getStartIndex();
@@ -904,7 +905,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testSplitSegmentExceptsOnInvalidIndex() throws ProfileException {
+	public void testSplitSegmentExceptsOnInvalidIndex() throws SegmentUpdateException {
 		IProfileSegment s1 = profile.getSegments().get(1);
 
 		int indexTooCloseToStart = s1.getStartIndex() + 1;
@@ -917,7 +918,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testSplitSegmentExceptsOnIndexOutOfSegmentBounds() throws ProfileException {
+	public void testSplitSegmentExceptsOnIndexOutOfSegmentBounds() throws SegmentUpdateException {
 		IProfileSegment s1 = profile.getSegments().get(1);
 
 		int mid = profile.size() + 1;
@@ -930,7 +931,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testSplitSegmentExceptsOnInvalidSegment() throws ProfileException {
+	public void testSplitSegmentExceptsOnInvalidSegment() throws SegmentUpdateException {
 
 		IProfileSegment s1 = new DefaultProfileSegment(5, 10, 110, UUID.randomUUID());
 		int mid = s1.getStartIndex() + 1;
@@ -958,7 +959,7 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testInterpolate() throws ProfileException {
+	public void testInterpolate() throws SegmentUpdateException {
 
 		ISegmentedProfile result = profile.interpolate(profile.size() * 2);
 
@@ -970,13 +971,13 @@ public class ISegmentedProfileTest {
 	}
 
 	@Test
-	public void testInterpolateExceptsWhenLessThanZero() throws ProfileException {
+	public void testInterpolateExceptsWhenLessThanZero() throws SegmentUpdateException {
 		exception.expect(IllegalArgumentException.class);
 		profile.interpolate(-1);
 	}
 
 	@Test
-	public void testInterpolateInSegmentWithNoMergeSources() throws ProfileException {
+	public void testInterpolateInSegmentWithNoMergeSources() throws SegmentUpdateException {
 		profile.clearSegments();
 		assertEquals(1, profile.getSegmentCount());
 		ISegmentedProfile result = profile.interpolate(profile.size() * 2);
@@ -989,7 +990,7 @@ public class ISegmentedProfileTest {
 
 	@Test
 	public void testUpdateStartAndEnd()
-			throws SegmentUpdateException, MissingComponentException, ProfileException {
+			throws SegmentUpdateException, MissingDataException, SegmentUpdateException {
 		IProfileSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
 
 		int oldStart = seg0.getStartIndex();
@@ -1013,7 +1014,7 @@ public class ISegmentedProfileTest {
 
 	@Test
 	public void testUpdateStartOnly()
-			throws SegmentUpdateException, MissingComponentException, ProfileException {
+			throws SegmentUpdateException, MissingDataException, SegmentUpdateException {
 		IProfileSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
 
 		int oldStart = seg0.getStartIndex();
@@ -1036,7 +1037,7 @@ public class ISegmentedProfileTest {
 
 	@Test
 	public void testUpdateEndOnly()
-			throws SegmentUpdateException, MissingComponentException, ProfileException {
+			throws SegmentUpdateException, MissingDataException, SegmentUpdateException {
 		IProfileSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
 
 		int oldStart = seg0.getStartIndex();
@@ -1058,7 +1059,7 @@ public class ISegmentedProfileTest {
 
 	@Test
 	public void testUpdateFailsOnOutOfBoundsStart()
-			throws SegmentUpdateException, MissingComponentException, ProfileException {
+			throws SegmentUpdateException, MissingDataException, SegmentUpdateException {
 		IProfileSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
 
 		int oldStart = seg0.getStartIndex();
@@ -1088,7 +1089,7 @@ public class ISegmentedProfileTest {
 
 	@Test
 	public void testUpdateExceptsOnOutOfBoundsEnd()
-			throws SegmentUpdateException, MissingComponentException, ProfileException {
+			throws SegmentUpdateException, MissingDataException, SegmentUpdateException {
 		IProfileSegment seg0 = profile.getSegment(UUID.fromString(SEG_0));
 
 		int oldStart = seg0.getStartIndex();

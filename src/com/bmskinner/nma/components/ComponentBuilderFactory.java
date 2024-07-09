@@ -30,7 +30,7 @@ import com.bmskinner.nma.components.cells.DefaultNucleus;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.components.signals.DefaultNuclearSignal;
 import com.bmskinner.nma.components.signals.INuclearSignal;
@@ -166,9 +166,18 @@ public class ComponentBuilderFactory {
 				}
 
 				n.setScale(scale);
-
 				try {
+//					// Calculate basic parameters
+//					for (Measurement m : Measurement.getComponentStats()) {
+//						n.setMeasurement(m, ComponentMeasurer.calculate(m, n));
+//					}
+//
 					n.createProfiles(windowProp);
+//
+//					// Calculate measurements that rely on profiles
+//					for (Measurement m : Measurement.getNucleusStats()) {
+//						n.setMeasurement(m, ComponentMeasurer.calculate(m, n));
+//					}
 
 					ProfileIndexFinder.assignLandmarks(n, rsc);
 
@@ -180,7 +189,7 @@ public class ComponentBuilderFactory {
 
 					}
 					LOGGER.finer(n.getNameAndNumber() + ": Assigned landmarks");
-				} catch (MissingComponentException | ProfileException e) {
+				} catch (MissingDataException | SegmentUpdateException e) {
 					LOGGER.fine(() -> "Unable to reverse profile in nucleus");
 					throw new ComponentCreationException(e);
 				}

@@ -23,8 +23,10 @@ import java.util.stream.IntStream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.analysis.profiles.NoDetectedIndexException;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.io.XmlSerializable;
 
 /**
@@ -134,10 +136,14 @@ public class DefaultProfile implements IProfile {
 	}
 
 	@Override
-	public int getIndexOfMax(@NonNull BooleanProfile limits) throws ProfileException {
+	public int getIndexOfMax(@NonNull BooleanProfile limits) throws NoDetectedIndexException {
 
 		if (limits.size() != array.length)
 			throw new IllegalArgumentException("Limits are wrong size for this profile");
+
+		if (limits.countFalse() == limits.size())
+			throw new NoDetectedIndexException(
+					"No true indexes in the given boolean profile limits, cannot find a max profile value");
 
 		double max = -Double.MAX_VALUE;
 		int maxIndex = -1;
@@ -147,15 +153,11 @@ public class DefaultProfile implements IProfile {
 				maxIndex = i;
 			}
 		}
-
-		if (maxIndex == -1) {
-			throw new ProfileException("No valid index for maximum value");
-		}
 		return maxIndex;
 	}
 
 	@Override
-	public int getIndexOfMax() throws ProfileException {
+	public int getIndexOfMax() throws NoDetectedIndexException {
 		return getIndexOfMax(new BooleanProfile(this, true));
 	}
 
@@ -186,10 +188,14 @@ public class DefaultProfile implements IProfile {
 	}
 
 	@Override
-	public int getIndexOfMin(@NonNull BooleanProfile limits) throws ProfileException {
+	public int getIndexOfMin(@NonNull BooleanProfile limits) throws NoDetectedIndexException {
 
 		if (limits.size() != array.length)
 			throw new IllegalArgumentException("Limits are wrong size for this profile");
+
+		if (limits.countFalse() == limits.size())
+			throw new NoDetectedIndexException(
+					"No true indexes in the given boolean profile limits, cannot find a min profile value");
 
 		double min = Double.MAX_VALUE;
 
@@ -201,14 +207,12 @@ public class DefaultProfile implements IProfile {
 				minIndex = i;
 			}
 		}
-		if (minIndex == -1) {
-			throw new ProfileException("No valid index for minimum value");
-		}
+
 		return minIndex;
 	}
 
 	@Override
-	public int getIndexOfMin() throws ProfileException {
+	public int getIndexOfMin() throws NoDetectedIndexException {
 		return getIndexOfMin(new BooleanProfile(this, true));
 	}
 
@@ -229,7 +233,7 @@ public class DefaultProfile implements IProfile {
 	}
 
 	@Override
-	public double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException {
+	public double absoluteSquareDifference(@NonNull IProfile testProfile) {
 
 		float[] arr2 = testProfile.toFloatArray();
 		if (array.length == arr2.length)
@@ -276,20 +280,19 @@ public class DefaultProfile implements IProfile {
 	}
 
 	@Override
-	public double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength)
-			throws ProfileException {
+	public double absoluteSquareDifference(@NonNull IProfile testProfile, int interpolationLength) {
 		float[] arr1 = interpolate(array, interpolationLength);
 		float[] arr2 = interpolate(testProfile.toFloatArray(), interpolationLength);
 		return CellularComponent.squareDifference(arr1, arr2);
 	}
 
 	@Override
-	public IProfile duplicate() throws ProfileException {
+	public IProfile duplicate() throws SegmentUpdateException {
 		return new DefaultProfile(this.array);
 	}
 
 	@Override
-	public IProfile startFrom(int j) throws ProfileException {
+	public IProfile startFrom(int j) throws SegmentUpdateException {
 		if (j < 0 || j >= array.length)
 			j = wrapIndex(j, array.length);
 		float[] newArray = new float[array.length];
@@ -379,7 +382,7 @@ public class DefaultProfile implements IProfile {
 	}
 
 	@Override
-	public void reverse() {
+	public void reverse() throws SegmentUpdateException {
 
 		float tmp;
 		for (int i = 0; i < this.array.length / 2; i++) {
@@ -390,7 +393,7 @@ public class DefaultProfile implements IProfile {
 	}
 
 	@Override
-	public IProfile interpolate(int newLength) throws ProfileException {
+	public IProfile interpolate(int newLength) throws SegmentUpdateException {
 		if (newLength < MINIMUM_PROFILE_LENGTH)
 			throw new IllegalArgumentException(
 					String.format("New length %d below minimum %d", newLength,
@@ -401,13 +404,12 @@ public class DefaultProfile implements IProfile {
 	}
 
 	@Override
-	public int findBestFitOffset(@NonNull IProfile testProfile) throws ProfileException {
+	public int findBestFitOffset(@NonNull IProfile testProfile) {
 		return findBestFitOffset(testProfile, 0, array.length);
 	}
 
 	@Override
-	public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset)
-			throws ProfileException {
+	public int findBestFitOffset(@NonNull IProfile testProfile, int minOffset, int maxOffset) {
 		float[] test = testProfile.toFloatArray();
 		if (array.length != test.length)
 			test = interpolate(test, array.length);
@@ -607,7 +609,7 @@ public class DefaultProfile implements IProfile {
 	}
 
 	@Override
-	public IProfile getSubregion(@NonNull IProfileSegment segment) throws ProfileException {
+	public IProfile getSubregion(@NonNull IProfileSegment segment) {
 		if (segment.getProfileLength() != array.length)
 			throw new IllegalArgumentException("Segment comes from a different length profile");
 

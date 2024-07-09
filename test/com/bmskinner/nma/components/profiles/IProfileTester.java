@@ -20,7 +20,9 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.bmskinner.nma.analysis.profiles.NoDetectedIndexException;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.samples.dummy.DummySegmentedCellularComponent;
 
 /**
@@ -71,7 +73,8 @@ public class IProfileTester {
 	 * @return
 	 * @throws Exception
 	 */
-	private static IProfile createInstance(Class<? extends IProfile> source, float[] data) throws Exception {
+	private static IProfile createInstance(Class<? extends IProfile> source, float[] data)
+			throws Exception {
 		if (source == DefaultProfile.class)
 			return new DefaultProfile(data);
 
@@ -138,7 +141,8 @@ public class IProfileTester {
 	}
 
 	@Test
-	public void testGetIndexOfMaxBooleanProfile() throws ProfileException {
+	public void testGetIndexOfMaxBooleanProfile()
+			throws SegmentUpdateException, NoDetectedIndexException {
 
 		// Restrict to first half of array
 		BooleanProfile b = new BooleanProfile(data.length, false);
@@ -146,28 +150,32 @@ public class IProfileTester {
 			b.set(i, true);
 		}
 
-		int exp = IntStream.range(0, data.length / 2).boxed().max(Comparator.comparing(profile::get)).get();
+		int exp = IntStream.range(0, data.length / 2).boxed()
+				.max(Comparator.comparing(profile::get)).get();
 
 		assertEquals(exp, profile.getIndexOfMax(b));
 	}
 
 	@Test
-	public void testGetIndexOfMaxBooleanProfileExceptsOnAllFalseProfile() throws ProfileException {
+	public void testGetIndexOfMaxBooleanProfileExceptsOnAllFalseProfile()
+			throws SegmentUpdateException, NoDetectedIndexException {
 		BooleanProfile b = new BooleanProfile(data.length, false);
-		exception.expect(ProfileException.class);
+		exception.expect(NoDetectedIndexException.class);
 		profile.getIndexOfMax(b);
 	}
 
 	@Test
-	public void testGetIndexOfMaxBooleanProfileExceptsOnDifferentLength() throws ProfileException {
+	public void testGetIndexOfMaxBooleanProfileExceptsOnDifferentLength()
+			throws SegmentUpdateException, NoDetectedIndexException {
 		BooleanProfile b = new BooleanProfile(data.length / 2, false);
 		exception.expect(IllegalArgumentException.class);
 		profile.getIndexOfMax(b);
 	}
 
 	@Test
-	public void testGetIndexOfMax() throws ProfileException {
-		int exp = IntStream.range(0, data.length).boxed().max(Comparator.comparing(profile::get)).get();
+	public void testGetIndexOfMax() throws SegmentUpdateException, NoDetectedIndexException {
+		int exp = IntStream.range(0, data.length).boxed().max(Comparator.comparing(profile::get))
+				.get();
 		assertEquals(exp, profile.getIndexOfMax());
 	}
 
@@ -231,30 +239,35 @@ public class IProfileTester {
 	 * Test method for
 	 * {@link com.bmskinner.nma.components.profiles.IProfile#getIndexOfMin(com.bmskinner.nma.components.profiles.BooleanProfile)}.
 	 * 
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
+	 * @throws NoDetectedIndexException
 	 */
 	@Test
-	public void testGetIndexOfMinBooleanProfile() throws ProfileException {
+	public void testGetIndexOfMinBooleanProfile()
+			throws SegmentUpdateException, NoDetectedIndexException {
 		// Restrict to second half of array
 		BooleanProfile b = new BooleanProfile(data.length, true);
 		for (int i = 0; i < data.length / 2; i++) {
 			b.set(i, false);
 		}
-		int exp = IntStream.range(data.length / 2, data.length - 1).boxed().min(Comparator.comparing(profile::get))
+		int exp = IntStream.range(data.length / 2, data.length - 1).boxed()
+				.min(Comparator.comparing(profile::get))
 				.get();
 
 		assertEquals(exp, profile.getIndexOfMin(b));
 	}
 
 	@Test
-	public void testGetIndexOfMinBooleanProfileExceptsOnAllFalseProfile() throws ProfileException {
+	public void testGetIndexOfMinBooleanProfileExceptsOnAllFalseProfile()
+			throws SegmentUpdateException, NoDetectedIndexException {
 		BooleanProfile b = new BooleanProfile(data.length, false);
-		exception.expect(ProfileException.class);
+		exception.expect(NoDetectedIndexException.class);
 		profile.getIndexOfMin(b);
 	}
 
 	@Test
-	public void testGetIndexOfMinBooleanProfileExceptsOnDifferentLength() throws ProfileException {
+	public void testGetIndexOfMinBooleanProfileExceptsOnDifferentLength()
+			throws SegmentUpdateException, NoDetectedIndexException {
 		BooleanProfile b = new BooleanProfile(data.length / 2, false);
 		exception.expect(IllegalArgumentException.class);
 		profile.getIndexOfMin(b);
@@ -264,12 +277,14 @@ public class IProfileTester {
 	 * Test method for
 	 * {@link com.bmskinner.nma.components.profiles.IProfile#getIndexOfMin()}.
 	 * 
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
+	 * @throws NoDetectedIndexException
 	 */
 	@Test
-	public void testGetIndexOfMin() throws ProfileException {
+	public void testGetIndexOfMin() throws SegmentUpdateException, NoDetectedIndexException {
 
-		int exp = IntStream.range(0, data.length - 1).boxed().min(Comparator.comparing(profile::get)).get();
+		int exp = IntStream.range(0, data.length - 1).boxed()
+				.min(Comparator.comparing(profile::get)).get();
 
 		assertEquals(exp, profile.getIndexOfMin());
 	}
@@ -296,11 +311,12 @@ public class IProfileTester {
 	 * {@link com.bmskinner.nma.components.profiles.IProfile#absoluteSquareDifference(com.bmskinner.nma.components.profiles.IProfile)}.
 	 */
 	@Test
-	public void testAbsoluteSquareDifferenceIsZeroWhenSameProfile() throws ProfileException {
+	public void testAbsoluteSquareDifferenceIsZeroWhenSameProfile() throws SegmentUpdateException {
 		assertEquals(0, profile.absoluteSquareDifference(profile), 0);
 	}
 
-	private void testAbsoluteSquareDifferenceOnSameLengthProfiles(IProfile template, float diff) throws Exception {
+	private void testAbsoluteSquareDifferenceOnSameLengthProfiles(IProfile template, float diff)
+			throws Exception {
 		float[] test = Arrays.copyOf(template.toFloatArray(), template.size());
 
 		test[0] = test[0] + diff;
@@ -337,7 +353,8 @@ public class IProfileTester {
 	 * @param diff      the difference to add to the first profile index
 	 * @throws Exception
 	 */
-	private void testAbsoluteSquareDifferenceOnDifferentLengthProfiles(IProfile template, int newLength, float diff)
+	private void testAbsoluteSquareDifferenceOnDifferentLengthProfiles(IProfile template,
+			int newLength, float diff)
 			throws Exception {
 
 		IProfile interpolated = template.interpolate(newLength);
@@ -395,7 +412,7 @@ public class IProfileTester {
 	 * {@link com.bmskinner.nma.components.profiles.IProfile#startFrom(int)}.
 	 */
 	@Test
-	public void testOffsetByOne() throws ProfileException {
+	public void testOffsetByOne() throws SegmentUpdateException {
 		float[] exp1 = new float[data.length];
 		for (int i = 0; i < data.length - 1; i++) {
 			exp1[i] = data[i + 1];
@@ -403,7 +420,8 @@ public class IProfileTester {
 		exp1[data.length - 1] = data[0];
 
 		float[] result = profile.startFrom(1).toFloatArray();
-		assertTrue("Exp: " + Arrays.toString(exp1) + " Was: " + Arrays.toString(result), Arrays.equals(exp1, result));
+		assertTrue("Exp: " + Arrays.toString(exp1) + " Was: " + Arrays.toString(result),
+				Arrays.equals(exp1, result));
 	}
 
 	/**
@@ -411,7 +429,7 @@ public class IProfileTester {
 	 * {@link com.bmskinner.nma.components.profiles.IProfile#startFrom(int)}.
 	 */
 	@Test
-	public void testOffsetByFive() throws ProfileException {
+	public void testOffsetByFive() throws SegmentUpdateException {
 		int offset = 5;
 		float[] exp1 = new float[data.length];
 		for (int i = 0; i < data.length - offset; i++) {
@@ -423,7 +441,8 @@ public class IProfileTester {
 		}
 
 		float[] result = profile.startFrom(offset).toFloatArray();
-		assertTrue("Exp: " + Arrays.toString(exp1) + " Was: " + Arrays.toString(result), Arrays.equals(exp1, result));
+		assertTrue("Exp: " + Arrays.toString(exp1) + " Was: " + Arrays.toString(result),
+				Arrays.equals(exp1, result));
 	}
 
 	/**
@@ -431,7 +450,7 @@ public class IProfileTester {
 	 * {@link com.bmskinner.nma.components.profiles.IProfile#startFrom(int)}.
 	 */
 	@Test
-	public void testOffsetByNegativeOne() throws ProfileException {
+	public void testOffsetByNegativeOne() throws SegmentUpdateException {
 
 		float[] exp1 = new float[data.length];
 		for (int i = 1; i < data.length; i++) {
@@ -466,10 +485,12 @@ public class IProfileTester {
 			exp[i] = (r1 + r0 + data[i] + f0 + f1) / 5;
 		}
 
-		exp[data.length - 2] = (data[data.length - 2] + data[data.length - 1] + data[0] + data[data.length - 3]
+		exp[data.length - 2] = (data[data.length - 2] + data[data.length - 1] + data[0]
+				+ data[data.length - 3]
 				+ data[data.length - 4]) / 5;
 		exp[data.length
-				- 1] = (data[data.length - 3] + data[data.length - 2] + data[data.length - 1] + data[0] + data[1]) / 5;
+				- 1] = (data[data.length - 3] + data[data.length - 2] + data[data.length - 1]
+						+ data[0] + data[1]) / 5;
 
 		IProfile p = profile.smooth(2);
 		float[] obs = p.toFloatArray();
@@ -491,9 +512,11 @@ public class IProfileTester {
 	/**
 	 * Test method for
 	 * {@link com.bmskinner.nma.components.profiles.IProfile#reverse()}.
+	 * 
+	 * @throws SegmentUpdateException
 	 */
 	@Test
-	public void testReverse() {
+	public void testReverse() throws SegmentUpdateException {
 
 		float[] arr = Arrays.copyOf(data, data.length);
 
@@ -511,7 +534,7 @@ public class IProfileTester {
 	}
 
 	@Test
-	public void testFindBestFitOffsetHasNoEffectWithZeroOffset() throws ProfileException {
+	public void testFindBestFitOffsetHasNoEffectWithZeroOffset() throws SegmentUpdateException {
 		int exp = 0;
 		IProfile test = profile.startFrom(exp);
 		int offset = profile.findBestFitOffset(test);
@@ -522,10 +545,11 @@ public class IProfileTester {
 	 * Test method for
 	 * {@link com.bmskinner.nma.components.profiles.IProfile#findBestFitOffset(com.bmskinner.nma.components.profiles.IProfile)}.
 	 * 
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
 	@Test
-	public void testFindBestFitOffsetWithPositiveOffsetIdenticalProfile() throws ProfileException {
+	public void testFindBestFitOffsetWithPositiveOffsetIdenticalProfile()
+			throws SegmentUpdateException {
 
 		for (int exp = 1; exp < profile.size(); exp++) {
 			IProfile test = profile.startFrom(exp);
@@ -540,10 +564,11 @@ public class IProfileTester {
 	 * Test method for
 	 * {@link com.bmskinner.nma.components.profiles.IProfile#findBestFitOffset(com.bmskinner.nma.components.profiles.IProfile)}.
 	 * 
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
 	@Test
-	public void testFindBestFitOffsetWithNegativeOffsetIdenticalProfile() throws ProfileException {
+	public void testFindBestFitOffsetWithNegativeOffsetIdenticalProfile()
+			throws SegmentUpdateException {
 
 		for (int exp = -1; exp > -profile.size(); exp--) {
 			IProfile test = profile.startFrom(exp);
@@ -560,10 +585,10 @@ public class IProfileTester {
 	 * Test method for
 	 * {@link com.bmskinner.nma.components.profiles.IProfile#getLocalMinima(int)}.
 	 * 
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
 	@Test
-	public void testGetLocalMinimaInt() throws ProfileException {
+	public void testGetLocalMinimaInt() throws SegmentUpdateException {
 
 		BooleanProfile b = profile.getLocalMinima(3);
 		for (int i = 0; i < data.length; i++) {
@@ -596,7 +621,7 @@ public class IProfileTester {
 	}
 
 	@Test
-	public void testGetLocalMinimaWorksOnZeroIndex() throws ProfileException {
+	public void testGetLocalMinimaWorksOnZeroIndex() throws SegmentUpdateException {
 		IProfile offset = profile.startFrom(270);
 		BooleanProfile b = offset.getLocalMinima(3, 180);
 		assertTrue("Expecting minima at " + offset.get(0), b.get(0));
@@ -690,10 +715,11 @@ public class IProfileTester {
 	 * Test method for
 	 * {@link com.bmskinner.nma.components.profiles.IProfile#getSubregion(com.bmskinner.nma.components.profiles.IProfileSegment)}.
 	 * 
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
 	@Test
-	public void testGetSubregionIBorderSegmentFromNonWrappingSegment() throws ProfileException {
+	public void testGetSubregionIBorderSegmentFromNonWrappingSegment()
+			throws SegmentUpdateException {
 
 		int start = 0;
 		int stop = 3;
@@ -708,7 +734,7 @@ public class IProfileTester {
 	}
 
 	@Test
-	public void testGetSubregionIBorderSegmentFromWrappingSegment() throws ProfileException {
+	public void testGetSubregionIBorderSegmentFromWrappingSegment() throws SegmentUpdateException {
 
 		IProfileSegment s = new DefaultProfileSegment(profile.size() - 10, 10, profile.size());
 		IProfile p = profile.getSubregion(s);
@@ -725,7 +751,8 @@ public class IProfileTester {
 	}
 
 	@Test
-	public void testGetSubregionIBorderSegmentExceptsOnSegmentOutOfUpperBounds() throws ProfileException {
+	public void testGetSubregionIBorderSegmentExceptsOnSegmentOutOfUpperBounds()
+			throws SegmentUpdateException {
 		IProfileSegment s = new DefaultProfileSegment(0, 100, 200);
 		exception.expect(IllegalArgumentException.class);
 		profile.getSubregion(s);
@@ -751,13 +778,16 @@ public class IProfileTester {
 
 		IProfile res = profile.calculateDeltas(2);
 
-		double expAt0 = (data[data.length - 1] - data[data.length - 2]) + (data[0] - data[data.length - 1])
+		double expAt0 = (data[data.length - 1] - data[data.length - 2])
+				+ (data[0] - data[data.length - 1])
 				+ (data[1] - data[0]) + (data[2] - data[1]);
 
-		double expAt1 = (data[0] - data[data.length - 1]) + (data[1] - data[0]) + (data[2] - data[1])
+		double expAt1 = (data[0] - data[data.length - 1]) + (data[1] - data[0])
+				+ (data[2] - data[1])
 				+ (data[3] - data[2]);
 
-		double expAt2 = (data[1] - data[0]) + (data[2] - data[1]) + (data[3] - data[2]) + (data[4] - data[3]);
+		double expAt2 = (data[1] - data[0]) + (data[2] - data[1]) + (data[3] - data[2])
+				+ (data[4] - data[3]);
 
 		assertEquals(expAt0, res.get(0), 0.00001);
 		assertEquals(expAt1, res.get(1), 0.00001);
@@ -1072,19 +1102,19 @@ public class IProfileTester {
 	}
 
 	@Test
-	public void interpolationShouldShrinkWhenGivenLowerLength() throws ProfileException {
+	public void interpolationShouldShrinkWhenGivenLowerLength() throws SegmentUpdateException {
 		IProfile test = profile.interpolate(profile.size() / 2);
 		assertEquals(profile.size() / 2, test.size());
 	}
 
 	@Test
-	public void interpolateExceptsOnLengthZero() throws ProfileException {
+	public void interpolateExceptsOnLengthZero() throws SegmentUpdateException {
 		exception.expect(IllegalArgumentException.class);
 		profile.interpolate(0);
 	}
 
 	@Test
-	public void interpolateExceptsOnLengthNegative() throws ProfileException {
+	public void interpolateExceptsOnLengthNegative() throws SegmentUpdateException {
 		exception.expect(IllegalArgumentException.class);
 		profile.interpolate(-1);
 	}
@@ -1123,7 +1153,8 @@ public class IProfileTester {
 	public void testGetWindowAtEndOfProfile() {
 
 		IProfile r = profile.getWindow(data.length - 1, 2);
-		float[] exp = { data[data.length - 3], data[data.length - 2], data[data.length - 1], data[0], data[1] };
+		float[] exp = { data[data.length - 3], data[data.length - 2], data[data.length - 1],
+				data[0], data[1] };
 		assertTrue(equals(exp, r.toFloatArray()));
 	}
 
@@ -1163,7 +1194,8 @@ public class IProfileTester {
 	@Test
 	public void testWrapsAssignsNegativeIndexesToCorrectProfileIndex() {
 		for (int i = -1; i > -profile.size(); i--) {
-			assertEquals("Testing " + i + " against profile size " + profile.size(), profile.size() + i,
+			assertEquals("Testing " + i + " against profile size " + profile.size(),
+					profile.size() + i,
 					profile.wrap(i));
 		}
 	}
@@ -1171,7 +1203,8 @@ public class IProfileTester {
 	@Test
 	public void testWrapsAssignsPositiveIndexesToCorrectProfileIndex() {
 		for (int i = profile.size(); i < profile.size() * 2; i++) {
-			assertEquals("Testing " + i + " against profile size " + profile.size(), i - profile.size(),
+			assertEquals("Testing " + i + " against profile size " + profile.size(),
+					i - profile.size(),
 					profile.wrap(i));
 		}
 	}
@@ -1186,7 +1219,8 @@ public class IProfileTester {
 
 			if (prev > Integer.MIN_VALUE) {
 				int exp = CellularComponent.wrapIndex(prev + 1, profile.size());
-				assertEquals("Testing " + i + " against profile size " + profile.size(), exp, current);
+				assertEquals("Testing " + i + " against profile size " + profile.size(), exp,
+						current);
 			}
 			prev = current;
 		}
@@ -1212,7 +1246,8 @@ public class IProfileTester {
 		assertEquals(exp.length, obs.length);
 
 		for (int i = 0; i < exp.length; i++) {
-			equal &= (Double.isNaN(exp[i]) && Double.isNaN(obs[i])) || Math.abs(exp[i] - obs[i]) <= epsilon;
+			equal &= (Double.isNaN(exp[i]) && Double.isNaN(obs[i]))
+					|| Math.abs(exp[i] - obs[i]) <= epsilon;
 			assertEquals("Index " + i, exp[i], obs[i], epsilon);
 		}
 		return equal;
@@ -1231,7 +1266,8 @@ public class IProfileTester {
 		assertEquals(exp.length, obs.length);
 
 		for (int i = 0; i < exp.length; i++) {
-			equal &= (Float.isNaN(exp[i]) && Float.isNaN(obs[i])) || Math.abs(exp[i] - obs[i]) <= epsilon;
+			equal &= (Float.isNaN(exp[i]) && Float.isNaN(obs[i]))
+					|| Math.abs(exp[i] - obs[i]) <= epsilon;
 			assertEquals("Index " + i, exp[i], obs[i], epsilon);
 		}
 		return equal;

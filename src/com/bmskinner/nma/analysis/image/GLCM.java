@@ -805,7 +805,7 @@ public class GLCM {
 			if (component instanceof Nucleus)
 				r.setIdentifier(((Nucleus) component).getNameAndNumber());
 			else
-				r.setIdentifier(component.getID().toString());
+				r.setIdentifier(component.getId().toString());
 			return r;
 		} catch (UnloadableImageException e) {
 			LOGGER.log(Loggable.STACK, "Cannot open component image", e);

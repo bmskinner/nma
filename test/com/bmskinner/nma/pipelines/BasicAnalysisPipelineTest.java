@@ -104,8 +104,6 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 			throws Exception {
 		assertEquals("Dataset name", exp.getName(), obs.getName());
 
-		// assertEquals("Options",exp.getAnalysisOptions(), obs.getAnalysisOptions());
-
 		assertEquals("Number of images", exp.getCollection().getImageFiles().size(),
 				obs.getCollection().getImageFiles().size());
 
@@ -123,7 +121,8 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 				obs.getCollection().getNucleusCount());
 
 		// Check the stats are the same
-		for (Measurement s : Measurement.getStats(CellularComponent.NUCLEUS)) {
+		for (Measurement s : exp.getAnalysisOptions().get().getRuleSetCollection()
+				.getMeasurableValues()) {
 			double eMed = exp.getCollection().getMedian(s, CellularComponent.NUCLEUS,
 					MeasurementScale.PIXELS);
 			double oMed = obs.getCollection().getMedian(s, CellularComponent.NUCLEUS,

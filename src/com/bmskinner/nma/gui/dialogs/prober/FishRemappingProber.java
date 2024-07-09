@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JPanel;
@@ -29,13 +30,12 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.detection.Finder;
 import com.bmskinner.nma.analysis.detection.FishRemappingFinder;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 
 @SuppressWarnings("serial")
 public class FishRemappingProber extends IntegratedImageProber {
@@ -108,11 +108,9 @@ public class FishRemappingProber extends IntegratedImageProber {
 				try {
 					IAnalysisDataset subDataset = dataset.addChildCollection(sub);
 					newList.add(subDataset);
-				} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} catch (MissingDataException | SegmentUpdateException e) {
+					LOGGER.log(Level.SEVERE, "Error addig new child dataset", e);
 				}
-
 			}
 		}
 	}

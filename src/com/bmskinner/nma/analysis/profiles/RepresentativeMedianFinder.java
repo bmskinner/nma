@@ -23,12 +23,12 @@ import java.util.Random;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.profiles.DefaultProfileAggregate;
 import com.bmskinner.nma.components.profiles.IProfile;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
@@ -93,12 +93,11 @@ public class RepresentativeMedianFinder {
 	 * Find the median that describes the largest subset of the dataset
 	 * 
 	 * @return
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
-	 * @throws ProfileException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	public IProfile findMedian()
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		// Get normalised pairwise differences between nuclei profiles
 		float[][] differences = buildDifferenceMatrix();
 
@@ -126,12 +125,12 @@ public class RepresentativeMedianFinder {
 	 * 
 	 * @param target
 	 * @return
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
 	 * @throws ProfileException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private List<IProfile> findBestProfiles(@NonNull IProfile target)
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws SegmentUpdateException, MissingDataException {
 		float[] differences = calculateDistancesToTemplate(target);
 		float medianDiff = Stats.quartile(differences, Stats.MEDIAN);
 		List<IProfile> result = new ArrayList<>();
@@ -150,7 +149,7 @@ public class RepresentativeMedianFinder {
 	}
 
 	private IProfile buildMedianFromProfiles(@NonNull final List<IProfile> profiles, int length)
-			throws ProfileException {
+			throws SegmentUpdateException {
 		DefaultProfileAggregate agg = new DefaultProfileAggregate(length, profiles.size());
 		for (IProfile p : profiles)
 			agg.addValues(p);
@@ -179,7 +178,7 @@ public class RepresentativeMedianFinder {
 	}
 
 	private float[] calculateDistancesToTemplate(IProfile template)
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		float[] result = new float[nuclei.size()];
 		for (int i = 0; i < result.length; i++) {
 			result[i] = (float) nuclei.get(i)
@@ -194,12 +193,11 @@ public class RepresentativeMedianFinder {
 	 * 
 	 * @return a matrix in which each nucleus profile is compared to every other
 	 *         nucleus profile
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
-	 * @throws ProfileException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private float[][] buildDifferenceMatrix()
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		float[][] matrix = new float[nuclei.size()][nuclei.size()];
 
 		// Handle the two diagonals of the matrix simultaneously

@@ -70,7 +70,7 @@ public class FluorescentNucleusFinderTest {
 			IProfile p1 = ProfileCreator.createProfile(c.getPrimaryNucleus(), ProfileType.ANGLE);
     		IProfile p2 = ProfileCreator.createProfile(dup.getPrimaryNucleus(), ProfileType.ANGLE);
     		assertEquals(p1, p2);
-			assertEquals("Nucleus "+c.getPrimaryNucleus().getID(), c.getPrimaryNucleus().getProfile(ProfileType.ANGLE), 
+			assertEquals("Nucleus "+c.getPrimaryNucleus().getId(), c.getPrimaryNucleus().getProfile(ProfileType.ANGLE), 
 					dup.getPrimaryNucleus().getProfile(ProfileType.ANGLE));
 			
 			ComponentTester.testDuplicatesByField(c.getId().toString(), c, dup);

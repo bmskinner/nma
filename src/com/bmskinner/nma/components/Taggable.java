@@ -25,8 +25,10 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.generic.IPoint;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
@@ -77,7 +79,7 @@ public interface Taggable extends CellularComponent, Orientable {
 	 * @throws MissingLandmarkException
 	 */
 	ISegmentedProfile getProfile(@NonNull ProfileType type)
-			throws MissingProfileException, ProfileException, MissingLandmarkException;
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get a copy of the profile offset to start at the given point
@@ -86,12 +88,13 @@ public interface Taggable extends CellularComponent, Orientable {
 	 * @param tag  the tag to offset the profile to
 	 * @return a copy of the segmented profile
 	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 * @throws MissingLandmarkException
 	 * @throws MissingProfileException
 	 */
 	@NonNull
 	ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark lm)
-			throws ProfileException, MissingLandmarkException, MissingProfileException;
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get a copy of the profile offset to start at the given point
@@ -104,7 +107,7 @@ public interface Taggable extends CellularComponent, Orientable {
 	 * @throws MissingProfileException
 	 */
 	ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
-			throws ProfileException, MissingLandmarkException, MissingProfileException;
+			throws SegmentUpdateException, MissingDataException;
 
 	/**
 	 * Get a copy of the profile offset to start at the given point
@@ -117,24 +120,29 @@ public interface Taggable extends CellularComponent, Orientable {
 	 * @throws MissingProfileException
 	 */
 	IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
-			throws ProfileException, MissingLandmarkException, MissingProfileException;
+			throws SegmentUpdateException, MissingDataException;
 
 	/**
 	 * Set segments from the reference point. The first segment must begin at index
 	 * zero.
 	 * 
 	 * @param segments the segments covering the profile
-	 * @throws ProfileException if the profile segments are not suitable
+	 * @throws SegmentUpdateException if the profile segments are not suitable
 	 */
 	void setSegments(@NonNull List<IProfileSegment> segments)
-			throws MissingLandmarkException, ProfileException;
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the window size for generating the specificed profile
 	 * 
 	 * @return
+	 * @throws MissingMeasurementException
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
-	int getWindowSize();
+	int getWindowSize() throws MissingMeasurementException, MissingDataException,
+			ComponentCreationException, SegmentUpdateException;
 
 	/**
 	 * Get the fraction of the perimeter to use for calculating the window size in
@@ -181,7 +189,7 @@ public interface Taggable extends CellularComponent, Orientable {
 	 * the border list and updates landmarks to the new positions
 	 */
 	@Override
-	void reverse() throws ProfileException, MissingComponentException;
+	void reverse() throws MissingDataException, SegmentUpdateException, ComponentCreationException;
 
 	/**
 	 * Get the border index of point in the border list, removing offset to a
@@ -250,27 +258,27 @@ public interface Taggable extends CellularComponent, Orientable {
 	 * @throws ProfileException
 	 * @throws MissingProfileException
 	 * @throws MissingLandmarkException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	void setLandmark(@NonNull OrientationMark tag, int i)
-			throws IndexOutOfBoundsException, MissingProfileException, ProfileException,
-			MissingLandmarkException;
+			throws IndexOutOfBoundsException, MissingDataException, SegmentUpdateException;
 
 	void setLandmark(@NonNull Landmark tag, int i)
-			throws IndexOutOfBoundsException, MissingProfileException, ProfileException,
-			MissingLandmarkException;
+			throws IndexOutOfBoundsException, MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Set the index of the given landmark. Has no effect if this object is locked.
 	 * 
 	 * @param tag the tag
 	 * @param i   the index of the border point to set the tag at
+	 * @throws SegmentUpdateException
 	 * @throws ProfileException
 	 * @throws MissingProfileException
 	 * @throws MissingLandmarkException
 	 */
 	void setOrientationMark(@NonNull OrientationMark tag, int i)
-			throws IndexOutOfBoundsException, MissingProfileException, ProfileException,
-			MissingLandmarkException;
+			throws IndexOutOfBoundsException, MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the indexes of orientation marks within the border of this object

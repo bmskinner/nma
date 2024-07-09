@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -120,10 +121,9 @@ public abstract class CellFinder extends AbstractFinder<ICell> {
 				list.addAll(findInFile(f));
 				LOGGER.finer(() -> "Found images in %s".formatted(f.getName()));
 			} catch (ImageImportException e) {
-				LOGGER.log(Loggable.STACK, "Error searching image", e);
+				LOGGER.log(Level.SEVERE, "Error searching image: %s".formatted(e.getMessage()), e);
 			} catch (Exception e) {
-				LOGGER.log(Loggable.STACK, "Error detecting cell", e);
-				throw (e);
+				LOGGER.log(Level.SEVERE, "Error detecting cell: %s".formatted(e.getMessage()), e);
 			}
 
 		});

@@ -29,12 +29,11 @@ import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 
 import ij.gui.Roi;
@@ -65,8 +64,12 @@ public final class ComponentMeasurer {
 	 * @param m the measurement to make
 	 * @param c the cell to measure
 	 * @return
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
-	public static double calculate(Measurement m, ICell c) {
+	public static double calculate(Measurement m, ICell c)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		if (Measurement.CELL_NUCLEUS_COUNT.equals(m))
 			return c.getNuclei().size();
 
@@ -75,18 +78,23 @@ public final class ComponentMeasurer {
 
 		if (Measurement.CELL_NUCLEAR_RATIO.equals(m))
 			return calculateCellNuclearRatio(c);
-		return Statistical.ERROR_CALCULATING_STAT;
+		throw new IllegalArgumentException(
+				"Measurement is not appropriate for a cell: " + m.toString());
 	}
 
 	/**
 	 * Calculate a measurement for a component. If the measurement type is not valid
-	 * for the component, Statistical.STAT_NOT_CALCULATED will be returned.
+	 * for the component an IllegalArgumnentException will be thrown
 	 * 
 	 * @param m the measurement to make
 	 * @param c the component to measure
 	 * @return
+	 * @throws MissingDataException
+	 * @throws ComponentCreationException
+	 * @throws SegmentUpdateException
 	 */
-	public static double calculate(@NonNull Measurement m, @NonNull CellularComponent c) {
+	public static double calculate(@NonNull Measurement m, @NonNull CellularComponent c)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		if (Measurement.CIRCULARITY.equals(m))
 			return calculateCircularity(c);
 
@@ -102,7 +110,9 @@ public final class ComponentMeasurer {
 			return calculateRadius(c);
 
 		if (!(c instanceof Taggable))
-			return Statistical.INVALID_OBJECT_TYPE;
+			throw new IllegalArgumentException(
+					"Measurement is not appropriate for a taggable component: '%s'"
+							.formatted(m.toString()));
 
 		Taggable t = (Taggable) c;
 
@@ -110,41 +120,42 @@ public final class ComponentMeasurer {
 			return calculateMinDiameter(t);
 
 		if (!(t instanceof Nucleus))
-			return Statistical.INVALID_OBJECT_TYPE;
+			throw new IllegalArgumentException(
+					"Measurement is not appropriate for a nucleus: '%s'"
+							.formatted(m.toString()));
 
 		Nucleus n = (Nucleus) t;
 
-		try {
+		if (Measurement.ELLIPTICITY.equals(m))
+			return calculateEllipticity(n);
 
-			if (Measurement.ELLIPTICITY.equals(m))
-				return calculateEllipticity(n);
+		if (Measurement.ASPECT.equals(m))
+			return calculateAspect(n);
 
-			if (Measurement.ASPECT.equals(m))
-				return calculateAspect(n);
+		if (Measurement.ELONGATION.equals(m))
+			return calculateElongation(n);
 
-			if (Measurement.ELONGATION.equals(m))
-				return calculateElongation(n);
+		if (Measurement.REGULARITY.equals(m))
+			return calculateRegularity(n);
 
-			if (Measurement.REGULARITY.equals(m))
-				return calculateRegularity(n);
+		if (Measurement.BOUNDING_HEIGHT.equals(m))
+			return n.getOrientedNucleus().getHeight();
 
-			if (Measurement.BOUNDING_HEIGHT.equals(m))
-				return n.getOrientedNucleus().getHeight();
+		if (Measurement.BOUNDING_WIDTH.equals(m))
+			return n.getOrientedNucleus().getWidth();
 
-			if (Measurement.BOUNDING_WIDTH.equals(m))
-				return n.getOrientedNucleus().getWidth();
+		if (Measurement.BODY_WIDTH.equals(m))
+			return calculateBodyWidth(n);
 
-			if (Measurement.BODY_WIDTH.equals(m))
-				return calculateBodyWidth(n);
+		if (Measurement.HOOK_LENGTH.equals(m))
+			return calculateHookLength(n);
 
-			if (Measurement.HOOK_LENGTH.equals(m))
-				return calculateHookLength(n);
+		if (Measurement.VARIABILITY.equals(m))
+			return -1; // calculated at the dataset level, not per cell
 
-		} catch (MissingLandmarkException | ComponentCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error getting consensus", e);
-			return Statistical.ERROR_CALCULATING_STAT;
-		}
-		return Statistical.ERROR_CALCULATING_STAT;
+		throw new IllegalArgumentException(
+				"Measurement is not appropriate for a cellular component: '%s'"
+						.formatted(m.toString()));
 	}
 
 	/**
@@ -155,33 +166,33 @@ public final class ComponentMeasurer {
 	 * @param angle the target angle
 	 * @return the distance from the closest border point at the requested angle to
 	 *         the CoM
+	 * @throws UnavailableBorderPointException
 	 */
-	public static IPoint getDistanceFromCoMToBorderAtAngle(Taggable t, double angle) {
+	public static IPoint getDistanceFromCoMToBorderAtAngle(Taggable t, double angle)
+			throws UnavailableBorderPointException {
 
 		double bestDiff = Double.MAX_VALUE;
 		IPoint com = t.getCentreOfMass();
 		IPoint ref = new FloatPoint(com.getX(), com.getY() - 10);
 
 		IPoint bestPoint = com;
-		try {
-			for (int i = 0; i < t.getBorderLength(); i++) {
-				IPoint p = t.getBorderPoint(i);
-				double pAngle = com.findAbsoluteAngle(ref, p);
 
-				if (Math.abs(angle - pAngle) < bestDiff) {
-					bestDiff = Math.abs(angle - pAngle);
-					bestPoint = p;
+		for (int i = 0; i < t.getBorderLength(); i++) {
+			IPoint p = t.getBorderPoint(i);
+			double pAngle = com.findAbsoluteAngle(ref, p);
 
-				}
+			if (Math.abs(angle - pAngle) < bestDiff) {
+				bestDiff = Math.abs(angle - pAngle);
+				bestPoint = p;
+
 			}
-			return bestPoint;
-		} catch (UnavailableBorderPointException e) {
-			LOGGER.warning("Unable to caculate distance from CoM to border");
 		}
-		return null;
+		return bestPoint;
+
 	}
 
-	private static double calculateCellNuclearArea(ICell c) {
+	private static double calculateCellNuclearArea(ICell c)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		double i = 0;
 		for (Nucleus n : c.getNuclei()) {
 			i += n.getMeasurement(Measurement.AREA);
@@ -189,21 +200,26 @@ public final class ComponentMeasurer {
 		return i;
 	}
 
-	private static double calculateCellNuclearRatio(ICell c) {
+	private static double calculateCellNuclearRatio(ICell c)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		if (c.hasCytoplasm()) {
 			double cy = c.getCytoplasm().getMeasurement(Measurement.AREA);
 			double n = c.getMeasurement(Measurement.CELL_NUCLEAR_AREA);
 			return n / cy;
 		}
-		return Statistical.ERROR_CALCULATING_STAT;
+		throw new MissingMeasurementException("Cell does not have cytoplasm");
 	}
 
 	/**
 	 * Calculate the circularity of an object
 	 * 
 	 * @return
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
-	private static double calculateCircularity(@NonNull final CellularComponent c) {
+	private static double calculateCircularity(@NonNull final CellularComponent c)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		double p = c.getMeasurement(Measurement.PERIMETER);
 		double a = c.getMeasurement(Measurement.AREA);
 		return (Math.PI * 4 * a) / (p * p);
@@ -213,29 +229,25 @@ public final class ComponentMeasurer {
 	 * Calculate the radius of an object if it were a circle with the same area
 	 * 
 	 * @return
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
-	private static double calculateRadius(@NonNull final CellularComponent c) {
+	private static double calculateRadius(@NonNull final CellularComponent c)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		return Math.sqrt(c.getMeasurement(Measurement.AREA) / Math.PI);
 	}
 
-	private static double calculateMinDiameter(@NonNull final Taggable c) {
-		try {
-			return Arrays.stream(c.getProfile(ProfileType.DIAMETER).toDoubleArray()).min()
-					.orElse(Statistical.ERROR_CALCULATING_STAT);
-		} catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
-			LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
-			return Statistical.ERROR_CALCULATING_STAT;
-		}
+	private static double calculateMinDiameter(@NonNull final Taggable c)
+			throws MissingDataException, SegmentUpdateException {
+		return Arrays.stream(c.getProfile(ProfileType.DIAMETER).toDoubleArray()).min()
+				.getAsDouble();
 	}
 
-	private static double calculateMaximumDiameter(@NonNull final Taggable c) {
-		try {
-			return Arrays.stream(c.getProfile(ProfileType.DIAMETER).toDoubleArray()).max()
-					.orElse(Statistical.ERROR_CALCULATING_STAT);
-		} catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
-			LOGGER.log(Loggable.STACK, "Error getting diameter profile", e);
-			return Statistical.ERROR_CALCULATING_STAT;
-		}
+	private static double calculateMaximumDiameter(@NonNull final Taggable c)
+			throws MissingDataException, SegmentUpdateException {
+		return Arrays.stream(c.getProfile(ProfileType.DIAMETER).toDoubleArray()).max()
+				.getAsDouble();
 	}
 
 	/**
@@ -243,24 +255,19 @@ public final class ComponentMeasurer {
 	 * 
 	 * @param c the component to measure
 	 * @return the perimeter of the component
+	 * @throws UnavailableBorderPointException
 	 */
-	private static double calculatePerimeter(@NonNull final CellularComponent c) {
+	private static double calculatePerimeter(@NonNull final CellularComponent c)
+			throws UnavailableBorderPointException {
 		double perimeter = 0;
-		try {
 
-			IPoint p0 = c.getBorderPoint(0);
-			IPoint prev = p0;
-			for (IPoint p : c.getBorderList()) {
-				perimeter += prev.getLengthTo(p);
-				prev = p;
-			}
-			perimeter += prev.getLengthTo(p0);
-
-		} catch (UnavailableBorderPointException e) {
-			LOGGER.log(Loggable.STACK, "Unable to calculate perimeter of object", e);
-			return Statistical.ERROR_CALCULATING_STAT;
+		IPoint p0 = c.getBorderPoint(0);
+		IPoint prev = p0;
+		for (IPoint p : c.getBorderList()) {
+			perimeter += prev.getLengthTo(p);
+			prev = p;
 		}
-		return perimeter;
+		return perimeter + prev.getLengthTo(p0);
 	}
 
 	/**
@@ -268,13 +275,13 @@ public final class ComponentMeasurer {
 	 * 
 	 * @param c the component to measure
 	 * @return the area of the component
+	 * @throws MissingMeasurementException
 	 */
-	private static double calculateArea(@NonNull final CellularComponent c) {
+	private static double calculateArea(@NonNull final CellularComponent c)
+			throws MissingMeasurementException {
 		Roi r = c.toOriginalRoi();
-		if (r == null) {
-			LOGGER.fine("Could not convert component to roi");
-			return Statistical.ERROR_CALCULATING_STAT;
-		}
+		if (r == null)
+			throw new MissingMeasurementException("Could not convert component to roi");
 		return Stats.area(c.toOriginalRoi());
 	}
 
@@ -296,14 +303,17 @@ public final class ComponentMeasurer {
 	 * Calculate the regularity of the object
 	 * 
 	 * @return
-	 * @throws MissingLandmarkException
 	 * @throws ComponentCreationException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	private static double calculateRegularity(@NonNull final Nucleus n)
-			throws MissingLandmarkException, ComponentCreationException {
+			throws ComponentCreationException,
+			MissingDataException, SegmentUpdateException {
 		double h = n.getOrientedNucleus().getHeight();
 		double w = n.getOrientedNucleus().getWidth();
 		double a = n.getMeasurement(Measurement.AREA);
+
 		return (Math.PI * h * w) / (4 * a);
 	}
 
@@ -340,27 +350,27 @@ public final class ComponentMeasurer {
 	 * @throws ComponentCreationException
 	 */
 	private static double calculateHookLength(@NonNull Nucleus n)
-			throws ComponentCreationException {
+			throws ComponentCreationException, MissingLandmarkException {
 
-		if (!n.hasLandmark(OrientationMark.TOP) || !n.hasLandmark(OrientationMark.TOP)
-				|| !n.hasLandmark(OrientationMark.Y)) {
-			return Statistical.MISSING_LANDMARK;
+		if (!n.hasLandmark(OrientationMark.TOP)) {
+			throw new MissingLandmarkException(
+					"Missing required OrientationMark TOP when calculating hook length");
 		}
 
-		try {
-			// Get the oriented nucleus
-			Nucleus t = n.getOrientedNucleus();
-			double vertX = t.getBorderPoint(OrientationMark.TOP).getX();
-
-			/* Find the x values in the bounding box of the vertical nucleus. */
-			FloatPolygon p = t.toPolygon();
-			double minX = p.getBounds().getMinX();
-
-			return vertX - minX;
-		} catch (MissingLandmarkException e) {
-			LOGGER.fine("Unable to calculate hook length: " + e.getMessage());
-			return Statistical.ERROR_CALCULATING_STAT;
+		if (!n.hasLandmark(OrientationMark.Y)) {
+			throw new MissingLandmarkException(
+					"Missing required OrientationMark Y when calculating hook length");
 		}
+
+		// Get the oriented nucleus
+		Nucleus t = n.getOrientedNucleus();
+		double vertX = t.getBorderPoint(OrientationMark.TOP).getX();
+
+		/* Find the x values in the bounding box of the vertical nucleus. */
+		FloatPolygon p = t.toPolygon();
+		double minX = p.getBounds().getMinX();
+
+		return vertX - minX;
 	}
 
 	/**
@@ -369,27 +379,25 @@ public final class ComponentMeasurer {
 	 * @param n
 	 * @throws ComponentCreationException
 	 */
-	private static double calculateBodyWidth(@NonNull Nucleus n) throws ComponentCreationException {
+	private static double calculateBodyWidth(@NonNull Nucleus n)
+			throws ComponentCreationException, MissingLandmarkException {
 
 		if (!n.hasLandmark(OrientationMark.TOP) || !n.hasLandmark(OrientationMark.TOP)
 				|| !n.hasLandmark(OrientationMark.Y)) {
-			return Statistical.MISSING_LANDMARK;
+			throw new MissingLandmarkException(
+					"Missing required landmark when calculating body width");
 		}
 
-		try {
-			// Get the oriented nucleus
-			Nucleus t = n.getOrientedNucleus();
-			double vertX = t.getBorderPoint(OrientationMark.TOP).getX();
+		// Get the oriented nucleus
+		Nucleus t = n.getOrientedNucleus();
+		double vertX = t.getBorderPoint(OrientationMark.TOP).getX();
 
-			/* Find the x values in the bounding box of the vertical nucleus. */
-			FloatPolygon p = t.toPolygon();
-			double maxX = p.getBounds().getMaxX();
+		/* Find the x values in the bounding box of the vertical nucleus. */
+		FloatPolygon p = t.toPolygon();
+		double maxX = p.getBounds().getMaxX();
 
-			return maxX - vertX;
-		} catch (MissingLandmarkException e) {
-			LOGGER.fine("Unable to calculate body width: " + e.getMessage());
-			return Statistical.ERROR_CALCULATING_STAT;
-		}
+		return maxX - vertX;
+
 	}
 
 }

@@ -26,13 +26,14 @@ import javax.swing.table.TableModel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
@@ -215,8 +216,13 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 * Run Wilcoxon rank sum tests on nuclear measurements
 	 * 
 	 * @return
+	 * @throws MissingDataException
+	 * @throws ProfileException
+	 * @throws MissingMeasurementException
+	 * @throws SegmentUpdateException
 	 */
-	private List<WilcoxDatasetResult> calculateNuclearWilcoxonResults() {
+	private List<WilcoxDatasetResult> calculateNuclearWilcoxonResults()
+			throws MissingDataException, SegmentUpdateException {
 		List<WilcoxDatasetResult> results = new ArrayList<>();
 
 		// Bonferroni correction on number of datasets and number of measurement types
@@ -253,12 +259,12 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 * Run Wilcoxon rank sum tests on segment measurements
 	 * 
 	 * @return
-	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private List<WilcoxDatasetResult> calculateSegmentWilcoxonResults()
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws MissingDataException,
+			SegmentUpdateException {
 		List<WilcoxDatasetResult> results = new ArrayList<>();
 		int nComparisons = (options.datasetCount() * (options.datasetCount() - 1)) / 2;
 
@@ -337,8 +343,14 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 * Calculate magnitude differences between datasets
 	 * 
 	 * @return
+	 * @throws MissingDataException
+	 * @throws ProfileException
+	 * @throws MissingMeasurementException
+	 * @throws SegmentUpdateException
 	 */
-	private List<MagnitudeDatasetResult> calculateNuclearMagnitudes() {
+	private List<MagnitudeDatasetResult> calculateNuclearMagnitudes()
+			throws MissingDataException,
+			SegmentUpdateException {
 		List<MagnitudeDatasetResult> results = new ArrayList<>();
 
 		for (IAnalysisDataset d1 : options.getDatasets()) {
@@ -365,11 +377,13 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 * 
 	 * @return
 	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
+	 * @throws MissingDataException
+	 * @throws MissingMeasurementException
+	 * @throws SegmentUpdateException
 	 */
 	private List<MagnitudeDatasetResult> calculateSegmentMagnitudes()
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws MissingDataException,
+			SegmentUpdateException {
 		List<MagnitudeDatasetResult> results = new ArrayList<>();
 
 		for (IAnalysisDataset d1 : options.getDatasets()) {

@@ -16,7 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.profiles;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 
 /**
  * Thrown when the requested border tag is not present in a Taggable object
@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.MissingComponentException;
  * @since 1.13.3
  *
  */
-public class MissingLandmarkException extends MissingComponentException {
+public class MissingLandmarkException extends MissingDataException {
     private static final long serialVersionUID = 1L;
 
     public MissingLandmarkException() {

@@ -35,7 +35,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nma.analysis.profiles.ProfileCreator;
 import com.bmskinner.nma.analysis.profiles.SegmentFitter;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.generic.IPoint;
@@ -47,11 +47,11 @@ import com.bmskinner.nma.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nma.components.rules.OrientationMark;
@@ -185,7 +185,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 					.getSegments()); // getSegments creates a copy, no need to duplicate again
 			IProfileSegment.linkSegments(segments);
 
-		} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			throw new ComponentCreationException("Cannot make new profile from template", e);
 		}
 
@@ -222,7 +222,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 				profileMap.put(type, ProfileCreator.createProfile(this, type));
 			}
 
-		} catch (ProfileException e1) {
+		} catch (SegmentUpdateException | MissingDataException e1) {
 			throw new ComponentCreationException(
 					"Unable to create profiles or segments in cellular component constructor",
 					e1);
@@ -248,7 +248,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 			segments.add(
 					new DefaultProfileSegment(0, 0, this.getBorderLength(),
 							IProfileCollection.DEFAULT_SEGMENT_ID));
-		} catch (ProfileException | IllegalArgumentException e) {
+		} catch (IllegalArgumentException | MissingDataException
+				| SegmentUpdateException e) {
 			throw new ComponentCreationException(
 					"Could not calculate profiles due to " + e.getMessage(), e);
 		}
@@ -261,7 +262,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	@Override
 	public void setLandmark(@NonNull OrientationMark om, int newLmIndex)
-			throws MissingProfileException, MissingLandmarkException, ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		Landmark land = orientationMarks.get(om);
 
 		if (land == null)
@@ -275,7 +276,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	@Override
 	public void setLandmark(@NonNull Landmark land, int newLmIndex)
-			throws MissingProfileException, ProfileException, MissingLandmarkException {
+			throws MissingProfileException, MissingLandmarkException, SegmentUpdateException {
 		if (isLocked)
 			return;
 
@@ -405,8 +406,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	@Override
 	public void setOrientationMark(@NonNull OrientationMark om, int i)
-			throws IndexOutOfBoundsException, MissingProfileException, ProfileException,
-			MissingLandmarkException {
+			throws IndexOutOfBoundsException, MissingDataException, SegmentUpdateException {
 		setLandmark(om, i);
 	}
 
@@ -432,7 +432,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	@Override
 	public @NonNull ISegmentedProfile getProfile(@NonNull ProfileType type,
 			@NonNull OrientationMark om)
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws SegmentUpdateException, MissingDataException {
 		Landmark lm = getLandmark(om);
 		if (lm == null)
 			throw new MissingLandmarkException("Cannot find landmark for " + om);
@@ -441,7 +441,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	@Override
 	public @NonNull ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark lm)
-			throws ProfileException, MissingLandmarkException, MissingProfileException {
+			throws SegmentUpdateException, MissingDataException {
 
 		// fetch the index of the pointType (the zero index of the profile to return)
 		if (profileLandmarks.get(lm) == null)
@@ -458,7 +458,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	@Override
 	public IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
-			throws ProfileException, MissingLandmarkException, MissingProfileException {
+			throws SegmentUpdateException, MissingDataException {
 		Landmark lm = getLandmark(om);
 		if (lm == null)
 			throw new MissingLandmarkException("Cannot find landmark for " + om);
@@ -477,9 +477,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	}
 
 	@Override
-	public int getWindowSize() {
+	public int getWindowSize()
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
+
 		return Math.max(1,
 				(int) Math.ceil(getMeasurement(Measurement.PERIMETER) * windowProportion));
+
 	}
 
 	@Override
@@ -501,9 +504,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		try {
 			for (ProfileType type : ProfileType.values())
 				profileMap.put(type, ProfileCreator.createProfile(this, type));
-		} catch (ProfileException e) {
-			LOGGER.warning("Unable to set window proportion");
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+		} catch (MissingDataException
+				| ComponentCreationException
+				| SegmentUpdateException e) {
+			LOGGER.log(Loggable.STACK, "Unable to set window proportion: " + e.getMessage(), e);
 		}
 
 	}
@@ -515,7 +519,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	@Override
 	public ISegmentedProfile getProfile(@NonNull ProfileType type)
-			throws MissingProfileException, ProfileException, MissingLandmarkException {
+			throws SegmentUpdateException, MissingDataException {
 		if (!this.hasProfile(type))
 			throw new MissingProfileException("Cannot get profile type " + type);
 		return getProfile(type, OrientationMark.REFERENCE);
@@ -523,7 +527,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
 	@Override
 	public void setSegments(@NonNull List<IProfileSegment> segs)
-			throws MissingLandmarkException, ProfileException {
+			throws MissingLandmarkException, SegmentUpdateException {
 
 		if (isLocked) {
 			LOGGER.finer("Cannot set profile segments: object is locked");
@@ -531,7 +535,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		}
 
 		if (segs.get(0).getStartIndex() != 0)
-			throw new ProfileException(
+			throw new SegmentUpdateException(
 					"Cannot set segments: no boundary at index 0: " + segs.get(0).toString());
 
 		// fetch the index of the RP (the zero of the input profile)
@@ -562,7 +566,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	}
 
 	@Override
-	public void reverse() throws MissingComponentException, ProfileException {
+	public void reverse()
+			throws MissingDataException, SegmentUpdateException, ComponentCreationException {
 		if (isLocked)
 			return;
 

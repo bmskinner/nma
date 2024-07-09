@@ -24,22 +24,22 @@ package com.bmskinner.nma.components;
  * @since 1.13.3
  *
  */
-public class MissingComponentException extends Exception {
+public class MissingDataException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    public MissingComponentException() {
+    public MissingDataException() {
         super();
     }
 
-    public MissingComponentException(String message) {
+    public MissingDataException(String message) {
         super(message);
     }
 
-    public MissingComponentException(String message, Throwable cause) {
+    public MissingDataException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public MissingComponentException(Throwable cause) {
+    public MissingDataException(Throwable cause) {
         super(cause);
     }
 }

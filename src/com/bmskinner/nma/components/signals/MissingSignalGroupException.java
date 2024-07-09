@@ -16,7 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.signals;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 
 /**
  * Thrown when a requested signal group is not present within a dataset or cell
@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.MissingComponentException;
  * @since 1.13.3
  *
  */
-public class MissingSignalGroupException extends MissingComponentException {
+public class MissingSignalGroupException extends MissingDataException {
     private static final long serialVersionUID = 1L;
 
     public MissingSignalGroupException() {

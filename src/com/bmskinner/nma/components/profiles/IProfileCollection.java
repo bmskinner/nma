@@ -21,6 +21,8 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.io.XmlSerializable;
 
@@ -47,18 +49,17 @@ public interface IProfileCollection extends XmlSerializable {
 	 * 
 	 * @return
 	 */
-	IProfileCollection duplicate();
+	IProfileCollection duplicate() throws SegmentUpdateException;
 
 	/**
 	 * Discard any cached data, and calculate all median and other profiles from the
 	 * cells in the collection.
 	 * 
-	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	void calculateProfiles()
-			throws MissingLandmarkException, MissingProfileException, ProfileException;
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the index of the landmark in the profile, zeroed on the reference point
@@ -145,19 +146,6 @@ public interface IProfileCollection extends XmlSerializable {
 	 */
 	Landmark getLandmark(@NonNull OrientationMark om);
 
-//	/**
-//	 * Get or calculate the requested profile.
-//	 * 
-//	 * @param type     the type of profile to fetch
-//	 * @param landmark the landmark to use as index zero
-//	 * @param quartile the collection quartile to return (0-100)
-//	 * @return the quartile profile from the given landmark
-//	 * @throws MissingLandmarkException when the landmark is not present
-//	 * @throws ProfileException
-//	 */
-//	IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark landmark, int quartile)
-//			throws MissingLandmarkException, ProfileException, MissingProfileException;
-
 	/**
 	 * Get or calculate the requested profile.
 	 * 
@@ -166,10 +154,10 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @param quartile the collection quartile to return (0-100)
 	 * @return the quartile profile from the given landmark
 	 * @throws MissingLandmarkException when the landmark is not present
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
 	IProfile getProfile(@NonNull ProfileType type, @NonNull OrientationMark landmark, int quartile)
-			throws MissingLandmarkException, ProfileException, MissingProfileException;
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get or calculate the requested profile.
@@ -180,21 +168,22 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @return the quartile profile from the given landmark
 	 * @throws MissingLandmarkException when the landmark is not present
 	 * @throws ProfileException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	IProfile getProfile(@NonNull ProfileType type, @NonNull Landmark landmark, int quartile)
-			throws MissingLandmarkException, ProfileException, MissingProfileException;
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Turn the IQR (difference between Q25, Q75) of the median into a profile.
 	 * 
 	 * @param pointType the profile type to use
 	 * @return the profile
-	 * @throws ProfileException
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	IProfile getIQRProfile(@NonNull ProfileType type, @NonNull OrientationMark landmark)
-			throws MissingLandmarkException, ProfileException, MissingProfileException;
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get or calculate the requested segmented profile.
@@ -204,16 +193,13 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @param quartile the quartile to fetch (0-100)
 	 * @return the profile
 	 * @throws ProfileException
-	 * @throws MissingLandmarkException    when the landmark is not present as an
-	 *                                     offset
-	 * @throws MissingProfileException     when the profile type does not have an
-	 *                                     associated aggregate
-	 * @throws UnsegmentedProfileException when no segments are available for the
-	 *                                     profile
+	 * @throws MissingDataException   when the profile is missing landmarks, profile
+	 *                                types or segments
+	 * @throws SegmentUpdateException
 	 */
 	ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type,
 			@NonNull OrientationMark landmark, int quartile)
-			throws MissingLandmarkException, ProfileException, MissingProfileException;
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * The number of segments in the profile
@@ -241,7 +227,7 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @throws ProfileException
 	 */
 	List<IProfileSegment> getSegments(@NonNull OrientationMark landmark)
-			throws MissingLandmarkException, ProfileException;
+			throws MissingLandmarkException, SegmentUpdateException;
 
 	/**
 	 * Get the IDs of the segments in this collection, ordered by position from the
@@ -257,9 +243,10 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @param position
 	 * @return
 	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
 	IProfileSegment getSegmentAt(@NonNull OrientationMark landmark, int position)
-			throws MissingLandmarkException, ProfileException;
+			throws MissingLandmarkException, SegmentUpdateException;
 
 	/**
 	 * Fetch the segment from the profile containing at the given landmark;
@@ -269,7 +256,7 @@ public interface IProfileCollection extends XmlSerializable {
 	 * @throws MissingLandmarkException
 	 */
 	IProfileSegment getSegmentContaining(@NonNull OrientationMark landmark)
-			throws ProfileException, MissingLandmarkException;
+			throws SegmentUpdateException, MissingLandmarkException;
 
 	/**
 	 * Set the index for a given landmark, with RP at index zero. Setting the index

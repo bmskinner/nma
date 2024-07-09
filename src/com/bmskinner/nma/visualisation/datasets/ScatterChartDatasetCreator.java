@@ -26,22 +26,24 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import com.bmskinner.nma.components.Statistical;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.components.signals.SignalManager;
 import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog.ColourByType;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 /**
@@ -69,18 +71,27 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 	 * 
 	 * @return a charting dataset
 	 * @throws ChartDatasetCreationException
+	 * @throws MissingMeasurementException
+	 * @throws ComponentCreationException
+	 * @throws MissingLandmarkException
 	 */
 	public XYDataset createScatterDataset(String component) throws ChartDatasetCreationException {
+		try {
+			if (CellularComponent.NUCLEUS.equals(component)) {
 
-		if (CellularComponent.NUCLEUS.equals(component)) {
-			return createNucleusScatterDataset();
+				return createNucleusScatterDataset();
+
+			}
+
+			if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+				return createSignalScatterDataset();
+			}
+		} catch (SegmentUpdateException | MissingDataException | ComponentCreationException e) {
+			throw new ChartDatasetCreationException(
+					"Error creating chart dataset for %s".formatted(component), e);
 		}
-
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
-			return createSignalScatterDataset();
-		}
-
-		throw new ChartDatasetCreationException("Component not recognised: " + component);
+		throw new ChartDatasetCreationException(
+				"Component for scatter chart not recognised: " + component);
 
 	}
 
@@ -89,9 +100,12 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 	 * 
 	 * @param options the charting options
 	 * @return
-	 * @throws ChartDatasetCreationException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
 	 */
-	private XYDataset createNucleusScatterDataset() throws ChartDatasetCreationException {
+	private XYDataset createNucleusScatterDataset()
+			throws SegmentUpdateException, MissingDataException, ComponentCreationException {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -123,25 +137,17 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 				double statAValue;
 				double statBValue;
 
-				try {
+				if (statA.equals(Measurement.VARIABILITY))
+					statAValue = c.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE,
+							n);
+				else
+					statAValue = n.getMeasurement(statA, scale);
 
-					if (statA.equals(Measurement.VARIABILITY))
-						statAValue = c.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE,
-								n);
-					else
-						statAValue = n.getMeasurement(statA, scale);
-
-					if (statB.equals(Measurement.VARIABILITY))
-						statBValue = c.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE,
-								n);
-					else
-						statBValue = n.getMeasurement(statB, scale);
-
-				} catch (MissingLandmarkException e) {
-					LOGGER.log(Loggable.STACK, "Tag not present in cell", e);
-					statAValue = Statistical.ERROR_CALCULATING_STAT;
-					statBValue = Statistical.ERROR_CALCULATING_STAT;
-				}
+				if (statB.equals(Measurement.VARIABILITY))
+					statBValue = c.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE,
+							n);
+				else
+					statBValue = n.getMeasurement(statB, scale);
 
 				xpoints[j] = statAValue;
 				ypoints[j] = statBValue;
@@ -160,10 +166,14 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 	 * 
 	 * @param options the charting options
 	 * @return
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 * @throws ChartDatasetCreationException
 	 * @throws Exception
 	 */
-	private SignalXYDataset createSignalScatterDataset() throws ChartDatasetCreationException {
+	private SignalXYDataset createSignalScatterDataset()
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		List<IAnalysisDataset> datasets = options.getDatasets();
 
 		List<Measurement> stats = options.getStats();
@@ -217,12 +227,15 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 	 * 
 	 * @param r
 	 * @return
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 * @throws ChartDatasetCreationException
 	 */
 	public static XYDataset createDimensionalityReductionScatterDataset(IAnalysisDataset d,
 			ColourByType type,
 			IClusterGroup plotGroup, IClusterGroup colourGroup)
-			throws ChartDatasetCreationException {
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
 
 		boolean isUMAP = plotGroup.getOptions().get()
@@ -281,7 +294,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 
 	private static double[][] createDimensionalityReductionValues(List<Nucleus> nuclei,
 			String xStatName,
-			String yStatName) {
+			String yStatName)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		double[] xpoints = new double[nuclei.size()];
 		double[] ypoints = new double[nuclei.size()];
 

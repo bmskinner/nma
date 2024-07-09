@@ -24,35 +24,36 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
+
 public class DefaultProfileAggregateTest {
-	
+
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
-	
+
 	@Test
-	public void profileShouldNotBeCreatedWithNullData(){
+	public void profileShouldNotBeCreatedWithNullData() {
 
 		exception.expect(IllegalArgumentException.class);
-		new DefaultProfileAggregate(100, 0); 
+		new DefaultProfileAggregate(100, 0);
 	}
-	
+
 	@Test
-	public void addAProfileToTheAggregate() throws ProfileException{
-		
-		float[] array   = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
+	public void addAProfileToTheAggregate() throws ProfileException, SegmentUpdateException {
+
+		float[] array = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 		IProfile values = new DefaultProfile(array);
 
 		IProfileAggregate tester = new DefaultProfileAggregate(10, 50);
-		
-		for( int i=0;i<50; i++){
+
+		for (int i = 0; i < 50; i++) {
 			tester.addValues(values);
 		}
 
-
 		IProfile median = tester.getMedian();
 
-		for( int i =0;i<10; i++){
-			assertEquals("Values should be identical", array[i], median.toDoubleArray()[i],0);
+		for (int i = 0; i < 10; i++) {
+			assertEquals("Values should be identical", array[i], median.toDoubleArray()[i], 0);
 		}
 	}
 

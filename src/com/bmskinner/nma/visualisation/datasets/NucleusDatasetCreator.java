@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -41,10 +42,9 @@ import com.bmskinner.nma.components.mesh.MeshVertex;
 import com.bmskinner.nma.components.profiles.BooleanProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.signals.INuclearSignal;
@@ -89,9 +89,11 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param dataset
 	 * @return
 	 */
-	public XYDataset createBareNucleusOutline(@NonNull IAnalysisDataset dataset) throws ChartDatasetCreationException {
+	public XYDataset createBareNucleusOutline(@NonNull IAnalysisDataset dataset)
+			throws ChartDatasetCreationException {
 		try {
-			return new ComponentOutlineDataset(dataset.getCollection().getConsensus(), false, options.getScale());
+			return new ComponentOutlineDataset(dataset.getCollection().getConsensus(), false,
+					options.getScale());
 		} catch (MissingLandmarkException | ComponentCreationException e) {
 			throw new ChartDatasetCreationException(e);
 		}
@@ -112,7 +114,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		try {
 
 			Nucleus n = collection.getConsensus();
-			ISegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+			ISegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE,
+					OrientationMark.REFERENCE);
 
 			// At this point, the angle profile and the iqr profile should be in sync
 			// The following set of checks confirms this.
@@ -141,9 +144,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			if (ds.getSeriesCount() < angleProfile.getSegmentCount())
 				throw new ChartDatasetCreationException(
 						"Cannot make segmented nucleus outline: too few series in chart dataset");
-		} catch (ProfileException | MissingLandmarkException | MissingProfileException | UnavailableBorderPointException
-				| ComponentCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error getting nucleus angle profile from " + OrientationMark.REFERENCE, e);
+		} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
 			throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
 		}
 		return ds;
@@ -157,7 +158,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createNucleusIndexTags(@NonNull Nucleus nucleus) throws ChartDatasetCreationException {
+	public XYDataset createNucleusIndexTags(@NonNull Nucleus nucleus)
+			throws ChartDatasetCreationException {
 
 		FloatXYDataset ds = new FloatXYDataset();
 		try {
@@ -190,7 +192,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return a dataset for charting
 	 * 
 	 */
-	public List<ComponentOutlineDataset> createSignalOutlines(@NonNull ICell cell, @NonNull IAnalysisDataset dataset)
+	public List<ComponentOutlineDataset> createSignalOutlines(@NonNull ICell cell,
+			@NonNull IAnalysisDataset dataset)
 			throws ChartDatasetCreationException {
 
 		List<ComponentOutlineDataset> result = new ArrayList<>();
@@ -227,7 +230,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * 
 	 * @return chartable datasets
 	 */
-	public List<ComponentOutlineDataset> createMultiNucleusOutline() throws ChartDatasetCreationException {
+	public List<ComponentOutlineDataset> createMultiNucleusOutline()
+			throws ChartDatasetCreationException {
 
 		List<ComponentOutlineDataset> result = new ArrayList<>();
 
@@ -238,8 +242,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 			if (collection.hasConsensus()) {
 				try {
-					result.add(new ComponentOutlineDataset(collection.getConsensus(), false, scale));
-				} catch (ChartDatasetCreationException | MissingLandmarkException | ComponentCreationException e) {
+					result.add(
+							new ComponentOutlineDataset(collection.getConsensus(), false, scale));
+				} catch (ChartDatasetCreationException | MissingLandmarkException
+						| ComponentCreationException e) {
 					throw new ChartDatasetCreationException();
 				}
 			}
@@ -303,7 +309,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws Exception
 	 */
-	public NucleusMeshXYDataset createNucleusMeshVertexDataset(Mesh mesh) throws ChartDatasetCreationException {
+	public NucleusMeshXYDataset createNucleusMeshVertexDataset(Mesh mesh)
+			throws ChartDatasetCreationException {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
 		for (MeshVertex v : mesh.getPeripheralVertices()) {
@@ -333,14 +340,17 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws Exception
 	 */
-	public NucleusMeshXYDataset createNucleusMeshEdgeDataset(Mesh mesh) throws ChartDatasetCreationException {
+	public NucleusMeshXYDataset createNucleusMeshEdgeDataset(Mesh mesh)
+			throws ChartDatasetCreationException {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
 		for (MeshEdge edge : mesh.getEdges()) {
 
-			double[] yvalues = { edge.getV1().getPosition().getY(), edge.getV2().getPosition().getY() };
+			double[] yvalues = { edge.getV1().getPosition().getY(),
+					edge.getV2().getPosition().getY() };
 
-			double[] xvalues = { edge.getV1().getPosition().getX(), edge.getV2().getPosition().getX() };
+			double[] xvalues = { edge.getV1().getPosition().getX(),
+					edge.getV2().getPosition().getX() };
 
 			double[][] data = { xvalues, yvalues };
 			ds.addSeries(edge.toString(), data);
@@ -356,7 +366,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws Exception
 	 */
-	public NucleusMeshXYDataset createNucleusMeshMidpointDataset(Mesh mesh) throws ChartDatasetCreationException {
+	public NucleusMeshXYDataset createNucleusMeshMidpointDataset(Mesh mesh)
+			throws ChartDatasetCreationException {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
 		for (MeshEdge edge : mesh.getEdges()) {
@@ -372,18 +383,22 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		return ds;
 	}
 
-	public HistogramDataset createNucleusMeshHistogramDataset(Mesh mesh) throws ChartDatasetCreationException {
+	public HistogramDataset createNucleusMeshHistogramDataset(Mesh mesh)
+			throws ChartDatasetCreationException {
 		HistogramDataset ds = new HistogramDataset();
 
 		int bins = 100;
 
 		double max = mesh.getEdges().parallelStream()
-				.max((e1, e2) -> Double.compare(e1.getLog2Ratio(), e2.getLog2Ratio())).get().getLog2Ratio();
+				.max((e1, e2) -> Double.compare(e1.getLog2Ratio(), e2.getLog2Ratio())).get()
+				.getLog2Ratio();
 
 		double min = mesh.getEdges().parallelStream()
-				.min((e1, e2) -> Double.compare(e1.getLog2Ratio(), e2.getLog2Ratio())).get().getLog2Ratio();
+				.min((e1, e2) -> Double.compare(e1.getLog2Ratio(), e2.getLog2Ratio())).get()
+				.getLog2Ratio();
 
-		double[] values = mesh.getEdges().parallelStream().mapToDouble(MeshEdge::getLog2Ratio).toArray();
+		double[] values = mesh.getEdges().parallelStream().mapToDouble(MeshEdge::getLog2Ratio)
+				.toArray();
 
 		ds.addSeries("mesh result", values, bins, min, max);
 

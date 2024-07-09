@@ -10,17 +10,17 @@ import com.bmskinner.nma.analysis.AnalysisMethodException;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
-import com.bmskinner.nma.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.stats.Stats;
 
@@ -82,7 +82,7 @@ public class SegmentMergeMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	private void run() throws ProfileException, MissingComponentException {
+	private void run() throws ProfileException, MissingDataException, SegmentUpdateException {
 		if (!dataset.isRoot()) {
 			LOGGER.fine("Cannot merge segments in a virtual collection");
 			return;
@@ -95,8 +95,8 @@ public class SegmentMergeMethod extends SingleDatasetAnalysisMethod {
 		}
 
 		LOGGER.fine(
-				() ->
-				"Merging segments %s and %s in %s to new segment %s".formatted(seg0Id, seg1Id, dataset.getName(),
+				() -> "Merging segments %s and %s in %s to new segment %s".formatted(seg0Id, seg1Id,
+						dataset.getName(),
 						newId));
 
 		ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
@@ -153,13 +153,13 @@ public class SegmentMergeMethod extends SingleDatasetAnalysisMethod {
 	 * @param seg1  the first segment in the pair to merge
 	 * @param seg2  the second segment in the pair to merge
 	 * @param newID the id for the merged segment
-	 * @throws UnsegmentedProfileException if the median profile is not segmented
-	 * @throws ProfileException            if the update fails
-	 * @throws MissingComponentException
+	 * @throws ProfileException       if the update fails
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private void mergeSegments(@NonNull ICellCollection collection, @NonNull UUID seg1,
 			@NonNull UUID seg2, @NonNull UUID newID)
-			throws ProfileException, MissingComponentException {
+			throws ProfileException, MissingDataException, SegmentUpdateException {
 		// Note - we can't do the root check here. It must be at the segmentation
 		// handler level
 		// otherwise updating child datasets to match a root will fail
@@ -215,11 +215,12 @@ public class SegmentMergeMethod extends SingleDatasetAnalysisMethod {
 	 * @param seg2  the second segment to be merged
 	 * @param newID the new ID for the merged segment
 	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private void mergeSegments(@NonNull Nucleus p, @NonNull UUID seg1, @NonNull UUID seg2,
 			@NonNull UUID newID)
-			throws ProfileException, MissingComponentException {
+			throws ProfileException, MissingDataException, SegmentUpdateException {
 		ISegmentedProfile profile = p.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 
 		// Only try the merge if both segments are present in the profile

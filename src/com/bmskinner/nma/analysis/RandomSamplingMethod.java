@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -29,7 +29,7 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 
 public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
 
@@ -97,7 +97,7 @@ public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
 	}
 
 	private ICellCollection[] makeRandomSampledCollection(int firstSize, int secondSize)
-			throws MissingComponentException, ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 
 		ICellCollection c1 = new VirtualDataset(dataset, "first");
 		ICellCollection c2 = new VirtualDataset(dataset, "second");

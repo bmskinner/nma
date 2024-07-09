@@ -27,9 +27,11 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -94,9 +96,11 @@ public interface IAnalysisDataset extends XmlSerializable {
 	 * @throws ProfileException
 	 * @throws MissingLandmarkException
 	 * @throws MissingProfileException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	IAnalysisDataset addChildCollection(@NonNull ICellCollection collection)
-			throws MissingProfileException, MissingLandmarkException, ProfileException;
+			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Add the given dataset as a child of this dataset

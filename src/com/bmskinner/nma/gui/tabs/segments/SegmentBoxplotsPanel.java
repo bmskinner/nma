@@ -35,8 +35,8 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.Labels;
@@ -107,7 +107,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 			List<IProfileSegment> segments;
 			try {
 				segments = collection.getProfileCollection().getSegments(OrientationMark.REFERENCE);
-			} catch (MissingLandmarkException | ProfileException e) {
+			} catch (MissingLandmarkException | SegmentUpdateException e) {
 				LOGGER.warning("Cannot get segments");
 				LOGGER.log(Loggable.STACK, "Cannot get segments", e);
 				return;

@@ -29,68 +29,72 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.samples.dummy.DummyRodentSpermNucleus;
 
-
 public class DefaultRodentSpermNucleusTest {
-    
-    private Nucleus testNucleus;
-    
-    @Before
-    public void setUp() throws ComponentCreationException{
-        testNucleus = new DummyRodentSpermNucleus();
-    }
 
-    @Test
-    public void testGetChannel() {
-        int expected = 0;
-        assertThat(testNucleus.getChannel(), is(expected));
-    }
+	private Nucleus testNucleus;
 
-    @Test
-    public void testGetScale() {
-        double expected = 1;
-        assertThat(testNucleus.getScale(), is(expected));
-    }
+	@Before
+	public void setUp() throws ComponentCreationException {
+		testNucleus = new DummyRodentSpermNucleus();
+	}
 
-    @Test
-    public void testGetStatisticPlottableStatisticMeasurementScale() {
-        double scale = 5;
+	@Test
+	public void testGetChannel() {
+		int expected = 0;
+		assertThat(testNucleus.getChannel(), is(expected));
+	}
 
-        // Get and save the values with default scale 1
-        Map<Measurement, Double> map = new HashMap<>();
-        for(Measurement stat : testNucleus.getMeasurements()){
-            map.put(stat, testNucleus.getMeasurement(stat));
-        }
-        
-        // Update scale
-        testNucleus.setScale(scale);
-        
-        // Get the actual values for microns and pixels
-        for(Measurement stat : testNucleus.getMeasurements()){
-            double m = testNucleus.getMeasurement(stat, MeasurementScale.MICRONS);
-            
-            double expected = Measurement.convert(map.get(stat), scale, MeasurementScale.MICRONS, stat.getDimension());
-            assertEquals(stat.toString(), expected, m, 0);
-            
-            double d = testNucleus.getMeasurement(stat, MeasurementScale.PIXELS);
-            assertEquals(stat.toString(), map.get(stat), d, 0);
-        }        
-    }
+	@Test
+	public void testGetScale() {
+		double expected = 1;
+		assertThat(testNucleus.getScale(), is(expected));
+	}
 
-    @Test
-    public void testSetStatistic() {
-        double epsilon = 0; // the amount of difference permitted 
-        double expected = 25;
-        
-        for(Measurement stat : Measurement.getNucleusStats()){
-            testNucleus.setMeasurement(stat, expected);
-            double d = testNucleus.getMeasurement(stat);
-            assertEquals(stat.toString(), expected, d, epsilon);
-        }
-    }
+	@Test
+	public void testGetStatisticPlottableStatisticMeasurementScale()
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
+		double scale = 5;
+
+		// Get and save the values with default scale 1
+		Map<Measurement, Double> map = new HashMap<>();
+		for (Measurement stat : testNucleus.getMeasurements()) {
+			map.put(stat, testNucleus.getMeasurement(stat));
+		}
+
+		// Update scale
+		testNucleus.setScale(scale);
+
+		// Get the actual values for microns and pixels
+		for (Measurement stat : testNucleus.getMeasurements()) {
+			double m = testNucleus.getMeasurement(stat, MeasurementScale.MICRONS);
+
+			double expected = Measurement.convert(map.get(stat), scale, MeasurementScale.MICRONS,
+					stat.getDimension());
+			assertEquals(stat.toString(), expected, m, 0);
+
+			double d = testNucleus.getMeasurement(stat, MeasurementScale.PIXELS);
+			assertEquals(stat.toString(), map.get(stat), d, 0);
+		}
+	}
+
+	@Test
+	public void testSetStatistic()
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
+		double epsilon = 0; // the amount of difference permitted
+		double expected = 25;
+
+		for (Measurement stat : Measurement.getNucleusStats()) {
+			testNucleus.setMeasurement(stat, expected);
+			double d = testNucleus.getMeasurement(stat);
+			assertEquals(stat.toString(), expected, d, epsilon);
+		}
+	}
 }

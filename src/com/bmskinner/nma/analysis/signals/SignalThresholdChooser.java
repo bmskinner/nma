@@ -23,12 +23,15 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.BooleanProfile;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.utility.ArrayUtils;
 
@@ -82,19 +85,20 @@ public class SignalThresholdChooser {
 
 		if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
 				.equals(SignalDetectionMode.FORWARD.name())) {
-			LOGGER.finer("Running forward detection");
 			return chooseForwardThresholdSignal(ip, n);
 		}
 
 		if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
 				.equals(SignalDetectionMode.REVERSE.name())) {
-			LOGGER.finer("Running reverse detection");
-			return chooseReverseThresholdSignal(ip, n);
+			try {
+				return chooseReverseThresholdSignal(ip, n);
+			} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+				throw new IllegalArgumentException("Cannot create reverse detection mode", e);
+			}
 		}
 
 		if (options.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
 				.equals(SignalDetectionMode.ADAPTIVE.name())) {
-			LOGGER.finer("Running adaptive detection");
 			return chooseHistogramThresholdSignal(ip, n);
 		}
 		throw new IllegalArgumentException("No detection mode found");
@@ -114,11 +118,15 @@ public class SignalThresholdChooser {
 	 * 
 	 * @param sourceFile the file the image came from
 	 * @param n          the nucleus
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 * @throws ImageImportException
 	 * @throws Exception
 	 */
 	private int chooseReverseThresholdSignal(@NonNull ImageProcessor ip,
-			@NonNull Nucleus n) {
+			@NonNull Nucleus n)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		FloatPolygon polygon = n.toOriginalPolygon();
 
 		// map brightness to count

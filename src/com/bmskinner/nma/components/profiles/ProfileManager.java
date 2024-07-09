@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.ICellCollection;
@@ -72,19 +72,18 @@ public class ProfileManager {
 	 * regular angle profile onto all other profile types
 	 * 
 	 * @param destination the collection to update
-	 * @throws ProfileException         if the copy fails
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	public void copySegmentsAndLandmarksTo(@NonNull final ICellCollection destination)
-			throws ProfileException, MissingProfileException, MissingLandmarkException {
+			throws MissingDataException, SegmentUpdateException {
 
 		// Get the corresponding profile collection from the template
 		IProfileCollection sourcePC = collection.getProfileCollection();
 
 		List<IProfileSegment> segments = sourcePC.getSegments(OrientationMark.REFERENCE);
 		if (segments.isEmpty())
-			throw new ProfileException("No segments in profile of " + collection.getName());
+			throw new MissingDataException("No segments in profile of " + collection.getName());
 
 		// Create a new profile collection for the destination, so profiles are
 		// refreshed
@@ -112,7 +111,7 @@ public class ProfileManager {
 		List<IProfileSegment> newSegs = destPC.getSegments(OrientationMark.REFERENCE);
 
 		if (segments.size() != newSegs.size())
-			throw new ProfileException(
+			throw new SegmentUpdateException(
 					"Segments are not consistent with the old profile: were " + segments.size()
 							+ ", now " + newSegs.size());
 
@@ -120,13 +119,13 @@ public class ProfileManager {
 			// Start and end points can change, but id and lock state should be consistent
 			// Check ids are in correct order
 			if (!segments.get(i).getID().equals(newSegs.get(i).getID())) {
-				throw new ProfileException(
+				throw new SegmentUpdateException(
 						"Segment IDs are not consistent with the old profile");
 			}
 
 			// Check lock state preserved
 			if (segments.get(i).isLocked() != newSegs.get(i).isLocked()) {
-				throw new ProfileException(
+				throw new SegmentUpdateException(
 						"Segment lock state not consistent with the old profile");
 			}
 		}
@@ -160,11 +159,11 @@ public class ProfileManager {
 	 * @param cell  the cell to alter
 	 * @param id    the segment id
 	 * @param index the new start index of the segment
-	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	public void updateCellSegmentStartIndex(@NonNull ICell cell, @NonNull UUID id, int index)
-			throws ProfileException, MissingComponentException {
+			throws MissingDataException, SegmentUpdateException {
 
 		Nucleus n = cell.getPrimaryNucleus();
 		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
@@ -209,11 +208,11 @@ public class ProfileManager {
 	 * @param index the median profile index for the new segment start
 	 * @throws UnsegmentedProfileException
 	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
 	 * @throws SegmentUpdateException
 	 */
 	public void updateMedianProfileSegmentStartIndex(UUID id, int index)
-			throws ProfileException, MissingComponentException, SegmentUpdateException {
+			throws ProfileException, MissingDataException, SegmentUpdateException {
 
 		ISegmentedProfile oldProfile = collection.getProfileCollection().getSegmentedProfile(
 				ProfileType.ANGLE,

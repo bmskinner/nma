@@ -30,8 +30,6 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.FilteringOptions;
-import com.bmskinner.nma.components.profiles.ProfileException;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Perform filtering of collections on arbitrary predicates
@@ -140,14 +138,8 @@ public class CellCollectionFilteringMethod extends MultipleDatasetAnalysisMethod
 
 			ICellCollection v = new VirtualDataset(d, newCollectionName, null);
 			v.addAll(filtered);
-			try {
-				d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(v);
-				d.getCollection().getSignalManager().copySignalGroupsTo(v);
-
-			} catch (ProfileException e) {
-				LOGGER.warning("Error copying collection offsets");
-				LOGGER.log(Loggable.STACK, "Error in offsetting", e);
-			}
+			d.getCollection().getProfileManager().copySegmentsAndLandmarksTo(v);
+			d.getCollection().getSignalManager().copySignalGroupsTo(v);
 			d.addChildCollection(v);
 		}
 		LOGGER.fine("Filtering completed for all datasets");

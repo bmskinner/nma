@@ -76,7 +76,7 @@ public class SignalMeasurer {
 
 				for (INuclearSignal s : sc.getSignals(signalGroup)) {
 
-					INuclearSignal s1 = sso.stream().filter(ss -> ss.getID().equals(s.getID()))
+					INuclearSignal s1 = sso.stream().filter(ss -> ss.getId().equals(s.getId()))
 							.findFirst().get();
 
 					// Measure angle in the oriented signal, than save the measurement in the real

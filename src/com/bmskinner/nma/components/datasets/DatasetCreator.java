@@ -6,10 +6,10 @@ import org.jdom2.Element;
 
 import com.bmskinner.nma.analysis.ProgressEvent;
 import com.bmskinner.nma.analysis.ProgressListener;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 
 /**
@@ -57,8 +57,8 @@ public class DatasetCreator {
 			for (IAnalysisDataset c : d.getAllChildDatasets())
 				c.getCollection().getProfileCollection().calculateProfiles();
 
-		} catch (NullPointerException | ProfileException | MissingLandmarkException
-				| MissingProfileException e1) {
+		} catch (NullPointerException | MissingDataException
+				| SegmentUpdateException e1) {
 			throw new ComponentCreationException(e1);
 		}
 

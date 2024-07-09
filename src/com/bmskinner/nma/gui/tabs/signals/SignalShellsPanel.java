@@ -50,13 +50,12 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nma.analysis.signals.shells.ShellResultCellFilterer;
 import com.bmskinner.nma.analysis.signals.shells.ShellResultCellFilterer.ShellResultFilterOperation;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.MissingOptionException;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nma.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nma.gui.components.ExportableTable;
@@ -365,8 +364,8 @@ public class SignalShellsPanel extends DetailPanel
 				// alert that there is a new dataset
 				UIController.getInstance().fireDatasetAdded(dataset.getChildDataset(virt.getId()));
 
-			} catch (ProfileException | CollectionFilteringException | MissingProfileException
-					| MissingLandmarkException e1) {
+			} catch (CollectionFilteringException | MissingDataException
+					| SegmentUpdateException e1) {
 				LOGGER.log(Loggable.STACK,
 						"Unable to filter collection for %s".formatted(dataset.getName()),
 						e1);

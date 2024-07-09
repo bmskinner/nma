@@ -4,10 +4,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
@@ -59,7 +60,7 @@ public class DatasetRepairer {
 					repairNucleusRPNotAtSegmentBoundary(n, seg0Id);
 			}
 
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			// allow isOk to fall through
 			LOGGER.fine("No border tag present");
 		}
@@ -82,7 +83,7 @@ public class DatasetRepairer {
 	 *                               start index of
 	 * @throws ProfileException
 	 */
-	private void repairNucleusRPNotAtSegmentBoundary(Nucleus n, UUID expectedRPSegmentStart) throws ProfileException {
+	private void repairNucleusRPNotAtSegmentBoundary(Nucleus n, UUID expectedRPSegmentStart) {
 		boolean wasLocked = n.isLocked();
 		if (wasLocked)
 			n.setLocked(false);
@@ -96,20 +97,23 @@ public class DatasetRepairer {
 				// We can't just set RP since setting RP will update segments by the same amount
 				// Need to copy the profile and segments as is, then reload them after the RP
 				// has been changed
-				LOGGER.finest("RP at " + rpIndex + "; expected at " + segStart);
 				n.setLandmark(OrientationMark.REFERENCE, segStart);
-				LOGGER.finest(n.getNameAndNumber() + ": updated RP to index " + segStart);
-//				n.setProfile(ProfileType.ANGLE, profile);
 			}
 			LOGGER.finest(n.getNameAndNumber() + ": Seg start index now "
-					+ n.getProfile(ProfileType.ANGLE).getSegment(expectedRPSegmentStart).getStartIndex());
+					+ n.getProfile(ProfileType.ANGLE).getSegment(expectedRPSegmentStart)
+							.getStartIndex());
 
 		} catch (MissingLandmarkException e) {
 			LOGGER.fine("No RP tag present in " + n.getNameAndNumber());
 		} catch (MissingProfileException e) {
 			LOGGER.fine("No angle profile present in " + n.getNameAndNumber());
-		} catch (MissingComponentException e) {
-			LOGGER.fine("No segment with id " + expectedRPSegmentStart + " in " + n.getNameAndNumber());
+		} catch (MissingDataException e) {
+			LOGGER.fine(
+					"No segment with id " + expectedRPSegmentStart + " in " + n.getNameAndNumber());
+		} catch (IndexOutOfBoundsException e) {
+			LOGGER.fine("No suitable index in " + n.getNameAndNumber());
+		} catch (SegmentUpdateException e) {
+			LOGGER.fine("Unable to update segment bounds in " + n.getNameAndNumber());
 		}
 		n.setLocked(wasLocked);
 	}

@@ -23,18 +23,17 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.signals.ISignalGroup;
@@ -49,289 +48,316 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
  *
  */
 public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ViolinDatasetCreator.class.getName());
-	
+
 	private static final int STEP_COUNT = 100;
 
-    /**
-     * Create with options
-     * 
-     * @param options
-     */
-    public ViolinDatasetCreator(@NonNull final ChartOptions options) {
-        super(options);
-    }
+	/**
+	 * Create with options
+	 * 
+	 * @param options
+	 */
+	public ViolinDatasetCreator(@NonNull final ChartOptions options) {
+		super(options);
+	}
 
-    /**
-     * Get a violin dataset for the given statistic for each dataset in the
-     * options
-     * 
-     * @param stat the statistic to chart
-     * @return a violin dataset
-     * @throws ChartDatasetCreationException if any error occurs or the statistic was not recognised
-     */
-    public synchronized ViolinCategoryDataset createPlottableStatisticViolinDataset(@NonNull String component)
-            throws ChartDatasetCreationException {
+	/**
+	 * Get a violin dataset for the given statistic for each dataset in the options
+	 * 
+	 * @param stat the statistic to chart
+	 * @return a violin dataset
+	 * @throws ChartDatasetCreationException if any error occurs or the statistic
+	 *                                       was not recognised
+	 */
+	public synchronized ViolinCategoryDataset createPlottableStatisticViolinDataset(
+			@NonNull String component)
+			throws ChartDatasetCreationException {
 
-        if (CellularComponent.WHOLE_CELL.equals(component))
-            return createCellStatisticViolinDataset();
+		try {
+			if (CellularComponent.WHOLE_CELL.equals(component))
+				return createCellStatisticViolinDataset();
 
-        if (CellularComponent.NUCLEUS.equals(component))
-            return createNucleusStatisticViolinDataset();
+			if (CellularComponent.NUCLEUS.equals(component))
+				return createNucleusStatisticViolinDataset();
 
-        if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
-            return createSignalStatisticViolinDataset();
+			if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
+				return createSignalStatisticViolinDataset();
 
-        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
-            return createSegmentStatisticDataset();
-        throw new ChartDatasetCreationException("Component not recognised: " + component);
+			if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
+				return createSegmentStatisticDataset();
 
-    }
+		} catch (MissingDataException | SegmentUpdateException e) {
+			throw new ChartDatasetCreationException(
+					"Error making violin dataset for %s".formatted(component));
+		}
+		throw new ChartDatasetCreationException(
+				"Component not recognised: %s".formatted(component));
 
-    /**
-     * Get a boxplot dataset for the given statistic for each collection
-     * 
-     * @param options the charting options
-     * @return
-     * @throws Exception
-     */
-    private ViolinCategoryDataset createCellStatisticViolinDataset() {
-        List<IAnalysisDataset> datasets = options.getDatasets();
-        Measurement stat = options.getMeasurement();
-        MeasurementScale scale = options.getScale();
-        ViolinCategoryDataset ds = new ViolinCategoryDataset();
+	}
 
-        for (int i = 0; i < datasets.size(); i++) {
-            ICellCollection c = datasets.get(i).getCollection();
+	/**
+	 * Get a boxplot dataset for the given statistic for each collection
+	 * 
+	 * @param options the charting options
+	 * @return
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
+	 * @throws Exception
+	 */
+	private ViolinCategoryDataset createCellStatisticViolinDataset()
+			throws MissingDataException, SegmentUpdateException {
+		List<IAnalysisDataset> datasets = options.getDatasets();
+		Measurement stat = options.getMeasurement();
+		MeasurementScale scale = options.getScale();
+		ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
-            String rowKey = c.getName() + "_" + i;
-            String colKey = stat.toString();
+		for (int i = 0; i < datasets.size(); i++) {
+			ICellCollection c = datasets.get(i).getCollection();
 
-            // Add the boxplot values
+			String rowKey = c.getName() + "_" + i;
+			String colKey = stat.toString();
 
-            double[] stats = c.getRawValues(stat, CellularComponent.WHOLE_CELL, scale);
-            List<Number> list = new ArrayList<>();
-            for (double d : stats) {
-                list.add(d);
-            }
+			// Add the boxplot values
 
-            ds.add(list, rowKey, colKey);
-        }
+			double[] stats = c.getRawValues(stat, CellularComponent.WHOLE_CELL, scale);
+			List<Number> list = new ArrayList<>();
+			for (double d : stats) {
+				list.add(d);
+			}
 
-        return ds;
-    }
+			ds.add(list, rowKey, colKey);
+		}
 
-    /**
-     * Get a boxplot dataset for the given statistic for each collection
-     * 
-     * @return
-     * @throws Exception
-     */
-    private ViolinCategoryDataset createNucleusStatisticViolinDataset() {
-        List<IAnalysisDataset> datasets = options.getDatasets();
-        Measurement stat = options.getMeasurement();
-        MeasurementScale scale = options.getScale();
-        ViolinCategoryDataset ds = new ViolinCategoryDataset();
+		return ds;
+	}
 
-        for (int i = 0; i < datasets.size(); i++) {
-            ICellCollection c = datasets.get(i).getCollection();
+	/**
+	 * Get a boxplot dataset for the given statistic for each collection
+	 * 
+	 * @return
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
+	 * @throws Exception
+	 */
+	private ViolinCategoryDataset createNucleusStatisticViolinDataset()
+			throws MissingDataException, SegmentUpdateException {
+		List<IAnalysisDataset> datasets = options.getDatasets();
+		Measurement stat = options.getMeasurement();
+		MeasurementScale scale = options.getScale();
+		ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
-            String rowKey = c.getName() + "_" + i;
-            String colKey = stat.toString();
+		for (int i = 0; i < datasets.size(); i++) {
+			ICellCollection c = datasets.get(i).getCollection();
 
-            // Add the boxplot values
-            double[] stats = c.getRawValues(stat, CellularComponent.NUCLEUS, scale);
-            List<Number> list = new ArrayList<>();
-            for (double d : stats) 
-                list.add(d);
-            
-            ds.add(list, rowKey, colKey);
-        }
+			String rowKey = c.getName() + "_" + i;
+			String colKey = stat.toString();
 
-        return ds;
-    }
+			// Add the boxplot values
+			double[] stats = c.getRawValues(stat, CellularComponent.NUCLEUS, scale);
+			List<Number> list = new ArrayList<>();
+			for (double d : stats)
+				list.add(d);
 
-    /**
-     * Create a violin dataset for signal statistics for a single analysis
-     * dataset
-     * 
-     * @param dataset the analysis dataset to get signal info from
-     * @return a violin dataset
-     */
-    private ViolinCategoryDataset createSignalStatisticViolinDataset() {
+			ds.add(list, rowKey, colKey);
+		}
 
-        List<IAnalysisDataset> datasets = options.getDatasets();
-        Measurement stat = options.getMeasurement();
-        MeasurementScale scale = options.getScale();
-        ViolinCategoryDataset ds = new ViolinCategoryDataset();
-        for (@NonNull IAnalysisDataset d : datasets) {
+		return ds;
+	}
 
-            ICellCollection collection = d.getCollection();
+	/**
+	 * Create a violin dataset for signal statistics for a single analysis dataset
+	 * 
+	 * @param dataset the analysis dataset to get signal info from
+	 * @return a violin dataset
+	 */
+	private ViolinCategoryDataset createSignalStatisticViolinDataset() {
 
-            for (@NonNull UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
+		List<IAnalysisDataset> datasets = options.getDatasets();
+		Measurement stat = options.getMeasurement();
+		MeasurementScale scale = options.getScale();
+		ViolinCategoryDataset ds = new ViolinCategoryDataset();
+		for (@NonNull
+		IAnalysisDataset d : datasets) {
 
-                if (collection.getSignalManager().hasSignals(signalGroup)) {
-                	
-                	ISignalGroup group = collection.getSignalGroup(signalGroup).get();
+			ICellCollection collection = d.getCollection();
 
-                    double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
+			for (@NonNull
+			UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
-                    String rowKey = CellularComponent.NUCLEAR_SIGNAL + "_"+signalGroup+"_"+group.getGroupName();
-                    String colKey = collection.getName();
-                    /*
-                     * For charting, use offset angles, otherwise the boxplots
-                     * will fail on wrapped signals
-                     */
-                    if (stat.equals(Measurement.ANGLE))
-                        values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
+				if (collection.getSignalManager().hasSignals(signalGroup)) {
 
-                    List<Number> list = new ArrayList<>();
-                    for (double value : values) {
-                        list.add(value);
-                    }
-                    if(!list.isEmpty())
-                        ds.add(list, rowKey, colKey);
-                }
-            }
-        }
-        return ds;
-    }
+					ISignalGroup group = collection.getSignalGroup(signalGroup).get();
 
-    /**
-     * Create a violin dataset for the desired segment statistic
-     * 
-     * @return
-     * @throws ChartDatasetCreationException
-     */
-    private synchronized ViolinCategoryDataset createSegmentStatisticDataset() throws ChartDatasetCreationException {
+					double[] values = collection.getSignalManager().getSignalStatistics(stat, scale,
+							signalGroup);
 
-        LOGGER.finest( "Making segment statistic dataset");
+					String rowKey = CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup + "_"
+							+ group.getGroupName();
+					String colKey = collection.getName();
+					/*
+					 * For charting, use offset angles, otherwise the boxplots will fail on wrapped
+					 * signals
+					 */
+					if (stat.equals(Measurement.ANGLE))
+						values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
 
-        Measurement stat = options.getMeasurement();
+					List<Number> list = new ArrayList<>();
+					for (double value : values) {
+						list.add(value);
+					}
+					if (!list.isEmpty())
+						ds.add(list, rowKey, colKey);
+				}
+			}
+		}
+		return ds;
+	}
 
-        if (stat.equals(Measurement.LENGTH)) {
-            return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition());
-        }
+	/**
+	 * Create a violin dataset for the desired segment statistic
+	 * 
+	 * @return
+	 * @throws ChartDatasetCreationException
+	 */
+	private synchronized ViolinCategoryDataset createSegmentStatisticDataset()
+			throws ChartDatasetCreationException {
 
-        if (stat.equals(Measurement.DISPLACEMENT)) {
-            return createSegmentDisplacementDataset(options.getDatasets(), options.getSegPosition());
-        }
+		LOGGER.finest("Making segment statistic dataset");
 
-        return null;
+		Measurement stat = options.getMeasurement();
 
-    }
+		if (stat.equals(Measurement.LENGTH)) {
+			return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition());
+		}
 
-    /**
-     * Get the lengths of the given segment in the collections
-     * 
-     * @param datasets
-     * @param segPosition
-     * @return
-     * @throws ChartDatasetCreationException
-     * @throws Exception
-     */
-    private synchronized ViolinCategoryDataset createSegmentLengthDataset(@NonNull final List<IAnalysisDataset> datasets, final int segPosition) throws ChartDatasetCreationException {
+		if (stat.equals(Measurement.DISPLACEMENT)) {
+			return createSegmentDisplacementDataset(options.getDatasets(),
+					options.getSegPosition());
+		}
 
-        ViolinCategoryDataset dataset = new ViolinCategoryDataset();
+		return null;
 
-        for (int i = 0; i < datasets.size(); i++) {
+	}
 
-            ICellCollection collection = datasets.get(i).getCollection();
-            try {
-                IProfileSegment medianSeg = collection.getProfileCollection().getSegmentAt(OrientationMark.REFERENCE,
-                        segPosition);
+	/**
+	 * Get the lengths of the given segment in the collections
+	 * 
+	 * @param datasets
+	 * @param segPosition
+	 * @return
+	 * @throws ChartDatasetCreationException
+	 * @throws Exception
+	 */
+	private synchronized ViolinCategoryDataset createSegmentLengthDataset(
+			@NonNull final List<IAnalysisDataset> datasets, final int segPosition)
+			throws ChartDatasetCreationException {
 
-                List<Number> list = new ArrayList<>();
+		ViolinCategoryDataset dataset = new ViolinCategoryDataset();
 
-                for (Nucleus n : collection.getNuclei()) {
+		for (int i = 0; i < datasets.size(); i++) {
 
-                	try {
+			ICellCollection collection = datasets.get(i).getCollection();
+			try {
+				IProfileSegment medianSeg = collection.getProfileCollection().getSegmentAt(
+						OrientationMark.REFERENCE,
+						segPosition);
 
-                		IProfileSegment seg = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegment(medianSeg.getID());
+				List<Number> list = new ArrayList<>();
 
-                		double length = 0;
-                		int indexLength = seg.length();
-                		double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
-                		length = n.getMeasurement(Measurement.PERIMETER, options.getScale()) * proportionPerimeter;
-                		list.add(length);
+				for (Nucleus n : collection.getNuclei()) {
 
-                	} catch (MissingComponentException e) {
-                		LOGGER.log(Loggable.STACK, "Error fetching segment for nucleus "+n.getNameAndNumber(), e);
-                		throw new ChartDatasetCreationException("Error fetching segment for nucleus "+n.getNameAndNumber(), e);
-                	}
-                }
+					try {
 
-                String rowKey = IProfileSegment.SEGMENT_PREFIX + segPosition + "_" + i;
-                String colKey = IProfileSegment.SEGMENT_PREFIX + segPosition;
-                dataset.add(list, rowKey, colKey);
+						IProfileSegment seg = n
+								.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
+								.getSegment(medianSeg.getID());
 
-            } catch (ProfileException e) {
-                LOGGER.log(Loggable.STACK, "Error fetching median profile", e);
-                throw new ChartDatasetCreationException("Error fetching median profile", e);
-            } catch (MissingComponentException e) {
-                LOGGER.log(Loggable.STACK, "Error fetching segment", e);
-                throw new ChartDatasetCreationException("Error fetching segment", e);
-            }
-            
-        }
+						double length = 0;
+						int indexLength = seg.length();
+						double proportionPerimeter = (double) indexLength
+								/ (double) seg.getProfileLength();
+						length = n.getMeasurement(Measurement.PERIMETER, options.getScale())
+								* proportionPerimeter;
+						list.add(length);
 
-        return dataset;
-    }
+					} catch (MissingDataException | ComponentCreationException e) {
+						throw new ChartDatasetCreationException(
+								"Error fetching segment for nucleus " + n.getNameAndNumber(), e);
+					}
+				}
 
-    /**
-     * Get the displacements of the given segment in the collections
-     * 
-     * @param collections
-     * @param segName
-     * @return
-     * @throws ChartDatasetCreationException
-     * @throws Exception
-     */
-    private ViolinCategoryDataset createSegmentDisplacementDataset(List<IAnalysisDataset> collections, int segPosition)
-            throws ChartDatasetCreationException {
+				String rowKey = IProfileSegment.SEGMENT_PREFIX + segPosition + "_" + i;
+				String colKey = IProfileSegment.SEGMENT_PREFIX + segPosition;
+				dataset.add(list, rowKey, colKey);
 
-        ViolinCategoryDataset dataset = new ViolinCategoryDataset();
+			} catch (SegmentUpdateException e) {
+				throw new ChartDatasetCreationException("Error fetching median profile", e);
+			} catch (MissingDataException e) {
+				throw new ChartDatasetCreationException("Error fetching segment", e);
+			}
 
-        for (int i = 0; i < collections.size(); i++) {
+		}
 
-            ICellCollection collection = collections.get(i).getCollection();
+		return dataset;
+	}
 
-            IProfileSegment medianSeg;
-            try {
-                medianSeg = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
-                        .getSegments().get(options.getSegPosition());
+	/**
+	 * Get the displacements of the given segment in the collections
+	 * 
+	 * @param collections
+	 * @param segName
+	 * @return
+	 * @throws ChartDatasetCreationException
+	 * @throws Exception
+	 */
+	private ViolinCategoryDataset createSegmentDisplacementDataset(
+			List<IAnalysisDataset> collections, int segPosition)
+			throws ChartDatasetCreationException {
+
+		ViolinCategoryDataset dataset = new ViolinCategoryDataset();
+
+		for (int i = 0; i < collections.size(); i++) {
+
+			ICellCollection collection = collections.get(i).getCollection();
+
+			IProfileSegment medianSeg;
+			try {
+				medianSeg = collection.getProfileCollection()
+						.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
+								Stats.MEDIAN)
+						.getSegments().get(options.getSegPosition());
 //                        .getSegmentAt(segPosition);
-            } catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
-            	LOGGER.log(Loggable.STACK, "Unable to get segmented median profile", e);
-            	throw new ChartDatasetCreationException("Cannot get median profile");
-            }
+			} catch (MissingDataException | SegmentUpdateException e) {
+				LOGGER.log(Loggable.STACK, "Unable to get segmented median profile", e);
+				throw new ChartDatasetCreationException("Cannot get median profile");
+			}
 
-            List<Number> list = new ArrayList<>(0);
+			List<Number> list = new ArrayList<>(0);
 
-            for (Nucleus n : collection.getNuclei()) {
+			for (Nucleus n : collection.getNuclei()) {
 
-            	try {
+				try {
 
-            		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE,
+							OrientationMark.REFERENCE);
 
-            		IProfileSegment seg = profile.getSegment(medianSeg.getID());
+					IProfileSegment seg = profile.getSegment(medianSeg.getID());
 
-            		double displacement = profile.getDisplacement(seg);
-            		list.add(displacement);
-            	} catch (ProfileException | MissingComponentException e) {
-            		LOGGER.log(Loggable.STACK, "Error getting segmented profile", e);
-            		throw new ChartDatasetCreationException("Cannot get segmented profile", e);
-            	}
+					double displacement = profile.getDisplacement(seg);
+					list.add(displacement);
+				} catch (MissingDataException | SegmentUpdateException e) {
+					LOGGER.log(Loggable.STACK, "Error getting segmented profile", e);
+					throw new ChartDatasetCreationException("Cannot get segmented profile", e);
+				}
 
-            }
+			}
 
-            String rowKey = IProfileSegment.SEGMENT_PREFIX + segPosition + "_" + i;
-            String colKey = IProfileSegment.SEGMENT_PREFIX + segPosition;
+			String rowKey = IProfileSegment.SEGMENT_PREFIX + segPosition + "_" + i;
+			String colKey = IProfileSegment.SEGMENT_PREFIX + segPosition;
 
-            dataset.add(list, rowKey, colKey);
-        }
-        return dataset;
-    }
+			dataset.add(list, rowKey, colKey);
+		}
+		return dataset;
+	}
 }

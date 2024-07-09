@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.AnalysisMethodException;
 import com.bmskinner.nma.analysis.ClusterAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
@@ -35,17 +35,18 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
 import com.bmskinner.nma.components.mesh.DefaultMesh;
 import com.bmskinner.nma.components.mesh.Mesh;
 import com.bmskinner.nma.components.mesh.MeshCreationException;
 import com.bmskinner.nma.components.mesh.MeshFace;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.IProfile;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
-import com.bmskinner.nma.logging.Loggable;
 
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
@@ -167,7 +168,8 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		return attributes;
 	}
 
-	private ArrayList<Attribute> makePCAttributes() {
+	private ArrayList<Attribute> makePCAttributes()
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 
 		// From the first nucleus, find the number of PCs to cluster on
 		Nucleus n = dataset.getCollection().getCells().stream().findFirst()
@@ -197,7 +199,12 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
 			LOGGER.finer("Checking if PCA clustering is set");
 			if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY))
-				return makePCAttributes();
+				try {
+					return makePCAttributes();
+				} catch (MissingDataException | ComponentCreationException
+						| SegmentUpdateException e) {
+					throw new AnalysisMethodException("Missing measurements in nuclei", e);
+				}
 
 			LOGGER.finer("Checking if UMAP clustering is set");
 			if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY))
@@ -224,21 +231,18 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		// apart
 		for (ProfileType t : ProfileType.displayValues()) {
 			if (options.getBoolean(t.toString())) {
-				LOGGER.finer("Creating attribute count for " + t.toString());
 				attributeCount += profileAttributeCount;
 			}
 		}
 
 		for (Measurement stat : Measurement.getNucleusStats()) {
 			if (options.getBoolean(stat.toString())) {
-				LOGGER.finer("Adding attribute count for " + stat);
 				attributeCount++;
 			}
 		}
 
 		for (Measurement stat : Measurement.getGlcmStats()) {
 			if (options.getBoolean(stat.toString())) {
-				LOGGER.finer("Adding attribute count for " + stat);
 				attributeCount++;
 			}
 		}
@@ -252,8 +256,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 				attributeCount += mesh.getFaces().size();
 			} catch (MeshCreationException | MissingLandmarkException
 					| ComponentCreationException e) {
-				LOGGER.log(Loggable.STACK, "Cannot create mesh", e);
-				throw new AnalysisMethodException(e);
+				throw new AnalysisMethodException("Cannot create mesh", e);
 			}
 
 		}
@@ -269,7 +272,6 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		int profileAttCounter = 0;
 		for (ProfileType t : ProfileType.displayValues()) {
 			if (options.getBoolean(t.toString())) {
-				LOGGER.finer("Creating attributes for profile " + t);
 				for (int i = 0; i < profileAttributeCount; i++) {
 					Attribute a = new Attribute("att_" + profileAttCounter);
 					attributes.add(a);
@@ -318,13 +320,16 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 	 * @return
 	 * @throws MeshCreationException
 	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
 	 * @throws ComponentCreationException
+	 * @throws MissingMeasurementException
+	 * @throws SegmentUpdateException
 	 * @throws ClusteringMethodException
 	 */
 	@Override
 	protected Instances makeInstances() throws AnalysisMethodException, MeshCreationException,
-			ProfileException, MissingComponentException, ComponentCreationException {
+			ProfileException, MissingDataException, ComponentCreationException,
+			SegmentUpdateException {
 		LOGGER.finer("Creating clusterable instances");
 		double windowProportion = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
 		if (dataset.hasAnalysisOptions())// Merged datasets may not have options
@@ -358,9 +363,13 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 	 * @param n
 	 * @param attributes
 	 * @param instances
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
 	private void addUMAPNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes,
-			Instances instances) {
+			Instances instances)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		int attNumber = 0;
 		Instance inst = new SparseInstance(attributes.size());
 		Attribute attX = attributes.get(attNumber++);
@@ -389,9 +398,13 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 	 * @param n
 	 * @param attributes
 	 * @param instances
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
 	private void addTsneNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes,
-			Instances instances) {
+			Instances instances)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		int attNumber = 0;
 		Instance inst = new SparseInstance(attributes.size());
 		Attribute attX = attributes.get(attNumber++);
@@ -414,7 +427,8 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 	}
 
 	private void addPCANucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes,
-			Instances instances) {
+			Instances instances)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		int attNumber = 0;
 		Instance inst = new SparseInstance(attributes.size());
 
@@ -441,7 +455,8 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 	private void addNucleus(ICell c, Nucleus n, ArrayList<Attribute> attributes,
 			Instances instances, Mesh template,
 			double windowProportion)
-			throws ProfileException, MeshCreationException, MissingComponentException {
+			throws MeshCreationException, MissingDataException,
+			SegmentUpdateException, ComponentCreationException {
 
 		// Shortcuts if dimensionality reduction is used first
 		if (options.getBoolean(HashOptions.CLUSTER_USE_DIM_RED_KEY)) {

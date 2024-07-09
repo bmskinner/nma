@@ -27,19 +27,20 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.DefaultNucleus;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.PriorityAxis;
@@ -193,24 +194,25 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 	@Override
 	public ISegmentedProfile getProfile(@NonNull ProfileType type)
-			throws MissingProfileException, ProfileException, MissingLandmarkException {
+			throws MissingDataException, SegmentUpdateException {
 		return nucleus.getProfile(type);
 	}
 
 	@Override
 	public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
-			throws ProfileException, MissingLandmarkException, MissingProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		return nucleus.getProfile(type, om);
 	}
 
 	@Override
 	public IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
-			throws ProfileException, MissingLandmarkException, MissingProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		return nucleus.getUnsegmentedProfile(type, om);
 	}
 
 	@Override
-	public int getWindowSize() {
+	public int getWindowSize() throws MissingMeasurementException, MissingDataException,
+			ComponentCreationException, SegmentUpdateException {
 		return nucleus.getWindowSize();
 	}
 
@@ -251,14 +253,13 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 	@Override
 	public void setLandmark(@NonNull OrientationMark tag, int i)
-			throws IndexOutOfBoundsException, MissingProfileException, MissingLandmarkException,
-			ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		nucleus.setLandmark(tag, i);
 	}
 
 	@Override
 	public void setSegments(@NonNull List<IProfileSegment> segs)
-			throws MissingLandmarkException, ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		nucleus.setSegments(segs);
 
 	}
@@ -306,8 +307,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 	@Override
 	public void setOrientationMark(@NonNull OrientationMark tag, int i)
-			throws IndexOutOfBoundsException, MissingProfileException, ProfileException,
-			MissingLandmarkException {
+			throws MissingDataException, SegmentUpdateException {
 		nucleus.setOrientationMark(tag, i);
 	}
 
@@ -318,14 +318,13 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 	@Override
 	public void setLandmark(@NonNull Landmark tag, int i)
-			throws IndexOutOfBoundsException, MissingProfileException, ProfileException,
-			MissingLandmarkException {
+			throws MissingDataException, SegmentUpdateException {
 		nucleus.setLandmark(tag, i);
 	}
 
 	@Override
 	public @NonNull ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Landmark lm)
-			throws ProfileException, MissingLandmarkException, MissingProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		return nucleus.getProfile(type, lm);
 	}
 

@@ -10,13 +10,16 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.IProfile;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
@@ -122,10 +125,13 @@ public class TsneMethod extends SingleDatasetAnalysisMethod {
 	 * @param nuclei
 	 * @return
 	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
+	 * @throws MissingMeasurementException
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
 	 */
 	private double[][] makeProfileMatrix(List<Nucleus> nuclei, int initialDims)
-			throws ProfileException, MissingComponentException {
+			throws MissingDataException, SegmentUpdateException, ComponentCreationException {
 		double[][] matrix = new double[nuclei.size()][initialDims];
 
 		for (int i = 0; i < nuclei.size(); i++) {

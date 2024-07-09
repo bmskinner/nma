@@ -23,8 +23,12 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.io.UnloadableImageException;
 import com.bmskinner.nma.io.XmlSerializable;
 
@@ -199,8 +203,14 @@ public interface ISignalCollection extends XmlSerializable {
 	 * @param scale       the scale to fetch values at
 	 * @param signalGroup the signal group ID
 	 * @return the values from each signal in the group
+	 * @throws MissingMeasurementException
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
-	List<Double> getStatistics(@NonNull Measurement stat, MeasurementScale scale, @NonNull UUID signalGroup);
+	List<Double> getMeasurements(@NonNull Measurement stat, MeasurementScale scale,
+			@NonNull UUID signalGroup) throws MissingDataException,
+			ComponentCreationException, SegmentUpdateException;
 
 	/**
 	 * Get the ImageJ image processor for the source image for signals in the given
@@ -237,5 +247,6 @@ public interface ISignalCollection extends XmlSerializable {
 	 * @param id2 the second signal group
 	 * @return a list of the pixel distances between paired signals
 	 */
-	List<Colocalisation<INuclearSignal>> calculateColocalisation(@NonNull UUID id1, @NonNull UUID id2);
+	List<Colocalisation<INuclearSignal>> calculateColocalisation(@NonNull UUID id1,
+			@NonNull UUID id2);
 }

@@ -242,7 +242,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 
 	@Override
 	public String toString() {
-		return "Hash: " + hashCode() + target.getID() + " " + isCellsWithSignals + " " + threshold
+		return "Hash: " + hashCode() + target.getId() + " " + isCellsWithSignals + " " + threshold
 				+ " " + isBinarised
 				+ " " + isNormalised;
 	}
@@ -252,7 +252,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (isCellsWithSignals ? 1231 : 1237);
-		result = prime * result + ((target.getID() == null) ? 0 : target.getID().hashCode());
+		result = prime * result + ((target.getId() == null) ? 0 : target.getId().hashCode());
 		result = prime * result + threshold;
 		result = prime * result + (isBinarised ? 1231 : 1237);
 		result = prime * result + (isNormalised ? 1231 : 1237);
@@ -276,7 +276,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 			return false;
 		if (isNormalised != other.isNormalised)
 			return false;
-		if (!target.getID().equals(other.target.getID()))
+		if (!target.getId().equals(other.target.getId()))
 			return false;
 		if (!Arrays.equals(image, other.image))
 			return false;

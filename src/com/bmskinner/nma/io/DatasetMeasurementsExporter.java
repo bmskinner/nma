@@ -28,8 +28,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.image.GLCM.GLCMParameter;
-import com.bmskinner.nma.components.MissingComponentException;
-import com.bmskinner.nma.components.Statistical;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
@@ -45,6 +44,7 @@ import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
@@ -124,10 +124,10 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 
 		// Only include if present in all cells of all datasets
 		isIncludeGlcm = list.stream()
-				.allMatch(d -> d.getCollection().getCells().stream().noneMatch(c -> c
-						.getPrimaryNucleus().getMeasurement(
+				.allMatch(d -> d.getCollection().getCells().stream().allMatch(c -> c
+						.getPrimaryNucleus().hasMeasurement(
 								GLCMParameter.SUM
-										.toMeasurement()) == Statistical.ERROR_CALCULATING_STAT));
+										.toMeasurement())));
 
 		// Only include if present in all cells of all datasets
 		isIncludePixelHistogram = hasPixelHistogramsInChannel(list);
@@ -313,7 +313,7 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 							.append(d.getSavePath() + TAB)
 							.append(cell.getId() + TAB)
 							.append(CellularComponent.NUCLEUS + "_" + n.getNameAndNumber() + TAB)
-							.append(n.getID() + TAB)
+							.append(n.getId() + TAB)
 							.append(n.getSourceFolder() + TAB)
 							.append(n.getSourceFileName() + TAB)
 							.append(n.getOriginalCentreOfMass().toString() + TAB);
@@ -353,40 +353,52 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 		for (Measurement s : measurements) {
 			double varP = 0;
 			double varM = 0;
+			try {
+				if (s.equals(Measurement.VARIABILITY)) {
 
-			if (s.equals(Measurement.VARIABILITY)) {
-
-				try {
 					varP = d.getCollection().getNormalisedDifferenceToMedian(
 							OrientationMark.REFERENCE, (Taggable) c);
 					varM = varP;
-				} catch (MissingLandmarkException e) {
-					LOGGER.log(Loggable.STACK, "Landmark not present in component", e);
-					varP = -1;
-					varM = -1;
+
+				} else {
+					varP = c.getMeasurement(s, MeasurementScale.PIXELS);
+					varM = c.getMeasurement(s, MeasurementScale.MICRONS);
 				}
-			} else {
-				varP = c.getMeasurement(s, MeasurementScale.PIXELS);
-				varM = c.getMeasurement(s, MeasurementScale.MICRONS);
+
+				outLine.append(varP + TAB);
+				if (!s.isDimensionless() && !s.isAngle()) {
+					outLine.append(varM + TAB);
+				}
+
+			} catch (MissingDataException | SegmentUpdateException | ComponentCreationException e) {
+				outLine.append(NA + TAB);
+				if (!s.isDimensionless() && !s.isAngle()) {
+					outLine.append(NA + TAB);
+				}
 			}
 
-			outLine.append(varP + TAB);
-			if (!s.isDimensionless() && !s.isAngle()) {
-				outLine.append(varM + TAB);
-			}
 		}
 
 		if (isIncludeGlcm) {
 			for (Measurement s : Measurement.getGlcmStats()) {
-				outLine.append(c.getMeasurement(s) + TAB);
+				try {
+					outLine.append(c.getMeasurement(s) + TAB);
+				} catch (MissingDataException | ComponentCreationException
+						| SegmentUpdateException e) {
+					outLine.append(NA + TAB);
+				}
 			}
 		}
 
 		if (isIncludePixelHistogram) {
 			for (int channel : pixelHistogramChannels) {
 				for (Measurement m : Measurement.getPixelHistogramMeasurements(channel)) {
-					// if there is no value, returns 0
-					outLine.append(c.getMeasurement(m) + TAB);
+					try {
+						outLine.append(c.getMeasurement(m) + TAB);
+					} catch (MissingDataException | ComponentCreationException
+							| SegmentUpdateException e) {
+						outLine.append(NA + TAB);
+					}
 				}
 			}
 		}
@@ -398,12 +410,12 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 	 * 
 	 * @param outLine the string builder to append to
 	 * @param c       the component to export
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
 	 * @throws ProfileException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private void appendProfiles(StringBuilder outLine, Taggable c)
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws SegmentUpdateException, MissingDataException {
 		for (ProfileType type : ProfileType.exportValues()) {
 
 			IProfile p = c.getProfile(type, OrientationMark.REFERENCE);
@@ -418,7 +430,7 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 	}
 
 	private void appendSegments(StringBuilder outLine, Taggable c)
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws SegmentUpdateException, MissingDataException {
 
 		double varP = 0;
 		double varM = 0;
@@ -430,27 +442,29 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 
 		for (IProfileSegment segment : segs) {
 			if (segment != null) {
-				// Add the length of the segment
-				int indexLength = segment.length();
-				double fractionOfPerimeter = (double) indexLength
-						/ (double) segment.getProfileLength();
-				varP = fractionOfPerimeter
-						* c.getMeasurement(Measurement.PERIMETER, MeasurementScale.PIXELS);
-				varM = fractionOfPerimeter
-						* c.getMeasurement(Measurement.PERIMETER, MeasurementScale.MICRONS);
-				outLine.append(varP + TAB);
-				outLine.append(varM + TAB);
 
-				// Add the index of the segment start and end in the normalised profile.
 				try {
+					// Add the length of the segment
+					int indexLength = segment.length();
+					double fractionOfPerimeter = (double) indexLength
+							/ (double) segment.getProfileLength();
+					varP = fractionOfPerimeter
+							* c.getMeasurement(Measurement.PERIMETER, MeasurementScale.PIXELS);
+					varM = fractionOfPerimeter
+							* c.getMeasurement(Measurement.PERIMETER, MeasurementScale.MICRONS);
+					outLine.append(varP + TAB);
+					outLine.append(varM + TAB);
+
+					// Add the index of the segment start and end in the normalised profile.
+
 					IProfileSegment normalisedSeg = normalisedProfile.getSegment(segment.getID());
 					int start = normalisedSeg.getStartIndex();
 					int end = normalisedSeg.getEndIndex();
 					outLine.append(start + TAB);
 					outLine.append(end + TAB);
-				} catch (MissingComponentException e) {
-					outLine.append("NA" + TAB);
-					outLine.append("NA" + TAB);
+				} catch (MissingDataException | ComponentCreationException e) {
+					outLine.append(NA + TAB);
+					outLine.append(NA + TAB);
 				}
 			}
 		}
@@ -476,7 +490,8 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 								* DEFAULT_PROFILE_LENGTH;
 				}
 			}
-		} catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
+		} catch (MissingDataException
+				| SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK, "Unable to get profile: " + e.getMessage(), e);
 			LOGGER.fine("Unable to get a profile, defaulting to default profile length of "
 					+ DEFAULT_PROFILE_LENGTH);
@@ -497,13 +512,13 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 			String orientedString = createOutlineString(o);
 			outLine.append(orientedString);
 
-		} catch (MissingLandmarkException | ProfileException | ComponentCreationException e) {
+		} catch (MissingLandmarkException | ComponentCreationException | SegmentUpdateException e) {
 			LOGGER.warning(() -> "Error creating outline to export for " + n.getNameAndNumber());
 		}
 	}
 
 	private String createOutlineString(Nucleus n)
-			throws ProfileException, MissingLandmarkException {
+			throws MissingLandmarkException, SegmentUpdateException {
 		// If a landmark to offset has been specified, lmOffset will not be null
 		OrientationMark lmOffset = null;
 		for (OrientationMark lm : n.getOrientationMarks()) {
@@ -534,10 +549,10 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 	 * 
 	 * @param inputBorder
 	 * @return
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
 	private List<IPoint> normaliseBorderList(List<IPoint> inputBorder, int nPoints)
-			throws ProfileException {
+			throws SegmentUpdateException {
 
 		if (nPoints == inputBorder.size())
 			return inputBorder;

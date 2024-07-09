@@ -16,7 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.profiles;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 
 /**
  * Thrown when a profile type is not available within a profile collection.
@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.MissingComponentException;
  * @since 1.13.3
  *
  */
-public class MissingProfileException extends MissingComponentException {
+public class MissingProfileException extends MissingDataException {
     private static final long serialVersionUID = 1L;
 
     public MissingProfileException() {

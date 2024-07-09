@@ -8,13 +8,14 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
@@ -106,17 +107,19 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public @NonNull UUID getID() {
-		return component.getID();
+	public @NonNull UUID getId() {
+		return component.getId();
 	}
 
 	@Override
-	public double getMeasurement(@NonNull Measurement stat, @NonNull MeasurementScale scale) {
+	public double getMeasurement(@NonNull Measurement stat, @NonNull MeasurementScale scale)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		return component.getMeasurement(stat, scale);
 	}
 
 	@Override
-	public double getMeasurement(@NonNull Measurement stat) {
+	public double getMeasurement(@NonNull Measurement stat)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		return component.getMeasurement(stat);
 	}
 
@@ -271,7 +274,8 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public IPoint findOrthogonalBorderPoint(@NonNull IPoint a) throws UnavailableBorderPointException {
+	public IPoint findOrthogonalBorderPoint(@NonNull IPoint a)
+			throws UnavailableBorderPointException {
 		return component.findOrthogonalBorderPoint(a);
 	}
 
@@ -316,7 +320,8 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public void reverse() throws MissingComponentException, ProfileException {
+	public void reverse()
+			throws MissingDataException, SegmentUpdateException, ComponentCreationException {
 		component.reverse();
 	}
 
@@ -369,6 +374,11 @@ public class DummyCellularComponent implements CellularComponent {
 	public void clearMeasurements() {
 		component.clearMeasurements();
 
+	}
+
+	@Override
+	public boolean hasMeasurement(@NonNull Measurement measurement) {
+		return component.hasMeasurement(measurement);
 	}
 
 }

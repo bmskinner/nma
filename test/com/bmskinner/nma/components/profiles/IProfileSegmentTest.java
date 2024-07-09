@@ -21,7 +21,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
@@ -73,7 +73,7 @@ public class IProfileSegmentTest {
 	 * @throws ComponentCreationException
 	 */
 	public static IProfileSegment createInstance(Class<?> source)
-			throws ProfileException, ComponentCreationException {
+			throws SegmentUpdateException, ComponentCreationException {
 
 		// The component from which profiles will be generated
 		DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
@@ -283,7 +283,7 @@ public class IProfileSegmentTest {
 	}
 
 	@Test
-	public void testOffset() throws ProfileException, ComponentCreationException {
+	public void testOffset() throws SegmentUpdateException, ComponentCreationException {
 
 		for (int i = -PROFILE_LENGTH; i < PROFILE_LENGTH; i++) {
 			segment = createInstance(source);
@@ -295,7 +295,7 @@ public class IProfileSegmentTest {
 
 	@Test
 	public void testOffsetPreservesSegmentLock()
-			throws ProfileException, ComponentCreationException {
+			throws SegmentUpdateException, ComponentCreationException {
 		IProfileSegment seg = createInstance(source);
 		seg.setLocked(true);
 		assertTrue(seg.isLocked());
@@ -415,7 +415,7 @@ public class IProfileSegmentTest {
 	}
 
 	@Test
-	public void testSingleSegmentListCanBeLinked() throws ProfileException {
+	public void testSingleSegmentListCanBeLinked() throws SegmentUpdateException {
 		List<IProfileSegment> segs = new ArrayList<>();
 		segs.add(new DefaultProfileSegment(START_INDEX, START_INDEX, PROFILE_LENGTH, SEG_ID_0));
 		assertFalse(segs.get(0).hasNextSegment());
@@ -427,7 +427,7 @@ public class IProfileSegmentTest {
 	}
 
 	@Test
-	public void testMultiSegmentListCanBeLinked() throws ProfileException {
+	public void testMultiSegmentListCanBeLinked() throws SegmentUpdateException {
 		List<IProfileSegment> segs = createInstanceSegmentList(source);
 
 		// After first creation, segments should not be linked
@@ -456,7 +456,8 @@ public class IProfileSegmentTest {
 	 * @throws ProfileException
 	 */
 	@Test
-	public void testSingleSegmentListLockStatePersistsThroughLinking() throws ProfileException {
+	public void testSingleSegmentListLockStatePersistsThroughLinking()
+			throws SegmentUpdateException {
 		List<IProfileSegment> segs = new ArrayList<>();
 		segs.add(new DefaultProfileSegment(START_INDEX, START_INDEX, PROFILE_LENGTH, SEG_ID_0));
 		assertFalse(segs.get(0).isLocked());
@@ -473,7 +474,8 @@ public class IProfileSegmentTest {
 	 * @throws ProfileException
 	 */
 	@Test
-	public void testMultiSegmentListLockStatePersistsThroughLinking() throws ProfileException {
+	public void testMultiSegmentListLockStatePersistsThroughLinking()
+			throws SegmentUpdateException {
 		List<IProfileSegment> segs = createInstanceSegmentList(source);
 		for (IProfileSegment s : segs) {
 			s.setLocked(true);
@@ -488,7 +490,7 @@ public class IProfileSegmentTest {
 	}
 
 	@Test
-	public void testLinkingPreservesMergeSources() throws ProfileException {
+	public void testLinkingPreservesMergeSources() throws SegmentUpdateException {
 		List<IProfileSegment> segs = createInstanceSegmentList(source);
 
 		IProfileSegment merged = new DefaultProfileSegment(segs.get(0).getStartIndex(),
@@ -780,7 +782,7 @@ public class IProfileSegmentTest {
 	}
 
 	@Test
-	public void testHasNextSegment() throws MissingComponentException {
+	public void testHasNextSegment() throws MissingDataException {
 		IProfileSegment overlappingEnd = new DefaultProfileSegment(END_INDEX, PROFILE_LENGTH,
 				PROFILE_LENGTH);
 		segment.setNextSegment(overlappingEnd);
@@ -788,7 +790,7 @@ public class IProfileSegmentTest {
 	}
 
 	@Test
-	public void testHasPrevSegment() throws MissingComponentException {
+	public void testHasPrevSegment() throws MissingDataException {
 		IProfileSegment overlappingStart = new DefaultProfileSegment(END_INDEX + 1, START_INDEX,
 				PROFILE_LENGTH);
 		segment.setPrevSegment(overlappingStart);

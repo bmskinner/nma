@@ -24,11 +24,13 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 import weka.estimators.KernelEstimator;
@@ -42,16 +44,17 @@ import weka.estimators.KernelEstimator;
  */
 public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
-	private static final Logger LOGGER = Logger.getLogger(NuclearHistogramDatasetCreator.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(NuclearHistogramDatasetCreator.class.getName());
 
 	public NuclearHistogramDatasetCreator(final ChartOptions o) {
 		super(o);
 	}
 
-	public HistogramDataset createNuclearStatsHistogramDataset() throws ChartDatasetCreationException {
+	public HistogramDataset createNuclearStatsHistogramDataset()
+			throws ChartDatasetCreationException {
 		HistogramDataset ds = new HistogramDataset();
 
-		LOGGER.finest("Creating histogram dataset: " + options.getMeasurement());
 		if (!options.hasDatasets()) {
 			return ds;
 		}
@@ -61,7 +64,14 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 			ICellCollection collection = dataset.getCollection();
 
 			Measurement stat = options.getMeasurement();
-			double[] values = collection.getRawValues(stat, CellularComponent.NUCLEUS, options.getScale());
+			double[] values;
+			try {
+				values = collection.getRawValues(stat, CellularComponent.NUCLEUS,
+						options.getScale());
+			} catch (MissingDataException | SegmentUpdateException e) {
+				throw new ChartDatasetCreationException("Unable to get measurements from dataset",
+						e);
+			}
 
 			double[] minMaxStep = findMinAndMaxForHistogram(values);
 			int minRounded = (int) minMaxStep[0];
@@ -72,10 +82,12 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 			String groupLabel = stat.toString();
 
 			if (minRounded >= maxRounded) {
-				throw new ChartDatasetCreationException("Histogram lower bound equal to or grater than upper bound");
+				throw new ChartDatasetCreationException(
+						"Histogram lower bound equal to or grater than upper bound");
 			}
 
-			ds.addSeries(groupLabel + "_" + collection.getName(), values, bins, minRounded, maxRounded);
+			ds.addSeries(groupLabel + "_" + collection.getName(), values, bins, minRounded,
+					maxRounded);
 		}
 
 		return ds;
@@ -95,47 +107,56 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 			return ds;
 		}
 
-		List<IAnalysisDataset> list = options.getDatasets();
-		Measurement stat = options.getMeasurement();
-		MeasurementScale scale = options.getScale();
+		try {
 
-		int[] minMaxRange = calculateMinAndMaxRange(list, stat, CellularComponent.NUCLEUS, scale);
+			List<IAnalysisDataset> list = options.getDatasets();
+			Measurement stat = options.getMeasurement();
+			MeasurementScale scale = options.getScale();
 
-		for (IAnalysisDataset dataset : list) {
-			ICellCollection collection = dataset.getCollection();
+			int[] minMaxRange = calculateMinAndMaxRange(list, stat, CellularComponent.NUCLEUS,
+					scale);
 
-			String groupLabel = stat.toString();
-			double[] values = collection.getRawValues(stat, CellularComponent.NUCLEUS, scale);
+			for (IAnalysisDataset dataset : list) {
+				ICellCollection collection = dataset.getCollection();
 
-			KernelEstimator est;
-			try {
-				est = new NucleusDatasetCreator(options).createProbabililtyKernel(values, 0.001);
-			} catch (Exception e1) {
-				throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
+				String groupLabel = stat.toString();
+				double[] values = collection.getRawValues(stat, CellularComponent.NUCLEUS, scale);
+
+				KernelEstimator est;
+				try {
+					est = new NucleusDatasetCreator(options).createProbabililtyKernel(values,
+							0.001);
+				} catch (Exception e1) {
+					throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
+				}
+
+				double[] minMax = findMinAndMaxForHistogram(values);
+
+				List<Double> xValues = new ArrayList<>();
+				List<Double> yValues = new ArrayList<>();
+
+				for (double i = minMaxRange[0]; i <= minMaxRange[1]; i += minMax[STEP_SIZE]) {
+
+					xValues.add(i);
+					yValues.add(est.getProbability(i));
+
+				}
+
+				// Make into an array of arrays
+
+				double[] xData = xValues.stream().mapToDouble(d -> d.doubleValue()).toArray();
+				double[] yData = yValues.stream().mapToDouble(d -> d.doubleValue()).toArray();
+
+				double[][] data = { xData, yData };
+
+				ds.addSeries(groupLabel + "_" + collection.getName(), data);
+
 			}
+			return ds;
 
-			double[] minMax = findMinAndMaxForHistogram(values);
-
-			List<Double> xValues = new ArrayList<>();
-			List<Double> yValues = new ArrayList<>();
-
-			for (double i = minMaxRange[0]; i <= minMaxRange[1]; i += minMax[STEP_SIZE]) {
-
-				xValues.add(i);
-				yValues.add(est.getProbability(i));
-
-			}
-
-			// Make into an array of arrays
-
-			double[] xData = xValues.stream().mapToDouble(d -> d.doubleValue()).toArray();
-			double[] yData = yValues.stream().mapToDouble(d -> d.doubleValue()).toArray();
-
-			double[][] data = { xData, yData };
-
-			ds.addSeries(groupLabel + "_" + collection.getName(), data);
-
+		} catch (MissingDataException | SegmentUpdateException e) {
+			throw new ChartDatasetCreationException("Unable to get measurements from dataset",
+					e);
 		}
-		return ds;
 	}
 }

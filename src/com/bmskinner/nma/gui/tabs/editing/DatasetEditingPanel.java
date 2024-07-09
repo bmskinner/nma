@@ -36,6 +36,7 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.ui.RectangleEdge;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -45,11 +46,10 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.GlobalOptions;
@@ -259,35 +259,37 @@ public class DatasetEditingPanel extends ChartDetailPanel
 		if (!options.firstDataset().isRoot()) // only allow resegmentation of root datasets
 			segmentButton.setEnabled(false);
 
-		ISegmentedProfile medianProfile;
 		try {
-			medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
+			ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(
+					ProfileType.ANGLE,
 					OrientationMark.REFERENCE, Stats.MEDIAN);
-		} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
+
+			// Don't allow merging below 2 segments
+			mergeButton.setEnabled(medianProfile.getSegmentCount() > 2);
+
+			// Check if there are any merged segments
+			// If there are no merged segments, don't allow unmerging
+			unmergeButton.setEnabled(
+					medianProfile.getSegments().stream()
+							.anyMatch(IProfileSegment::hasMergeSources));
+
+			// set child dataset options
+			if (!options.firstDataset().isRoot()) {
+				mergeButton.setEnabled(false);
+				unmergeButton.setEnabled(false);
+				splitButton.setEnabled(false);
+				updatewindowButton.setEnabled(false);
+				windowSizeButton.setEnabled(false);
+				buttonStateLbl.setText(
+						"Cannot merge, unmerge or split child dataset segments - try the root dataset");
+			} else {
+				buttonStateLbl
+						.setText("Click a point on the border to update landmarks or segments");
+			}
+
+		} catch (MissingDataException | SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK, "Error getting profile", e);
 			setButtonsEnabled(false);
-			return;
-		}
-
-		// Don't allow merging below 2 segments
-		mergeButton.setEnabled(medianProfile.getSegmentCount() > 2);
-
-		// Check if there are any merged segments
-		// If there are no merged segments, don't allow unmerging
-		unmergeButton.setEnabled(
-				medianProfile.getSegments().stream().anyMatch(IProfileSegment::hasMergeSources));
-
-		// set child dataset options
-		if (!options.firstDataset().isRoot()) {
-			mergeButton.setEnabled(false);
-			unmergeButton.setEnabled(false);
-			splitButton.setEnabled(false);
-			updatewindowButton.setEnabled(false);
-			windowSizeButton.setEnabled(false);
-			buttonStateLbl.setText(
-					"Cannot merge, unmerge or split child dataset segments - try the root dataset");
-		} else {
-			buttonStateLbl.setText("Click a point on the border to update landmarks or segments");
 		}
 	}
 
@@ -337,7 +339,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 
 		} catch (RequestCancelledException e) {
 			LOGGER.fine("User cancelled segment merge request");
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException e1) {
+		} catch (MissingDataException | SegmentUpdateException e1) {
 			LOGGER.warning(() -> "Unable to get median profile: %s".formatted(e1.getMessage()));
 		}
 	}
@@ -375,7 +377,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 					new SegmentUnmergeEvent(this, activeDataset(), nameArray[option].getID()));
 		} catch (RequestCancelledException e) {
 			LOGGER.fine("User cancelled segment unmerge request");
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException e1) {
+		} catch (MissingDataException | SegmentUpdateException e1) {
 			LOGGER.warning("Unable to get median profile: " + e1.getMessage());
 		}
 	}
@@ -400,7 +402,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 							nameArray[option].getID()));
 		} catch (RequestCancelledException e) {
 			LOGGER.fine("User cancelled segment split request");
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException e1) {
+		} catch (MissingDataException | SegmentUpdateException e1) {
 			LOGGER.warning("Unable to get median profile: " + e1.getMessage());
 		}
 	}
@@ -599,8 +601,8 @@ public class DatasetEditingPanel extends ChartDetailPanel
 
 			});
 			popupMenu.add(nextItem);
-		} catch (MissingProfileException | MissingLandmarkException | ProfileException
-				| ComponentCreationException e) {
+		} catch (MissingDataException
+				| ComponentCreationException | SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK, "Cannot create segment popup", e);
 		}
 	}

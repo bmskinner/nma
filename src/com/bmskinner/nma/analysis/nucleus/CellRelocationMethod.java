@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -38,9 +39,7 @@ import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.logging.Loggable;
 
 /**
@@ -93,8 +92,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 		Set<UUID> newDatasets;
 		try {
 			newDatasets = parsePathList();
-		} catch (CellRelocationException | ProfileException | MissingLandmarkException
-				| MissingProfileException e) {
+		} catch (CellRelocationException | MissingDataException | SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK, "Error relocating cells", e);
 			return;
 		}
@@ -112,7 +110,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
 					}
 				}
-			} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
+			} catch (MissingDataException | SegmentUpdateException e) {
 				LOGGER.warning("Unable to profile new collections");
 				LOGGER.log(Loggable.STACK, "Unable to profile new collections", e);
 			}
@@ -120,8 +118,8 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
 	}
 
-	private Set<UUID> parsePathList() throws CellRelocationException, ProfileException,
-			MissingLandmarkException, MissingProfileException {
+	private Set<UUID> parsePathList()
+			throws CellRelocationException, MissingDataException, SegmentUpdateException {
 		Scanner scanner;
 		try {
 			scanner = new Scanner(inputFile);

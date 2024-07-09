@@ -28,14 +28,15 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.ComponentOrienter;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -196,7 +197,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 
 	@Override
 	public void setLandmark(@NonNull OrientationMark lm, int newLmIndex)
-			throws MissingProfileException, MissingLandmarkException, ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		super.setLandmark(lm, newLmIndex);
 
 		// If any of the updated landmarks affect
@@ -207,7 +208,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 
 	@Override
 	public void setLandmark(@NonNull Landmark lm, int newLmIndex)
-			throws MissingProfileException, MissingLandmarkException, ProfileException {
+			throws MissingProfileException, MissingLandmarkException, SegmentUpdateException {
 		super.setLandmark(lm, newLmIndex);
 
 		// In case any of the updated landmarks affect
@@ -218,7 +219,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 
 	@Override
 	public void setSegments(@NonNull List<IProfileSegment> segs)
-			throws MissingLandmarkException, ProfileException {
+			throws MissingLandmarkException, SegmentUpdateException {
 		super.setSegments(segs);
 
 		// New segments must be drawn when we get the nucleus

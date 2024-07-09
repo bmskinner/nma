@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -31,6 +32,7 @@ import org.jfree.data.Range;
 import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.XYDataset;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -39,6 +41,7 @@ import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog.ColourByType;
@@ -129,8 +132,10 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			addClusterGroupConsensusNuclei(d, plotGroup, chart);
 
 			return chart;
-		} catch (ChartDatasetCreationException | MissingLandmarkException
-				| ComponentCreationException e) {
+		} catch (ChartDatasetCreationException | MissingDataException
+				| ComponentCreationException
+				| SegmentUpdateException e) {
+			LOGGER.log(Level.SEVERE, "Unable to make dimensionality reduction chart", e);
 			return createErrorChart();
 		}
 	}
@@ -405,19 +410,20 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		// Disable notifications while the batch is processed
 		chart.setNotify(false);
 		List<XYDataImageAnnotation> anns = new ArrayList<>();
-
-		for (Nucleus n : list) {
-			anns.add(createDimensionalityReductionImageAnnotation(n, prefix1 + plotGroup.getId(),
-					prefix2 + plotGroup.getId(), chart.getXYPlot(), scale, col));
-		}
-
 		try {
+			for (Nucleus n : list) {
+				anns.add(
+						createDimensionalityReductionImageAnnotation(n, prefix1 + plotGroup.getId(),
+								prefix2 + plotGroup.getId(), chart.getXYPlot(), scale, col));
+			}
+
 			SwingUtilities.invokeAndWait(() -> {
 				for (XYDataImageAnnotation ann : anns) {
 					chart.getXYPlot().getRenderer().addAnnotation(ann, Layer.FOREGROUND);
 				}
 			});
-		} catch (InvocationTargetException | InterruptedException e) {
+		} catch (InvocationTargetException | InterruptedException | MissingDataException
+				| ComponentCreationException | SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK, "Error adding annotation to chart", e);
 		}
 
@@ -431,10 +437,14 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @param xStatName
 	 * @param yStatName
 	 * @return
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
 	private static XYDataImageAnnotation createDimensionalityReductionImageAnnotation(Nucleus n,
 			String xStatName,
-			String yStatName, XYPlot plot, double scaleFactor, Color col) {
+			String yStatName, XYPlot plot, double scaleFactor, Color col)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 
 		Measurement dim1 = n.getMeasurements().stream().filter(s -> s.name().equals(xStatName))
 				.findFirst()

@@ -10,7 +10,7 @@ import com.bmskinner.nma.analysis.AnalysisMethodException;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
@@ -32,7 +32,7 @@ import com.bmskinner.nma.stats.Stats;
  * @param id
  * @param index
  * @throws ProfileException
- * @throws MissingComponentException
+ * @throws MissingDataException
  * @throws MissingProfileException
  * @throws SegmentUpdateException
  * @throws Exception
@@ -72,7 +72,7 @@ public class UpdateSegmentIndexMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	private void run() throws MissingComponentException, ProfileException, SegmentUpdateException {
+	private void run() throws MissingDataException, ProfileException, SegmentUpdateException {
 		LOGGER.fine(() -> "Requested update of segment %s to index %d in dataset %s".formatted(
 				segmentId, newIndex, dataset.getName()));
 

@@ -21,82 +21,83 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.stats.Stats;
 
 /**
- * Aggregate profiles from individual nuclei for calculation of
- * median and quartile profiles
+ * Aggregate profiles from individual nuclei for calculation of median and
+ * quartile profiles
  * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public class DefaultProfileAggregate implements IProfileAggregate {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(DefaultProfileAggregate.class.getName());
 
 	/** the values samples per profile */
-    private float[][] aggregate;  
-    
-    /** the length of the aggregate */
-    private final int length; 
-    
-    /** the number of profiles in the aggregate */
-    private final int profileCount;
+	private float[][] aggregate;
 
-    /** track the number of profiles added to the aggregate */
-    private int counter = 0;
+	/** the length of the aggregate */
+	private final int length;
 
-    /**
-     * Create specifying the length of the profile, and the number of profiles expected
-     * @param length
-     * @param profileCount
-     */
-    public DefaultProfileAggregate(final int length, final int profileCount) {
-        if (profileCount <= 0)
-            throw new IllegalArgumentException("Cannot have zero profiles in aggregate");
-        this.length = length;
-        this.profileCount = profileCount;
+	/** the number of profiles in the aggregate */
+	private final int profileCount;
 
-        aggregate = new float[length][profileCount];
-    }
+	/** track the number of profiles added to the aggregate */
+	private int counter = 0;
 
-    @Override
-	public void addValues(@NonNull final IProfile profile) throws ProfileException {
+	/**
+	 * Create specifying the length of the profile, and the number of profiles
+	 * expected
+	 * 
+	 * @param length
+	 * @param profileCount
+	 */
+	public DefaultProfileAggregate(final int length, final int profileCount) {
+		if (profileCount <= 0)
+			throw new IllegalArgumentException("Cannot have zero profiles in aggregate");
+		this.length = length;
+		this.profileCount = profileCount;
 
-        if (counter >= profileCount)
-            throw new ProfileException("Aggregate is full");
+		aggregate = new float[length][profileCount];
+	}
 
-        /*
-         * Make the profile the desired length, sample each point and add it to
-         * the aggregate
-         */
-        IProfile interpolated = profile.interpolate(length);
-        for (int i = 0; i < length; i++) {
-            float d = (float) interpolated.get(i);
-            aggregate[i][counter] = d;
-        }
+	@Override
+	public void addValues(@NonNull final IProfile profile) throws SegmentUpdateException {
 
-        counter++;
+		if (counter >= profileCount)
+			throw new IllegalArgumentException("Aggregate is full");
 
-    }
+		/*
+		 * Make the profile the desired length, sample each point and add it to the
+		 * aggregate
+		 */
+		IProfile interpolated = profile.interpolate(length);
+		for (int i = 0; i < length; i++) {
+			float d = (float) interpolated.get(i);
+			aggregate[i][counter] = d;
+		}
 
-    @Override
-	public IProfile getMedian() throws ProfileException {
-        return getQuartile(Stats.MEDIAN);
-    }
-    
-    @Override
-    public IProfile getQuartile(int quartile) throws ProfileException {
-        float[] medians = new float[length];
+		counter++;
 
-        for (int i = 0; i < length; i++) {
-            medians[i] = Stats.quartile(aggregate[i], quartile);
-        }
-        return new DefaultProfile(medians);
-    }
+	}
 
+	@Override
+	public IProfile getMedian() throws SegmentUpdateException {
+		return getQuartile(Stats.MEDIAN);
+	}
 
+	@Override
+	public IProfile getQuartile(int quartile) throws SegmentUpdateException {
+		float[] medians = new float[length];
+
+		for (int i = 0; i < length; i++) {
+			medians[i] = Stats.quartile(aggregate[i], quartile);
+		}
+		return new DefaultProfile(medians);
+	}
 
 	@Override
 	public int hashCode() {
@@ -131,13 +132,11 @@ public class DefaultProfileAggregate implements IProfileAggregate {
 
 	@Override
 	public String toString() {
-		return "DefaultProfileAggregate [aggregate=" 
-				+ Arrays.toString(aggregate) 
+		return "DefaultProfileAggregate [aggregate="
+				+ Arrays.toString(aggregate)
 				+ ", length=" + length
-				+ ", profileCount=" + profileCount 
+				+ ", profileCount=" + profileCount
 				+ ", counter=" + counter + "]";
 	}
-
-    
 
 }

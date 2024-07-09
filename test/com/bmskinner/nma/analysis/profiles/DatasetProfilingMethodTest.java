@@ -18,7 +18,6 @@ import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.analysis.nucleus.NucleusDetectionMethod;
-import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -230,19 +229,16 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 				continue; // we can't test this on a per-nucleus level
 
 			for (Nucleus n : d.getCollection().getNuclei()) {
-				assertFalse("Nucleus error calculating " + stat,
-						Statistical.ERROR_CALCULATING_STAT == n.getMeasurement(stat));
-				assertFalse("Nucleus missing landmark " + stat,
-						Statistical.MISSING_LANDMARK == n.getMeasurement(stat));
-				assertFalse("Not a nucleus " + stat,
-						Statistical.INVALID_OBJECT_TYPE == n.getMeasurement(stat));
+				assertFalse("Measurement should be a number", Double.isNaN(n.getMeasurement(stat)));
+				assertFalse("Measurement should be finite",
+						Double.isInfinite(n.getMeasurement(stat)));
 			}
 
 			double value = d.getCollection().getMedian(stat, CellularComponent.NUCLEUS,
 					MeasurementScale.PIXELS);
-			assertFalse("Error calculating " + stat, Statistical.ERROR_CALCULATING_STAT == value);
-			assertFalse("Missing landmark " + stat, Statistical.MISSING_LANDMARK == value);
-			assertFalse("Not a nucleus " + stat, Statistical.INVALID_OBJECT_TYPE == value);
+			assertFalse("Measurement should be a number", Double.isNaN(value));
+			assertFalse("Measurement should be finite",
+					Double.isInfinite(value));
 		}
 	}
 
@@ -324,19 +320,19 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 				mes.put(stat, n.getMeasurement(stat));
 			}
 			// Store the current values
-			pre.put(n.getID(), mes);
+			pre.put(n.getId(), mes);
 
-			borders.put(n.getID(), n.getBorderList());
+			borders.put(n.getId(), n.getBorderList());
 
 			// Check current values match the stored values before we profile
 			// Sanity check that nothing non-deterministic is happening
-			assertEquals("Border list should not change", borders.get(n.getID()),
+			assertEquals("Border list should not change", borders.get(n.getId()),
 					n.getBorderList());
 
 			for (Measurement stat : toTest) {
 				if (Measurement.VARIABILITY.equals(stat))
 					continue; // we can't test this on a per-nucleus level
-				assertEquals(stat + " should not change", pre.get(n.getID()).get(stat),
+				assertEquals(stat + " should not change", pre.get(n.getId()).get(stat),
 						n.getMeasurement(stat), 0.0000001);
 			}
 		}
@@ -348,7 +344,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 		for (UUID id : pre.keySet()) {
 			Nucleus n = d.getCollection().getNucleus(id).orElseThrow(NullPointerException::new);
 
-			List<IPoint> prevBorder = borders.get(n.getID());
+			List<IPoint> prevBorder = borders.get(n.getId());
 			List<IPoint> currBorder = n.getBorderList();
 			assertEquals("Border list should not change", prevBorder, currBorder);
 
@@ -357,7 +353,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 				if (Measurement.VARIABILITY.equals(stat))
 					continue; // we can't test this on a per-nucleus level
 
-				assertEquals(stat + " should not change in " + n.getID(), pre.get(id).get(stat),
+				assertEquals(stat + " should not change in " + n.getId(), pre.get(id).get(stat),
 						n.getMeasurement(stat), 0.0000001);
 
 			}

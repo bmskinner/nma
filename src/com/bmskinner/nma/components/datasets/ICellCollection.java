@@ -27,16 +27,16 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.Filterable;
+import com.bmskinner.nma.components.MeasureableCollection;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Refoldable;
-import com.bmskinner.nma.components.StatisticalCollection;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.profiles.IProfileCollection;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileManager;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -53,7 +53,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  *
  */
 public interface ICellCollection
-		extends XmlSerializable, Filterable, StatisticalCollection, Refoldable, Collection<ICell> {
+		extends XmlSerializable, Filterable, MeasureableCollection, Refoldable, Collection<ICell> {
 
 	/** The length to interpolate profiles for comparisons between objects */
 	int FIXED_PROFILE_LENGTH = 500;
@@ -332,12 +332,11 @@ public interface ICellCollection
 	 * 
 	 * @param referencePoint the tag to zero the profile against
 	 * @return
-	 * @throws ProfileException
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	Nucleus getNucleusMostSimilarToMedian(OrientationMark referencePoint)
-			throws ProfileException, MissingLandmarkException, MissingProfileException;
+			throws SegmentUpdateException, MissingDataException;
 
 	/**
 	 * Get the profile manager for the collection
@@ -397,9 +396,10 @@ public interface ICellCollection
 	 * @param pointType the tag to use as index 0
 	 * @param t         the taggable object to test
 	 * @return the variabililty score of the object
-	 * @throws MissingLandmarkException if the tag is not present
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	double getNormalisedDifferenceToMedian(@NonNull OrientationMark pointType, Taggable t)
-			throws MissingLandmarkException;
+			throws MissingLandmarkException, SegmentUpdateException, MissingDataException;
 
 }

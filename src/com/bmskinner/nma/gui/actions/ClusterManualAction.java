@@ -15,6 +15,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.classification.ClusteringMethod;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -22,9 +23,7 @@ import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.AnnotatedNucleusPanel;
@@ -192,8 +191,8 @@ public class ClusterManualAction extends SingleDatasetResultAction {
 
 						group.addDataset(d);
 
-					} catch (ProfileException | MissingProfileException
-							| MissingLandmarkException e) {
+					} catch (MissingDataException
+							| SegmentUpdateException e) {
 						LOGGER.warning("Error copying collection offsets");
 						LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 					}

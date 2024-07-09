@@ -2,23 +2,31 @@ package com.bmskinner.nma.visualisation.tables;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.DoubleStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.stats.ConfidenceInterval;
 import com.bmskinner.nma.stats.Stats;
 
 public class NucleusMeasurementsTableModel extends DatasetTableModel {
 
+	private static final Logger LOGGER = Logger
+			.getLogger(NucleusMeasurementsTableModel.class.getName());
+
 	private static final long serialVersionUID = 6546268613206621371L;
 
-	private static final List<String> DEFAULT_ROW_NAMES = List.of(" median", " mean", " S.E.M.", " C.o.V.", " 95% CI");
+	private static final List<String> DEFAULT_ROW_NAMES = List.of(" median", " mean", " S.E.M.",
+			" C.o.V.", " 95% CI");
 
 	private String[] colNames;
 	private String[][] rowData;
@@ -29,11 +37,17 @@ public class NucleusMeasurementsTableModel extends DatasetTableModel {
 			makeEmptyTable();
 			return;
 		}
-		createTable(datasets);
+		try {
+			createTable(datasets);
+		} catch (MissingDataException | SegmentUpdateException e) {
+			LOGGER.log(Level.SEVERE, "Unable to create measurements table", e);
+			makeEmptyTable();
+		}
 
 	}
 
-	private void createTable(@NonNull List<IAnalysisDataset> datasets) {
+	private void createTable(@NonNull List<IAnalysisDataset> datasets)
+			throws MissingDataException, SegmentUpdateException {
 		colNames = makeColNames(datasets);
 		int colCount = colNames.length;
 
@@ -43,7 +57,8 @@ public class NucleusMeasurementsTableModel extends DatasetTableModel {
 		for (Measurement stat : stats) {
 			for (String value : DEFAULT_ROW_NAMES) {
 				String unitLabel = stat.isDimensionless() ? ""
-						: " (" + Measurement.units(GlobalOptions.getInstance().getScale(), stat.getDimension()) + ")";
+						: " (" + Measurement.units(GlobalOptions.getInstance().getScale(),
+								stat.getDimension()) + ")";
 				rowNames.add(stat + value + unitLabel);
 			}
 		}
@@ -62,7 +77,8 @@ public class NucleusMeasurementsTableModel extends DatasetTableModel {
 
 				// Add the calculated values in each dataset as a batch
 
-				double[] vals = datasets.get(c - 1).getCollection().getRawValues(m, CellularComponent.NUCLEUS,
+				double[] vals = datasets.get(c - 1).getCollection().getRawValues(m,
+						CellularComponent.NUCLEUS,
 						GlobalOptions.getInstance().getScale());
 				double mean = DoubleStream.of(vals).average().orElse(0);
 				double sem = Stats.stderr(vals);

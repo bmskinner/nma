@@ -126,6 +126,6 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 	 */
 	private synchronized boolean isCommonTargetSelected() {
 		Nucleus t = options.getWarpedSignals().stream().findFirst().get().target();
-		return options.getWarpedSignals().stream().allMatch(s -> s.target().getID().equals(t.getID()));
+		return options.getWarpedSignals().stream().allMatch(s -> s.target().getId().equals(t.getId()));
 	}
 }

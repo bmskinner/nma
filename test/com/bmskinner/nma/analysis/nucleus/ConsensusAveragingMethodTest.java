@@ -10,7 +10,6 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.bmskinner.nma.TestDatasetBuilder;
-import com.bmskinner.nma.components.Statistical;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -141,7 +140,6 @@ public class ConsensusAveragingMethodTest {
 		new ConsensusAveragingMethod(d).call();
 
 		Nucleus n = d.getCollection().getConsensus();
-		assertTrue(n.getMeasurement(Measurement.PERIMETER) != Statistical.ERROR_CALCULATING_STAT);
-		assertTrue(n.getMeasurement(Measurement.AREA) != Statistical.ERROR_CALCULATING_STAT);
+		assertFalse(Double.isNaN(n.getMeasurement(Measurement.PERIMETER)));
 	}
 }

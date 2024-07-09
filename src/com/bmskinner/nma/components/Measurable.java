@@ -20,63 +20,72 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 
 /**
- * This interface allows for the retrieval of statistics from cells and their
+ * This interface allows for the retrieval of measurements from cells and their
  * components
  * 
  * @author bms41
  * @since 1.13.4
  *
  */
-public interface Statistical {
-
-	double ERROR_CALCULATING_STAT = -1d;
-	double MISSING_LANDMARK = -2d;
-	double INVALID_OBJECT_TYPE = -4d;
-	double VALUE_NOT_PRESENT = -8d;
+public interface Measurable {
 
 	/**
 	 * Get the value of the given measurement for this component. Note that
 	 * {@link Measurement.VARIABILILTY} returns zero, as this must be calculated at
 	 * the collection level
 	 * 
-	 * @param stat  the measurement to fetch
-	 * @param scale the units to return values in
+	 * @param measurement the measurement to fetch
+	 * @param scale       the units to return values in
 	 * @return the value or zero if stat.equals(Measurement.VARIABILILTY)
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
-	double getMeasurement(@NonNull Measurement stat, @NonNull MeasurementScale scale);
+	double getMeasurement(@NonNull Measurement measurement, @NonNull MeasurementScale scale)
+			throws MissingDataException, ComponentCreationException,
+			SegmentUpdateException;
 
 	/**
 	 * Get the measurement at the default scale ({@link MeasurementScale.PIXELS}),
 	 * calculating if not already present.
 	 * 
-	 * @param stat
+	 * @param measurement
 	 * @return
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
-	double getMeasurement(@NonNull Measurement stat);
+	double getMeasurement(@NonNull Measurement measurement)
+			throws MissingDataException, ComponentCreationException,
+			SegmentUpdateException;
 
 	/**
 	 * Set the measurement at the default scale ({@link MeasurementScale.PIXELS})
 	 * 
-	 * @param stat
+	 * @param measurement
 	 * @param d
 	 */
-	void setMeasurement(@NonNull Measurement stat, double d);
+	void setMeasurement(@NonNull Measurement measurement, double d);
 
 	/*
 	 * Remove the given measurement from the cache
 	 * 
 	 * @param measurement
 	 */
-	void clearMeasurement(@NonNull Measurement stat);
+	void clearMeasurement(@NonNull Measurement measurement);
 
 	/**
 	 * Clear all measurements from the cache
 	 */
 	void clearMeasurements();
+
+	boolean hasMeasurement(@NonNull Measurement measurement);
 
 	/**
 	 * Get all the measurements in this object

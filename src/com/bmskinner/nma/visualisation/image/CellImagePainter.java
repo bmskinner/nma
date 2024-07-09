@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.ComponentOrienter;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
@@ -27,10 +28,9 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.signals.INuclearSignal;
@@ -70,33 +70,10 @@ public class CellImagePainter implements ImagePainter {
 	public BufferedImage paintDecorated(int w, int h) {
 		try {
 
-//			BufferedImage input = ImageImporter.importFullImageTo24bit(cell.getPrimaryNucleus()).getBufferedImage();
-
 			Nucleus n = isOriented ? cell.getPrimaryNucleus().getOrientedNucleus()
 					: cell.getPrimaryNucleus();
 
 			BufferedImage output = paintRaw(w, h);
-
-			// A transform to convert from original image coordinates to the final screen
-			// coordinates
-//			AffineTransform at = new AffineTransform();
-//			AffineTransform at = createAspectPreservingScaleTransform(originalWidth, originalHeight, w, h);
-
-//			if (isOriented) {
-			// If the image has been rotated, we will need to scale the points drawn down
-			// by a ratio of the new image dimensions
-//				at.concatenate(createMainTransform(originalWidth, originalHeight));
-
-//				tat.concatenate(at);
-
-//				at = tat;
-//			}
-
-//			BufferedImage output = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_ARGB);
-//			Graphics2D g2 = output.createGraphics();
-//			g2.drawImage(input, 0, 0, null);
-//			paintNucleus(output, at);
-//			paintSignals(output, at);
 
 			return output;
 		} catch (MissingLandmarkException | ComponentCreationException e) {
@@ -107,8 +84,7 @@ public class CellImagePainter implements ImagePainter {
 	}
 
 	private void paintNucleus(BufferedImage output, AffineTransform at)
-			throws MissingProfileException,
-			MissingLandmarkException, ProfileException, UnavailableBorderPointException {
+			throws MissingDataException, SegmentUpdateException {
 		Nucleus n = cell.getPrimaryNucleus();
 		Graphics2D g2 = output.createGraphics();
 		Object saved = g2.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
@@ -220,14 +196,16 @@ public class CellImagePainter implements ImagePainter {
 		try {
 
 			if (!isOriented) {
-				BufferedImage input = ImageImporter.importCroppedImageTo24bitGreyscale(cell, component)
+				BufferedImage input = ImageImporter
+						.importCroppedImageTo24bitGreyscale(cell, component)
 						.getBufferedImage();
 				originalWidth = input.getWidth();
 				originalHeight = input.getHeight();
 				return scalePreservingAspect(input, w, h);
 			}
 
-			BufferedImage input = ImageImporter.importFullImageTo24bitGreyscale(cell.getPrimaryNucleus())
+			BufferedImage input = ImageImporter
+					.importFullImageTo24bitGreyscale(cell.getPrimaryNucleus())
 					.getBufferedImage();
 			originalWidth = input.getWidth();
 			originalHeight = input.getHeight();

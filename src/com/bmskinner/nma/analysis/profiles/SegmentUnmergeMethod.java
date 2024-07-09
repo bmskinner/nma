@@ -9,17 +9,17 @@ import com.bmskinner.nma.analysis.AnalysisMethodException;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
-import com.bmskinner.nma.components.profiles.UnsegmentedProfileException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.stats.Stats;
 
@@ -63,7 +63,7 @@ public class SegmentUnmergeMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	private void run() throws ProfileException, MissingComponentException {
+	private void run() throws MissingDataException, SegmentUpdateException {
 		LOGGER.fine("Requested unmerge of segment " + segId + " in dataset " + dataset.getName());
 
 		if (!dataset.isRoot()) {
@@ -106,12 +106,12 @@ public class SegmentUnmergeMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param segId the segment to unmerge
 	 * @return
-	 * @throws UnsegmentedProfileException
 	 * @throws ProfileException
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private void unmergeSegments(@NonNull ICellCollection collection, @NonNull UUID segId)
-			throws ProfileException, UnsegmentedProfileException, MissingComponentException {
+			throws MissingDataException, SegmentUpdateException {
 
 		ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(
 				ProfileType.ANGLE,
@@ -147,7 +147,7 @@ public class SegmentUnmergeMethod extends SingleDatasetAnalysisMethod {
 	}
 
 	private void unmergeSegments(@NonNull Taggable t, @NonNull UUID id)
-			throws ProfileException, MissingComponentException {
+			throws MissingDataException, SegmentUpdateException {
 		boolean wasLocked = t.isLocked();
 		t.setLocked(false);
 		ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);

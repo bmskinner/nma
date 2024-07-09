@@ -395,7 +395,8 @@ public class DefaultBorderSegmentTest {
 //		test.update(0, 101);
 //	}
 
-	private List<IProfileSegment> createLinkedList() throws ProfileException {
+	private List<IProfileSegment> createLinkedList()
+			throws ProfileException, SegmentUpdateException {
 		DefaultProfileSegment s1 = new DefaultProfileSegment(0, 25, 100);
 		DefaultProfileSegment s2 = new DefaultProfileSegment(25, 40, 100);
 		DefaultProfileSegment s3 = new DefaultProfileSegment(40, 0, 100);
@@ -648,7 +649,7 @@ public class DefaultBorderSegmentTest {
 	}
 
 	@Test
-	public void testCopy() throws ProfileException {
+	public void testCopy() throws ProfileException, SegmentUpdateException {
 
 		int[] start = { 0, 10, 30, 88 };
 		int[] end = { 10, 30, 88, 0 };

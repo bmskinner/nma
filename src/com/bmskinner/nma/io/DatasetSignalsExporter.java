@@ -25,7 +25,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -33,6 +35,7 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -149,7 +152,7 @@ public class DatasetSignalsExporter extends MeasurementsExportMethod {
 
 						outLine.append(d.getName() + TAB)
 								.append(cell.getId() + TAB)
-								.append(n.getID() + TAB)
+								.append(n.getId() + TAB)
 								.append(groupName + TAB)
 								.append(groupFolder + TAB)
 								.append(s.getSourceFile().getName() + TAB)
@@ -171,8 +174,17 @@ public class DatasetSignalsExporter extends MeasurementsExportMethod {
 	private void appendSignalStats(@NonNull StringBuilder outLine, @NonNull CellularComponent c) {
 
 		for (Measurement s : Measurement.getSignalStats()) {
-			double varP = c.getMeasurement(s, MeasurementScale.PIXELS);
-			double varM = c.getMeasurement(s, MeasurementScale.MICRONS);
+
+			String varP;
+			String varM;
+
+			try {
+				varP = String.valueOf(c.getMeasurement(s, MeasurementScale.PIXELS));
+				varM = String.valueOf(c.getMeasurement(s, MeasurementScale.MICRONS));
+			} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+				varP = NA;
+				varM = NA;
+			}
 
 			outLine.append(varP + TAB);
 			if (!s.isDimensionless() && !s.isAngle()) {

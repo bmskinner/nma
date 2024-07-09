@@ -31,7 +31,7 @@ import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.charting.ChartFactoryTest;
-import com.bmskinner.nma.components.Statistical;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.datasets.DefaultAnalysisDataset;
 import com.bmskinner.nma.components.datasets.DefaultCellCollection;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -42,9 +42,8 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.FilteringOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -243,7 +242,7 @@ public class ICellCollectionTest {
 	@Test
 	public void testContainsExact() {
 		ICell c = collection.streamCells().findFirst().get();
-		UUID id = c.getPrimaryNucleus().getID();
+		UUID id = c.getPrimaryNucleus().getId();
 		ICell cell = mock(ICell.class);
 		when(cell.getId()).thenReturn(id);
 		when(cell.hasNucleus()).thenReturn(false);
@@ -300,7 +299,7 @@ public class ICellCollectionTest {
 		int exp = collection.streamCells().mapToInt(c -> {
 			try {
 				return c.getPrimaryNucleus().getProfile(ProfileType.ANGLE).size();
-			} catch (MissingProfileException | ProfileException | MissingLandmarkException e) {
+			} catch (MissingDataException | SegmentUpdateException e) {
 				return Integer.MAX_VALUE;
 			}
 		}).max().orElse(Integer.MAX_VALUE);
@@ -421,12 +420,11 @@ public class ICellCollectionTest {
 	}
 
 	@Test
-	public void testGetDifferenceToMedian() throws MissingLandmarkException {
+	public void testGetDifferenceToMedian() throws SegmentUpdateException, MissingDataException {
 
 		for (Nucleus n : collection.getNuclei()) {
 			double d = collection.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, n);
 			assertNotEquals(Double.NaN, d);
-			assertNotEquals(Statistical.ERROR_CALCULATING_STAT, d);
 		}
 
 	}

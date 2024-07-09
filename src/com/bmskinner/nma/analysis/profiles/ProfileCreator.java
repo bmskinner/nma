@@ -23,18 +23,22 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.ComponentMeasurer;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.DoubleEquation;
 import com.bmskinner.nma.components.measure.LineEquation;
+import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.AngleTools;
 
 /**
@@ -56,25 +60,23 @@ public class ProfileCreator {
 	 * 
 	 * @param type the profile type
 	 * @return a profile of the requested type.
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 * @throws ProfileException
 	 */
 	public static IProfile createProfile(@NonNull Taggable target, @NonNull ProfileType type)
-			throws ProfileException {
-		try {
-			switch (type) {
-			case ANGLE:
-				return calculateAngleProfile(target);
-			case DIAMETER:
-				return calculateDiameterProfile(target);
-			case RADIUS:
-				return calculateRadiusProfile(target);
-			default:
-				return calculateAngleProfile(target);
-			}
-		} catch (UnavailableBorderPointException e) {
-			LOGGER.log(Loggable.STACK, "Cannot create profile %s".formatted(e.getMessage()), e);
-			LOGGER.warning("Cannot create " + type.toString() + "" + e.getMessage());
-			throw new ProfileException("Cannot create profile " + type, e);
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
+
+		switch (type) {
+		case ANGLE:
+			return calculateAngleProfile(target);
+		case DIAMETER:
+			return calculateDiameterProfile(target);
+		case RADIUS:
+			return calculateRadiusProfile(target);
+		default:
+			return calculateAngleProfile(target);
 		}
 	}
 
@@ -84,11 +86,12 @@ public class ProfileCreator {
 	 * 
 	 * @param target
 	 * @return
-	 * @throws UnavailableBorderPointException
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
 	private static IProfile calculateAngleProfile(@NonNull Taggable target)
-			throws UnavailableBorderPointException {
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 
 		float[] angles = new float[target.getBorderLength()];
 
@@ -98,6 +101,11 @@ public class ProfileCreator {
 
 		if (borderList == null)
 			throw new UnavailableBorderPointException("Null border list in target");
+
+		if (!target.hasMeasurement(Measurement.PERIMETER)) {
+			double perimeter = ComponentMeasurer.calculate(Measurement.PERIMETER, target);
+			target.setMeasurement(Measurement.PERIMETER, perimeter);
+		}
 
 		int windowSize = target.getWindowSize();
 
@@ -222,11 +230,12 @@ public class ProfileCreator {
 	 * Calculate the distance between points separated by the window size
 	 * 
 	 * @return
-	 * @throws UnavailableBorderPointException
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
 	public static IProfile calculatePointToPointDistanceProfile(@NonNull Taggable target)
-			throws UnavailableBorderPointException {
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		float[] profile = new float[target.getBorderLength()];
 
 		int index = 0;

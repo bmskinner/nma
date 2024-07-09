@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.generic.IPoint;
@@ -170,10 +170,10 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 * 
 	 * @return the merge source segment with the given id if present within this
 	 *         segment (recursive)
-	 * @throws MissingComponentException if the segment does not have the requested
-	 *                                   source
+	 * @throws MissingDataException if the segment does not have the requested
+	 *                              source
 	 */
-	IProfileSegment getMergeSource(@NonNull UUID id) throws MissingComponentException;
+	IProfileSegment getMergeSource(@NonNull UUID id) throws MissingDataException;
 
 	/**
 	 * Get the index at the start of the segment (inclusive)
@@ -503,9 +503,10 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 * Given a list of segments, link them together into a circle.
 	 * 
 	 * @param list the segments to link
-	 * @throws ProfileException if updating the first segment indexes fails
+	 * @throws SegmentUpdateException if updating the first segment indexes fails
 	 */
-	static IProfileSegment[] linkSegments(@NonNull IProfileSegment[] list) throws ProfileException {
+	static IProfileSegment[] linkSegments(@NonNull IProfileSegment[] list)
+			throws SegmentUpdateException {
 
 		for (int i = 0; i < list.length; i++) {
 			IProfileSegment s = list[i];
@@ -514,14 +515,10 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 			int n = i == list.length - 1 ? 0 : i + 1;
 
 			if (i == 0) {
-				try {
-					boolean lockState = s.isLocked();
-					s.setLocked(false);
-					s.update(list[p].getEndIndex(), s.getEndIndex());
-					s.setLocked(lockState);
-				} catch (IllegalArgumentException | SegmentUpdateException e) {
-					throw new ProfileException("Error linking final segment: " + e.getMessage());
-				}
+				boolean lockState = s.isLocked();
+				s.setLocked(false);
+				s.update(list[p].getEndIndex(), s.getEndIndex());
+				s.setLocked(lockState);
 			}
 
 			s.setPrevSegment(list[p]);
@@ -537,10 +534,10 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 * 
 	 * @param list
 	 * @return the input list
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
 	static List<IProfileSegment> linkSegments(@NonNull List<IProfileSegment> list)
-			throws ProfileException {
+			throws SegmentUpdateException {
 
 		for (int i = 0; i < list.size(); i++) {
 			IProfileSegment s = list.get(i);
@@ -549,19 +546,13 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 			int n = i == list.size() - 1 ? 0 : i + 1;
 
 			if (i == 0) {
-
-				try {
-					// only update if really necessary, to stop merge sources being lost
-					if (s.getStartIndex() != list.get(p).getEndIndex()) {
-						boolean lockState = s.isLocked();
-						s.setLocked(false);
-						s.update(list.get(p).getEndIndex(), s.getEndIndex());
-						s.setLocked(lockState);
-					}
-				} catch (IllegalArgumentException | SegmentUpdateException e) {
-					throw new ProfileException("Error linking final segment: " + e.getMessage(), e);
+				// only update if really necessary, to stop merge sources being lost
+				if (s.getStartIndex() != list.get(p).getEndIndex()) {
+					boolean lockState = s.isLocked();
+					s.setLocked(false);
+					s.update(list.get(p).getEndIndex(), s.getEndIndex());
+					s.setLocked(lockState);
 				}
-
 			}
 
 			s.setPrevSegment(list.get(p));
@@ -581,7 +572,7 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 * @throws SegmentUpdateException
 	 */
 	static List<IProfileSegment> scaleSegments(@NonNull List<IProfileSegment> list, int newLength)
-			throws ProfileException, SegmentUpdateException {
+			throws SegmentUpdateException {
 		List<IProfileSegment> result = new ArrayList<>();
 
 		if (list.isEmpty())
@@ -635,10 +626,8 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 			if (!isPartial && i == list.size() - 1)
 				segEnd = startIndex;
 
-//			LOGGER.fine("New end point " + segEnd);
 			IProfileSegment newSeg = new DefaultProfileSegment(newStartIndex, segEnd, newLength,
 					segment.getID());
-//			LOGGER.fine("Scaled to " + newSeg);
 
 			// Scale merge sources recursively and add to the new segment
 			if (segment.hasMergeSources()) {
@@ -654,7 +643,6 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 				m1.update(m1.getStartIndex(), newSeg.getEndIndex());
 
 				for (IProfileSegment p : mergeScaled) {
-//					LOGGER.fine("Adding " + p + " to " + newSeg);
 					newSeg.addMergeSource(p);
 				}
 			}
@@ -671,10 +659,10 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 * 
 	 * @param list the segments to copy
 	 * @return a new list
-	 * @throws Exception
+	 * @throws SegmentUpdateException
 	 */
 	static List<IProfileSegment> copyAndLink(@NonNull List<IProfileSegment> list)
-			throws ProfileException {
+			throws SegmentUpdateException {
 		if (list.isEmpty())
 			throw new IllegalArgumentException(
 					"Cannot copy segments: segment list is null or empty");
@@ -687,10 +675,10 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 * 
 	 * @param segments the segments to be copied
 	 * @return a list of linked segments, duplicated from the input
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
 	static List<IProfileSegment> copyAndLink(@NonNull IProfileSegment[] segments)
-			throws ProfileException {
+			throws SegmentUpdateException {
 		if (segments.length == 0)
 			throw new IllegalArgumentException("Cannot copy segments: segment list is empty");
 		IProfileSegment[] temp = copyWithoutLinking(segments);
@@ -707,7 +695,6 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 * 
 	 * @param list the segments to copy
 	 * @return a list of duplicated segments
-	 * @throws Exception
 	 */
 	static List<IProfileSegment> copyWithoutLinking(@NonNull List<IProfileSegment> list) {
 
@@ -726,7 +713,6 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 * 
 	 * @param segments an array of segments to copy
 	 * @return a copy of the segments
-	 * @throws ProfileException
 	 */
 	static IProfileSegment[] copyWithoutLinking(@NonNull IProfileSegment[] segments) {
 		if (segments == null || segments.length == 0) {
@@ -747,7 +733,6 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 * @param list    the linked order list
 	 * @param segName the segment name to find ('Seg_n')
 	 * @return the segment or null
-	 * @throws Exception
 	 */
 	static IProfileSegment getSegment(@NonNull final List<IProfileSegment> list, String segName) {
 

@@ -34,12 +34,11 @@ import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.SettingsDialog;
 import com.bmskinner.nma.gui.events.UIController;
@@ -91,7 +90,7 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 							c.getCollection().size());
 
 					UIController.getInstance().fireDatasetAdded(d);
-				} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
+				} catch (MissingDataException | SegmentUpdateException e) {
 					LOGGER.warning("Error copying collection offsets");
 					LOGGER.log(Loggable.STACK, "Error in offsetting", e);
 				}

@@ -35,6 +35,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.ClusterAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -43,9 +44,7 @@ import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.logging.Loggable;
 
 /**
@@ -263,7 +262,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 					c.setSharedCount(dataset.getCollection(), c.size());
 					dataset.getCollection().setSharedCount(c, c.size());
 
-				} catch (ProfileException | MissingProfileException | MissingLandmarkException e) {
+				} catch (MissingDataException | SegmentUpdateException e) {
 					LOGGER.log(Loggable.STACK,
 							"Error copying segments or landmarks from " + dataset.getName(), e);
 				}

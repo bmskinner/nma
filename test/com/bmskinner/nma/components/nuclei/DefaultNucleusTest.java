@@ -15,6 +15,8 @@ import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.TestImageDatasetCreator;
 import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.components.ComponentMeasurer;
+import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.DefaultConsensusNucleus;
 import com.bmskinner.nma.components.cells.DefaultNucleus;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -22,6 +24,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 
 /**
@@ -75,7 +78,8 @@ public class DefaultNucleusTest {
 	}
 
 	@Test
-	public void testMeasurementsAreStable() {
+	public void testMeasurementsAreStable()
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		Nucleus dup = nucleus.duplicate();
 		for (Measurement m : nucleus.getMeasurements()) {
 			double a1 = ComponentMeasurer.calculate(m, nucleus);

@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ICell;
@@ -14,6 +15,7 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.IProfile;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -109,8 +111,8 @@ public class DatasetProfileExporter extends MeasurementsExportMethod {
 				outLine.append(value + COMMA);
 			}
 
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
-			LOGGER.severe("Unable to get profile for component " + c.getID());
+		} catch (MissingDataException | SegmentUpdateException e) {
+			LOGGER.severe("Unable to get profile for component " + c.getId());
 		}
 	}
 }

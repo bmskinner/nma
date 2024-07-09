@@ -26,7 +26,7 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.ProgressEvent;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -40,8 +40,6 @@ import com.bmskinner.nma.components.profiles.IProfileCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
@@ -277,12 +275,11 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * the reference point
 	 * 
 	 * @param collection
-	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	private ISegmentedProfile createSegmentsInMedian()
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws SegmentUpdateException, MissingDataException {
 
 		// choose the best subset of nuclei and make a median profile from them
 		LOGGER.finer("Collection median length " + collection.getMedianArrayLength());
@@ -303,12 +300,12 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * will unlock nuclei as needed to ensure that segments are consistent through
 	 * the dataset.
 	 * 
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
 	 * @throws SegmentUpdateException
 	 * @throws ProfileException
 	 */
 	private void assignSegmentsToNuclei(@NonNull ISegmentedProfile template)
-			throws ProfileException, MissingComponentException {
+			throws ProfileException, MissingDataException, SegmentUpdateException {
 		IterativeSegmentFitter fitter = new IterativeSegmentFitter(template);
 		for (Nucleus n : collection.getNuclei()) {
 

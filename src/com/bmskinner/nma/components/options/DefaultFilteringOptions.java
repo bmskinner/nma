@@ -20,110 +20,121 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.signals.INuclearSignal;
 
 /**
  * Default implementation of the filtering options
+ * 
  * @author ben
  * @since 1.14.0
  *
  */
 public class DefaultFilteringOptions extends DefaultOptions implements FilteringOptions {
-	
+
+	private static final Logger LOGGER = Logger.getLogger(DefaultFilteringOptions.class.getName());
+
 	private static final long serialVersionUID = 1L;
 	private final Map<Key, Double> minima = new HashMap<>();
 	private final Map<Key, Double> maxima = new HashMap<>();
-	
+
 	private static final String ALL_MATCH_KEY = "All_match";
-	
+
 	/**
-	 * Construct with default multiple matching rules:
-	 * all sub-components must pass their filter for a cell
-	 * to be included.
+	 * Construct with default multiple matching rules: all sub-components must pass
+	 * their filter for a cell to be included.
 	 */
 	public DefaultFilteringOptions() {
 		this(FilterMatchType.ALL_MATCH);
 	}
-	
+
 	/**
-	 * Construct an options specifying the matching rules for 
-	 * multiple objects of the same type within a cell. For example,
-	 * nuclear signals: should all signals pass the filter for the cell
-	 * to pass, or should any signals pass the filter for the cell to pass? 
+	 * Construct an options specifying the matching rules for multiple objects of
+	 * the same type within a cell. For example, nuclear signals: should all signals
+	 * pass the filter for the cell to pass, or should any signals pass the filter
+	 * for the cell to pass?
+	 * 
 	 * @param allMatch should all cell components pass the filter?
 	 */
 	public DefaultFilteringOptions(FilterMatchType matchType) {
 		setMatchState(matchType);
 	}
-	
 
 	@Override
 	public void setMatchState(FilterMatchType type) {
 		setBoolean(ALL_MATCH_KEY, type.equals(FilterMatchType.ALL_MATCH));
 	}
-	
 
 	@Override
-	public void addMinimumThreshold(@NonNull Measurement stat, @NonNull String component, double value) {
+	public void addMinimumThreshold(@NonNull Measurement stat, @NonNull String component,
+			double value) {
 		addMinimumThreshold(stat, component, MeasurementScale.PIXELS, null, value);
 	}
-	
+
 	@Override
-	public void addMinimumThreshold(@NonNull Measurement stat, @NonNull String component, @Nullable UUID id, double value) {
+	public void addMinimumThreshold(@NonNull Measurement stat, @NonNull String component,
+			@Nullable UUID id, double value) {
 		addMinimumThreshold(stat, component, MeasurementScale.PIXELS, id, value);
 	}
-	
+
 	@Override
-	public void addMinimumThreshold(@NonNull Measurement stat, @NonNull String component, @NonNull MeasurementScale scale, double value) {
+	public void addMinimumThreshold(@NonNull Measurement stat, @NonNull String component,
+			@NonNull MeasurementScale scale, double value) {
 		addMinimumThreshold(stat, component, scale, null, value);
 	}
-	
+
 	@Override
 	public void addMinimumThreshold(@NonNull Measurement stat, @NonNull String component,
 			@NonNull MeasurementScale scale, @Nullable UUID id, double value) {
 		Key k = new Key(stat, component, scale, id);
 		minima.put(k, value);
 	}
-	
+
 	@Override
-	public void addMaximumThreshold(@NonNull Measurement stat, @NonNull String component, double value) {
+	public void addMaximumThreshold(@NonNull Measurement stat, @NonNull String component,
+			double value) {
 		addMaximumThreshold(stat, component, MeasurementScale.PIXELS, value);
 	}
-	
+
 	@Override
-	public void addMaximumThreshold(@NonNull Measurement stat, @NonNull String component, @Nullable UUID id, double value) {
+	public void addMaximumThreshold(@NonNull Measurement stat, @NonNull String component,
+			@Nullable UUID id, double value) {
 		addMaximumThreshold(stat, component, MeasurementScale.PIXELS, id, value);
 	}
 
 	@Override
-	public void addMaximumThreshold(@NonNull Measurement stat, @NonNull String component, @NonNull MeasurementScale scale, double value) {
+	public void addMaximumThreshold(@NonNull Measurement stat, @NonNull String component,
+			@NonNull MeasurementScale scale, double value) {
 		addMaximumThreshold(stat, component, scale, null, value);
-	}	
-	
+	}
+
 	@Override
 	public void addMaximumThreshold(@NonNull Measurement stat, @NonNull String component,
 			@NonNull MeasurementScale scale, @Nullable UUID id, double value) {
 		Key k = new Key(stat, component, scale, id);
 		maxima.put(k, value);
 	}
-	
+
 	@Override
-	public double getMinimaThreshold(@NonNull Measurement stat, @NonNull String component, @NonNull MeasurementScale scale) {
+	public double getMinimaThreshold(@NonNull Measurement stat, @NonNull String component,
+			@NonNull MeasurementScale scale) {
 		return getMinimaThreshold(stat, component, scale, null);
 	}
-	
+
 	@Override
 	public double getMinimaThreshold(@NonNull Measurement stat, @NonNull String component,
 			@NonNull MeasurementScale scale, @Nullable UUID id) {
@@ -132,105 +143,128 @@ public class DefaultFilteringOptions extends DefaultOptions implements Filtering
 	}
 
 	@Override
-	public double getMaximaThreshold(@NonNull Measurement stat, @NonNull String component, @NonNull MeasurementScale scale) {
+	public double getMaximaThreshold(@NonNull Measurement stat, @NonNull String component,
+			@NonNull MeasurementScale scale) {
 		return getMaximaThreshold(stat, component, scale, null);
 	}
-	
+
 	@Override
 	public double getMaximaThreshold(@NonNull Measurement stat, @NonNull String component,
 			@NonNull MeasurementScale scale, @Nullable UUID id) {
 		Key k = new Key(stat, component, scale, id);
 		return maxima.get(k);
 	}
-	
+
 	@Override
 	public Predicate<ICell> getPredicate(@NonNull ICellCollection collection) {
-		return  (c) -> {
+		return (c) -> {
 			boolean passes = true;
-			for(Key k : minima.keySet()) {
-				
-				switch(k.component){
-					case CellularComponent.NUCLEUS:        passes &= createNucleusFilter(k, c, collection, true); break;
-					case CellularComponent.NUCLEAR_SIGNAL: passes &= createNuclearSignalFilter(k, c, collection, true); break;
+			for (Key k : minima.keySet()) {
+
+				switch (k.component) {
+				case CellularComponent.NUCLEUS:
+					passes &= createNucleusFilter(k, c, collection, true);
+					break;
+				case CellularComponent.NUCLEAR_SIGNAL:
+					passes &= createNuclearSignalFilter(k, c, collection, true);
+					break;
 				}
 			}
-			
-			for(Key k : maxima.keySet()) {
-				
-				switch(k.component){
-					case CellularComponent.NUCLEUS:        passes &= createNucleusFilter(k, c, collection, false); break;
-					case CellularComponent.NUCLEAR_SIGNAL: passes &= createNuclearSignalFilter(k, c, collection, false); break;
+
+			for (Key k : maxima.keySet()) {
+
+				switch (k.component) {
+				case CellularComponent.NUCLEUS:
+					passes &= createNucleusFilter(k, c, collection, false);
+					break;
+				case CellularComponent.NUCLEAR_SIGNAL:
+					passes &= createNuclearSignalFilter(k, c, collection, false);
+					break;
 				}
 			}
 			return passes;
 		};
 	}
-	
-	
-	private boolean createNucleusFilter(Key k, ICell c, ICellCollection collection, boolean isMin){
-//		log(String.format("Making nucleus filter for key %s", k));
-		if(getBoolean(ALL_MATCH_KEY))
-			return c.getNuclei().stream().allMatch(n->nucleusMatches(k, n, collection, isMin));
-		return c.getNuclei().stream().anyMatch(n->nucleusMatches(k, n, collection, isMin));
+
+	private boolean createNucleusFilter(Key k, ICell c, ICellCollection collection, boolean isMin) {
+
+		if (getBoolean(ALL_MATCH_KEY))
+			return c.getNuclei().stream().allMatch(n -> nucleusMatches(k, n, collection, isMin));
+		return c.getNuclei().stream().anyMatch(n -> nucleusMatches(k, n, collection, isMin));
 	}
-	
-	private boolean nucleusMatches(Key k, Nucleus n, ICellCollection collection, boolean isMin){
+
+	private boolean nucleusMatches(Key k, Nucleus n, ICellCollection collection, boolean isMin) {
 		try {
-			if(k.stat.equals(Measurement.VARIABILITY)) {
+			if (k.stat.equals(Measurement.VARIABILITY)) {
 				double v = collection.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE, n);
-				return isMin ? v>=minima.get(k) : v<=maxima.get(k);
+				return isMin ? v >= minima.get(k) : v <= maxima.get(k);
 			}
-				
-			if(k.stat.equals(Measurement.NUCLEUS_SIGNAL_COUNT)) {
-				if(k.id==null)
+
+			if (k.stat.equals(Measurement.NUCLEUS_SIGNAL_COUNT)) {
+				if (k.id == null)
 					return false;
 				double v = n.getSignalCollection().numberOfSignals(k.id);
-				return isMin ? v>=minima.get(k) : v<=maxima.get(k);
+				return isMin ? v >= minima.get(k) : v <= maxima.get(k);
 			}
 			double v = n.getMeasurement(k.stat, k.scale);
-			return isMin ? v>=minima.get(k) : v<=maxima.get(k);
-		} catch (MissingLandmarkException e) {
+			return isMin ? v >= minima.get(k) : v <= maxima.get(k);
+		} catch (MissingDataException | SegmentUpdateException | ComponentCreationException e) {
 			return false;
 		}
 	}
-	
-	private boolean createNuclearSignalFilter(Key k, ICell c, ICellCollection collection, boolean isMin){
-		
-		if(k.id==null) { // filter all signal groups
-			if(getBoolean(ALL_MATCH_KEY))
-				return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getAllSignals().stream()).allMatch(s->signalMatches(k, s, isMin));
-			return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getAllSignals().stream()).anyMatch(s->signalMatches(k, s, isMin));
+
+	private boolean createNuclearSignalFilter(Key k, ICell c, ICellCollection collection,
+			boolean isMin) {
+
+		if (k.id == null) { // filter all signal groups
+			if (getBoolean(ALL_MATCH_KEY))
+				return c.getNuclei().stream()
+						.flatMap(n -> n.getSignalCollection().getAllSignals().stream())
+						.allMatch(s -> signalMatches(k, s, isMin));
+			return c.getNuclei().stream()
+					.flatMap(n -> n.getSignalCollection().getAllSignals().stream())
+					.anyMatch(s -> signalMatches(k, s, isMin));
 		}
 		// filter specific signal group
-		if(getBoolean(ALL_MATCH_KEY))
-			return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getSignals(k.id).stream()).allMatch(s->signalMatches(k, s, isMin));
-		return c.getNuclei().stream().flatMap(n->n.getSignalCollection().getSignals(k.id).stream()).anyMatch(s->signalMatches(k, s, isMin));
-	}
-	
-	private boolean signalMatches(Key k, INuclearSignal s, boolean isMin){
-		double v = s.getMeasurement(k.stat, k.scale);
-		return isMin ? v>=minima.get(k) : v<=maxima.get(k);
+		if (getBoolean(ALL_MATCH_KEY))
+			return c.getNuclei().stream()
+					.flatMap(n -> n.getSignalCollection().getSignals(k.id).stream())
+					.allMatch(s -> signalMatches(k, s, isMin));
+		return c.getNuclei().stream()
+				.flatMap(n -> n.getSignalCollection().getSignals(k.id).stream())
+				.anyMatch(s -> signalMatches(k, s, isMin));
 	}
 
-	
-	private class Key{
-		
+	private boolean signalMatches(Key k, INuclearSignal s, boolean isMin) {
+		double v;
+		try {
+			v = s.getMeasurement(k.stat, k.scale);
+		} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+			LOGGER.fine("Missing '%s' for signal".formatted(k.stat));
+			return false;
+		}
+		return isMin ? v >= minima.get(k) : v <= maxima.get(k);
+	}
+
+	private class Key {
+
 		private Measurement stat;
 		private String component;
 		private MeasurementScale scale;
 		private UUID id;
-		
-		public Key(@NonNull Measurement stat, @NonNull String component, @NonNull MeasurementScale scale, @Nullable UUID id) {
+
+		public Key(@NonNull Measurement stat, @NonNull String component,
+				@NonNull MeasurementScale scale, @Nullable UUID id) {
 			this.stat = stat;
 			this.component = component;
 			this.scale = scale;
 			this.id = id;
 		}
-		
+
 		@Override
 		public String toString() {
-			String s = stat.toString()+"_"+component+"_"+scale;
-			return id==null ? s : s+"_"+id.toString();
+			String s = stat.toString() + "_" + component + "_" + scale;
+			return id == null ? s : s + "_" + id.toString();
 		}
 
 		@Override

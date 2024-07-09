@@ -6,14 +6,13 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.MissingOptionException;
 import com.bmskinner.nma.components.profiles.IProfile;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 
@@ -84,7 +83,7 @@ public class PoorEdgeDetectionProfilePredicate implements Predicate<ICell> {
 				IProfile deltas = p.calculateDerivative().absolute();
 				cellPasses &= deltas.getMax() <= deltaMax;
 
-			} catch (MissingProfileException | MissingLandmarkException | ProfileException e) {
+			} catch (MissingDataException | SegmentUpdateException e) {
 				LOGGER.log(Level.SEVERE, "Unable to get profile in nucleus", e);
 				return false;
 			}

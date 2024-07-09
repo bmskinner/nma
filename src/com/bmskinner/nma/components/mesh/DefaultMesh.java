@@ -29,14 +29,12 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.CellularComponent;
-import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.logging.Loggable;
@@ -471,7 +469,7 @@ public class DefaultMesh implements Mesh {
 				segmentVertexProportions.put(segNumber, proportions);
 				segmentFaces.put(segNumber, new HashSet<>());
 			}
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			throw new MeshCreationException("Unable to get segments from template nucleus", e);
 		}
 
@@ -532,8 +530,7 @@ public class DefaultMesh implements Mesh {
 				}
 
 			}
-		} catch (MissingLandmarkException | MissingProfileException | ProfileException
-				| UnavailableBorderPointException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			throw new MeshCreationException("Unable to get segments from template nucleus", e);
 		}
 	}

@@ -24,9 +24,8 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nma.components.profiles.DefaultSegmentedProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
@@ -63,7 +62,8 @@ public class TaggableTest {
 
 		if (source == DefaultNucleus.class) {
 			IAnalysisDataset d = new TestDatasetBuilder(ComponentTester.RNG_SEED).cellCount(1)
-					.ofType(RuleSetCollection.roundRuleSetCollection()).randomOffsetProfiles(true).segmented().build();
+					.ofType(RuleSetCollection.roundRuleSetCollection()).randomOffsetProfiles(true)
+					.segmented().build();
 			return d.getCollection().getCells().stream().findFirst().get().getPrimaryNucleus();
 		}
 
@@ -79,15 +79,16 @@ public class TaggableTest {
 	 * Ensure that getting a profile type is equivalent to getting the profile
 	 * offset to the RP
 	 * 
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
 	 * @throws ProfileException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	@Test
 	public void testGetProfileTypeLandmark()
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws ProfileException, SegmentUpdateException, MissingDataException {
 		ISegmentedProfile rawProfile = taggable.getProfile(ProfileType.ANGLE);
-		ISegmentedProfile tagProfile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile tagProfile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 		assertEquals(rawProfile, tagProfile);
 	}
 
@@ -95,7 +96,8 @@ public class TaggableTest {
 	public void testUpdatingSegmentsInProfile() throws Exception {
 
 		// Get the profile to update
-		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 
 		IProfileSegment seg0 = oldProfile.getSegments().get(1);
 		UUID segId = seg0.getID();
@@ -113,7 +115,8 @@ public class TaggableTest {
 		taggable.setSegments(oldProfile.getSegments());
 
 		// Confirm everything was saved properly
-		ISegmentedProfile newProfile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile newProfile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 		assertEquals(oldProfile, newProfile);
 	}
 
@@ -127,7 +130,8 @@ public class TaggableTest {
 	@Test
 	public void testSettingMultiSegmentProfileIsReversible() throws Exception {
 		// Fetch the profile zeroed on the RP
-		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 
 		// Make a duplicate for manipulation - note this will have the same segment
 		// pattern
@@ -137,7 +141,8 @@ public class TaggableTest {
 		taggable.setSegments(templateProfile.getSegments());
 
 		// Fetch the profile back out from the object
-		ISegmentedProfile testProfile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile testProfile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 		assertEquals("Profiles should match", templateProfile, testProfile);
 		assertEquals("Value at index 0", oldProfile.get(0), testProfile.get(0), 0);
 		assertEquals("Segment count", oldProfile.getSegmentCount(), testProfile.getSegmentCount());
@@ -158,7 +163,8 @@ public class TaggableTest {
 	@Test
 	public void testSettingSingleSegmentProfileIsReversible() throws Exception {
 		// Fetch the profile zeroed on the RP
-		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile oldProfile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 
 		// Make a duplicate for manipulation - note this will have only one segment
 		ISegmentedProfile templateProfile = new DefaultSegmentedProfile(oldProfile.toFloatArray());
@@ -167,7 +173,8 @@ public class TaggableTest {
 		taggable.setSegments(templateProfile.getSegments());
 
 		// Fetch the profile back out from the object
-		ISegmentedProfile testProfile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile testProfile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 
 		// Test the two profiles are identical
 		assertEquals("Profiles should match", templateProfile, testProfile);
@@ -193,7 +200,8 @@ public class TaggableTest {
 
 	@Test
 	public void testSegmentsCanBeMerged() throws Exception {
-		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 		UUID segId1 = profile.getSegments().get(1).getID();
 		UUID segId2 = profile.getSegments().get(2).getID();
 
@@ -201,7 +209,8 @@ public class TaggableTest {
 		profile.mergeSegments(segId1, segId2, newId);
 		taggable.setSegments(profile.getSegments());
 
-		ISegmentedProfile result = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile result = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 
 		assertEquals(profile, result);
 
@@ -211,7 +220,8 @@ public class TaggableTest {
 
 	@Test
 	public void testGetSegmentsReturnsLinkedSegments() throws Exception {
-		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 		List<IProfileSegment> testSegs = profile.getSegments();
 
 		for (int i = 0; i < profile.getSegmentCount(); i++) {
@@ -222,7 +232,8 @@ public class TaggableTest {
 
 	@Test
 	public void testSetSegmentsUpdatesReplacesExistingSegments() throws Exception {
-		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 
 		List<IProfileSegment> newSegs = new ArrayList<>();
 		newSegs.add(new DefaultProfileSegment(0, profile.size() / 2, profile.size()));
@@ -237,13 +248,16 @@ public class TaggableTest {
 
 	@Test
 	public void testReverseBorderReversesSegments() throws Exception {
-		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile profile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 
 		taggable.reverse();
 
-		ISegmentedProfile revProfile = taggable.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		ISegmentedProfile revProfile = taggable.getProfile(ProfileType.ANGLE,
+				OrientationMark.REFERENCE);
 
-		assertEquals("Reversed profile should have the same number of segments", profile.getSegmentCount(),
+		assertEquals("Reversed profile should have the same number of segments",
+				profile.getSegmentCount(),
 				revProfile.getSegmentCount());
 
 		for (IProfileSegment s : profile.getSegments()) {

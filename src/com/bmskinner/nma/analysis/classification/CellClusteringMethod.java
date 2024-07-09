@@ -25,56 +25,63 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.AnalysisMethodException;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
 import com.bmskinner.nma.components.mesh.MeshCreationException;
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 
 import weka.core.Instance;
 import weka.core.Instances;
 
 /**
- * This provides an interface between subclassing methods and the
- * weka library being used
+ * This provides an interface between subclassing methods and the weka library
+ * being used
+ * 
  * @author ben
  * @since 1.14.0
  *
  */
 public abstract class CellClusteringMethod extends SingleDatasetAnalysisMethod {
-	
+
 	protected final Map<Instance, UUID> cellToInstanceMap = new HashMap<>();
-	protected final ICellCollection    collection;
+	protected final ICellCollection collection;
 	protected final HashOptions options;
-	
-	public CellClusteringMethod(@NonNull IAnalysisDataset dataset, @NonNull HashOptions options) {
-        super(dataset);
-        this.collection = dataset.getCollection();
-        this.options = options;
-    }
-	
+
+	protected CellClusteringMethod(@NonNull IAnalysisDataset dataset,
+			@NonNull HashOptions options) {
+		super(dataset);
+		this.collection = dataset.getCollection();
+		this.options = options;
+	}
+
 	/**
 	 * Create the rows of the matrix to be analysed
+	 * 
 	 * @return
-	 * @throws MeshCreationException 
-	 * @throws ProfileException 
-	 * @throws MissingProfileException 
-	 * @throws MissingLandmarkException 
-	 * @throws MissingComponentException 
-	 * @throws ComponentCreationException 
+	 * @throws MeshCreationException
+	 * @throws ProfileException
+	 * @throws MissingDataException
+	 * @throws ComponentCreationException
+	 * @throws MissingMeasurementException
+	 * @throws SegmentUpdateException
 	 * @throws Exception
 	 */
-	protected abstract Instances makeInstances() throws AnalysisMethodException, MeshCreationException, MissingLandmarkException, MissingProfileException, ProfileException, MissingComponentException, ComponentCreationException;
-	
+	protected abstract Instances makeInstances()
+			throws AnalysisMethodException, MeshCreationException, ProfileException,
+			MissingDataException,
+			ComponentCreationException, SegmentUpdateException;
+
 	/**
 	 * Create the columns of the matrix to be analysed
+	 * 
 	 * @return
-	 * @throws AnalysisMethodException 
+	 * @throws AnalysisMethodException
 	 */
 	protected abstract ArrayList<?> makeAttributes() throws AnalysisMethodException;
-	
+
 }

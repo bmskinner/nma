@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ProfileableCellularComponent;
@@ -12,11 +13,11 @@ import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.profiles.IProfile;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -128,13 +129,13 @@ public class DummySegmentedCellularComponent extends ProfileableCellularComponen
 	@Override
 	public @NonNull ISegmentedProfile getProfile(@NonNull ProfileType type,
 			@NonNull OrientationMark om)
-			throws ProfileException, MissingLandmarkException, MissingProfileException {
+			throws SegmentUpdateException, MissingDataException {
 		return super.getProfile(type, om);
 	}
 
 	@Override
 	public IProfile getUnsegmentedProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
-			throws ProfileException, MissingLandmarkException, MissingProfileException {
+			throws MissingLandmarkException, MissingProfileException {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -13,7 +13,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -98,7 +98,7 @@ public class SignalWarpingMethod extends SingleDatasetAnalysisMethod {
 		ImageProcessor finalImage = ImageFilterer.addByteImages(warpedImages);
 
 		ISignalGroup sg = dataset.getCollection().getSignalGroup(options.signalId())
-				.orElseThrow(MissingComponentException::new);
+				.orElseThrow(MissingDataException::new);
 
 		IWarpedSignal ws = new DefaultWarpedSignal(
 				options.targetDataset().getCollection().getConsensus().duplicate(),

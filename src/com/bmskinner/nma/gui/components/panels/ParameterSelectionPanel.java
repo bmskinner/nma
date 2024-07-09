@@ -22,8 +22,8 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementDimension;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.GlobalOptions;
@@ -195,11 +195,10 @@ public class ParameterSelectionPanel extends OptionsPanel {
 				labels.add(label);
 				fields.add(box);
 			}
-		} catch (ProfileException | MissingLandmarkException e) {
+		} catch (MissingLandmarkException | SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK, "Unable to get segments", e);
 		}
 		addLabelTextRows(labels, fields, layout, panel);
-//		panel.setBorder(BorderFactory.createTitledBorder("Segments"));
 		return panel;
 	}
 

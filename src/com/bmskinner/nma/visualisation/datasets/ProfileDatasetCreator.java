@@ -29,6 +29,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -36,6 +37,7 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
@@ -302,10 +304,13 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				appendNuclei(collection, ds, isNormalised, type, om, alignment, maxLength, i);
 			}
 		} catch (MissingLandmarkException e) {
-			LOGGER.fine("Landmark is not present: " + om);
-		} catch (ProfileException | MissingProfileException e) {
-			LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
+			throw new ChartDatasetCreationException("Orientation mark is not present: " + om, e);
+		} catch (MissingProfileException e) {
 			throw new ChartDatasetCreationException("Unable to get median profile", e);
+		} catch (SegmentUpdateException e) {
+			throw new ChartDatasetCreationException("Unable to get median profile segments", e);
+		} catch (MissingDataException e) {
+			throw new ChartDatasetCreationException("Error getting data", e);
 		}
 	}
 
@@ -320,13 +325,13 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param alignment
 	 * @param maxLength
 	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
 	 */
 	private void appendNuclei(@NonNull final ICellCollection collection,
 			@NonNull final ProfileChartDataset ds, boolean isNormalised, ProfileType type,
 			OrientationMark om, ProfileAlignment alignment, int maxLength, int i)
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws SegmentUpdateException, MissingDataException {
 		// add random sample of n individual nuclei - avoid slowing the UI with too many
 		// cells
 		List<Nucleus> nuclei = new ArrayList<>(collection.getNuclei());
@@ -370,14 +375,14 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param om
 	 * @param isShowSegments
 	 * @param i
-	 * @throws MissingLandmarkException
-	 * @throws MissingProfileException
 	 * @throws ProfileException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	private void appendIQR(@NonNull final ICellCollection collection,
 			@NonNull final ProfileChartDataset ds, IProfile xpoints, ProfileType type,
 			OrientationMark om, boolean isShowSegments, int i)
-			throws MissingLandmarkException, MissingProfileException, ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 		IProfile profile25 = collection.getProfileCollection().getProfile(type, om,
 				Stats.LOWER_QUARTILE);
 		IProfile profile75 = collection.getProfileCollection().getProfile(type, om,
@@ -419,12 +424,11 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0,
 						xpoints);
 			} else {
-//				IProfile xpoints = createXPositions(profile, nucleus.getBorderLength());
 				float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
 				ds.addLines(PROFILE_SERIES_PREFIX + nucleus.getNameAndNumber(), data, 0);
 			}
 
-		} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			throw new ChartDatasetCreationException(
 					"Cannot get segmented profile for " + nucleus.getNameAndNumber(),
 					e);
@@ -441,20 +445,24 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public ProfileChartDataset createProfileDataset(@NonNull IProfile profile)
 			throws ChartDatasetCreationException {
-		ProfileChartDataset ds = new ProfileChartDataset();
-		IProfile xpoints = createXPositions(profile, profile.size());
-		if (profile instanceof ISegmentedProfile segProfile) {
 
-			if (segProfile.hasSegments()) {
-				List<IProfileSegment> segments = segProfile.getOrderedSegments();
-				addSegmentsFromProfile(segments, segProfile, ds, segProfile.size(), 0, xpoints);
+		try {
+			ProfileChartDataset ds = new ProfileChartDataset();
+			IProfile xpoints = createXPositions(profile, profile.size());
+			if (profile instanceof ISegmentedProfile segProfile) {
+
+				if (segProfile.hasSegments()) {
+					List<IProfileSegment> segments = segProfile.getOrderedSegments();
+					addSegmentsFromProfile(segments, segProfile, ds, segProfile.size(), 0, xpoints);
+				}
+			} else {
+				float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
+				ds.addLines(PROFILE_SERIES_PREFIX, data, 0);
 			}
-		} else {
-//			IProfile xpoints = createXPositions(profile, profile.size());
-			float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
-			ds.addLines(PROFILE_SERIES_PREFIX, data, 0);
+			return ds;
+		} catch (SegmentUpdateException e) {
+			throw new ChartDatasetCreationException("Unable to get segmented profile", e);
 		}
-		return ds;
 	}
 
 	/**
@@ -576,7 +584,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
 				ds.addLines(MEDIAN_SERIES_PREFIX + "0", data, 0);
 			}
-		} catch (ProfileException | MissingLandmarkException | MissingProfileException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			LOGGER.log(Loggable.STACK,
 					"Error creating single dataset variability data: %s".formatted(e.getMessage()),
 					e);
@@ -599,8 +607,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			try {
 				profile = collection.getProfileCollection().getIQRProfile(options.getType(),
 						options.getOrientationMark());
-			} catch (MissingLandmarkException | ProfileException | MissingProfileException e) {
-				LOGGER.log(Loggable.STACK, "Error getting profile from tag", e);
+			} catch (MissingDataException | SegmentUpdateException e) {
 				throw new ChartDatasetCreationException("Unable to get median profile", e);
 			}
 			IProfile xpoints = createXPositions(profile, DEFAULT_PROFILE_INTERPOLATION_LENGTH);

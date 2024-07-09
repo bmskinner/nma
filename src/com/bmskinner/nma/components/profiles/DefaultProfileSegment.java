@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
 
@@ -277,14 +277,14 @@ public class DefaultProfileSegment implements IProfileSegment {
 	}
 
 	@Override
-	public IProfileSegment getMergeSource(@NonNull UUID id) throws MissingComponentException {
+	public IProfileSegment getMergeSource(@NonNull UUID id) throws MissingDataException {
 		if (this.uuid.equals(id))
 			return this;
 		if (mergeSourceA.hasMergeSource(id))
 			return mergeSourceA.getMergeSource(id);
 		if (mergeSourceB.hasMergeSource(id))
 			return mergeSourceB.getMergeSource(id);
-		throw new MissingComponentException("Merge source not present");
+		throw new MissingDataException("Merge source not present");
 	}
 
 	@Override

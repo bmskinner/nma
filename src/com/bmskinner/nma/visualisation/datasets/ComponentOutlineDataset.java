@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import org.jfree.data.xy.DefaultXYDataset;
 
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
@@ -28,9 +29,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 
@@ -110,14 +109,13 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 
 					double[][] data = { xpoints, ypoints };
 
-					String seriesKey = "Seg_" + segmentPosition + "_" + t.getID();
+					String seriesKey = "Seg_" + segmentPosition + "_" + t.getId();
 					addSeries(seriesKey, data);
 				}
 			} else {
 				createWithoutSegments();
 			}
-		} catch (ProfileException | MissingLandmarkException | MissingProfileException
-				| UnavailableBorderPointException e) {
+		} catch (MissingDataException | SegmentUpdateException e) {
 			throw new ChartDatasetCreationException("Cannot get profile", e);
 		}
 	}
@@ -149,7 +147,7 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 		} catch (UnavailableBorderPointException e) {
 			throw new ChartDatasetCreationException(UNABLE_TO_GET_BORDER_POINT_ERROR, e);
 		}
-		addSeries(c.getID(), new double[][] { xpoints, ypoints });
+		addSeries(c.getId(), new double[][] { xpoints, ypoints });
 	}
 
 	public CellularComponent getComponent() {

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -32,12 +33,16 @@ import com.bmskinner.nma.analysis.detection.Detector;
 import com.bmskinner.nma.analysis.detection.FinderDisplayType;
 import com.bmskinner.nma.components.ComponentBuilderFactory;
 import com.bmskinner.nma.components.ComponentBuilderFactory.SignalBuilderFactory;
+import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.measure.MissingMeasurementException;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
@@ -165,8 +170,6 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 		File dapiFile = new File(dapiFolder, imageName);
 
 		Set<Nucleus> nuclei = collection.getNuclei(dapiFile);
-
-		LOGGER.finer("Detecting signals in " + nuclei.size() + " nuclei");
 
 		int i = 0;
 		for (Nucleus n : nuclei) {
@@ -338,19 +341,28 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 	 * @param s the signal
 	 * @param n the nucleus the signal belongs to
 	 * @return
+	 * @throws MissingMeasurementException
 	 */
 	private boolean isValid(@NonNull INuclearSignal s, @NonNull Nucleus n) {
-		return (n.containsOriginalPoint(s.getOriginalCentreOfMass())
-				&& s.getMeasurement(Measurement.AREA) >= signalOptions
-						.getInt(HashOptions.MIN_SIZE_PIXELS)
-				&& s.getMeasurement(Measurement.AREA) <= (signalOptions
-						.getDouble(HashOptions.SIGNAL_MAX_FRACTION)
-						* n.getMeasurement(Measurement.AREA)));
+
+		try {
+			return (n.containsOriginalPoint(s.getOriginalCentreOfMass())
+					&& s.getMeasurement(Measurement.AREA) >= signalOptions
+							.getInt(HashOptions.MIN_SIZE_PIXELS)
+					&& s.getMeasurement(Measurement.AREA) <= (signalOptions
+							.getDouble(HashOptions.SIGNAL_MAX_FRACTION)
+							* n.getMeasurement(Measurement.AREA)));
+		} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
+			LOGGER.log(Level.SEVERE,
+					"Missing measurement in signal validation: %s".formatted(e.getMessage()), e);
+			return false;
+		}
 	}
 
 	@Override
 	public boolean isValid(@NonNull INuclearSignal entity) {
-		// TODO Auto-generated method stub
+		// A signal should always have a nucleus - we use the method above. This method
+		// is just a stub.
 		return false;
 	}
 

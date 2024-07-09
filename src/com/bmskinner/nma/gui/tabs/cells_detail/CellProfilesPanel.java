@@ -28,16 +28,17 @@ import javax.swing.JPanel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.Labels;
-import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
+import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nma.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
@@ -125,7 +126,7 @@ public class CellProfilesPanel extends ChartDetailPanel
 
 				// Trigger refresh of dataset median profile and charts
 				activeDataset().getCollection().getProfileCollection().calculateProfiles();
-			} catch (ProfileException | MissingComponentException e) {
+			} catch (MissingDataException | SegmentUpdateException | ComponentCreationException e) {
 				LOGGER.log(Loggable.STACK, "Error recalculating profile aggregate", e);
 			}
 		}

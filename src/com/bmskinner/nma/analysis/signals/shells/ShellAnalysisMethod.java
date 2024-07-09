@@ -33,8 +33,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nma.components.MissingComponentException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -46,6 +47,7 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.signals.DefaultShellResult;
 import com.bmskinner.nma.components.signals.DefaultSignalGroup;
 import com.bmskinner.nma.components.signals.INuclearSignal;
@@ -97,7 +99,9 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 		return new DefaultAnalysisResult(dataset);
 	}
 
-	private void run() throws MissingComponentException, ImageImportException {
+	private void run()
+			throws MissingDataException, ImageImportException,
+			ComponentCreationException, SegmentUpdateException {
 		collection = dataset.getCollection();
 		if (!collection.getSignalManager().hasSignals())
 			return;
@@ -155,9 +159,9 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 	/**
 	 * Create the shell results for each signal group
 	 * 
-	 * @throws MissingComponentException
+	 * @throws MissingDataException
 	 */
-	private void createShellCounters() throws MissingComponentException {
+	private void createShellCounters() throws MissingDataException {
 		for (UUID signalGroupId : collection.getSignalManager().getSignalGroupIDs()) {
 			if (IShellResult.RANDOM_SIGNAL_ID.equals(signalGroupId))
 				continue;
@@ -174,7 +178,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
 			// Store the shell options in the signal options
 			datasetOptions.get().getNuclearSignalOptions(signalGroupId)
-					.orElseThrow(MissingComponentException::new).set(options);
+					.orElseThrow(MissingDataException::new).set(options);
 		}
 
 		// Ensure a random distribution exists

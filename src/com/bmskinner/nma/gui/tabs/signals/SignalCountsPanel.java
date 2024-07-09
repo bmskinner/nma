@@ -37,6 +37,7 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterBuilder;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer.CollectionFilteringException;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
@@ -44,9 +45,7 @@ import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.FilteringOptions;
 import com.bmskinner.nma.components.options.FilteringOptions.FilterMatchType;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.MissingProfileException;
-import com.bmskinner.nma.components.profiles.ProfileException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.components.panels.SignalGroupSelectionPanel;
@@ -216,8 +215,8 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 				// Alert new dataset has been added
 				UIController.getInstance().fireDatasetAdded(dataset.getChildDataset(virt.getId()));
 
-			} catch (CollectionFilteringException | ProfileException | MissingProfileException
-					| MissingLandmarkException e1) {
+			} catch (CollectionFilteringException | MissingDataException
+					| SegmentUpdateException e1) {
 				LOGGER.log(Loggable.STACK,
 						"Unable to filter collection for %s".formatted(dataset.getName()),
 						e1);

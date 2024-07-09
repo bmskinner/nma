@@ -28,6 +28,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.nucleus.CellCollectionFilterer;
 import com.bmskinner.nma.analysis.signals.PairedSignalGroups;
 import com.bmskinner.nma.analysis.signals.PairedSignalGroups.DatasetSignalId;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -41,7 +42,7 @@ import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.profiles.DefaultProfileSegment;
 import com.bmskinner.nma.components.profiles.IProfileCollection;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
@@ -137,12 +138,12 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	 * 
 	 * @param newCollection
 	 * @return a new dataset containing the cell collection
-	 * @throws MissingOptionException
-	 * @throws MissingLandmarkException
 	 * @throws ProfileException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	private IAnalysisDataset buildDataset(ICellCollection newCollection)
-			throws MissingOptionException, MissingLandmarkException, ProfileException {
+			throws MissingDataException, SegmentUpdateException {
 
 		for (Nucleus n : newCollection.getNuclei()) {
 			// Ensure that all nuclei have any existing segments removed
@@ -198,8 +199,8 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	}
 
 	private IAnalysisDataset performAnd(@NonNull String newDatasetName)
-			throws MissingOptionException, ProfileException, MissingLandmarkException,
-			ComponentCreationException {
+			throws ProfileException, ComponentCreationException, MissingDataException,
+			SegmentUpdateException {
 
 		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
 				.toList();
@@ -211,8 +212,8 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	}
 
 	private IAnalysisDataset performNot(@NonNull String newDatasetName)
-			throws MissingOptionException, ProfileException, MissingLandmarkException,
-			ComponentCreationException {
+			throws ComponentCreationException, MissingDataException,
+			SegmentUpdateException {
 		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
 				.toList();
 
@@ -222,8 +223,8 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	}
 
 	private IAnalysisDataset performXor(@NonNull String newDatasetName)
-			throws MissingOptionException, ProfileException, MissingLandmarkException,
-			ComponentCreationException {
+			throws ComponentCreationException, MissingDataException,
+			SegmentUpdateException {
 		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
 				.toList();
 
@@ -240,14 +241,14 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	 * @param newCollection the new collection to copy cells into
 	 * @return the merged dataset
 	 * @throws MissingProfileException
-	 * @throws MissingOptionException
 	 * @throws ProfileException
-	 * @throws MissingLandmarkException
 	 * @throws ComponentCreationException
+	 * @throws SegmentUpdateException
+	 * @throws MissingDataException
 	 */
 	private IAnalysisDataset performOr(@NonNull String newDatasetName)
-			throws MissingOptionException, ProfileException, MissingLandmarkException,
-			ComponentCreationException {
+			throws ComponentCreationException, MissingDataException,
+			SegmentUpdateException {
 
 		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
 				.toList();

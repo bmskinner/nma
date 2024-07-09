@@ -19,6 +19,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.DefaultProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
@@ -102,7 +103,7 @@ public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 			if (cell.hasCytoplasm()) {
 				outLine.append(d.getName() + TAB)
 						.append(cell.getId() + TAB)
-						.append(CellularComponent.CYTOPLASM + "_" + cell.getCytoplasm().getID()
+						.append(CellularComponent.CYTOPLASM + "_" + cell.getCytoplasm().getId()
 								+ TAB)
 						.append(cell.getCytoplasm().getSourceFolder() + TAB)
 						.append(cell.getCytoplasm().getSourceFileName() + TAB);
@@ -127,14 +128,14 @@ public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 			String orientedString = createOutlineString(o);
 			outLine.append(orientedString).append(NEWLINE);
 
-		} catch (MissingLandmarkException | ProfileException | ComponentCreationException e) {
+		} catch (MissingLandmarkException | ComponentCreationException | SegmentUpdateException e) {
 			LOGGER.warning(() -> "Error creating outline to export for " + n.getNameAndNumber());
 			outLine.append(NEWLINE);
 		}
 	}
 
 	private String createOutlineString(Nucleus n)
-			throws ProfileException, MissingLandmarkException {
+			throws MissingLandmarkException, SegmentUpdateException {
 		// If a landmark to offset has been specified, lmOffset will not be null
 		OrientationMark lmOffset = null;
 		for (OrientationMark lm : n.getOrientationMarks()) {
@@ -165,10 +166,10 @@ public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 	 * 
 	 * @param inputBorder
 	 * @return
-	 * @throws ProfileException
+	 * @throws SegmentUpdateException
 	 */
 	private List<IPoint> normaliseBorderList(List<IPoint> inputBorder, int nPoints)
-			throws ProfileException {
+			throws SegmentUpdateException {
 
 		if (nPoints == inputBorder.size())
 			return inputBorder;

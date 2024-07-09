@@ -34,11 +34,14 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.ImagePlus;
@@ -141,8 +144,12 @@ public class Detector {
 	 * @param options the detection options
 	 * @param n       a nucleus to constrain the search within
 	 * @return
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
 	 */
-	public Map<Roi, IPoint> getValidRois(ImageProcessor ip, HashOptions options, Nucleus n) {
+	public Map<Roi, IPoint> getValidRois(ImageProcessor ip, HashOptions options, Nucleus n)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 
 		if (options.hasDouble(HashOptions.SIGNAL_MAX_FRACTION)) {
 			maxSize = n.getMeasurement(Measurement.AREA)
@@ -210,10 +217,6 @@ public class Detector {
 	public void setMaxCirc(double d) {
 		this.maxCirc = d;
 	}
-
-//	public void setThreshold(int i) {
-//		this.threshold = i;
-//	}
 
 	/**
 	 * Set whether the ROIs should include holes - i.e. should holes be flood filled
