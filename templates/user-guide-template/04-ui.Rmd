@@ -148,10 +148,14 @@ Rotation and offsets can also be applied in exact amounts using the options at t
 
 ## Analysis info tab {#analysis-info-tab}
 
-This contains the analysis parameters used to detect nuclei. If multiple datasets are selected, the background to each row will be green if all datasets have the same value, otherwise, the row will be white.
+This contains the analysis parameters used to detect nuclei. If multiple datasets are selected, the background to each row will be green if all datasets have the same value, otherwise, the row will be white. The information is split across two further tabs: Detection parameters, which shows the values used in nucleus detection, and Rulesets, which shows how landmarks have been detected and how nuclei are oriented.
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
-knitr::include_graphics("img/Analysis info.png")
+knitr::include_graphics("img/Analysis info_Detection parameters.png")
+```
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', echo=F}
+knitr::include_graphics("img/Analysis info_Rulesets.png")
 ```
 
 ## Images tab {#images-tab}

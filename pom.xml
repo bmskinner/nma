@@ -329,7 +329,8 @@
 								<resource>
 									<directory>${project.screenshot.directory}/Mouse.nmd</directory>
 									<includes>
-										<include>Analysis info.png</include>
+										<include>Analysis info_Detection parameters.png</include>
+										<include>Analysis info_Rulesets.png</include>
 										<include>Editing.png</include>
 										<include>Nuclear profiles_*.png</include>
 									</includes>
