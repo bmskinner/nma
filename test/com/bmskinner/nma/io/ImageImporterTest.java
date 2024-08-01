@@ -22,12 +22,12 @@ public class ImageImporterTest {
 
 		File nd2File = new File(testFolder, "LS1.nd2");
 
-		assertTrue(nd2File.exists());
+		assertTrue("The test ND2 file does not exist: %s".formatted(nd2File.getAbsolutePath()), nd2File.exists());
 
 		ImageStack ip = ImageImporter.importToStack(nd2File);
 
-		assertEquals(1004, ip.getWidth());
-		assertEquals(1002, ip.getHeight());
+		assertEquals("ND2 test image dimensions should match", 1004, ip.getWidth());
+		assertEquals("ND2 test image dimensions should match", 1002, ip.getHeight());
 	}
 
 	@Test
@@ -37,13 +37,13 @@ public class ImageImporterTest {
 
 		File nd2File = new File(testFolder, "LS1.nd2");
 
-		assertTrue(nd2File.exists());
+		assertTrue("The test ND2 file does not exist: %s".formatted(nd2File.getAbsolutePath()), nd2File.exists());
 
 		ImageStack is = ImageImporter.importToStack(nd2File);
 
 		ImageProcessor ip = is.getProcessor(1);
 
-		assertEquals("Should be 8 bit", 8, ip.getBitDepth());
+		assertEquals("ND2 image should be 8 bit", 8, ip.getBitDepth());
 	}
 
 }

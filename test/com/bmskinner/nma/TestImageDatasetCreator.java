@@ -32,10 +32,14 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
+import com.bmskinner.nma.components.workspaces.IWorkspace;
+import com.bmskinner.nma.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nma.gui.tabs.signals.warping.SignalWarpingRunSettings;
 import com.bmskinner.nma.io.DatasetExportMethod;
 import com.bmskinner.nma.io.DatasetOptionsExportMethod;
 import com.bmskinner.nma.io.SampleDatasetReader;
+import com.bmskinner.nma.io.WorkspaceExporter;
+import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
 import com.bmskinner.nma.logging.Loggable;
@@ -111,11 +115,27 @@ public class TestImageDatasetCreator {
 	@Test
 	public void createMouseDataset() throws Exception {
 
-		File testFolder = TestResources.MOUSE_INPUT_FOLDER.getAbsoluteFile();
+		File testFolder = TestResources.MOUSE_INPUT_FOLDER;
 		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 		IAnalysisDataset d = createTestDataset(TestResources.MOUSE_OUTPUT_FOLDER, op, false);
+
+		assertEquals("The test dataset should be the mouse dataset", TestResources.MOUSE, d.getName());
+
 		saveTestDataset(d, TestResources.MOUSE_TEST_DATASET);
 		testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
+
+		// Use mouse dataset to create a workspace
+		IWorkspace w = WorkspaceFactory.createWorkspace(d);
+
+		File f = new File(TestResources.DATASET_FOLDER, TestResources.WORKSPACE_NAME);
+		w.setSaveFile(f);
+
+		WorkspaceExporter.exportWorkspace(w);
+
+		IWorkspace result = XMLReader.readWorkspace(f);
+
+		assertEquals("The test workspace dataset should be the mouse dataset", TestResources.MOUSE, result.getName());
+		assertEquals("Test workspace should have 1 file", 1, result.getFiles().size());
 	}
 
 	@Test
@@ -226,6 +246,7 @@ public class TestImageDatasetCreator {
 		saveTestDataset(d, TestResources.ROUND_SIGNALS_DATASET);
 		testUnmarshalling(d, TestResources.ROUND_SIGNALS_DATASET);
 	}
+
 
 	/**
 	 * Run a new analysis on the images using the given options.

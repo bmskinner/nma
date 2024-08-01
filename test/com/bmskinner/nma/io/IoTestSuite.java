@@ -22,9 +22,7 @@ import com.bmskinner.nma.io.xml.IoXmlTestSuite;
 		IoXmlTestSuite.class,
 		DatasetMergeTest.class,
 		DatasetStatsExporterTest.class,
-		UpdateCheckerTest.class,
-		WorkspaceExporterTest.class,
-		WorkspaceImporterTest.class
+		UpdateCheckerTest.class
 })
 public class IoTestSuite {
 
