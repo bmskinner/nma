@@ -151,7 +151,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 					new SpinnerNumberModel(CellImageExportMethod.SINGLE_CELL_IMAGE_WIDTH_DEFAULT,
 							50, 10000, 1));
 			sizeSelector.setEnabled(
-					o.get(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY));
+					o.getBoolean(CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY));
 			sizeSelector.addChangeListener(e -> {
 				try {
 					sizeSelector.commitEdit();
@@ -164,7 +164,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 
 			// Should image size be normalised
 			JCheckBox sizeBox = new JCheckBox();
-			sizeBox.setSelected(o.get(
+			sizeBox.setSelected(o.getBoolean(
 					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_NORMALISE_WIDTH_KEY));
 
 			sizeBox.addActionListener(e -> {
@@ -179,7 +179,7 @@ public class ExportSingleCellImagesAction extends MultiDatasetResultAction {
 			});
 
 			JCheckBox keypointBox = new JCheckBox();
-			keypointBox.setSelected(o.get(
+			keypointBox.setSelected(o.getBoolean(
 					CellImageExportMethod.SINGLE_CELL_IMAGE_IS_EXPORT_KEYPOINTS_KEY));
 			keypointBox.addActionListener(
 					e -> o.setBoolean(
