@@ -1,42 +1,41 @@
 package com.bmskinner.nma.io;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
+import java.io.PrintWriter;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nma.analysis.DefaultAnalysisResult;
-import com.bmskinner.nma.analysis.IAnalysisResult;
-import com.bmskinner.nma.analysis.MultipleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.rules.OrientationMark;
-import com.bmskinner.nma.logging.Loggable;
+import com.bmskinner.nma.components.profiles.Landmark;
 
-import ij.IJ;
-
-public class DatasetKeypointExportMethod extends MultipleDatasetAnalysisMethod implements Io {
+/**
+ * Export the locations of landmarks of datasets to file. The file will be tab-separated with the following fields:
+ * 
+ * <pre>
+ * Dataset name
+ * Image folder name
+ * Image file name
+ * Cell ID
+ * Nucleus ID (under the generic name component ID)
+ * Nucleus bounding box x min
+ * Nucleus bounding box x max
+ * Nucleus bounding box y min
+ * Nucleus bounding box y max
+ * Landmark name
+ * Landmark x float coordinate
+ * Landmark y float coordinate
+ * </pre>
+ */
+public class DatasetKeypointExportMethod extends MeasurementsExportMethod implements Io {
 	private static final Logger LOGGER = Logger
 			.getLogger(DatasetKeypointExportMethod.class.getName());
 
-	private static final String EXPORT_FOLDER = "Annotations_";
-
-	private File outputFolder;
-
-	/**
-	 * Options are kept for future use even if not used at present
-	 */
-	private final HashOptions options;
 
 	/**
 	 * Create with a dataset of cells to export and options
@@ -44,10 +43,9 @@ public class DatasetKeypointExportMethod extends MultipleDatasetAnalysisMethod i
 	 * @param dataset
 	 * @param options
 	 */
-	public DatasetKeypointExportMethod(@NonNull IAnalysisDataset dataset,
+	public DatasetKeypointExportMethod(@NonNull File file, @NonNull List<IAnalysisDataset> list,
 			@NonNull HashOptions options) {
-		super(dataset);
-		this.options = options;
+		super(file, list, options);
 	}
 
 	/**
@@ -56,69 +54,61 @@ public class DatasetKeypointExportMethod extends MultipleDatasetAnalysisMethod i
 	 * @param datasets
 	 * @param options
 	 */
-	public DatasetKeypointExportMethod(@NonNull List<IAnalysisDataset> datasets,
+	public DatasetKeypointExportMethod(@NonNull File file, @NonNull IAnalysisDataset dataset,
 			@NonNull HashOptions options) {
-		super(datasets);
-		this.options = options;
+		this(file,List.of(dataset), options);
 	}
 
 	@Override
-	public IAnalysisResult call() throws Exception {
-		for (IAnalysisDataset d : datasets)
-			exportKeypoints(d);
-		return new DefaultAnalysisResult(datasets);
+	protected void appendHeader(@NonNull StringBuilder outLine) {
+		outLine.append("Dataset").append(TAB)
+		.append("ImageFile").append(TAB)
+		.append("CellID").append(TAB)
+		.append("NucleusID").append(TAB)
+		.append("BoundingXMin").append(TAB)
+		.append("BoundingXMax").append(TAB)
+		.append("BoundingYMin").append(TAB)
+		.append("BoundingYMax").append(TAB)
+		.append("LandmarkName").append(TAB)
+		.append("LandmarkX").append(TAB)
+		.append("LandmarkY").append(NEWLINE);
+		
 	}
 
-	private void exportKeypoints(IAnalysisDataset d)
-			throws MissingLandmarkException {
-		outputFolder = new File(
-				d.getSavePath().getParent() + File.separator + EXPORT_FOLDER + d.getName());
-		if (!outputFolder.exists())
-			outputFolder.mkdirs();
+	@Override
+	protected void append(@NonNull IAnalysisDataset d, @NonNull PrintWriter pw) throws Exception {
+		for (ICell cell : d.getCollection().getCells()) {
 
-		for (File f : d.getCollection().getImageFiles()) {
-			String fileName = String.format("%s.json", f.getName().replaceAll("\\.\\w+$", ""));
+			StringBuilder outLine = new StringBuilder();
 
-			File exportFile = new File(outputFolder, fileName);
-			try {
-				Files.deleteIfExists(exportFile.toPath());
-			} catch (IOException e) {
-				LOGGER.log(Level.WARNING, "Unable to delete file: " + fileName);
-				LOGGER.log(Loggable.STACK, "Unable to delete existing file", e);
-			}
+			if (cell.hasNucleus()) {
 
-			// Store coordinate pairs in JSON
-			List<String> bb = new ArrayList<>();
-			List<String> kk = new ArrayList<>();
-			for (ICell c : d.getCollection().getCells(f)) {
+				for (Nucleus n : cell.getNuclei()) {
+					
+					IPoint base = n.getBase();
 
-				for (Nucleus n : c.getNuclei()) {
+					for(Landmark l : n.getLandmarks()) {
+						IPoint p = n.getBorderPoint(l);
 
-					// TODO - expand beyond rodent sperm keypoints
-					IPoint rp = n.getBorderPoint(OrientationMark.REFERENCE);
-					IPoint op = n.getBorderPoint(OrientationMark.Y);
+						outLine.append(d.getName() + TAB)
+						.append(n.getSourceFolder() + TAB)
+						.append(n.getSourceFileName() + TAB)
+						.append(cell.getId() + TAB)
+						.append(n.getId() + TAB)
+						.append(base.getX() + TAB)
+						.append(base.getX()+n.getWidth() + TAB)
+						.append(base.getY() + TAB)
+						.append(base.getY()+n.getHeight() + TAB)
+						.append(l.getName() + TAB)
+						.append(p.getX() + TAB)
+						.append(p.getY()+TAB);
 
-					IPoint p1 = n.getBase();
-					int x2 = (int) (p1.getXAsInt() + n.getWidth());
-					int y2 = (int) (p1.getYAsInt() + n.getHeight());
-
-					// x & y min & max
-					bb.add("[%s, %s, %s, %s]".formatted(p1.getXAsInt(), p1.getYAsInt(), x2, y2));
-
-					// x, y, visibility
-					kk.add("[[%s, %s, 1], [%s, %s, 1]]".formatted(rp.getXAsInt(), rp.getYAsInt(),
-							op.getXAsInt(), op.getYAsInt()));
+						outLine.append(NEWLINE);
+					}
 				}
+				pw.write(outLine.toString());
 			}
-
-			// Combine into JSON
-			String bboxes = "{\"bboxes\":[" + bb.stream().collect(Collectors.joining(", ")) + "], ";
-			String keypoints = "\"keypoints\":[" + kk.stream().collect(Collectors.joining(", "))
-					+ "]} ";
-
-			IJ.append(bboxes + keypoints, exportFile.getAbsolutePath());
-			fireProgressEvent();
 		}
 
-	}
+	}	
 }

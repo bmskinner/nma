@@ -72,13 +72,16 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 */
 	private final Map<UUID, Integer> datasetHashcodeMap = new ConcurrentHashMap<>();
 
+	/**
+	 * Workspaces currently loaded
+	 */
 	private final List<IWorkspace> workspaces = new CopyOnWriteArrayList<>();
 
 	/** Hashcodes for workspaces */
 	private final Map<UUID, Integer> workspaceHashcodeMap = new ConcurrentHashMap<>();
 
 	private DatasetListManager() {
-
+		// never externally instantiated
 	}
 
 	/**

@@ -127,7 +127,7 @@ public interface IAnalysisDataset extends XmlSerializable {
 	void setName(@NonNull String s);
 
 	/**
-	 * Get the save file location
+	 * Get the path to the save file location
 	 * 
 	 * @return
 	 */
