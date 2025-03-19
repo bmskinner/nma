@@ -53,6 +53,7 @@ import com.bmskinner.nma.gui.actions.ExtractRandomCellsAction;
 import com.bmskinner.nma.gui.actions.FilterPoorEdgeDetectionCellsAction;
 import com.bmskinner.nma.gui.actions.FishRemappingAction;
 import com.bmskinner.nma.gui.actions.ImportDatasetAction;
+import com.bmskinner.nma.gui.actions.ImportKeypointsAction;
 import com.bmskinner.nma.gui.actions.ImportWorkflowAction;
 import com.bmskinner.nma.gui.actions.ImportWorkspaceAction;
 import com.bmskinner.nma.gui.actions.LandmarkRemappingAction;
@@ -162,62 +163,8 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().equals(UserActionEvent.PRINT_DATASET_HASH_CMD)) {
 			// Print the component hashes of the selected datasets
-//			for (IAnalysisDataset d : event.getDatasets()) {
 			for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
 				LOGGER.info(() -> "Dataset '%s': hash '%s'".formatted(d.getName(), d.hashCode()));
-
-				// TODO: remove once finished with the GLCM measurements being auto-errors
-//				LOGGER.info(
-//						() -> "  Collection: hash '%s'".formatted(d.getCollection().hashCode()));
-////				LOGGER.info(
-////						() -> "  Signals: hash '%s'"
-////								.formatted(d.getCollection().getSignalGroups().hashCode()));
-//				LOGGER.info(
-//						() -> "  Consensus: hash '%s'"
-//								.formatted(d.getCollection().getRawConsensus().hashCode()));
-//				for (ICell c : d.getCollection()) {
-//					LOGGER.info(
-//							() -> "    Cell '%s': hash '%s'"
-//									.formatted(c.getId(), c.hashCode()));
-//					for (Nucleus n : c.getNuclei()) {
-//						LOGGER.info(
-//								() -> "      Nucleus '%s': hash '%s'"
-//										.formatted(n.getID(), n.hashCode()));
-//
-////						LOGGER.info(
-////								() -> "      Signals '%s': hash '%s'"
-////										.formatted(n.getSignalCollection(),
-////												n.getSignalCollection().hashCode()));
-//						LOGGER.info(
-//								() -> "      profileLandmarks: hash '%s'"
-//										.formatted(n.getLandmarks().hashCode()));
-//						LOGGER.info(
-//								() -> {
-//									try {
-//										return "      segments: hash '%s'"
-//												.formatted(
-//														n.getProfile(ProfileType.ANGLE).hashCode());
-//									} catch (MissingProfileException | MissingLandmarkException
-//											| ProfileException e) {
-//										// TODO Auto-generated catch block
-//										e.printStackTrace();
-//										return "Error";
-//									}
-//								});
-//						LOGGER.info(
-//								() -> "      border: hash '%s'"
-//										.formatted(n.getBorderList().hashCode()));
-//						LOGGER.info(
-//								() -> "      measurements '%s'"
-//										.formatted(n.getMeasurements().hashCode()));
-//						for (Measurement m : n.getMeasurements()) {
-//							LOGGER.info(
-//									() -> "      '%s': %s : '%s'"
-//											.formatted(m, n.getMeasurement(m), m.hashCode()));
-//						}
-//
-//					}
-//				}
 
 			}
 		}
@@ -283,6 +230,10 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().equals(UserActionEvent.EXPORT_KEYPOINTS))
 			return new ExportKeypointsAction(event.getDatasets(), acceptor);
+		
+		// Single dataset only
+		if (event.type().equals(UserActionEvent.IMPORT_KEYPOINTS))
+			return new ImportKeypointsAction(selectedDataset, acceptor);
 
 		if (event.type().equals(UserActionEvent.MERGE_DATASETS_ACTION))
 			return new MergeCollectionAction(event.getDatasets(),

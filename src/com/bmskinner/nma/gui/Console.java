@@ -53,7 +53,8 @@ public class Console extends JPanel implements ActionListener {
 	private static final String CLEAR_CMD = "clear";
 	private static final String GLCM_CMD = "glcm";
 	private static final String HISTOGRAM_CMD = "histogram";
-	private static final String KEYPOINT_CMD = "keypoints";
+	private static final String KEYPOINT_EXPORT_CMD = "export keypoints";
+	private static final String KEYPOINT_IMPORT_CMD = "import keypoints";
 	private static final String LIST_CMD = "list";
 	private static final String TASKS_CMD = "tasks";
 	private static final String HASH_CMD = "hash";
@@ -190,11 +191,18 @@ public class Console extends JPanel implements ActionListener {
 								UserActionEvent.RUN_GLCM_ANALYSIS,
 								DatasetListManager.getInstance().getSelectedDatasets()))));
 
-		runnableCommands.add(new Command(KEYPOINT_CMD,
+		runnableCommands.add(new Command(KEYPOINT_EXPORT_CMD,
 				"export keypoints from all selected datasets",
 				() -> UserActionController.getInstance()
 						.userActionEventReceived(new UserActionEvent(this,
 								UserActionEvent.EXPORT_KEYPOINTS,
+								DatasetListManager.getInstance().getSelectedDatasets()))));
+		
+		runnableCommands.add(new Command(KEYPOINT_IMPORT_CMD,
+				"import keypoints to selected dataset",
+				() -> UserActionController.getInstance()
+						.userActionEventReceived(new UserActionEvent(this,
+								UserActionEvent.IMPORT_KEYPOINTS,
 								DatasetListManager.getInstance().getSelectedDatasets()))));
 
 	}

@@ -162,6 +162,7 @@ public class FileSelector {
 	 * 
 	 * @param defaultFolder the default folder
 	 * @param filter        the filename extension filter
+	 * @param message		the message to display on the file picker
 	 * @return the selected file, or null on cancel or error
 	 */
 	public static @Nullable File chooseFile(File defaultFolder,
