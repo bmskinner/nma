@@ -42,7 +42,9 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.core.GlobalOptions;
+import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.core.ThreadManager;
+import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.prober.NucleusImageProber;
 import com.bmskinner.nma.gui.events.UserActionController;
@@ -85,12 +87,25 @@ public class NewAnalysisAction extends VoidResultAction {
 
 	@Override
 	public void run() {
-		if (folder == null && !getImageDirectory()) {
+		// Image directory may have been specified; if not, request from user
+		if(folder == null) {
+			try {
+				folder = new DefaultInputSupplier().requestFolder("Select image directory", GlobalOptions.getInstance().getDefaultDir());
+			} catch (RequestCancelledException e) {
+				// user cancelled
+				this.cancel();
+				return;
+			}
+		}
+
+		// If the user selected file failed, cancel
+		if (folder == null) {
 			LOGGER.fine("Could not get image directory");
 			cancel();
 			return;
 		}
 
+		// Initialise an options with default values
 		IAnalysisOptions options = OptionsFactory
 				.makeAnalysisOptions(RuleSetCollection.mouseSpermRuleSetCollection());
 		options.setDetectionFolder(CellularComponent.NUCLEUS, this.folder);
@@ -102,10 +117,12 @@ public class NewAnalysisAction extends VoidResultAction {
 
 		LOGGER.fine("Creating for " + folder.getAbsolutePath());
 
+		// Start the image prober to set analysis options
 		NucleusImageProber analysisSetup = new NucleusImageProber(folder, options);
 
 		if (analysisSetup.isOk()) {
 
+			// Don't run if the selected folder has been removed
 			Optional<File> detectionFolder = options.getDetectionFolder(CellularComponent.NUCLEUS);
 			if (!detectionFolder.isPresent()) {
 				cancel();
@@ -114,6 +131,7 @@ public class NewAnalysisAction extends VoidResultAction {
 
 			LOGGER.info("Directory: " + detectionFolder.get().getName());
 
+			// Get the start time of the analysis to make the output directory
 			Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
 			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
 
@@ -164,28 +182,4 @@ public class NewAnalysisAction extends VoidResultAction {
 
 		super.finished();
 	}
-
-	private boolean getImageDirectory() {
-
-		File defaultDir = GlobalOptions.getInstance().getDefaultDir();
-
-		JFileChooser fc = new JFileChooser(defaultDir); // if null, will be home
-														// dir
-
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-		int returnVal = fc.showOpenDialog(fc);
-		if (returnVal != 0) {
-			return false; // user cancelled
-		}
-
-		File file = fc.getSelectedFile();
-
-		if (!file.isDirectory())
-			return false;
-
-		folder = file;
-		return true;
-	}
-
 }
