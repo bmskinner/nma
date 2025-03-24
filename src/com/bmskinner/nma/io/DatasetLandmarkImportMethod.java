@@ -26,15 +26,15 @@ import com.bmskinner.nma.components.profiles.Landmark;
 
 /**
  * Method to read a keypoint file and update all landmarks in a dataset to match.
- * This file should take the same format as the keypoint export in {@link DatasetKeypointExportMethod}
+ * This file should take the same format as the keypoint export in {@link DatasetLandmarkExportMethod}
  * 
  * @author bs19022
  *
  */
-public class DatasetKeypointImportMethod extends MultipleDatasetAnalysisMethod implements Io {
+public class DatasetLandmarkImportMethod extends MultipleDatasetAnalysisMethod implements Io {
 
 	private static final Logger LOGGER = Logger
-			.getLogger(DatasetKeypointImportMethod.class.getName());
+			.getLogger(DatasetLandmarkImportMethod.class.getName());
 
 	private static final String IMPORT_FILE_KEY = "IMPORT_FILE";
 
@@ -48,7 +48,7 @@ public class DatasetKeypointImportMethod extends MultipleDatasetAnalysisMethod i
 	 * @param dataset
 	 * @param options
 	 */
-	public DatasetKeypointImportMethod(@NonNull IAnalysisDataset dataset, @NonNull File f,
+	public DatasetLandmarkImportMethod(@NonNull IAnalysisDataset dataset, @NonNull File f,
 			@NonNull HashOptions options) {
 		super(dataset);
 		this.options = options;
@@ -61,7 +61,7 @@ public class DatasetKeypointImportMethod extends MultipleDatasetAnalysisMethod i
 	 * @param datasets
 	 * @param options
 	 */
-	public DatasetKeypointImportMethod(@NonNull List<IAnalysisDataset> datasets, @NonNull File f,
+	public DatasetLandmarkImportMethod(@NonNull List<IAnalysisDataset> datasets, @NonNull File f,
 			@NonNull HashOptions options) {
 		super(datasets);
 		this.options = options;

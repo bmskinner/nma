@@ -48,8 +48,8 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
-import com.bmskinner.nma.io.DatasetMeasurementsExporter;
-import com.bmskinner.nma.io.DatasetOutlinesExporter;
+import com.bmskinner.nma.io.DatasetMeasurementsExportMethod;
+import com.bmskinner.nma.io.DatasetOutlinesExportMethod;
 import com.bmskinner.nma.io.DatasetProfileExporter;
 import com.bmskinner.nma.io.DatasetShellsExporter;
 import com.bmskinner.nma.io.DatasetSignalsExporter;
@@ -97,7 +97,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 					File file = FileSelector.chooseStatsExportFile(datasets, "stats");
 					if (is.fileIsOKForSave(file)) {
 
-						IAnalysisMethod m = new DatasetMeasurementsExporter(file, datasets,
+						IAnalysisMethod m = new DatasetMeasurementsExportMethod(file, datasets,
 								optionsPanel.getOptions());
 						worker = new DefaultAnalysisWorker(m, datasets.size());
 						worker.addPropertyChangeListener(this);
@@ -320,7 +320,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 				try {
 					File file = FileSelector.chooseStatsExportFile(datasets, "outlines");
 					if (is.fileIsOKForSave(file)) {
-						IAnalysisMethod m = new DatasetOutlinesExporter(file, datasets,
+						IAnalysisMethod m = new DatasetOutlinesExportMethod(file, datasets,
 								optionsPanel.getOptions());
 						worker = new DefaultAnalysisWorker(m, datasets.size());
 						worker.addPropertyChangeListener(this);

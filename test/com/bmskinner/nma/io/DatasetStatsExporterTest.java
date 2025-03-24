@@ -59,6 +59,6 @@ public class DatasetStatsExporterTest {
 		File outFile = new File("test");
 
 		// No exceptions should occur here
-		new DatasetMeasurementsExporter(outFile, d, op);
+		new DatasetMeasurementsExportMethod(outFile, d, op);
 	}
 }

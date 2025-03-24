@@ -72,6 +72,7 @@ import com.bmskinner.nma.gui.actions.SegmentUnmergeAction;
 import com.bmskinner.nma.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nma.gui.actions.SignalWarpingAction;
 import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
+import com.bmskinner.nma.gui.actions.TextDatasetProfilingAction;
 import com.bmskinner.nma.gui.actions.TextFileAnalysisAction;
 import com.bmskinner.nma.gui.actions.UpdateLandmarkAction;
 import com.bmskinner.nma.gui.actions.UpdateSegmentIndexAction;
@@ -278,6 +279,10 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return () -> {
 				removeFromWorkspace(event.getDatasets());
 			};
+			
+		if (event.type().equals(UserActionEvent.TEXT_PROFILING_AND_LANDMARKING)) {
+			return new TextDatasetProfilingAction(event.getDatasets(), acceptor);
+		}
 
 		if (event.type().equals(UserActionEvent.SEGMENTATION_ACTION))
 			return new RunSegmentationAction(event.getDatasets(),

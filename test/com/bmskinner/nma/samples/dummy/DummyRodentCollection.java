@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
 import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.IAnalysisWorker;
-import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.DefaultCell;
@@ -72,7 +72,7 @@ public class DummyRodentCollection extends DefaultCellCollection {
 
 		DummyRodentCollection collection = new DummyRodentCollection(10000);
 		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File("C:\\"));
-		IAnalysisMethod profiler = new DatasetProfilingMethod(d);
+		IAnalysisMethod profiler = new DefaultDatasetProfilingMethod(d);
 
 		IAnalysisWorker w = new DefaultAnalysisWorker(profiler);
 		w.run();

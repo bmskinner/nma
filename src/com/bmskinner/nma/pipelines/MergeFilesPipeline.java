@@ -9,7 +9,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.DatasetMergeMethod;
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
-import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -63,7 +63,7 @@ public class MergeFilesPipeline {
 				.call()
 				.getFirstDataset();
 
-		new DatasetProfilingMethod(merged)
+		new DefaultDatasetProfilingMethod(merged)
 				.then(new DatasetSegmentationMethod(merged,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.then(new ConsensusAveragingMethod(merged))

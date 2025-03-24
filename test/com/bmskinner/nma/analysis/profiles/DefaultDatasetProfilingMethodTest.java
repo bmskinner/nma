@@ -42,7 +42,7 @@ import ij.Prefs;
  * @since 1.14.0
  *
  */
-public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
+public class DefaultDatasetProfilingMethodTest extends AbstractProfileMethodTest {
 
 	@Before
 	public void setUp() {
@@ -222,7 +222,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 		NucleusDetectionMethod nm = new NucleusDetectionMethod(TestResources.MOUSE_INPUT_FOLDER,
 				op);
 		IAnalysisDataset d = nm.call().getFirstDataset();
-		new DatasetProfilingMethod(d).call();
+		new DefaultDatasetProfilingMethod(d).call();
 
 		for (Measurement stat : op.getRuleSetCollection().getMeasurableValues()) {
 			if (stat.equals(Measurement.VARIABILITY))
@@ -275,7 +275,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 					0.0000001);
 		}
 
-		new DatasetProfilingMethod(d).call();
+		new DefaultDatasetProfilingMethod(d).call();
 
 		// Check if any values have changed
 		for (Measurement stat : nucleus.getMeasurements()) {
@@ -337,7 +337,7 @@ public class DatasetProfilingMethodTest extends AbstractProfileMethodTest {
 			}
 		}
 
-		new DatasetProfilingMethod(d).call();
+		new DefaultDatasetProfilingMethod(d).call();
 
 		// Check each of the saved results against their current value.
 		// Nothing should have changed in the test measurements.

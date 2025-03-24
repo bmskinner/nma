@@ -428,6 +428,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	public boolean hasLandmark(@NonNull OrientationMark landmark) {
 		return orientationMarks.containsKey(landmark);
 	}
+	
+	@Override
+	public boolean hasLandmark(@NonNull Landmark landmark) {
+		return profileLandmarks.containsKey(landmark);
+	}
+
 
 	@Override
 	public @NonNull ISegmentedProfile getProfile(@NonNull ProfileType type,

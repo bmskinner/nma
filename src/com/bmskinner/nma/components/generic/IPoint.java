@@ -33,7 +33,7 @@ public interface IPoint {
 	 * Create a new point at the origin, 0,0
 	 * @return
 	 */
-	static IPoint atOrigin() {
+	static @NonNull IPoint atOrigin() {
 		return new FloatPoint(0, 0);
 	}
 	    

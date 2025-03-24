@@ -15,7 +15,7 @@ import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.FileSelector;
-import com.bmskinner.nma.io.DatasetKeypointExportMethod;
+import com.bmskinner.nma.io.DatasetLandmarkExportMethod;
 
 /**
  * Export keypoints and bounding boxes of nuclei in images in JSON format
@@ -48,7 +48,7 @@ public class ExportKeypointsAction extends MultiDatasetResultAction {
 			if (is.fileIsOKForSave(file)) {
 
 				// No options set yet, leave for future expansion
-				IAnalysisMethod m = new DatasetKeypointExportMethod(file, datasets,
+				IAnalysisMethod m = new DatasetLandmarkExportMethod(file, datasets,
 						new DefaultOptions());
 				worker = new DefaultAnalysisWorker(m, datasets.size());
 				worker.addPropertyChangeListener(this);

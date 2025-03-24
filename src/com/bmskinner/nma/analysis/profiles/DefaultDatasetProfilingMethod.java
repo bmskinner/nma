@@ -57,7 +57,7 @@ import com.bmskinner.nma.stats.Stats;
  * @since 1.13.4
  *
  */
-public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
+public class DefaultDatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
 	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
 
@@ -72,7 +72,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param dataset
 	 */
-	public DatasetProfilingMethod(@NonNull IAnalysisDataset dataset) {
+	public DefaultDatasetProfilingMethod(@NonNull IAnalysisDataset dataset) {
 		super(dataset);
 	}
 

@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -33,16 +32,16 @@ import com.bmskinner.nma.utility.ArrayUtils;
  * @since 1.18.0
  *
  */
-public class DatasetOutlinesExporter extends MeasurementsExportMethod {
+public class DatasetOutlinesExportMethod extends MeasurementsExportMethod {
 
-	private static final Logger LOGGER = Logger.getLogger(DatasetOutlinesExporter.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DatasetOutlinesExportMethod.class.getName());
 
 	/**
 	 * Create specifying the folder profiles will be exported into
 	 * 
 	 * @param folder
 	 */
-	public DatasetOutlinesExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
+	public DatasetOutlinesExportMethod(@NonNull File file, @NonNull List<IAnalysisDataset> list,
 			@NonNull HashOptions options) {
 		super(file, list, options);
 	}
@@ -52,7 +51,7 @@ public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 	 * 
 	 * @param folder
 	 */
-	public DatasetOutlinesExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
+	public DatasetOutlinesExportMethod(@NonNull File file, @NonNull IAnalysisDataset dataset,
 			@NonNull HashOptions options) {
 		super(file, dataset, options);
 	}
@@ -64,8 +63,10 @@ public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 				.append("Component").append(TAB)
 				.append("Folder").append(TAB)
 				.append("Image").append(TAB)
-				.append("RawCoordinates").append(TAB)
-				.append("OrientedCoordinates")
+				.append("RawX").append(TAB)
+				.append("RawY").append(TAB)
+				.append("OrientedX").append(TAB)
+				.append("OrientedX")
 				.append(NEWLINE);
 	}
 
@@ -82,59 +83,73 @@ public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 	protected void append(@NonNull IAnalysisDataset d, @NonNull PrintWriter pw)
 			throws Exception {
 
+		String datasetCols = d.getName() + TAB; 
+
 		for (ICell cell : d.getCollection().getCells()) {
 
-			StringBuilder outLine = new StringBuilder();
+			String cellCols = cell.getId() + TAB;
 
-			if (cell.hasNucleus()) {
+			for (Nucleus n : cell.getNuclei()) {
+				StringBuilder constantCols = new StringBuilder()
+						.append(datasetCols)
+						.append(cellCols)
+						.append(CellularComponent.NUCLEUS + "_" + n.getNameAndNumber() + TAB)
+						.append(n.getSourceFolder() + TAB)
+						.append(n.getSourceFile().getAbsolutePath() + TAB);
 
-				for (Nucleus n : cell.getNuclei()) {
-
-					outLine.append(d.getName() + TAB)
-							.append(cell.getId() + TAB)
-							.append(CellularComponent.NUCLEUS + "_" + n.getNameAndNumber() + TAB)
-							.append(n.getSourceFolder() + TAB)
-							.append(n.getSourceFileName() + TAB);
-
-					appendNucleusOutline(outLine, n);
-				}
+				String nString = appendNucleusOutline(constantCols.toString(), n);
+				pw.write(nString);
+				fireProgressEvent();
 			}
-
-			if (cell.hasCytoplasm()) {
-				outLine.append(d.getName() + TAB)
-						.append(cell.getId() + TAB)
-						.append(CellularComponent.CYTOPLASM + "_" + cell.getCytoplasm().getId()
-								+ TAB)
-						.append(cell.getCytoplasm().getSourceFolder() + TAB)
-						.append(cell.getCytoplasm().getSourceFileName() + TAB);
-
-				appendCytoplasmOutline(outLine, cell.getCytoplasm());
-			}
-
-			pw.write(outLine.toString());
 		}
 	}
 
-	private void appendNucleusOutline(StringBuilder outLine, Nucleus n) {
 
+	private String appendNucleusOutline(String constantColumns, Nucleus n) {
+		
+		StringBuilder outLine = new StringBuilder();
 		try {
-			// Add the outline coordinates to the output line
-			String borderString = createOutlineString(n);
-			outLine.append(borderString).append(TAB);
-
-			// Add the oriented outline coordinates to the output line
+			// Get normalised coordinates for raw and oriented nuclei
+			List<IPoint> rawCoords = getOutlinePoints(n);
+			
 			Nucleus o = n.getOrientedNucleus();
 			o.moveCentreOfMass(IPoint.atOrigin());
-			String orientedString = createOutlineString(o);
-			outLine.append(orientedString).append(NEWLINE);
+			List<IPoint> orientedCoords = getOutlinePoints(o);
+			
+			// Add the outline coordinates to the output line
+			for(int i=0; i<rawCoords.size(); i++) {
+				
+				IPoint raw = rawCoords.get(i);
+				IPoint ori = orientedCoords.get(i);
+
+				outLine.append(constantColumns)
+					.append(raw.getX()).append(TAB)
+					.append(raw.getY()).append(TAB)
+					.append(ori.getX()).append(TAB)
+					.append(ori.getY()).append(NEWLINE);
+
+			}
 
 		} catch (MissingLandmarkException | ComponentCreationException | SegmentUpdateException e) {
 			LOGGER.warning(() -> "Error creating outline to export for " + n.getNameAndNumber());
 			outLine.append(NEWLINE);
 		}
+		return outLine.toString();
 	}
 
-	private String createOutlineString(Nucleus n)
+	/**
+	 * @param n
+	 * @return
+	 * @throws MissingLandmarkException
+	 * @throws SegmentUpdateException
+	 */
+	/**
+	 * @param n
+	 * @return
+	 * @throws MissingLandmarkException
+	 * @throws SegmentUpdateException
+	 */
+	private List<IPoint> getOutlinePoints(Nucleus n)
 			throws MissingLandmarkException, SegmentUpdateException {
 		// If a landmark to offset has been specified, lmOffset will not be null
 		OrientationMark lmOffset = null;
@@ -151,14 +166,11 @@ public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 
 		// Normalise border list - if required - to given number of points
 		if (options.getBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY)) {
-			borderList = normaliseBorderList(borderList,
+			borderList = changeBorderLength(borderList,
 					options.getInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY));
 		}
 
-		// Add the outline coordinates to the output line
-		return borderList.stream()
-				.map(p -> p.getX() + PIPE + p.getY())
-				.collect(Collectors.joining(COMMA));
+		return borderList;
 	}
 
 	/**
@@ -168,7 +180,7 @@ public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 	 * @return
 	 * @throws SegmentUpdateException
 	 */
-	private List<IPoint> normaliseBorderList(List<IPoint> inputBorder, int nPoints)
+	private List<IPoint> changeBorderLength(List<IPoint> inputBorder, int nPoints)
 			throws SegmentUpdateException {
 
 		if (nPoints == inputBorder.size())
@@ -187,23 +199,13 @@ public class DatasetOutlinesExporter extends MeasurementsExportMethod {
 		IProfile xScale = xprofile.interpolate(nPoints);
 		IProfile yScale = yprofile.interpolate(nPoints);
 
-		List<IPoint> result = new ArrayList<>();
+		List<IPoint> r = new ArrayList<>();
 		for (int i = 0; i < nPoints; i++) {
-			result.add(new FloatPoint(xScale.get(i), yScale.get(i)));
+			r.add(new FloatPoint(xScale.get(i), yScale.get(i)));
 		}
 
-		return result;
+		return r;
 
-	}
-
-	private void appendCytoplasmOutline(StringBuilder outLine, CellularComponent c) {
-
-		String borderString = c.getBorderList().stream()
-				.map(p -> p.getX() + PIPE + p.getY())
-				.collect(Collectors.joining(COMMA));
-
-		outLine.append(borderString);
-		outLine.append(NEWLINE);
 	}
 
 }

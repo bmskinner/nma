@@ -32,9 +32,9 @@ import com.bmskinner.nma.components.profiles.Landmark;
  * Landmark y float coordinate
  * </pre>
  */
-public class DatasetKeypointExportMethod extends MeasurementsExportMethod implements Io {
+public class DatasetLandmarkExportMethod extends MeasurementsExportMethod implements Io {
 	private static final Logger LOGGER = Logger
-			.getLogger(DatasetKeypointExportMethod.class.getName());
+			.getLogger(DatasetLandmarkExportMethod.class.getName());
 
 
 	/**
@@ -43,7 +43,7 @@ public class DatasetKeypointExportMethod extends MeasurementsExportMethod implem
 	 * @param dataset
 	 * @param options
 	 */
-	public DatasetKeypointExportMethod(@NonNull File file, @NonNull List<IAnalysisDataset> list,
+	public DatasetLandmarkExportMethod(@NonNull File file, @NonNull List<IAnalysisDataset> list,
 			@NonNull HashOptions options) {
 		super(file, list, options);
 	}
@@ -54,7 +54,7 @@ public class DatasetKeypointExportMethod extends MeasurementsExportMethod implem
 	 * @param datasets
 	 * @param options
 	 */
-	public DatasetKeypointExportMethod(@NonNull File file, @NonNull IAnalysisDataset dataset,
+	public DatasetLandmarkExportMethod(@NonNull File file, @NonNull IAnalysisDataset dataset,
 			@NonNull HashOptions options) {
 		this(file,List.of(dataset), options);
 	}

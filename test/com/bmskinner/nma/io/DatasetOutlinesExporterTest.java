@@ -112,7 +112,7 @@ public class DatasetOutlinesExporterTest {
 				.build();
 
 		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
-		new DatasetOutlinesExporter(outFile, d, o).call();
+		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
 		ParsedOutline ps = readOutlineFile(outFile);
@@ -145,7 +145,7 @@ public class DatasetOutlinesExporterTest {
 				.build();
 
 		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
-		new DatasetOutlinesExporter(outFile, d, o).call();
+		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
 		ParsedOutline ps = readOutlineFile(outFile);
@@ -177,7 +177,7 @@ public class DatasetOutlinesExporterTest {
 				.build();
 
 		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
-		new DatasetOutlinesExporter(outFile, d, o).call();
+		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
 		ParsedOutline ps = readOutlineFile(outFile);
@@ -211,7 +211,7 @@ public class DatasetOutlinesExporterTest {
 				.build();
 
 		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
-		new DatasetOutlinesExporter(outFile, d, o).call();
+		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
 		ParsedOutline ps = readOutlineFile(outFile);
@@ -243,7 +243,7 @@ public class DatasetOutlinesExporterTest {
 				.build();
 
 		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
-		new DatasetOutlinesExporter(outFile, d, o).call();
+		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
 		ParsedOutline ps = readOutlineFile(outFile);
@@ -278,7 +278,7 @@ public class DatasetOutlinesExporterTest {
 				.build();
 
 		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
-		new DatasetOutlinesExporter(outFile, d, o).call();
+		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
 		ParsedOutline ps = readOutlineFile(outFile);
@@ -311,7 +311,7 @@ public class DatasetOutlinesExporterTest {
 				.build();
 
 		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
-		new DatasetOutlinesExporter(outFile, d, o).call();
+		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
 		ParsedOutline ps = readOutlineFile(outFile);
@@ -346,7 +346,7 @@ public class DatasetOutlinesExporterTest {
 				.build();
 
 		File outFile = new File(d.getSavePath().getParent(), d.getName() + "_outlines.txt");
-		new DatasetOutlinesExporter(outFile, d, o).call();
+		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
 		ParsedOutline ps = readOutlineFile(outFile);

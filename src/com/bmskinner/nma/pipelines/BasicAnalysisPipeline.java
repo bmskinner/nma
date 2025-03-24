@@ -27,7 +27,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.analysis.nucleus.NucleusDetectionMethod;
-import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nma.components.cells.CellularComponent;
@@ -85,7 +85,7 @@ public class BasicAnalysisPipeline {
 		IAnalysisDataset obs = new NucleusDetectionMethod(outFolder, op)
 				.call().getFirstDataset();
 
-		new DatasetProfilingMethod(obs)
+		new DefaultDatasetProfilingMethod(obs)
 				.then(new DatasetSegmentationMethod(obs,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.then(new ConsensusAveragingMethod(obs))

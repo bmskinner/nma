@@ -20,7 +20,7 @@ import org.junit.Test;
 import com.bmskinner.nma.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.analysis.nucleus.NucleusDetectionMethod;
-import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nma.analysis.signals.SignalDetectionMethod;
@@ -266,7 +266,7 @@ public class TestImageDatasetCreator {
 
 		IAnalysisDataset d = new NucleusDetectionMethod(testFolder, op).call().getFirstDataset();
 
-		new DatasetProfilingMethod(d)
+		new DefaultDatasetProfilingMethod(d)
 				.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.then(op.getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())
 						? new ConsensusAveragingMethod(d) // TODO: replace once new refold method is
@@ -343,7 +343,7 @@ public class TestImageDatasetCreator {
 
 		HashOptions clusterOptions = OptionsFactory.makeDefaultClusteringOptions().build();
 
-		new DatasetProfilingMethod(d)
+		new DefaultDatasetProfilingMethod(d)
 				.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.then(op.getRuleSetCollection().equals(RuleSetCollection.roundRuleSetCollection())
 						? new ConsensusAveragingMethod(d) // TODO: temp replacement before the new

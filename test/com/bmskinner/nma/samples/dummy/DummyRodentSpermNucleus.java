@@ -353,4 +353,9 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		return nucleus.getBorderList(om);
 	}
 
+	@Override
+	public boolean hasLandmark(@NonNull Landmark landmark) {
+		return nucleus.hasLandmark(landmark);
+	}
+
 }

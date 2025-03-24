@@ -243,27 +243,42 @@ public interface Taggable extends CellularComponent, Orientable {
 	IPoint getBorderPoint(@NonNull Landmark tag) throws MissingLandmarkException;
 
 	/**
+	 * Check if the nucleus has the given orientation mark
+	 * 
+	 * @param landmark the orientation mark to test
+	 * @return true if the orientation mark is present, false otherwise
+	 */
+	boolean hasLandmark(@NonNull OrientationMark landmark);
+	
+	/**
 	 * Check if the nucleus has the given landmark
 	 * 
 	 * @param landmark the landmark to test
 	 * @return true if the landmark is present, false otherwise
 	 */
-	boolean hasLandmark(@NonNull OrientationMark landmark);
+	boolean hasLandmark(@NonNull Landmark landmark);
 
 	/**
-	 * Set the index of the given landmark. Has no effect if this object is locked.
+	 * Set the index of the given orientation mark. Has no effect if this object is locked.
 	 * 
-	 * @param tag the tag
-	 * @param i   the index of the border point to set the tag at
-	 * @throws ProfileException
-	 * @throws MissingProfileException
-	 * @throws MissingLandmarkException
+	 * @param tag the orientation mark
+	 * @param i   the index of the border point to set the orientation mark
+	 * @throws IndexOutOfBoundsException
 	 * @throws MissingDataException
 	 * @throws SegmentUpdateException
 	 */
 	void setLandmark(@NonNull OrientationMark tag, int i)
 			throws IndexOutOfBoundsException, MissingDataException, SegmentUpdateException;
 
+	/**
+	 * Set the index of the given landmark. Has no effect if this object is locked.
+	 * 
+	 * @param tag the landmark
+	 * @param i   the index of the border point to set the landmark
+	 * @throws IndexOutOfBoundsException
+	 * @throws MissingDataException
+	 * @throws SegmentUpdateException
+	 */
 	void setLandmark(@NonNull Landmark tag, int i)
 			throws IndexOutOfBoundsException, MissingDataException, SegmentUpdateException;
 

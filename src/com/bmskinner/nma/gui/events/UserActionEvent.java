@@ -95,6 +95,7 @@ public class UserActionEvent extends EventObject {
 	public static final String MORPHOLOGY_ANALYSIS_ACTION = "Morphology analysis action";
 	public static final String PROFILE_AND_CONSENSUS_ACTION = "ProfileAndConsensus";
 	public static final String REMAP_LANDMARKS = "RemapLandmarks";
+	public static final String TEXT_PROFILING_AND_LANDMARKING = "TextProfileAction";
 
 	public static final String PROFILING_ACTION = "Profiling action";
 

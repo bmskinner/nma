@@ -24,7 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
-import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.ThreadManager;
@@ -78,7 +78,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 		try {
 
 			this.setProgressMessage("Profiling: " + dataset.getName());
-			IAnalysisMethod method = new DatasetProfilingMethod(dataset);
+			IAnalysisMethod method = new DefaultDatasetProfilingMethod(dataset);
 			worker = new DefaultAnalysisWorker(method);
 
 			worker.addPropertyChangeListener(this);

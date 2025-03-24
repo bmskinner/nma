@@ -130,9 +130,27 @@ public class TestResources {
 	public static final File TEXT_OUTLINES_FOLDER = new File(IMAGE_FOLDER_BASE, "Text");
 
 	public static final String WORKSPACE_NAME = "Example.wrk";
+	
+	
+	/**
+	 * Get the path to the dataset output folder for the current software version
+	 * @return
+	 */
+	public static final File datasetOutputFolder() {
+		return new File( DATASET_FOLDER_BASE, unitTestFolderName(Version.currentVersion()));
+	}
+	
+	/**
+	 * Get the path to the image output folder for the given dataset name
+	 * @param datasetName
+	 * @return
+	 */
+	public static final File imageOutputFolder(String datasetName) {
+		return new File( new File(IMAGE_FOLDER_BASE, datasetName), unitTestFolderName(Version.currentVersion()));
+	}
 
 	/**
-	 * Return the unit test folder name for the given version
+	 * Return the dataset unit test folder name for the given version
 	 * 
 	 * @param version
 	 * @return

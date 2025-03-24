@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.options;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +82,10 @@ public interface HashOptions extends Serializable, XmlSerializable {
 
 	int DEFAULT_CHANNEL = 2;
 	boolean DEFAULT_NORMALISE_CONTRAST = false;
+	
+	/** Constants relating to nucleus detection via text file **/
+	String LANDMARK_LOCATION_FILE_KEY = "LandmarkLocation";
+	String LANDMARK_RP_NAME = "LandmarkRPName";
 
 	/** Constants relating to signals **/
 
@@ -414,7 +419,22 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	 * @param value
 	 */
 	void setUUID(String key, UUID value);
-
+	
+	/**
+	 * Get a file with the given key
+	 * @param s
+	 * @return
+	 */
+	File getFile(String s);
+	
+	/**
+	 * Store a file with the given key
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	void setFile(String s, File f);
+	
 	/**
 	 * Get the keys to all the boolean values in this options.
 	 * 

@@ -15,7 +15,7 @@ import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.runnables.SegmentAndRefold;
-import com.bmskinner.nma.io.DatasetKeypointImportMethod;
+import com.bmskinner.nma.io.DatasetLandmarkImportMethod;
 import com.bmskinner.nma.io.Io;
 
 public class ImportKeypointsAction extends SingleDatasetResultAction {
@@ -39,7 +39,7 @@ public class ImportKeypointsAction extends SingleDatasetResultAction {
 
 		if (file != null) {
 
-			IAnalysisMethod m = new DatasetKeypointImportMethod(dataset, file, new DefaultOptions());
+			IAnalysisMethod m = new DatasetLandmarkImportMethod(dataset, file, new DefaultOptions());
 			worker = new DefaultAnalysisWorker(m);
 
 			worker.addPropertyChangeListener(this);

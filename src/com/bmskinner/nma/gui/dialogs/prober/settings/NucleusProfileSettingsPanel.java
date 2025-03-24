@@ -180,7 +180,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
 		});
 
-		segmentBox = new JCheckBox("", true);
+		segmentBox = new JCheckBox("", options.getProfilingOptions().getBoolean(HashOptions.IS_SEGMENT_PROFILES));
 		segmentBox.addChangeListener(e -> {
 			options.getProfilingOptions().setBoolean(HashOptions.IS_SEGMENT_PROFILES,
 					segmentBox.isSelected());

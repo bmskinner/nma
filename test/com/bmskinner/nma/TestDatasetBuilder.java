@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.classification.NucleusClusteringMethod;
-import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nma.components.MissingDataException;
@@ -139,7 +139,7 @@ public class TestDatasetBuilder {
 		}
 
 		if (profile)
-			new DatasetProfilingMethod(d).call();
+			new DefaultDatasetProfilingMethod(d).call();
 		if (segment)
 			new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH).call();
 

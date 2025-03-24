@@ -18,6 +18,7 @@ package com.bmskinner.nma.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -215,18 +216,22 @@ public class ImageImporter implements Importer {
 			throws UnloadableImageException {
 		if (!c.getSourceFile().exists())
 			throw new UnloadableImageException(
-					"Source image is not available: " + c.getSourceFile().getAbsolutePath());
-
-		// Get the stack, make greyscale and invert
-		int stack = ImageImporter.rgbToStack(c.getChannel());
+					"Source image is not available: '%s'".formatted(c.getSourceFile().getAbsolutePath()));
 
 		try {
+		// Get the stack, make greyscale and invert
+			int stack = ImageImporter.rgbToStack(c.getChannel());
+
 			ImageStack imageStack = importToStack(c.getSourceFile());
 			return imageStack.getProcessor(stack);
 		} catch (ImageImportException e) {
-			LOGGER.log(Loggable.STACK,
-					"Error importing source image " + c.getSourceFile().getAbsolutePath(), e);
-			throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE);
+			LOGGER.log(Level.WARNING,
+					"%s : '%s'".formatted(e.getMessage(), c.getSourceFile().getAbsolutePath()));
+			throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE, e);
+		} catch( IllegalArgumentException e) {
+			LOGGER.log(Level.WARNING,
+					"%s : '%s'".formatted(e.getMessage(), c.getSourceFile().getAbsolutePath()));
+			throw new UnloadableImageException(e);
 		}
 	}
 

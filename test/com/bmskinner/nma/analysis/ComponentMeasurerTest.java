@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.bmskinner.nma.ComponentTester;
 import com.bmskinner.nma.TestDatasetBuilder;
-import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.components.ComponentMeasurer;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -124,7 +124,7 @@ public class ComponentMeasurerTest {
 			}
 		}
 
-		new DatasetProfilingMethod(d).call();
+		new DefaultDatasetProfilingMethod(d).call();
 
 		// Check each of the saved results against their current value.
 		// Nothing should have changed in the test measurements.

@@ -12,7 +12,7 @@ import org.junit.runners.Suite.SuiteClasses;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ DatasetProfilingMethodTest.class,
+@SuiteClasses({ DefaultDatasetProfilingMethodTest.class,
 		DatasetSegmentationMethodTest.class,
 		IterativeSegmentFitterTest.class,
 		ProfileCreatorTest.class,

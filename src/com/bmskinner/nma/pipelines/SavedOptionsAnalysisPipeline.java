@@ -40,7 +40,7 @@ import com.bmskinner.nma.analysis.classification.TsneMethod;
 import com.bmskinner.nma.analysis.classification.UMAPMethod;
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.analysis.nucleus.NucleusDetectionMethod;
-import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nma.analysis.signals.SignalDetectionMethod;
@@ -197,7 +197,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 		List<IAnalysisDataset> datasets = new NucleusDetectionMethod(outputFolder, options).call()
 				.getDatasets();
 		for (IAnalysisDataset dataset : datasets) {
-			methodsToRun.add(new DatasetProfilingMethod(dataset));
+			methodsToRun.add(new DefaultDatasetProfilingMethod(dataset));
 			methodsToRun.add(new DatasetSegmentationMethod(dataset,
 					MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH));
 		}

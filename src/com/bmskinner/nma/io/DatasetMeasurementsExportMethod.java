@@ -61,10 +61,10 @@ import com.bmskinner.nma.utility.ArrayUtils;
  * @since 1.13.4
  *
  */
-public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
+public class DatasetMeasurementsExportMethod extends MeasurementsExportMethod {
 
 	private static final Logger LOGGER = Logger
-			.getLogger(DatasetMeasurementsExporter.class.getName());
+			.getLogger(DatasetMeasurementsExportMethod.class.getName());
 
 	private boolean isIncludeMeasurements = true;
 	private boolean isIncludeProfiles = true;
@@ -98,7 +98,7 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 	 * @param folder
 	 * @throws MissingOptionException
 	 */
-	public DatasetMeasurementsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list,
+	public DatasetMeasurementsExportMethod(@NonNull File file, @NonNull List<IAnalysisDataset> list,
 			@NonNull HashOptions options) throws MissingOptionException {
 		super(file, list, options);
 		segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
@@ -159,7 +159,7 @@ public class DatasetMeasurementsExporter extends MeasurementsExportMethod {
 	 * @param folder
 	 * @throws MissingOptionException
 	 */
-	public DatasetMeasurementsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset,
+	public DatasetMeasurementsExportMethod(@NonNull File file, @NonNull IAnalysisDataset dataset,
 			@NonNull HashOptions options) throws MissingOptionException {
 		this(file, List.of(dataset), options);
 	}

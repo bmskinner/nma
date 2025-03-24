@@ -18,9 +18,9 @@ import com.bmskinner.nma.core.CommandOptions;
 import com.bmskinner.nma.io.CellFileExporter;
 import com.bmskinner.nma.io.CellImageExportMethod;
 import com.bmskinner.nma.io.DatasetImportMethod;
-import com.bmskinner.nma.io.DatasetMeasurementsExporter;
+import com.bmskinner.nma.io.DatasetMeasurementsExportMethod;
 import com.bmskinner.nma.io.DatasetOptionsExportMethod;
-import com.bmskinner.nma.io.DatasetOutlinesExporter;
+import com.bmskinner.nma.io.DatasetOutlinesExportMethod;
 import com.bmskinner.nma.io.DatasetProfileExporter;
 import com.bmskinner.nma.io.DatasetShellsExporter;
 import com.bmskinner.nma.io.DatasetSignalsExporter;
@@ -111,7 +111,7 @@ public class ExportDataPipeline {
 		HashOptions exportOptions = new DefaultOptions();
 		exportOptions.setInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 100);
 
-		new DatasetMeasurementsExporter(statsFile, datasets, exportOptions)
+		new DatasetMeasurementsExportMethod(statsFile, datasets, exportOptions)
 				.call();
 	}
 
@@ -127,7 +127,7 @@ public class ExportDataPipeline {
 				root.getSavePath().getName() + ".outlines" + Io.TAB_FILE_EXTENSION);
 		LOGGER.info("Exporting outlines to: " + statsFile.getAbsolutePath());
 
-		new DatasetOutlinesExporter(statsFile, datasets, new DefaultOptions()).call();
+		new DatasetOutlinesExportMethod(statsFile, datasets, new DefaultOptions()).call();
 	}
 
 	private void exportSignals() throws Exception {

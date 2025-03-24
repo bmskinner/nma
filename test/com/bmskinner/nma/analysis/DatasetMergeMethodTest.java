@@ -19,7 +19,7 @@ import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.TestDatasetBuilder.TestComponentShape;
 import com.bmskinner.nma.TestImageDatasetCreator;
 import com.bmskinner.nma.TestResources;
-import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nma.analysis.signals.PairedSignalGroups;
@@ -69,7 +69,7 @@ public class DatasetMergeMethodTest {
 				result.getCollection().size());
 
 		// Run new profiling on the merged dataset
-		new DatasetProfilingMethod(result)
+		new DefaultDatasetProfilingMethod(result)
 				.then(new DatasetSegmentationMethod(result,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.call();
@@ -99,7 +99,7 @@ public class DatasetMergeMethodTest {
 		DatasetMergeMethod dm = new DatasetMergeMethod(datasets, BooleanOperation.OR, f3);
 		IAnalysisDataset merged = dm.call().getFirstDataset();
 
-		new DatasetProfilingMethod(merged)
+		new DefaultDatasetProfilingMethod(merged)
 				.then(new DatasetSegmentationMethod(merged,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.call();
@@ -164,7 +164,7 @@ public class DatasetMergeMethodTest {
 				result.getCollection().size());
 
 		// Run new profiling on the merged dataset
-		new DatasetProfilingMethod(result).call();
+		new DefaultDatasetProfilingMethod(result).call();
 		new DatasetSegmentationMethod(result, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH).call();
 
 		// Are OrientationMark positions properly restored?
@@ -230,7 +230,7 @@ public class DatasetMergeMethodTest {
 				.getFirstDataset();
 
 		// Profile, segment, save and reopen
-		merged = new DatasetProfilingMethod(merged)
+		merged = new DefaultDatasetProfilingMethod(merged)
 				.then(new DatasetSegmentationMethod(merged,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.call().getFirstDataset();
@@ -291,7 +291,7 @@ public class DatasetMergeMethodTest {
 				.getFirstDataset();
 
 		// Profile, segment, save and reopen
-		new DatasetProfilingMethod(merged)
+		new DefaultDatasetProfilingMethod(merged)
 				.then(new DatasetSegmentationMethod(merged,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.then(new DatasetExportMethod(merged, f3))
@@ -323,7 +323,7 @@ public class DatasetMergeMethodTest {
 				ps).call()
 						.getFirstDataset();
 
-		merged = new DatasetProfilingMethod(merged)
+		merged = new DefaultDatasetProfilingMethod(merged)
 				.then(new DatasetSegmentationMethod(merged,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.call().getFirstDataset();
@@ -362,7 +362,7 @@ public class DatasetMergeMethodTest {
 						.getFirstDataset();
 
 		// Profile, segment, save and reopen
-		new DatasetProfilingMethod(merged)
+		new DefaultDatasetProfilingMethod(merged)
 				.then(new DatasetSegmentationMethod(merged,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.then(new DatasetExportMethod(merged, f3))

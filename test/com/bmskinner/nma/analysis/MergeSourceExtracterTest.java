@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nma.TestResources;
-import com.bmskinner.nma.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nma.components.cells.ICell;
@@ -91,7 +91,7 @@ public class MergeSourceExtracterTest {
 		DatasetMergeMethod dm = new DatasetMergeMethod(datasets, BooleanOperation.OR, f3);
 		IAnalysisDataset merged = dm.call().getFirstDataset();
 
-		new DatasetProfilingMethod(merged)
+		new DefaultDatasetProfilingMethod(merged)
 				.then(new DatasetSegmentationMethod(merged,
 						MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
 				.then(new DatasetExportMethod(merged, f3))

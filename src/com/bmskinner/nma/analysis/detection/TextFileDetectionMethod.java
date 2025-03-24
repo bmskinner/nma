@@ -32,14 +32,6 @@ import com.bmskinner.nma.logging.Loggable;
  * Create nuclei from a text file describing their outlines. For example, as
  * generated from a YOLO segmentation model.
  * 
- * The expected text file format is 4 tab-separated columns with a header line.
- * Each line contains an XY coordinate for one point in an object outline:<br>
- * <br>
- * 
- * {@code Image	Object	x	y}<br>
- * {@code /path/to/image.jpg	0	1563.3	1020.6}<br>
- * {@code /path/to/image.jpg	0	1561.275	1022.625}<br>
- * 
  * @author bs19022
  *
  */
