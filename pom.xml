@@ -4,13 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.bmskinner</groupId>
 	<artifactId>nma</artifactId>
-	<version>2.2.1</version>
+	<version>2.3.0</version>
 
 	<!-- Define custom properties to be exported -->
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
 		<version>${project.version}</version>
-		<version.suffix></version.suffix>
+		<version.suffix>alpha</version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>
