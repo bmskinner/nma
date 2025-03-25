@@ -17,7 +17,6 @@
 package com.bmskinner.nma.components;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -30,11 +29,9 @@ import org.eclipse.jdt.annotation.Nullable;
  * @since 1.12.0
  *
  */
-public class Version implements Serializable {
+public class Version {
 
 	private static final Logger LOGGER = Logger.getLogger(Version.class.getName());
-
-	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The fields for setting the version. Backwards compatability should be
@@ -56,6 +53,12 @@ public class Version implements Serializable {
 	public static final Version V_2_1_0 = new Version(2, 1, 0);
 	public static final Version V_2_2_0 = new Version(2, 2, 0);
 
+	/**
+	 * Create a version
+	 * @param major
+	 * @param minor
+	 * @param revision
+	 */
 	public Version(final int major, final int minor, final int revision) {
 		this.major = major;
 		this.minor = minor;
@@ -95,7 +98,7 @@ public class Version implements Serializable {
 			return new Version(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]),
 					Integer.valueOf(parts[2]));
 		}
-		throw new IllegalArgumentException("Input string is not a version format");
+		throw new IllegalArgumentException("Input string %s is not a version format".formatted(s));
 	}
 
 	/**
@@ -120,6 +123,11 @@ public class Version implements Serializable {
 		return false;
 	}
 
+	/**
+	 * Test if the given version is older than the current software version
+	 * @param v
+	 * @return
+	 */
 	public boolean isNewerThan(@NonNull final Version v) {
 		return v.isOlderThan(this);
 	}
@@ -152,14 +160,32 @@ public class Version implements Serializable {
 		return true;
 	}
 
+	/**
+	 * Get the major version number. This indicates a substantial change in
+	 * functionality and backwards compatibility with saved files is not maintained.
+	 * 
+	 * @return the major version number
+	 */
 	public int getMajor() {
 		return major;
 	}
 
+	/**
+	 * Get the minor version number. This indicates a change in functionality.
+	 * Backwards compatibility with saved files is maintained.
+	 * 
+	 * @return the minor version number
+	 */
 	public int getMinor() {
 		return minor;
 	}
 
+	/**
+	 * Get the revision version number. This a bugfix only with no new functionality.
+	 * Backwards compatibility with saved files is maintained.
+	 * 
+	 * @return the revision version number
+	 */
 	public int getRevision() {
 		return revision;
 	}
@@ -180,20 +206,7 @@ public class Version implements Serializable {
 	public static boolean versionIsSupported(@NonNull Version version) {
 
 		// major version MUST be the same
-		if (version.getMajor() != VERSION_MAJOR)
-			return false;
-
-		return true;
-	}
-
-	private void readObject(java.io.ObjectInputStream in)
-			throws IOException, ClassNotFoundException {
-
-		in.defaultReadObject();
-
-		if (!versionIsSupported(this)) {
-			throw new UnsupportedVersionException(this);
-		}
+		return version.getMajor() == VERSION_MAJOR;
 	}
 
 	/**
@@ -213,7 +226,7 @@ public class Version implements Serializable {
 			detectedVersion = v;
 		}
 
-		public Version getDetectedVersion() {
+		public @Nullable Version getDetectedVersion() {
 			return detectedVersion;
 		}
 	}
