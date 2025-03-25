@@ -416,7 +416,7 @@ public class RuleSetCollection implements XmlSerializable {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 
 		Element rootElement = new Element(XMLNames.XML_RULE_SET_COLLECTION)
 				.setAttribute(XMLNames.XML_NAME, getName())
@@ -483,7 +483,7 @@ public class RuleSetCollection implements XmlSerializable {
 	 * 
 	 * @return
 	 */
-	public static RuleSetCollection mouseSpermRuleSetCollection() {
+	@NonNull public static RuleSetCollection mouseSpermRuleSetCollection() {
 
 		Landmark rp = new DefaultLandmark("Tip of hook");
 		Landmark tv = new DefaultLandmark("Ventral upper");
@@ -519,7 +519,7 @@ public class RuleSetCollection implements XmlSerializable {
 	 * 
 	 * @return
 	 */
-	public static RuleSetCollection pigSpermRuleSetCollection() {
+	@NonNull public static RuleSetCollection pigSpermRuleSetCollection() {
 
 		Landmark rp = new DefaultLandmark("Tail socket");
 
@@ -548,7 +548,7 @@ public class RuleSetCollection implements XmlSerializable {
 	 * 
 	 * @return
 	 */
-	public static RuleSetCollection roundRuleSetCollection() {
+	@NonNull public static RuleSetCollection roundRuleSetCollection() {
 
 		Landmark rp = new DefaultLandmark("Longest axis");
 

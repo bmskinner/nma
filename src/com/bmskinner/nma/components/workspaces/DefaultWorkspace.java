@@ -71,7 +71,7 @@ public class DefaultWorkspace implements IWorkspace {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		// root element
 		Element rootElement = new Element(XMLNames.XML_WORKSPACE)
 				.setAttribute(XMLNames.XML_WORKSPACE_NAME, name);

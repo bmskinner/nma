@@ -144,7 +144,7 @@ public class Rule implements XmlSerializable {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 
 		Element e = new Element(XMLNames.XML_RULE).setAttribute(XMLNames.XML_RULE_TYPE,
 				getType().toString());

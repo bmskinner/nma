@@ -115,7 +115,7 @@ public class DefaultProfileSegment implements IProfileSegment {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_SEGMENT)
 				.setAttribute(XMLNames.XML_ID, uuid.toString())
 				.setAttribute(XMLNames.XML_SEGMENT_START, String.valueOf(startIndex))

@@ -3,6 +3,7 @@ package com.bmskinner.nma.io;
 import java.io.File;
 import java.io.IOException;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
@@ -37,7 +38,7 @@ public abstract class XMLReader {
 	 * @return the XML representation of the file content
 	 * @throws XMLReadingException if the document could not be read or was not XML
 	 */
-	public static Document readDocument(File file) throws XMLReadingException {
+	public static Document readDocument(@NonNull File file) throws XMLReadingException {
 		SAXBuilder saxBuilder = new SAXBuilder();
 		try {
 			return saxBuilder.build(file);
@@ -47,30 +48,30 @@ public abstract class XMLReader {
 		}
 	}
 
-	public static IAnalysisDataset readDataset(File f)
+	public static IAnalysisDataset readDataset(@NonNull File f)
 			throws XMLReadingException, ComponentCreationException, UnsupportedVersionException {
 		Document d = readDocument(f);
 		return DatasetCreator.createRoot(d.getRootElement(), null);
 	}
 
-	public static RuleSetCollection readRulesetCollection(File f)
+	public static RuleSetCollection readRulesetCollection(@NonNull File f)
 			throws XMLReadingException, ComponentCreationException {
 		Document d = readDocument(f);
 		return new RuleSetCollection(d.getRootElement());
 	}
 
-	public static HashOptions readOptions(File f) throws XMLReadingException {
+	public static HashOptions readOptions(@NonNull File f) throws XMLReadingException {
 		Document d = readDocument(f);
 		return new DefaultOptions(d.getRootElement());
 	}
 
-	public static IAnalysisOptions readAnalysisOptions(File f)
+	public static IAnalysisOptions readAnalysisOptions(@NonNull File f)
 			throws XMLReadingException, ComponentCreationException {
 		Document d = readDocument(f);
 		return new DefaultAnalysisOptions(d.getRootElement());
 	}
 
-	public static IWorkspace readWorkspace(File f) throws XMLReadingException {
+	public static IWorkspace readWorkspace(@NonNull File f) throws XMLReadingException {
 		Document d = readDocument(f);
 		return new DefaultWorkspace(f, d.getRootElement());
 	}

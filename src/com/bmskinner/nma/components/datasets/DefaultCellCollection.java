@@ -236,7 +236,7 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_CELL_COLLECTION)
 				.setAttribute(XMLNames.XML_ID, uuid.toString())
 				.setAttribute(XMLNames.XML_NAME, name);
@@ -1561,7 +1561,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public Element toXmlElement() {
+		@NonNull public Element toXmlElement() {
 			Element e = new Element("ProfileCollection");
 
 			for (IProfileSegment s : segments) {

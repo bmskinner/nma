@@ -962,7 +962,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_COMPONENT).setAttribute(XMLNames.XML_ID,
 				uuid.toString());
 

@@ -127,7 +127,7 @@ public class DefaultWarpedSignal implements XmlSerializable, IWarpedSignal {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_WARPED_SIGNAL);
 		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_TARGET_NAME, targetName);
 		e.setAttribute(XMLNames.XML_WARPED_SIGNAL_SOURCE_DATASET, sourceDatasetName);

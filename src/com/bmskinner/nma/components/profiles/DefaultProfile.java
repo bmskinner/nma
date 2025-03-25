@@ -792,7 +792,7 @@ public class DefaultProfile implements IProfile {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_PROFILE);
 		e.setText(Arrays.toString(array));
 		return e;

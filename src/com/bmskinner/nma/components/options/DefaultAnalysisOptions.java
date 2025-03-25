@@ -360,7 +360,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_ANALYSIS_OPTIONS);
 
 		if (analysisTime > -1)

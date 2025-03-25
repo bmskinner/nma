@@ -234,7 +234,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = super.toXmlElement().setName(XMLNames.XML_VIRTUAL_DATASET)
 				.setAttribute(XMLNames.XML_ID, uuid.toString())
 				.setAttribute(XMLNames.XML_NAME, name);
@@ -1788,7 +1788,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		}
 
 		@Override
-		public Element toXmlElement() {
+		@NonNull public Element toXmlElement() {
 			Element e = new Element("ProfileCollection");
 
 			for (IProfileSegment s : segments) {

@@ -637,7 +637,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = super.toXmlElement()
 				.setAttribute(XMLNames.XML_WINDOW_PROPORTION, String.valueOf(windowProportion))
 				.setAttribute(XMLNames.XML_PRIORITY_AXIS, priorityAxis.toString());

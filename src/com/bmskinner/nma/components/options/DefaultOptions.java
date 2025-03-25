@@ -447,7 +447,7 @@ public class DefaultOptions implements HashOptions {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_OPTIONS);
 
 		// Add each map

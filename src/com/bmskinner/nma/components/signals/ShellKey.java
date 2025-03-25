@@ -52,7 +52,7 @@ public class ShellKey implements XmlSerializable {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_SIGNAL_SHELL_VALUES);
 
 		e.setAttribute(XMLNames.XML_SIGNAL_SHELL_CELLID, cellId.toString());

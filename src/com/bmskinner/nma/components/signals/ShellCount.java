@@ -42,7 +42,7 @@ public class ShellCount implements XmlSerializable {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_SIGNAL_SHELL_COUNT);
 
 		for (Entry<ShellKey, long[]> entry : results.entrySet()) {

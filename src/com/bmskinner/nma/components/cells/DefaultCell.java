@@ -302,7 +302,7 @@ public class DefaultCell implements ICell {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_CELL).setAttribute(XMLNames.XML_ID, uuid.toString());
 		for (Entry<Measurement, Double> entry : measurements.entrySet()) {
 			e.addContent(entry.getKey().toXmlElement().setAttribute(XMLNames.XML_VALUE,

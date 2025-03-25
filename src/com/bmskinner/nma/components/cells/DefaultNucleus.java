@@ -137,7 +137,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = super.toXmlElement().setName(XMLNames.XML_NUCLEUS).setAttribute(
 				XMLNames.XML_NUCLEUS_NUMBER,
 				String.valueOf(nucleusNumber));

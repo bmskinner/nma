@@ -1,5 +1,6 @@
 package com.bmskinner.nma.io;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 /**
@@ -16,5 +17,5 @@ public interface XmlSerializable {
 	 * 
 	 * @return the XML element
 	 */
-	Element toXmlElement();
+	@NonNull Element toXmlElement();
 }

@@ -116,7 +116,7 @@ public class DefaultClusterGroup implements IClusterGroup {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_CLUSTER_GROUP)
 				.setAttribute(XMLNames.XML_ID, id.toString())
 				.setAttribute(XMLNames.XML_NAME, name);

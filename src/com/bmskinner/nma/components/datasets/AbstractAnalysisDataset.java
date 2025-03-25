@@ -164,7 +164,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_ANALYSIS_DATASET);
 
 		if (datasetColour != null)

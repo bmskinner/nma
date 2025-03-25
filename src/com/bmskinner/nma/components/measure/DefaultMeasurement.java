@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.measure;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.XMLNames;
@@ -43,7 +44,7 @@ public class DefaultMeasurement implements Measurement {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		return new Element(XMLNames.XML_MEASUREMENT)
 				.setAttribute(XMLNames.XML_NAME, name)
 				.setAttribute(XMLNames.XML_DIMENSION, dim.toString());

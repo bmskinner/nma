@@ -89,7 +89,7 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = super.toXmlElement().setName(XMLNames.XML_SIGNAL);
 		e.addContent(
 				new Element(XMLNames.XML_SIGNAL_CLOSEST_BORDER)

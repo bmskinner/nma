@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.XMLNames;
@@ -94,7 +95,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = super.toXmlElement().setName(XMLNames.XML_CONSENSUS_NUCLEUS);
 
 		e.addContent(new Element(XMLNames.XML_OFFSET)

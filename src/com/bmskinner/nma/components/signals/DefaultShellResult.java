@@ -97,7 +97,7 @@ public class DefaultShellResult implements IShellResult {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_SIGNAL_SHELL_RESULT);
 
 		e.addContent(new Element(XMLNames.XML_SIGNAL_N_SHELLS).setText(String.valueOf(nShells)));

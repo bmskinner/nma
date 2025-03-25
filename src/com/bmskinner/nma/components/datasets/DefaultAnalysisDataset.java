@@ -106,7 +106,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = super.toXmlElement();
 		e.addContent(new Element(XMLNames.XML_SAVE_FILE).setText(savePath.getPath()));
 

@@ -94,7 +94,7 @@ public class RuleSet implements XmlSerializable {
 	}
 
 	@Override
-	public Element toXmlElement() {
+	@NonNull public Element toXmlElement() {
 		Element e = new Element(XMLNames.XML_RULESET)
 				.setAttribute(XMLNames.XML_RULE_TYPE, getType().toString());
 

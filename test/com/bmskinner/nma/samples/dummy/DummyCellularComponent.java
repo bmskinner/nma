@@ -342,9 +342,8 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public Element toXmlElement() {
-		// TODO Auto-generated method stub
-		return null;
+	@NonNull public Element toXmlElement() {
+		return component.toXmlElement();
 	}
 
 	@Override
