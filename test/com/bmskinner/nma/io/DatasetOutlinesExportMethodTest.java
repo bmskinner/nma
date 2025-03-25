@@ -5,12 +5,16 @@ import static org.junit.Assert.assertEquals;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -23,6 +27,7 @@ import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.rules.OrientationMark;
+import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 
 /**
  * Tests for the outline exporter
@@ -30,56 +35,84 @@ import com.bmskinner.nma.components.rules.OrientationMark;
  * @author Ben Skinner
  *
  */
-public class DatasetOutlinesExporterTest {
+public class DatasetOutlinesExportMethodTest {
+	
+	private static final Logger LOGGER = Logger.getLogger(DatasetOutlinesExportMethodTest.class.getName());
 
-	private record ParsedOutline(List<UUID> cellIds, List<List<IPoint>> rawBorders,
-			List<List<IPoint>> orientedBorders) {
+	private static final float EPSILON = 0.001f;
+	
+	/**
+	 * The fields in a text file that define a coordinate
+	 * 
+	 *  @param object the object number
+	 *  @param imageName the path to the image file 
+	 *  @param x the x coordinate of the point
+	 *  @param y the y coordinate of the point
+	 */
+	record CoordinateLine(String[] colNames, String ... args) {
+		
+		public int indexOf(String colName) {
+			
+			for(int i=0; i<colNames.length; i++) {
+				if(colNames[i].equals(colName))
+					return i;
+			}
+			return -1;
+		}
+		
+		public String col(int index) {
+			return args[index];
+		}
+		
+		public String col0() {
+			return args[0];
+		}
+		
+		public String col1() {
+			return args[1];
+		}
+	}
+	
+	private record ParsedOutline(List<CoordinateLine> coords) {
 
 	}
 
-	private ParsedOutline readOutlineFile(File importFile) throws Exception {
+	private List<ParsedOutline> readOutlineFile(File importFile) throws Exception {
 
+		List<CoordinateLine> coordinates = new ArrayList<>();
+		String[] colNames = new String[0];
+		
 		try (FileInputStream fstream = new FileInputStream(importFile);
 				BufferedReader br = new BufferedReader(
-						new InputStreamReader(fstream, StandardCharsets.ISO_8859_1));) {
-
+						new InputStreamReader(fstream, StandardCharsets.UTF_8));) {
 			String strLine;
-
-			List<UUID> uuids = new ArrayList<>();
-			List<List<IPoint>> rawBorders = new ArrayList<>();
-			List<List<IPoint>> orientedBorders = new ArrayList<>();
-
-			int cellIdIndex = 0;
-			int rawIndex = 0;
-			int orientedIndex = 0;
-
+			int row = 0;
 			while ((strLine = br.readLine()) != null) {
-				String[] arr = strLine.split("\t");
-				if (arr[0].equals("Dataset")) { // find which columns contain the data we need
-					for (int i = 1; i < arr.length; i++) {
-						if (arr[i].equals("CellID"))
-							cellIdIndex = i;
-						if (arr[i].equals("RawCoordinates"))
-							rawIndex = i;
-						if (arr[i].equals("OrientedCoordinates"))
-							orientedIndex = i;
-					}
+				if (row == 0) { // header
+					colNames = strLine.split(Io.TAB);
+					row++;
 					continue;
 				}
-
-				if (strLine.isEmpty())
-					continue;
-
-				UUID cellid = UUID.fromString(arr[cellIdIndex]);
-				uuids.add(cellid);
-				String[] coordArr = arr[rawIndex].split(",");
-				String[] orientedArr = arr[orientedIndex].split(",");
-
-				rawBorders.add(toList(coordArr));
-				orientedBorders.add(toList(orientedArr));
+				String[] arr = strLine.split(Io.TAB);
+				
+				coordinates.add(new CoordinateLine(colNames, arr));
 			}
-			return new ParsedOutline(uuids, rawBorders, orientedBorders);
+		} catch (FileNotFoundException e) {
+			LOGGER.severe("Cannot find input file: %s".formatted(importFile.getAbsolutePath()));
+			throw new ImageImportException(e);
+		} catch (IOException e) {
+			LOGGER.severe("Cannot read input file: %s".formatted(importFile.getAbsolutePath()));
+			throw new ImageImportException(e);
 		}
+		
+		List<ParsedOutline> objects  = coordinates.stream()
+				.collect(Collectors.groupingBy(CoordinateLine::col1,
+						Collectors.toList()))
+				.values().stream()
+				.map(ParsedOutline::new)
+				.collect(Collectors.toList());
+
+		return objects;
 
 	}
 
@@ -115,17 +148,20 @@ public class DatasetOutlinesExporterTest {
 		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
-		ParsedOutline ps = readOutlineFile(outFile);
+		List<ParsedOutline> ps = readOutlineFile(outFile);
 
-		UUID cellOne = ps.cellIds().get(0);
+		CoordinateLine cellOneLineOne = ps.get(0).coords().get(0);
+		UUID cellOne = UUID.fromString(cellOneLineOne.col(cellOneLineOne.indexOf("CellID")));
 
 		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus();
 
-		List<IPoint> border = ps.rawBorders().get(0);
-
+		float x = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("RawX")));
+		float y = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("RawY")));
+		
 		// Correct landmark selected and correct number of points exported
-		assertEquals(n.getBorderPoint(0), border.get(0));
-		assertEquals(n.getBorderLength(), border.size());
+		assertEquals(n.getBorderPoint(0).getX(), x, EPSILON);
+		assertEquals(n.getBorderPoint(0).getY(), y, EPSILON);
+		assertEquals(n.getBorderLength(), ps.get(0).coords().size());
 	}
 
 	/**
@@ -148,17 +184,20 @@ public class DatasetOutlinesExporterTest {
 		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
-		ParsedOutline ps = readOutlineFile(outFile);
+		List<ParsedOutline> ps = readOutlineFile(outFile);
 
-		UUID cellOne = ps.cellIds().get(0);
+		CoordinateLine cellOneLineOne = ps.get(0).coords().get(0);
+		UUID cellOne = UUID.fromString(cellOneLineOne.col(cellOneLineOne.indexOf("CellID")));
 
 		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus();
 
-		List<IPoint> border = ps.rawBorders().get(0);
+		float x = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("RawX")));
+		float y = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("RawY")));
 
 		// Correct landmark selected and correct number of points exported
-		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE), border.get(0));
-		assertEquals(n.getBorderLength(), border.size());
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE).getX(), x, EPSILON);
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE).getY(), y, EPSILON);
+		assertEquals(n.getBorderLength(), ps.get(0).coords().size());
 	}
 
 	/**
@@ -180,17 +219,21 @@ public class DatasetOutlinesExporterTest {
 		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
-		ParsedOutline ps = readOutlineFile(outFile);
+		List<ParsedOutline> ps = readOutlineFile(outFile);
 
-		UUID cellOne = ps.cellIds().get(0);
+		CoordinateLine cellOneLineOne = ps.get(0).coords().get(0);
+		UUID cellOne = UUID.fromString(cellOneLineOne.col(cellOneLineOne.indexOf("CellID")));
 
 		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus();
 
-		List<IPoint> border = ps.rawBorders().get(0);
+		float x = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("RawX")));
+		float y = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("RawY")));
 
 		// Correct landmark selected and correct number of points exported
-		assertEquals(n.getBorderPoint(0), border.get(0));
-		assertEquals(100, border.size());
+		assertEquals(n.getBorderPoint(0).getX(), x, EPSILON);
+		assertEquals(n.getBorderPoint(0).getY(), y, EPSILON);
+		assertEquals(100, ps.get(0).coords().size());
+
 	}
 
 	/**
@@ -214,17 +257,20 @@ public class DatasetOutlinesExporterTest {
 		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
-		ParsedOutline ps = readOutlineFile(outFile);
+		List<ParsedOutline> ps = readOutlineFile(outFile);
 
-		UUID cellOne = ps.cellIds().get(0);
+		CoordinateLine cellOneLineOne = ps.get(0).coords().get(0);
+		UUID cellOne = UUID.fromString(cellOneLineOne.col(cellOneLineOne.indexOf("CellID")));
 
 		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus();
 
-		List<IPoint> border = ps.rawBorders().get(0);
+		float x = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("RawX")));
+		float y = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("RawY")));
 
 		// Correct landmark selected and correct number of points exported
-		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE), border.get(0));
-		assertEquals(100, border.size());
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE).getX(), x, EPSILON);
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE).getY(), y, EPSILON);
+		assertEquals(100, ps.get(0).coords().size());
 	}
 
 	/**
@@ -246,18 +292,21 @@ public class DatasetOutlinesExporterTest {
 		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
-		ParsedOutline ps = readOutlineFile(outFile);
+		List<ParsedOutline> ps = readOutlineFile(outFile);
 
-		UUID cellOne = ps.cellIds().get(0);
+		CoordinateLine cellOneLineOne = ps.get(0).coords().get(0);
+		UUID cellOne = UUID.fromString(cellOneLineOne.col(cellOneLineOne.indexOf("CellID")));
 
-		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus().getOrientedNucleus();
-		n.moveCentreOfMass(IPoint.atOrigin());
+		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus();
 
-		List<IPoint> border = ps.orientedBorders().get(0);
+		float x = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("RawX")));
+		float y = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("RawY")));
 
 		// Correct landmark selected and correct number of points exported
-		assertEquals(n.getBorderPoint(0), border.get(0));
-		assertEquals(n.getBorderLength(), border.size());
+		assertEquals(n.getBorderPoint(0).getX(), x, EPSILON);
+		assertEquals(n.getBorderPoint(0).getY(), y, EPSILON);
+		assertEquals(n.getBorderLength(), ps.get(0).coords().size());
+
 	}
 
 	/**
@@ -281,18 +330,20 @@ public class DatasetOutlinesExporterTest {
 		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
-		ParsedOutline ps = readOutlineFile(outFile);
+		List<ParsedOutline> ps = readOutlineFile(outFile);
 
-		UUID cellOne = ps.cellIds().get(0);
+		CoordinateLine cellOneLineOne = ps.get(0).coords().get(0);
+		UUID cellOne = UUID.fromString(cellOneLineOne.col(cellOneLineOne.indexOf("CellID")));
 
 		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus().getOrientedNucleus();
-		n.moveCentreOfMass(IPoint.atOrigin());
 
-		List<IPoint> border = ps.orientedBorders().get(0);
+		float x = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("OrientedX")));
+		float y = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("OrientedY")));
 
 		// Correct landmark selected and correct number of points exported
-		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE), border.get(0));
-		assertEquals(n.getBorderLength(), border.size());
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE).getX(), x, EPSILON);
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE).getY(), y, EPSILON);
+		assertEquals(n.getBorderLength(), ps.get(0).coords().size());
 	}
 
 	/**
@@ -314,18 +365,21 @@ public class DatasetOutlinesExporterTest {
 		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
-		ParsedOutline ps = readOutlineFile(outFile);
+		List<ParsedOutline> ps = readOutlineFile(outFile);
 
-		UUID cellOne = ps.cellIds().get(0);
+		CoordinateLine cellOneLineOne = ps.get(0).coords().get(0);
+		UUID cellOne = UUID.fromString(cellOneLineOne.col(cellOneLineOne.indexOf("CellID")));
 
 		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus().getOrientedNucleus();
-		n.moveCentreOfMass(IPoint.atOrigin());
 
-		List<IPoint> border = ps.orientedBorders().get(0);
+		float x = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("OrientedX")));
+		float y = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("OrientedY")));
 
 		// Correct landmark selected and correct number of points exported
-		assertEquals(n.getBorderPoint(0), border.get(0));
-		assertEquals(100, border.size());
+		assertEquals(n.getBorderPoint(0).getX(), x, EPSILON);
+		assertEquals(n.getBorderPoint(0).getY(), y, EPSILON);
+		assertEquals(100, ps.get(0).coords().size());
+
 	}
 
 	/**
@@ -349,17 +403,19 @@ public class DatasetOutlinesExporterTest {
 		new DatasetOutlinesExportMethod(outFile, d, o).call();
 
 		// Read the file and check the first item is correct
-		ParsedOutline ps = readOutlineFile(outFile);
+		List<ParsedOutline> ps = readOutlineFile(outFile);
 
-		UUID cellOne = ps.cellIds().get(0);
+		CoordinateLine cellOneLineOne = ps.get(0).coords().get(0);
+		UUID cellOne = UUID.fromString(cellOneLineOne.col(cellOneLineOne.indexOf("CellID")));
 
 		Nucleus n = d.getCollection().getCell(cellOne).getPrimaryNucleus().getOrientedNucleus();
-		n.moveCentreOfMass(IPoint.atOrigin());
 
-		List<IPoint> border = ps.orientedBorders().get(0);
+		float x = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("OrientedX")));
+		float y = Float.valueOf(cellOneLineOne.col(cellOneLineOne.indexOf("OrientedY")));
 
 		// Correct landmark selected and correct number of points exported
-		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE), border.get(0));
-		assertEquals(100, border.size());
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE).getX(), x, EPSILON);
+		assertEquals(n.getBorderPoint(OrientationMark.REFERENCE).getY(), y, EPSILON);
+		assertEquals(100, ps.get(0).coords().size());
 	}
 }

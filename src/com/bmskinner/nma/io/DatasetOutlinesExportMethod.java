@@ -66,7 +66,7 @@ public class DatasetOutlinesExportMethod extends MeasurementsExportMethod {
 				.append("RawX").append(TAB)
 				.append("RawY").append(TAB)
 				.append("OrientedX").append(TAB)
-				.append("OrientedX")
+				.append("OrientedY")
 				.append(NEWLINE);
 	}
 

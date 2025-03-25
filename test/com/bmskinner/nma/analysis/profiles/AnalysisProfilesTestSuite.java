@@ -12,8 +12,9 @@ import org.junit.runners.Suite.SuiteClasses;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ DefaultDatasetProfilingMethodTest.class,
+@SuiteClasses({ 
 		DatasetSegmentationMethodTest.class,
+		DefaultDatasetProfilingMethodTest.class,
 		IterativeSegmentFitterTest.class,
 		ProfileCreatorTest.class,
 		ProfileSegmenterTest.class,
@@ -22,6 +23,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		SegmentMergeMethodTest.class,
 		SegmentUnmergeMethodTest.class,
 		SegmentSplitMethodTest.class,
+		TextDatasetProfilingMethodTest.class,
 		UpdateLandmarkMethodTest.class,
 		UpdateSegmentIndexMethodTest.class
 })
