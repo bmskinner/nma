@@ -40,6 +40,8 @@ public class TextDatasetProfilingMethodTest {
 
 		nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 500);
 		nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 10000);
+		
+		nucleus.setInt(HashOptions.CHANNEL, 2);
 
 		nucleus.set(HashOptions.LANDMARK_LOCATION_FILE_KEY, new File(TestResources.TEXT_OUTLINES_FOLDER, "Text_keypoints.tsv"));
 		nucleus.set(HashOptions.LANDMARK_RP_NAME, "Longest axis");
