@@ -59,7 +59,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * An basic implementation of the image prober panel
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */
@@ -501,7 +501,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	 * This renderer displays the small icons from an ImageProberTableCell, and sets
 	 * text appropriate to the label within the cell.
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	class IconCellRenderer extends DefaultTableCellRenderer {
@@ -610,7 +610,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	/**
 	 * Used to alert settings panels that images are being updated
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public interface PanelUpdatingEventListener {

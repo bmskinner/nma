@@ -7,7 +7,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Listener for updates to the consensus nucleus of a dataset.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public interface ConsensusUpdatedListener {

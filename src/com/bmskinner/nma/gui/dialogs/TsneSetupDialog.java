@@ -27,7 +27,7 @@ import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Analysis setup dialog for tSNE method
- * @author bms41
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

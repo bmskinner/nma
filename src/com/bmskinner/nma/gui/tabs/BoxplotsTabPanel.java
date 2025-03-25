@@ -42,7 +42,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 /**
  * Base class for multiple violin plots arranged horizontally
  *
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

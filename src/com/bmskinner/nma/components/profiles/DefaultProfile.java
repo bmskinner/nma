@@ -33,7 +33,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * The default implementation of {@link IProfile}, which stores values in float
  * precision.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

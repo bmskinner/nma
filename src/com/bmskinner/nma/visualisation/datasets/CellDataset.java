@@ -29,7 +29,7 @@ import com.bmskinner.nma.components.cells.ICell;
 /**
  * Holds the information needed to draw a cell outline
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class CellDataset {

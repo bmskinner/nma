@@ -49,7 +49,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Holds other nucleus detection options. E.g. profile window
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

@@ -27,7 +27,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 /**
  * An XY dataset mapping signals and nuclei to their XY coordinates
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class NuclearSignalXYDataset extends ComponentXYDataset<Nucleus> {

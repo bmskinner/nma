@@ -26,7 +26,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * A profile contains an array of values, and this interface details both access
  * to those values, and the transformations that can be applied to the profile.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

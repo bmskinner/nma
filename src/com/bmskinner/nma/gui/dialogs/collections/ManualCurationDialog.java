@@ -63,7 +63,7 @@ import ij.process.ImageProcessor;
 /**
  * This displays all the nuclei in the given dataset, annotated to show nuclei.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")
@@ -84,7 +84,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	 * Map ids for e.g. signal groups to a display name. Used in the component
 	 * selection combobox
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.15.0
 	 *
 	 */
@@ -254,7 +254,7 @@ public class ManualCurationDialog extends AbstractCellCollectionDialog {
 	/**
 	 * Import the cell images for the curator
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.15.0
 	 *
 	 */

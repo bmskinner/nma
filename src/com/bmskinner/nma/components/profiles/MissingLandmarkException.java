@@ -21,7 +21,7 @@ import com.bmskinner.nma.components.MissingDataException;
 /**
  * Thrown when the requested border tag is not present in a Taggable object
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

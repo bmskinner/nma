@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Utilities for string conversions and manipulation
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  */
 public class StringUtils {

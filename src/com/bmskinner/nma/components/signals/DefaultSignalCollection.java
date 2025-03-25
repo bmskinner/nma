@@ -50,7 +50,7 @@ import ij.process.ImageProcessor;
 /**
  * The default implementation of the {@link ISignalCollection} interface
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

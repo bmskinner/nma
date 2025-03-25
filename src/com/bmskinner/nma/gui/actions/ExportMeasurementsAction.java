@@ -57,7 +57,7 @@ import com.bmskinner.nma.io.DatasetSignalsExporter;
 /**
  * The base action for exporting measurements from datasets
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */
@@ -74,7 +74,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 	/**
 	 * The action for exporting nuclear stats from datasets
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.13.4
 	 *
 	 */
@@ -121,7 +121,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 		/**
 		 * Configure the exported parameters
 		 * 
-		 * @author ben
+		 * @author Ben Skinner
 		 * @since 1.18.4
 		 *
 		 */
@@ -262,7 +262,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 	/**
 	 * The action for exporting nuclear stats from datasets
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.17.2
 	 *
 	 */
@@ -299,7 +299,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 	/**
 	 * The action for exporting cell component outlines from datasets
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.17.2
 	 *
 	 */
@@ -343,7 +343,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 		/**
 		 * Configure the exported parameters
 		 * 
-		 * @author ben
+		 * @author Ben Skinner
 		 * @since 2.1.1
 		 *
 		 */
@@ -444,7 +444,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 	/**
 	 * The action for exporting shell data from datasets
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.13.8
 	 *
 	 */
@@ -484,7 +484,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 	/**
 	 * The action for exporting shell data from datasets
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.13.8
 	 *
 	 */

@@ -37,7 +37,7 @@ import com.bmskinner.nma.components.signals.ISignalCollection;
  * This carries out the calculations of signal positions and angles within a
  * nucleus
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class SignalMeasurer {

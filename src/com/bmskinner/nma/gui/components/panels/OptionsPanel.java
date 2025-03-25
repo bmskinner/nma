@@ -20,7 +20,7 @@ import com.bmskinner.nma.logging.Loggable;
 
 /**
  * A panel that allows options to be selected for downstream analyses
- * @author bms41
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

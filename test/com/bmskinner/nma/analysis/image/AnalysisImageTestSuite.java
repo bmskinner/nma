@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * Runs all test classes in the analysis.image package
- * @author ben
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

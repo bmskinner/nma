@@ -19,7 +19,7 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 /**
  * Export analysis options
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class DatasetOptionsExportMethod extends MultipleDatasetAnalysisMethod implements Io {

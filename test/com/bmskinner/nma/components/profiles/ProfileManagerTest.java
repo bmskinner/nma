@@ -35,7 +35,7 @@ import com.bmskinner.nma.stats.Stats;
 /**
  * Tests for population level profile manipulation consistency
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

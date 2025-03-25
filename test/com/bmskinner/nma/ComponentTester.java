@@ -31,7 +31,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 /**
  * Base class for the component tests
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

@@ -34,7 +34,7 @@ import ij.process.ImageProcessor;
  * images for machine learning classification. Each cell image will be exported
  * with a bounding region as close to square as possible.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.15.0
  *
  */

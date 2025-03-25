@@ -78,7 +78,7 @@ import ij.process.ImageProcessor;
 /**
  * Factory for creating outlines of cellular components and signals
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class OutlineChartFactory extends AbstractChartFactory {

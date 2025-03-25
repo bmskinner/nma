@@ -28,7 +28,7 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
  * Interface to allow different user interaction interfaces. Provides methods to
  * request user input.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */
@@ -290,7 +290,7 @@ public interface InputSupplier {
 	/**
 	 * Exception thrown when the user cancels the input request
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.14.0
 	 *
 	 */

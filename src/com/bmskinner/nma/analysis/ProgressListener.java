@@ -20,7 +20,7 @@ package com.bmskinner.nma.analysis;
  * This interface allows AnalysisWorkers to detect progress through a
  * multithreaded task run in an AbstractProgressAction.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.12.0
  *
  */

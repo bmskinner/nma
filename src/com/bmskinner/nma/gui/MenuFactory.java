@@ -17,7 +17,7 @@ import com.bmskinner.nma.gui.events.UserActionEvent;
 /**
  * Simplify creation of menu items
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  */
 public class MenuFactory {
@@ -27,7 +27,7 @@ public class MenuFactory {
 	/**
 	 * The class for submenus in the popup menu
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.14.0
 	 *
 	 */
@@ -75,7 +75,7 @@ public class MenuFactory {
 	/**
 	 * The class for items in the popup menu
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.14.0
 	 *
 	 */

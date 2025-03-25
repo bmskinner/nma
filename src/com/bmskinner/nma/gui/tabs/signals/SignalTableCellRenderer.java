@@ -28,7 +28,7 @@ import com.bmskinner.nma.visualisation.datasets.SignalTableCell;
  * This allows a blank cell in a table to be coloured with a signal colour based
  * on the colour tag in the following cell, as stored within a SignalTableCell
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

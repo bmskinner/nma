@@ -22,7 +22,7 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 /**
  * Tests for tSNE
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

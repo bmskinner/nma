@@ -30,7 +30,7 @@ import com.bmskinner.nma.stats.Stats;
 /**
  * Update landmarks in a dataset
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class UpdateLandmarkMethod extends SingleDatasetAnalysisMethod {

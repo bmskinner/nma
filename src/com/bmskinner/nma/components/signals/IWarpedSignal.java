@@ -32,7 +32,7 @@ import ij.process.ShortProcessor;
  * Interface for signals that have been derived from warping signal from one or
  * more nuclei onto a consensus template.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

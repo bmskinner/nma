@@ -80,7 +80,7 @@ import ij.process.ImageProcessor;
 /**
  * Show the outlines of all cells in each image analysed
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */
@@ -540,7 +540,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 	/**
 	 * Allow the string value of a node to be displayed as a tooltip
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.13.8
 	 *
 	 */

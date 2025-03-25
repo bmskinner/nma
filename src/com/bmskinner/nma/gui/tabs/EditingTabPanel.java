@@ -19,7 +19,7 @@ package com.bmskinner.nma.gui.tabs;
 /**
  * Methods for editing datasets via a tab panel
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

@@ -30,7 +30,7 @@ import ij.process.FloatPolygon;
 /**
  * Construct test components for unit testing
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

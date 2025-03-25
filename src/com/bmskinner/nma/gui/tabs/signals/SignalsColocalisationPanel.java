@@ -38,7 +38,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 /**
  * Show the minimum distances between signals within a dataset
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

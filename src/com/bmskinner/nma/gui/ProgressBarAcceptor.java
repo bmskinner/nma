@@ -22,7 +22,7 @@ import javax.swing.JProgressBar;
 
 /**
  * Defines components that can have a progress bar added to them
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

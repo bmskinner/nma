@@ -21,7 +21,7 @@ import com.bmskinner.nma.io.SampleDatasetReader;
 /**
  * Test that cells are correctly filtered
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class CellCollectionFiltererTest extends ComponentTester {

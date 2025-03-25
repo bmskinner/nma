@@ -36,7 +36,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * This contains information about nuclear signals within an
  * {@link ICellCollection},
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class DefaultSignalGroup implements ISignalGroup {

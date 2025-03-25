@@ -22,7 +22,7 @@ import com.bmskinner.nma.visualisation.tables.AnalysisDatasetTableCreator;
 /**
  * Displays tables of rulesets for selected datasets
  * 
- * @author bs19022
+ * @author Ben Skinner
  * @since 2.2.0
  *
  */

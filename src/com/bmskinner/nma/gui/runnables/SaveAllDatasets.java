@@ -14,7 +14,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Action to save all open datasets
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class SaveAllDatasets implements Runnable {

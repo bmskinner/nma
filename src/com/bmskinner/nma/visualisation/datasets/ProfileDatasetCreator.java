@@ -52,7 +52,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 /**
  * Create charting datasets from analysis datasets.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */
@@ -81,7 +81,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * Combine line series for profiles and difference series (for IQRs) in one
 	 * class
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.14.0
 	 *
 	 */

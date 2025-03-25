@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.signals.ISignalCollection;
  * A Nucleus is the interface to all the possible types of nuclei that will be
  * used.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public interface Nucleus extends CellularComponent, Taggable, Orientable, Comparable<Nucleus> {
@@ -93,7 +93,7 @@ public interface Nucleus extends CellularComponent, Taggable, Orientable, Compar
 	 * Thrown when a nucleus type in a collection is incorrect for a requested
 	 * analysis
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.13.5
 	 */
 	class IncorrectNucleusTypeException extends Exception {

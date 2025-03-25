@@ -61,7 +61,7 @@ import ij.Prefs;
 /**
  * Testing methods of the analysis dataset
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

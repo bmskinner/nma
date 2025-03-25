@@ -11,7 +11,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
  * This extension to the default box and whisker dataset stores the raw values,
  * so data can be exported directly from the chart
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

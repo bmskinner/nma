@@ -54,7 +54,7 @@ import com.bmskinner.nma.visualisation.tables.ClusterGroupTableModel;
  * This panel shows any cluster groups that have been created, and the
  * clustering options that were used to create them.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.9.0
  *
  */
@@ -258,7 +258,7 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 	 * Render a button in a cell. Note, this is non-functional - it just paints a
 	 * button shape. Use a mouse listener on the table for functionality
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.16.0
 	 *
 	 */

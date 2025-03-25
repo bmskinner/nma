@@ -9,7 +9,7 @@ import java.util.logging.LogRecord;
 /**
  * Log format for the system console
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

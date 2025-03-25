@@ -50,7 +50,7 @@ import ij.process.ImageProcessor;
  * This class is designed to simplify operations on CellCollections involving
  * signals. It should be accessed via CellCollection.getSignalManager()
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class SignalManager {

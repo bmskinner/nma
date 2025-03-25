@@ -7,7 +7,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Notify the listener that landmarks have changed in datasets.
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public interface LandmarkUpdatedListener {

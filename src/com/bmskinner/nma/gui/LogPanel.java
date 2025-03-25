@@ -63,7 +63,7 @@ import com.bmskinner.nma.gui.tabs.DetailPanel;
  * bars from actions. For historical reasons, it also houses the console and
  * contains the console code.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

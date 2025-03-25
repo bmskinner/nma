@@ -34,7 +34,7 @@ import com.bmskinner.nma.components.signals.SignalManager;
 
 /**
  * Allow selection of signal groups within a dataset via a combo-box
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

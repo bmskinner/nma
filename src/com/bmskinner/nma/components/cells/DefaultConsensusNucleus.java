@@ -35,7 +35,7 @@ import ij.process.FloatPolygon;
 /**
  * This describes a consensus shape for a population of cells.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

@@ -34,7 +34,7 @@ import com.bmskinner.nma.utility.FileUtils;
 /**
  * Export the options stored in a dataset
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

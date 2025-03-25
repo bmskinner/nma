@@ -30,7 +30,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 
 /**
  * Tests for the floating point line equations
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class FloatEquationTest {

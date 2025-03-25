@@ -22,7 +22,7 @@ import java.util.logging.Level;
  * This class provides static methods for logging to the ImageJ
  * window
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class Loggable {
@@ -40,7 +40,7 @@ public class Loggable {
      * FINE. It is used for reporting errors whilst hiding uninformative
      * messages from users generally.
      * 
-     * @author bms41
+     * @author Ben Skinner
      * @since 1.13.3
      *
      */

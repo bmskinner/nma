@@ -40,7 +40,7 @@ import com.bmskinner.nma.components.signals.INuclearSignal;
 /**
  * Method to merge signals groups within a single dataaset
  * 
- * @author bs19022
+ * @author Ben Skinner
  * @since 1.16.1
  *
  */

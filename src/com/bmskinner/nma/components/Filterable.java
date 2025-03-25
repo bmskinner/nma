@@ -19,7 +19,7 @@ package com.bmskinner.nma.components;
 /**
  * Methods for filtering, dividing and combining collections
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  */
 public interface Filterable {

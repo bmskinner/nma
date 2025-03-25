@@ -53,7 +53,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * The method for finding nuclei in fluorescence images
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

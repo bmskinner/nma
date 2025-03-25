@@ -29,7 +29,7 @@ import com.bmskinner.nma.io.XmlSerializable;
 /**
  * This stores details of an analysis setup for an IAnalysisDataset.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

@@ -27,7 +27,7 @@ import com.bmskinner.nma.stats.Stats;
  * Unmerge segments in a dataset collection and its children, as long as the
  * collection is real.
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class SegmentUnmergeMethod extends SingleDatasetAnalysisMethod {

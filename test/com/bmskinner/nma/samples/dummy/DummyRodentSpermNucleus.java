@@ -53,7 +53,7 @@ import ij.gui.Roi;
 /**
  * A rodent sperm component taken from a testing dataset
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

@@ -20,7 +20,7 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 
 /**
  * Test for classes implementing the CellularComponent interface
- * @author bms41
+ * @author Ben Skinner
  * @since 1.15.0
  *
  */

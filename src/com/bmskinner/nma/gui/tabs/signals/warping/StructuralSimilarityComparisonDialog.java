@@ -29,7 +29,7 @@ import com.bmskinner.nma.visualisation.tables.SSIMTableModel;
 /**
  * Calculate and display structural similarities between images
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.15.0
  *
  */

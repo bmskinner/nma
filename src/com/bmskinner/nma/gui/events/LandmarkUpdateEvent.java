@@ -26,7 +26,7 @@ import com.bmskinner.nma.components.profiles.Landmark;
  * Landmark update events indicate a change to the position of a landmark in a
  * profile.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.2
  *
  */

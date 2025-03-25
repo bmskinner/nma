@@ -34,7 +34,7 @@ import weka.estimators.KernelEstimator;
  * Each series needs to hold the boxplot quartiles, min, max, as well as a list
  * of probabilities to render between min and max with even spacing
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

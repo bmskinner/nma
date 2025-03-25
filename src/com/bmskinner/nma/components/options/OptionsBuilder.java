@@ -7,7 +7,7 @@ import org.eclipse.jdt.annotation.NonNull;
 /**
  * Builder pattern for creating options.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

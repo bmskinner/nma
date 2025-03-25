@@ -38,7 +38,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * An implementation of the Finder for cells
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */

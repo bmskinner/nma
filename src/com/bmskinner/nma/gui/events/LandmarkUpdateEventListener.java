@@ -19,7 +19,7 @@ package com.bmskinner.nma.gui.events;
 /**
  * Listen for updates to landmarks in a dataset
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public interface LandmarkUpdateEventListener {

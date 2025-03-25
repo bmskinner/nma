@@ -14,7 +14,7 @@ import com.bmskinner.nma.components.signals.ISignalGroup;
 /**
  * Store settings for a signal warping
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.19.4
  *
  */

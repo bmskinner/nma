@@ -28,7 +28,7 @@ import java.util.UUID;
  * Collects values from individual nuclei for the shortest pairwise distances
  * between signals
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

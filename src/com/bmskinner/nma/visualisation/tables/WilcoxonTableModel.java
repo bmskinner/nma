@@ -13,7 +13,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Diaplay the results of Wilcoxon rank sum tests
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class WilcoxonTableModel extends AbstractTableModel {

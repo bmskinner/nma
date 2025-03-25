@@ -28,7 +28,7 @@ import com.bmskinner.nma.components.profiles.Landmark;
  * Method to read a keypoint file and update all landmarks in a dataset to match.
  * This file should take the same format as the keypoint export in {@link DatasetLandmarkExportMethod}
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class DatasetLandmarkImportMethod extends MultipleDatasetAnalysisMethod implements Io {

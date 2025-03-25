@@ -74,7 +74,7 @@ import com.bmskinner.nma.visualisation.tables.ScatterTableDatasetCreator;
  * An abstract class implementing the plottable statistic header on a detail
  * panel for drawing scatter charts
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

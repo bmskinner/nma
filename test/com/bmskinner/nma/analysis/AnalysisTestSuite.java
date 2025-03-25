@@ -13,7 +13,7 @@ import com.bmskinner.nma.analysis.signals.AnalysisSignalsTestSuite;
 
 /**
  * Runs all test classes in the analysis package
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

@@ -34,7 +34,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Holds the Kuwahara and flattening settings for nucleus detection
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

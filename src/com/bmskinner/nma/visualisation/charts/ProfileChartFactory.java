@@ -68,7 +68,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
  * Create profile charts. The majority of methods are private, preferring
  * explicit options to have been set in the ChartOptions provided.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

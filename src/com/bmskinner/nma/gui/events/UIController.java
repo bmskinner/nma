@@ -14,7 +14,7 @@ import com.bmskinner.nma.gui.events.CellUpdatedEventListener.CellUpdatedEvent;
 /**
  * Control dispatch of updates to UI panels
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class UIController {

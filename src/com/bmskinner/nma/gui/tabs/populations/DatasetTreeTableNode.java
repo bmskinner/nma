@@ -15,7 +15,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * A node that can hold a dataset
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class DatasetTreeTableNode implements MutableTreeTableNode {

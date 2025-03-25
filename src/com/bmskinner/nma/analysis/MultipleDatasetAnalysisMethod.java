@@ -27,7 +27,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
  * An abstract class of analysis method designed for handling multiple analysis
  * datasets e.g. merging datasets together.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

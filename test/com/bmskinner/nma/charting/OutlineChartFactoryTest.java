@@ -9,7 +9,7 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 
 /**
  * Test that individual components are drawn correctly in outline charts.
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

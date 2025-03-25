@@ -38,7 +38,7 @@ import weka.estimators.KernelEstimator;
 /**
  * Create histograms for nuclear statistics
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

@@ -20,7 +20,7 @@ import java.util.EventObject;
 
 /**
  * Fired when options are changed in an image prober
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class OptionsChangeEvent extends EventObject {

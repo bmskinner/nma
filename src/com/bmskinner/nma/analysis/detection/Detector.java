@@ -70,7 +70,7 @@ import ij.process.ShortStatistics;
  * provides methods for setting size, circularity and thresholding criteria. It
  * calls ImageJ's RoiManager to find the ROIs in the image.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class Detector {
@@ -312,7 +312,7 @@ public class Detector {
 	 * This recapitulates the basic function of the ImageJ particle analyzer without
 	 * using the static roi manager. It works better for multithreading.
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.13.8
 	 *
 	 */

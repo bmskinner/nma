@@ -64,7 +64,7 @@ import ij.ImageStack;
 /**
  * Detect signal proportions within concentric shells of a nucleus
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */
@@ -289,7 +289,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 	/**
 	 * Abstracts the business of creating shell detectors.
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.13.8
 	 *
 	 */

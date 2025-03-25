@@ -44,7 +44,7 @@ import com.bmskinner.nma.stats.Stats;
  * Checks the state of a dataset to report on abnormalities in, for example,
  * segmentation patterns in parent versus child datasets
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.6
  *
  */

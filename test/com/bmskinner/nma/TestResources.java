@@ -8,7 +8,7 @@ import com.bmskinner.nma.io.Io;
 /**
  * Define the folder and file name constants for testing images and datasets
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  */
 public class TestResources {

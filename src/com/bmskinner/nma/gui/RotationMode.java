@@ -20,7 +20,7 @@ package com.bmskinner.nma.gui;
  * This details the rotations that can be applied to nuclei for display
  * purposes.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.11.5
  *
  */

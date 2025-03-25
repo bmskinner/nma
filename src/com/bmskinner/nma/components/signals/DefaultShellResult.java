@@ -40,7 +40,7 @@ import com.bmskinner.nma.stats.Stats;
  * analyses. Averages and normalisations are computed when data are requested,
  * rather than needing to be pre-computed and stored.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

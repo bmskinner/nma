@@ -15,7 +15,7 @@ import com.bmskinner.nma.io.PackageReplacementObjectInputStream;
 /**
  * This class tests the conversions between component
  * classes
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

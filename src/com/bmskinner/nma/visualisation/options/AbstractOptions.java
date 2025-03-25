@@ -35,7 +35,7 @@ import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
  * This implements the requirements of the DisplayOptions interface, providing
  * access to options common to charts and tables.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.12.0
  *
  */

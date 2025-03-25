@@ -37,7 +37,7 @@ import com.bmskinner.nma.utility.FileUtils;
 /**
  * Provides methods for selecting import and export files
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.7
  *
  */

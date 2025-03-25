@@ -23,7 +23,7 @@ import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateExcept
 /**
  * Store aggregated profile data.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public interface IProfileAggregate {

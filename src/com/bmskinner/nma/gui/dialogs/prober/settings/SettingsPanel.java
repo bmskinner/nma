@@ -39,7 +39,7 @@ import com.bmskinner.nma.gui.dialogs.prober.ProberReloadEventListener;
 /**
  * The class from which all detection settings panels will derive
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

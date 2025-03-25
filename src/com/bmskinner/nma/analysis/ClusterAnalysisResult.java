@@ -24,7 +24,7 @@ import com.bmskinner.nma.components.datasets.IClusterGroup;
 /**
  * An extension to the default analysis result to hold cluster groups
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ClusterAnalysisResult extends DefaultAnalysisResult {

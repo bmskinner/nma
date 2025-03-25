@@ -34,7 +34,7 @@ import com.bmskinner.nma.components.options.FilteringOptions;
 /**
  * Perform filtering of collections on arbitrary predicates
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

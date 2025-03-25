@@ -23,7 +23,7 @@ import java.util.UUID;
  * This allows a signal group UUID to be stored with the signal group number and
  * the signal colour for use in table formatting.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public record SignalTableCell(UUID id, String name, Color color) {

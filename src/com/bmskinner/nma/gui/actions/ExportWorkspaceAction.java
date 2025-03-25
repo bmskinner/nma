@@ -33,7 +33,7 @@ import com.bmskinner.nma.utility.FileUtils;
 /**
  * Action to export workspaces
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

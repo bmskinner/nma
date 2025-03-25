@@ -18,7 +18,7 @@ import com.bmskinner.nma.stats.Stats;
 
 /**
  * Tests for the median finder 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

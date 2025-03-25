@@ -3,7 +3,7 @@ package com.bmskinner.nma.components;
 /**
  * Contains the keys used to construct XML for nmd files
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class XMLNames {

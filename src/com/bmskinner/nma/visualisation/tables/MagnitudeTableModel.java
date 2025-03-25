@@ -13,7 +13,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Display magnitude differences between datasets
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class MagnitudeTableModel extends AbstractTableModel {

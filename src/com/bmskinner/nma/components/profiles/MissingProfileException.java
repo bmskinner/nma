@@ -21,7 +21,7 @@ import com.bmskinner.nma.components.MissingDataException;
 /**
  * Thrown when a profile type is not available within a profile collection.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

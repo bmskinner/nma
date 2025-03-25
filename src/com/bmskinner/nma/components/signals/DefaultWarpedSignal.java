@@ -36,7 +36,7 @@ import ij.process.ImageProcessor;
 /**
  * Key for mapping templates to images
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

@@ -8,7 +8,7 @@ import ij.process.ImageProcessor;
 
 /**
  * Allow images to be displayed during testing
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ImageViewer {

@@ -22,7 +22,7 @@ import com.bmskinner.nma.io.Io;
  * of landmarks in datasets and sensibly arrange datasets with differing numbers
  * of landmarks.
  * 
- * @author bs19022
+ * @author Ben Skinner
  * @since 2.2.0
  *
  */

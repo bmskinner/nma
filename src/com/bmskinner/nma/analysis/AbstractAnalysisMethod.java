@@ -39,7 +39,7 @@ import com.bmskinner.nma.logging.Loggable;
  * This base class does not take an input dataset; it serves as the starting
  * point for all pipelines
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public abstract class AbstractAnalysisMethod

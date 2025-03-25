@@ -3,7 +3,7 @@ package com.bmskinner.nma.components.rules;
 /**
  * Markers that can be used to orient an object
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

@@ -31,7 +31,7 @@ import com.bmskinner.nma.io.XmlSerializable;
 /**
  * This interface describes statistical measures that can be plotted in charts.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public interface Measurement extends XmlSerializable {
@@ -39,7 +39,7 @@ public interface Measurement extends XmlSerializable {
 	/**
 	 * The names of the measured statistics
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 *
 	 */
 	static class Names {

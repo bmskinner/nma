@@ -24,7 +24,7 @@ import org.junit.rules.ExpectedException;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 
 /**
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class DefaultBorderSegmentTest {

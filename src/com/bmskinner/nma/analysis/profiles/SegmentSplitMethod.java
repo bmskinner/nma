@@ -28,7 +28,7 @@ import com.bmskinner.nma.stats.Stats;
  * Split a segment in a dataset collection and its children, as long as the
  * collection is real.
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {

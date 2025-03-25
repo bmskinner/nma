@@ -27,7 +27,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * The default implementation of IAnalysisWorker, using a SwingWorker.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

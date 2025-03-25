@@ -19,7 +19,7 @@ package com.bmskinner.nma.components.mesh;
 /**
  * Throw when a pixel cannot be mapped to a mesh face coordinate
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class PixelOutOfBoundsException extends Exception {

@@ -53,7 +53,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * This replaces the v1.x.x series of dedicated classes for each type of nucleus
  * to be analysed.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class RuleSetCollection implements XmlSerializable {

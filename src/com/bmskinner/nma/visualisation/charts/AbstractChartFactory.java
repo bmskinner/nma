@@ -66,7 +66,7 @@ import ij.process.ImageProcessor;
  * Base class for chart generation. Contains static methods to create loading
  * and error charts. All chart factories should extend this class.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public abstract class AbstractChartFactory {

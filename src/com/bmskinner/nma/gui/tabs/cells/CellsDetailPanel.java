@@ -26,7 +26,7 @@ import com.bmskinner.nma.gui.tabs.cells_detail.IndividualCellDetailPanel;
 /**
  * Shows aggregate stats for the cells in datasets
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

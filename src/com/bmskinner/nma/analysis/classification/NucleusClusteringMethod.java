@@ -46,7 +46,7 @@ import weka.core.Instances;
 /**
  * Run clustering of nuclei in a dataset based on a given set of options
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.8.0
  *
  */

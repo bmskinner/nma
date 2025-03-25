@@ -48,7 +48,7 @@ import com.bmskinner.nma.logging.Loggable;
  * Allow a random subset of cells to be extracted as a child of the given
  * dataset.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

@@ -3,7 +3,7 @@ package com.bmskinner.nma.components.rules;
 /**
  * Control whether profile rules are applied to 
  * individual nuclei or to the median profile 
- * @author ben
+ * @author Ben Skinner
  * @since 1.18.3
  *
  */

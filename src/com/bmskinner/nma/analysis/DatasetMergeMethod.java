@@ -54,7 +54,7 @@ import com.bmskinner.nma.io.Io;
 /**
  * Merge multiple datasets into a single dataset
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {

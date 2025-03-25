@@ -16,7 +16,7 @@ import com.bmskinner.nma.components.signals.ISignalGroup;
 /**
  * Map dataset signal groups for merging datasets
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.15.1
  *
  */
@@ -76,7 +76,7 @@ public class PairedSignalGroups {
 	 * Combine a dataset id with a signal id. Ensures signal groups from different
 	 * datasets with the same id can be distinguished.
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.15.0
 	 *
 	 */

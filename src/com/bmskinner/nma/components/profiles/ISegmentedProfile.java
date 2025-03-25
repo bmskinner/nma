@@ -27,7 +27,7 @@ import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateExcept
 /**
  * This details a profile that can have segments applied to it.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

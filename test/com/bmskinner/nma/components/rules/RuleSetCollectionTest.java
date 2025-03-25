@@ -14,7 +14,7 @@ package com.bmskinner.nma.components.rules;
 //
 ///**
 // * Test class for rule set collections
-// * @author ben
+// * @author Ben Skinner
 // * @since 1.18.3
 // *
 // */

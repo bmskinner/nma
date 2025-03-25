@@ -30,7 +30,7 @@ import com.bmskinner.nma.stats.Stats;
  * Store summary measurements for the cell collection. Saves calculating median,
  * min and max each time.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

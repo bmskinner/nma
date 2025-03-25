@@ -45,7 +45,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Find cells from a .cell file and assign them to child datasets.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

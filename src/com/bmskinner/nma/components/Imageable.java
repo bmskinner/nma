@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 /**
  * This covers the things than can be found within an image.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

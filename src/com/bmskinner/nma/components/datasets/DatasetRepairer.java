@@ -22,7 +22,7 @@ import com.bmskinner.nma.stats.Stats;
  * attempts to apply simple fixes to repair problems. It is not guaranteed to
  * fix all problems.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

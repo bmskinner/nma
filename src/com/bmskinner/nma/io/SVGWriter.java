@@ -43,7 +43,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Write cellular components to svg format.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */

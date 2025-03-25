@@ -26,7 +26,7 @@ import ij.Prefs;
 /**
  * Test the remapping works
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class XMLLandmarkRemappingMethodTest {

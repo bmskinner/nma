@@ -32,7 +32,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * The default implementation of a segmented profile.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

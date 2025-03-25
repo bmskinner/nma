@@ -38,7 +38,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Export the dataset to an nmd file
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class DatasetExportMethod extends SingleDatasetAnalysisMethod {

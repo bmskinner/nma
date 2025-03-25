@@ -59,7 +59,7 @@ import ij.process.ImageProcessor;
  * equal area, and calculating the proportion of signal intensity within each
  * shell
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.1
  *
  */
@@ -568,7 +568,7 @@ public class ShellDetector extends Detector {
 	 * designed to erode the roi for shell analysis, using the fixed number of
 	 * shells to set threshold in the EDM
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.13.8
 	 *
 	 */

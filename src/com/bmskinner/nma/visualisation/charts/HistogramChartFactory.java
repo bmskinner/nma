@@ -39,7 +39,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 /**
  * Methods for creating histograms from chart options
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class HistogramChartFactory extends AbstractChartFactory {

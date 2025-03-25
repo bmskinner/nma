@@ -33,7 +33,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 /**
  * Display a profile chart
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

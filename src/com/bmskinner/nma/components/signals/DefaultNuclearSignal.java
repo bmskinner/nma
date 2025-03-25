@@ -33,7 +33,7 @@ import ij.gui.Roi;
 /**
  * An implementation of {@link INuclearSignal}.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

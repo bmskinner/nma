@@ -17,7 +17,7 @@
 /**
  * Packages and classes generating reports based on 
  * datasets and analyses.
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

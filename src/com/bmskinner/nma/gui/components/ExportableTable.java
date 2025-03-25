@@ -48,7 +48,7 @@ import com.bmskinner.nma.io.Io.Exporter;
  * An extension to a JTable that allows the table contents to be exported to
  * file, or copied to the clipboard.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")
@@ -148,7 +148,7 @@ public class ExportableTable extends JTable {
 	/**
 	 * Allow row heights to be resized when column widths change
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.16.0
 	 *
 	 */
@@ -241,7 +241,7 @@ public class ExportableTable extends JTable {
 	/**
 	 * The popup menu for the table
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 *
 	 */
 	private class TablePopupMenu extends JPopupMenu {

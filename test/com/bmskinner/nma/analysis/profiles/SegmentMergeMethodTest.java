@@ -44,7 +44,7 @@ import com.bmskinner.nma.stats.Stats;
 /**
  * Test methods for segment merging
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @RunWith(Parameterized.class)

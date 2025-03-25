@@ -43,7 +43,7 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 /**
  * Tests for implementations of the Nucleus interface
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @RunWith(Parameterized.class)

@@ -27,7 +27,7 @@ import com.bmskinner.nma.logging.Loggable;
  * Button that allows nuclear signal detection options to be copied from an open
  * dataset or a saved options file
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.15.0
  *
  */

@@ -22,7 +22,7 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 /**
  * Tests that the averaging method is working
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

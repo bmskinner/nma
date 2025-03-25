@@ -20,7 +20,7 @@ package com.bmskinner.nma.analysis.classification;
  * This exception gets thrown when errors occur during a clustering
  * or classification
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ClusteringMethodException extends Exception {

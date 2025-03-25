@@ -33,7 +33,7 @@ import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
  * This interface describes the values that should be checkable by chart and
  * table dataset creators. Implementing classes must provide sensible defaults.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public interface DisplayOptions extends HashOptions {

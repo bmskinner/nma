@@ -17,7 +17,7 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 
 /**
  * Tests for the default nuclear signal class
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

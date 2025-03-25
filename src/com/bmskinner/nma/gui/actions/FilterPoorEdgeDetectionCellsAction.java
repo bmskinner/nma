@@ -137,7 +137,7 @@ public class FilterPoorEdgeDetectionCellsAction extends SingleDatasetResultActio
 	/**
 	 * Configure the exported parameters
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 2.1.1
 	 *
 	 */

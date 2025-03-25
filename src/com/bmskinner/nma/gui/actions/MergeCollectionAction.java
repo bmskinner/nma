@@ -46,7 +46,7 @@ import com.bmskinner.nma.utility.FileUtils;
 /**
  * Carry out a merge of datasets
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class MergeCollectionAction extends MultiDatasetResultAction {

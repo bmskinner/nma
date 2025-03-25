@@ -19,7 +19,7 @@ import com.bmskinner.nma.utility.FileUtils;
 /**
  * Action to export ruleset collections as XML
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.18.3
  *
  */

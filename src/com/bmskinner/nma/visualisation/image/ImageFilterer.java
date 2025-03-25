@@ -59,7 +59,7 @@ import inra.ijpb.morphology.strel.DiskStrel;
  * Contains methods for manipulating ImageProcessors, and provides conversion
  * between ImageStacks and ImageIcons for use in the UI.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ImageFilterer {

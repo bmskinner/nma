@@ -48,7 +48,7 @@ import com.bmskinner.nma.components.profiles.IProfileSegment;
  * 
  * All vertices can be located in another components using segment proportions.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

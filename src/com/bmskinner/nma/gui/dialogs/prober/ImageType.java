@@ -19,7 +19,7 @@ package com.bmskinner.nma.gui.dialogs.prober;
 /**
  * This is to allow different enums to be used in the setup of an ImageProber.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public interface ImageType {

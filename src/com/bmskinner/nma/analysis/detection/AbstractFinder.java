@@ -37,7 +37,7 @@ import ij.process.ImageProcessor;
 /**
  * An abstract implementation of the {@link Finder} interface.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @param <E> the element to find
  * @since 1.13.5
  *

@@ -65,7 +65,7 @@ import com.bmskinner.nma.visualisation.image.WarpedCellPainter;
  * Base class for annotated cell images, allowing selection of tags or other
  * elements of the cell.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */
@@ -89,7 +89,7 @@ public class InteractiveCellPanel extends JPanel {
 	/**
 	 * Keys for display options. These are used in a HashOptions
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.15.4
 	 *
 	 */
@@ -189,7 +189,7 @@ public class InteractiveCellPanel extends JPanel {
 	/**
 	 * Respond to mouse inputs
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.5.4
 	 *
 	 */
@@ -374,7 +374,7 @@ public class InteractiveCellPanel extends JPanel {
 	/**
 	 * Ensure the image is repainted on resizing of the panel
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 2.0.0
 	 *
 	 */

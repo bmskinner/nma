@@ -54,7 +54,7 @@ import com.bmskinner.nma.visualisation.tables.CellTableDatasetCreator;
 /**
  * Display for overall stats per cell
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

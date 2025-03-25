@@ -30,7 +30,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * A workspace is a collection of nmd files that can be reopened together. This
  * interface mey be extended depending on how useful workspaces turn out to be.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

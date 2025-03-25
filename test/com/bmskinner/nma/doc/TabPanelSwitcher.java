@@ -28,7 +28,7 @@ import com.javadocking.dock.TabDock;
 /**
  * Change between tab panels in a main window
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

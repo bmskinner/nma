@@ -18,7 +18,7 @@ package com.bmskinner.nma.stats;
 
 /**
  * This interface holds values for significance testing, but no methods
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public interface SignificanceTest {

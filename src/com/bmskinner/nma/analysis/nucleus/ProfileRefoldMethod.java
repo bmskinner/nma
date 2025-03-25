@@ -47,7 +47,7 @@ import com.bmskinner.nma.stats.Stats;
 /**
  * The method that refolds a median angle profile into a shape.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

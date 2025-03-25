@@ -19,7 +19,7 @@ package com.bmskinner.nma.gui;
 /**
  * Hold tool tip labels for the various options panels
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class Labels {
@@ -71,7 +71,7 @@ public class Labels {
 	/**
 	 * Labels from the populations panel and popup menus
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public static class Populations {
@@ -144,7 +144,7 @@ public class Labels {
 	/**
 	 * Labels relating to signals for tables and UI
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public static class Signals {
@@ -213,7 +213,7 @@ public class Labels {
 		/**
 		 * Labels for the signal warping dialog
 		 * 
-		 * @author ben
+		 * @author Ben Skinner
 		 *
 		 */
 		public class Warper {
@@ -236,7 +236,7 @@ public class Labels {
 	/**
 	 * Labels relating to stats for tables and UI
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public static class Stats {
@@ -247,7 +247,7 @@ public class Labels {
 	/**
 	 * Labels relating to clusters for tables and UI
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public static class Clusters {

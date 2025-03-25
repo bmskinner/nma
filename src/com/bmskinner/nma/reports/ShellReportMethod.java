@@ -28,7 +28,7 @@ import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Method containined the shell report generator
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

@@ -22,7 +22,7 @@ import java.io.Serializable;
  * This interface accesses the tagged points around the periphery of an object.
  * Default tags are provided.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

@@ -33,7 +33,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Set the radius for top hat filtering
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */

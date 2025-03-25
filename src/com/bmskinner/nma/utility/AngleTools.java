@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 /**
  * Utility methods for handling angles
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class AngleTools {

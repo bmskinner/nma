@@ -54,7 +54,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 /**
  * Create the charts for nuclear signals
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ShellChartFactory extends AbstractChartFactory {
@@ -202,7 +202,7 @@ public class ShellChartFactory extends AbstractChartFactory {
 	
 	/**
 	 * A linear interpolating paint scale
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	private static class LinearPaintScale implements PaintScale {

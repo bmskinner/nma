@@ -32,7 +32,7 @@ import com.bmskinner.nma.logging.Loggable;
  * Create nuclei from a text file describing their outlines. For example, as
  * generated from a YOLO segmentation model.
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class TextFileDetectionMethod extends AbstractAnalysisMethod {

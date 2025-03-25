@@ -26,7 +26,7 @@ import java.util.concurrent.RunnableFuture;
  * int codes in this interface - e.g. errors, finished, or a switch of the
  * pregress bar to an indeterminate state.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

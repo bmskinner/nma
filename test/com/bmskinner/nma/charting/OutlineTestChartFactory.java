@@ -20,7 +20,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 /**
  * Create the outline charts for test cases
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.15.0
  *
  */

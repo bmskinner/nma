@@ -39,7 +39,7 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 
 /**
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

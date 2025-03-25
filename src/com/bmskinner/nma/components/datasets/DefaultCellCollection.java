@@ -96,7 +96,7 @@ import com.bmskinner.nma.utility.StreamUtils;
 /**
  * Store cells and their profiles
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */
@@ -1139,7 +1139,7 @@ public class DefaultCellCollection implements ICellCollection {
 	/**
 	 * Store the median profiles
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 2.0.0
 	 *
 	 */
@@ -1618,7 +1618,7 @@ public class DefaultCellCollection implements ICellCollection {
 		/**
 		 * The cache for profiles
 		 * 
-		 * @author bms41
+		 * @author Ben Skinner
 		 * @since 1.13.4
 		 *
 		 */
@@ -1627,7 +1627,7 @@ public class DefaultCellCollection implements ICellCollection {
 			/**
 			 * The key used to store values in the cache
 			 * 
-			 * @author bms41
+			 * @author Ben Skinner
 			 * @since 1.13.4
 			 *
 			 */

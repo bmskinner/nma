@@ -32,7 +32,7 @@ import com.bmskinner.nma.io.Io.Importer;
  * This is a grouping of open AnalysisDatasets, which can act as a shortcut to
  * opening a lot of nmd files in one go.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.signals.IShellResult.Normalisation;
 
 /**
  * Compare shell distributions between shell results
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */
@@ -36,7 +36,7 @@ public class ShellDistributionTester {
 	
 	/**
 	 * A tuple to return chi square test results 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.14.0
 	 *
 	 */

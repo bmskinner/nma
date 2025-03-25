@@ -25,7 +25,7 @@ import com.bmskinner.nma.core.GlobalOptions;
  * Generate colour swatches for display. Uses the accessibility global option to
  * choose swatch.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ColourSelecter {
@@ -73,7 +73,7 @@ public class ColourSelecter {
 	 * The available colour choices, used for default dataset, segment and signal
 	 * colours
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 *
 	 */
 	public enum ColourSwatch {

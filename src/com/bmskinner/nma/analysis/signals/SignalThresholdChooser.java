@@ -44,7 +44,7 @@ import ij.process.ImageStatistics;
 /**
  * The detector for nuclear signals.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class SignalThresholdChooser {

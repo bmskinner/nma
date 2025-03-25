@@ -40,7 +40,7 @@ import com.bmskinner.nma.io.ImageImporter;
 /**
  * Paints cell outlines on JPanels, correcting for scales
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */
@@ -258,7 +258,7 @@ public class CellImagePainter implements ImagePainter {
 	/**
 	 * Tuple for result of rotation calculation
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public record Values(double rads, int w, int h, double ratio) {

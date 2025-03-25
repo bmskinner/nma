@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 /**
  * A nucleus imaplementation of the MeshVertex
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

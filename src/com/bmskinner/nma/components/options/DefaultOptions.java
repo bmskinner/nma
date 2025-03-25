@@ -39,7 +39,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * A base for all the options classes that need to store options as a key value
  * pair
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  */
 public class DefaultOptions implements HashOptions {

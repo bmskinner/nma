@@ -22,7 +22,7 @@ import com.bmskinner.nma.core.DatasetListManager;
 /**
  * Test the shell detector is functioning
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class SignalDetectionMethodTest extends ComponentTester {

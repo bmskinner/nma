@@ -63,7 +63,7 @@ import ij.process.FloatPolygon;
  * for concrete cellular components. This handles the border, centre of mass and
  * statistics of a component.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

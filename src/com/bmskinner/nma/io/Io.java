@@ -29,7 +29,7 @@ import com.bmskinner.nma.logging.Loggable;
  * Top level interface for IO operations. Track the common file extensions and
  * provide access to the separate import and export operations.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */
@@ -173,7 +173,7 @@ public interface Io {
 	/**
 	 * Static methods for exporting data
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public static class Exporter {

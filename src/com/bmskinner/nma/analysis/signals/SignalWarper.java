@@ -59,7 +59,7 @@ import ij.process.ImageProcessor;
  * This is implemented as a SwingWorker that returns the merged overlay of all
  * the signals in the collection
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.6
  *
  */

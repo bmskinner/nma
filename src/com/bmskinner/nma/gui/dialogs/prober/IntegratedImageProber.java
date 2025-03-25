@@ -28,7 +28,7 @@ import com.bmskinner.nma.gui.dialogs.prober.settings.SettingsPanel;
 /**
  * Integrates the analysis setup dialog with the image prober.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

@@ -45,7 +45,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * The cell is the highest level of analysis here. Cells we can analyse have a
  * nucleus, mitochondria, cytoplasm, and maybe a flagellum and acrosome.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  */
 public class DefaultCell implements ICell {

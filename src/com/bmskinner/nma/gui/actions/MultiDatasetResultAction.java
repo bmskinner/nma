@@ -28,7 +28,7 @@ import com.bmskinner.nma.gui.ProgressBarAcceptor;
  * An action class that allows multiple datasets to be operated on
  * simultaneously
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.6
  *
  */

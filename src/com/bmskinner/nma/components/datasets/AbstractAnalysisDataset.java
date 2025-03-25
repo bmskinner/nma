@@ -44,7 +44,7 @@ import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateExcept
  * does not implement the IAnalysisDataset interface itself - it is the
  * responsibility of extending classes to add the remaining fields and methods.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

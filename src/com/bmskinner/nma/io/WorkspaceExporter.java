@@ -31,7 +31,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Saves a workspace to a *.wrk file
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

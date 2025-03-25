@@ -548,7 +548,7 @@ public class ImageImporter implements Importer {
 	/**
 	 * Thrown when a conversion fails or a file is not convertible
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public static class ImageImportException extends Exception {

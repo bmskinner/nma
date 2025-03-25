@@ -6,7 +6,7 @@ import com.bmskinner.nma.stats.Stats.WilcoxonRankSumResult;
 /**
  * Tuple to store results of Wilcoxon rank sum tests between datasets
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public final record WilcoxDatasetResult(long id, WilcoxonRankSumResult r) {

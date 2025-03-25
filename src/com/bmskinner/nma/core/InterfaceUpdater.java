@@ -18,7 +18,7 @@ package com.bmskinner.nma.core;
 
 /**
  * Used to tag runnables to be executed on the ui worker pool
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

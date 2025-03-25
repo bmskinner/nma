@@ -26,7 +26,7 @@ import javax.swing.JPanel;
 /**
  * Display the memory in use. Based on the monitor in 
  * SeqMonk: https://www.bioinformatics.babraham.ac.uk/projects/seqmonk/
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.7
  *
  */

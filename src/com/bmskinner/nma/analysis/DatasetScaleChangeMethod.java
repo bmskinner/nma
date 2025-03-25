@@ -10,7 +10,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Change dataset scale
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class DatasetScaleChangeMethod extends MultipleDatasetAnalysisMethod {

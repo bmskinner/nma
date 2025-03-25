@@ -32,7 +32,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * profile. Rules will be applied sequentially: if rule n limits indexes, rule
  * n+1 will only be applied to those remaining indexes
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class RuleSet implements XmlSerializable {

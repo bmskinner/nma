@@ -23,7 +23,7 @@ import com.bmskinner.nma.visualisation.image.ImagePainter;
 /**
  * A panel that can hold images. The images can be 
  * magnified on mouse-over
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */
@@ -155,7 +155,7 @@ public class MagnifiableImagePanel extends JPanel {
 	
 	/**
 	 * Respond to mouse scroll wheel input
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 2.0.0
 	 *
 	 */
@@ -179,7 +179,7 @@ public class MagnifiableImagePanel extends JPanel {
 		
 	/**
 	 * Respond to mouse scroll wheel input
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 2.0.0
 	 *
 	 */

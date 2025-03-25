@@ -26,7 +26,7 @@ import com.bmskinner.nma.components.measure.LineEquation;
  * An implementation of the MeshFaceCoordinate, which stores a pixel position
  * within a MeshFace.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class DefaultMeshFaceCoordinate implements MeshFaceCoordinate {

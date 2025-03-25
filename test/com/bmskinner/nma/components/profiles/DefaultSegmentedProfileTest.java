@@ -37,7 +37,7 @@ import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateExcept
  * Tests for the methods specific to the segmented float profile. Common methods
  * are tested by {@link ISegmentedProfileTest}
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class DefaultSegmentedProfileTest {

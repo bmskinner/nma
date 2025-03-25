@@ -57,7 +57,7 @@ import com.bmskinner.nma.utility.ArrayUtils;
 /**
  * Export all the stats from a dataset to a text file for downstream analysis
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

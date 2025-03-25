@@ -27,7 +27,7 @@ import com.bmskinner.nma.components.workspaces.IWorkspace;
  * and type of selected objects. Components should specify a bitmask describing
  * the combinations of objects they will respond to.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

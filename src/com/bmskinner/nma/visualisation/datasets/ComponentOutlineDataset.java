@@ -36,7 +36,7 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 /**
  * Holds the outlines of cellular components
  * 
- * @author ben
+ * @author Ben Skinner
  */
 @SuppressWarnings("serial")
 public class ComponentOutlineDataset extends DefaultXYDataset {

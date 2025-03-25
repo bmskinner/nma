@@ -9,7 +9,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Calculate and display the number of shared cells between datasets
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class VennTableModel extends DatasetTableModel {

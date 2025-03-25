@@ -29,7 +29,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * All cell types implement this interface. A cell can have multiple nuclei, and zero,
  * one or many acrosomes, flagella and mitochondria.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

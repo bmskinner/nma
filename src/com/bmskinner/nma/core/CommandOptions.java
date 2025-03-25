@@ -13,7 +13,7 @@ import net.sourceforge.argparse4j.annotation.Arg;
 /**
  * Store the options provided to the program via the command line
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.1.0
  *
  */

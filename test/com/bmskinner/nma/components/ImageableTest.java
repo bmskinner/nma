@@ -28,7 +28,7 @@ import com.bmskinner.nma.io.SampleDatasetReader;
 /**
  * Tests for the Imageable interface static and 
  * default methods
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ImageableTest {

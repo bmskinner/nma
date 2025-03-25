@@ -38,7 +38,7 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 /**
  * Provides a simple access point to open datasets for testing classes
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

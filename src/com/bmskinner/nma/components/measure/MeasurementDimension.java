@@ -19,7 +19,7 @@ package com.bmskinner.nma.components.measure;
 /**
  * Describes the dimensions available to a statistical measure
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public enum MeasurementDimension {

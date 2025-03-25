@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  * Manages the threading and task queue. Analysis methods and UI updates are
  * treated separately for smoother UI refreshes.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.0
  *
  */
@@ -193,7 +193,7 @@ public class ThreadManager {
 	 * Wrap a Runnable in another Runnable that updates the job queue when done, and
 	 * allows access to the original Runnable for checking the class.
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.14.0
 	 *
 	 */

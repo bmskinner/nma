@@ -25,7 +25,7 @@ import com.bmskinner.nma.stats.Stats;
 /**
  * Base class for testing profiling methods
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

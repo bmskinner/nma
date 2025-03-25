@@ -18,7 +18,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 /**
  * Create profile charts for test cases specifically
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.15.0
  *
  */

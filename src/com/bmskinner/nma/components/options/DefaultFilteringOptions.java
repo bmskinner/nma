@@ -40,7 +40,7 @@ import com.bmskinner.nma.components.signals.INuclearSignal;
 /**
  * Default implementation of the filtering options
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

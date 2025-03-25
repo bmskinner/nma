@@ -21,7 +21,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Trigger signal merging action
  * 
- * @author bs19022
+ * @author Ben Skinner
  * @since 1.16.1
  *
  */

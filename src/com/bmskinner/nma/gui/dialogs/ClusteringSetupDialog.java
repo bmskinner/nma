@@ -35,7 +35,7 @@ import com.bmskinner.nma.gui.components.panels.ParameterSelectionPanel;
 /**
  * Setup for clustering. It inherits the parameters for inclusion from the hierarchical tree
  * setup, and adds panels for clustering method
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

@@ -314,7 +314,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 	/**
 	 * Colour the background of the pseudocolour column in the signal warping table
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.15.0
 	 *
 	 */

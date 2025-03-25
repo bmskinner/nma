@@ -43,7 +43,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 /**
  * Display boxplots for whole cell data
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

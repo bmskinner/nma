@@ -20,7 +20,7 @@ package com.bmskinner.nma.components.profiles;
  * Thrown when a profile collection or segmented profile has no assigned
  * segments
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

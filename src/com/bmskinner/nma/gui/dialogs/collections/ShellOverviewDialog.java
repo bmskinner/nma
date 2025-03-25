@@ -59,7 +59,7 @@ import ij.process.ImageProcessor;
 /**
  * Display all nuclei in the collection with signals and shell overlays
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.7
  *
  */

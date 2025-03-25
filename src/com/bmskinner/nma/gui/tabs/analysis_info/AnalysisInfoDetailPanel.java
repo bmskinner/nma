@@ -10,7 +10,7 @@ import com.bmskinner.nma.gui.tabs.DetailPanel;
 /**
  * Top level tab panel for analysis settings and parameters
  * 
- * @author bs19022
+ * @author Ben Skinner
  * @since 2.2.0
  *
  */

@@ -41,7 +41,7 @@ import com.bmskinner.nma.gui.tabs.DetailPanel;
 /**
  * Walk through the UI, taking screenshots of each window for documentation
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

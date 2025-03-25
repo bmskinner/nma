@@ -34,7 +34,7 @@ import ij.process.ImageProcessor;
 /**
  * This is an image based on NucleusMeshFace coordinates.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @param <E>
  *
  */

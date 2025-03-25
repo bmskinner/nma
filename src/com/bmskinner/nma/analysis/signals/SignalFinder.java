@@ -60,7 +60,7 @@ import ij.process.ImageProcessor;
  * generates the step-by-step images for display in the image prober UI, calling
  * a SignalDetector to find the actual signals
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */

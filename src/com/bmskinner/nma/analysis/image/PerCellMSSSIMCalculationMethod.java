@@ -40,7 +40,7 @@ package com.bmskinner.nma.analysis.image;
 // * For example, if a nucleus has signals A and B, this will calculate the MS-SSIM* between 
 // * A and B warped onto a common template. If a nucleus has only one of these signals, no 
 // * score is generated, and an empty chart will result
-// * @author bms41
+// * @author Ben Skinner
 // * @since 1.15.0
 // *
 // */
@@ -195,7 +195,7 @@ package com.bmskinner.nma.analysis.image;
 //    
 //	/**
 //	 * A key for values entered into the violin datasets
-//	 * @author bms41
+//	 * @author Ben Skinner
 //	 * @since 1.15.0
 //	 *
 //	 */

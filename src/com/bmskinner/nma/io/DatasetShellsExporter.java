@@ -45,7 +45,7 @@ import com.bmskinner.nma.components.signals.SignalManager;
 /**
  * Export shell analysis results to a file
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

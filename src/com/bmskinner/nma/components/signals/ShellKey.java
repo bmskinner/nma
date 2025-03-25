@@ -14,7 +14,7 @@ import com.bmskinner.nma.io.XmlSerializable;
 /**
  * A key that allows distinction of cellular components
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class ShellKey implements XmlSerializable {

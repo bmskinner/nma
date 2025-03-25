@@ -55,7 +55,7 @@ import com.bmskinner.nma.logging.Loggable;
  * there can be multiple cells with the same name if this is a merge of
  * datasets.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

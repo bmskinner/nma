@@ -30,7 +30,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * a cell collection - for example, the folder of images the signals were
  * detected in, or the colour with which the signals should be drawn in charts.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

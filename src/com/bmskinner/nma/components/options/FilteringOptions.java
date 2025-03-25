@@ -29,7 +29,7 @@ import com.bmskinner.nma.components.measure.MeasurementScale;
 
 /**
  * Specify options for filtering a collection.
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

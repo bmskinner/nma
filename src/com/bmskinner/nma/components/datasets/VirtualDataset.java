@@ -76,7 +76,7 @@ import com.bmskinner.nma.utility.StreamUtils;
  * A combination cell collection and dataset used for storing child datasets and
  * other sub-datasets
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */
@@ -1368,7 +1368,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	/**
 	 * Store the median profiles
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 2.0.0
 	 *
 	 */
@@ -1806,7 +1806,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		/**
 		 * The cache for profiles
 		 * 
-		 * @author bms41
+		 * @author Ben Skinner
 		 * @since 1.13.4
 		 *
 		 */
@@ -1815,7 +1815,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			/**
 			 * The key used to store values in the cache
 			 * 
-			 * @author bms41
+			 * @author Ben Skinner
 			 * @since 1.13.4
 			 *
 			 */

@@ -15,7 +15,7 @@ import com.bmskinner.nma.gui.Labels;
 /**
  * A renderer that displays cell contents within a JTextArea
  * allowing multi-line cells
- * @author ben
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

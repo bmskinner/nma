@@ -7,7 +7,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Notify the listener that scale has changed in the given datasets.
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public interface ScaleUpdatedListener {

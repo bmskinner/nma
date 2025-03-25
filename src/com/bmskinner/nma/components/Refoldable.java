@@ -28,7 +28,7 @@ import com.bmskinner.nma.components.profiles.MissingLandmarkException;
  * Provides methods relating to the abillity to refold consensus shapes for a
  * component
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  * @param <E> the component that can be refolded

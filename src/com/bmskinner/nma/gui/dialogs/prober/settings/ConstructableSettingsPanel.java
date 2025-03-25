@@ -33,7 +33,7 @@ import com.bmskinner.nma.gui.dialogs.prober.OptionsChangeEvent;
  * Builder for options panels. Use this to make the individual component
  * settings panels for a new analysis
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

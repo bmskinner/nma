@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * The interface for pipelines when being called externally
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  */
 public interface AnalysisPipeline {
@@ -39,7 +39,7 @@ public interface AnalysisPipeline {
 	
 	/**
 	 * Thrown when an analysis encounters an error.
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.14.0
 	 *
 	 */

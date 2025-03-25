@@ -37,7 +37,7 @@ import com.bmskinner.nma.gui.events.UserActionEvent;
 /**
  * Run segmentation on the given datasets
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class RunSegmentationAction extends SingleDatasetResultAction {

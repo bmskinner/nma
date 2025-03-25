@@ -56,7 +56,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * An image prober for detecting nuclei
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */
@@ -175,7 +175,7 @@ public class NucleusImageProber extends IntegratedImageProber
 	 * Table model for valid and invalid cells. Shows only area and circularity
 	 * measurements
 	 * 
-	 * @author bs19022
+	 * @author Ben Skinner
 	 *
 	 */
 	private class ObjectTableModel extends AbstractTableModel {
@@ -241,7 +241,7 @@ public class NucleusImageProber extends IntegratedImageProber
 	/**
 	 * Display for valid and invalid cells table.
 	 * 
-	 * @author bs19022
+	 * @author Ben Skinner
 	 *
 	 */
 	private class ObjectTableRenderer extends DefaultTableCellRenderer {

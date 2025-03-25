@@ -31,7 +31,7 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 /**
  * This class handles fitting of segments between profiles
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class SegmentFitter {

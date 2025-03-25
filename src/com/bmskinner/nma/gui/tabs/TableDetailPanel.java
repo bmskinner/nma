@@ -181,7 +181,7 @@ public abstract class TableDetailPanel extends DetailPanel {
 	 * Tables can also be an intensive process, especially with venn comparisons.
 	 * This worker will keep the model generation off the EDT
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 *
 	 */
 	protected class TableFactoryWorker extends SwingWorker<TableModel, Void>

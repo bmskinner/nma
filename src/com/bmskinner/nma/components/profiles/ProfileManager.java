@@ -37,7 +37,7 @@ import com.bmskinner.nma.stats.Stats;
  * copying and refreshing of ProfileCollections and ProfileAggregates. It
  * handles movement of tag indexes within the median and the nuclei
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class ProfileManager {

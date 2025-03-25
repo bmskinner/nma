@@ -34,7 +34,7 @@ import ij.process.ImageProcessor;
  * Test class for replacing the FISH remapper with a Finder. Does not return
  * useful cells
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */

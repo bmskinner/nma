@@ -15,7 +15,7 @@ import com.bmskinner.nma.components.signals.ComponentSignalsTestSuite;
 
 /**
  * Runs all test classes in the components package
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

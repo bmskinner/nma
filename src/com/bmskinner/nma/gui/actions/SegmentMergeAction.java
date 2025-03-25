@@ -17,7 +17,7 @@ import com.bmskinner.nma.gui.events.UIController;
 /**
  * Action to merge segments in a dataset
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class SegmentMergeAction extends SingleDatasetResultAction {

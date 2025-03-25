@@ -47,7 +47,7 @@ import ij.process.FloatPolygon;
 /**
  * Provides quick implementations of basic stats methods
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class Stats {

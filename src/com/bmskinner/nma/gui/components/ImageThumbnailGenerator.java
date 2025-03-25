@@ -27,7 +27,7 @@ import ij.process.ImageProcessor;
  * displaying a ComponentXYDataset:
  * {@code chartPanel.addChartMouseListener(new ImageThumbnailGenerator(chartPanel));}
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

@@ -36,7 +36,7 @@ import com.bmskinner.nma.gui.components.FileSelector;
 /**
  * Implements the input supplier for the default UI
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

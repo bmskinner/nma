@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Count the number of bytes read in an input stream, and 
  * inform count listeners. Used for tracking opening of datasets
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

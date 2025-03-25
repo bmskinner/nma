@@ -61,7 +61,7 @@ import com.bmskinner.nma.stats.Stats;
  * equally spaced points around the perimeter of each vertical nucleus in the
  * dataset.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */

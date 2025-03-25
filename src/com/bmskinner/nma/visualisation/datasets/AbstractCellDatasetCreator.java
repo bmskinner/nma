@@ -24,7 +24,7 @@ import com.bmskinner.nma.visualisation.options.DisplayOptions;
 /**
  * Overall dataset creator for datasets concerning a single cell
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class AbstractCellDatasetCreator extends AbstractDatasetCreator<DisplayOptions> {

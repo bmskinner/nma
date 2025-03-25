@@ -83,7 +83,7 @@ import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
 /**
  * Display hierarchical clustering trees and apply colours based on clusters.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")
@@ -639,7 +639,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 	/**
 	 * Select cluster nodes based on horizontal position
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 *
 	 */
 	protected class MouseClusterSelectionAdapter extends MouseAdapter {

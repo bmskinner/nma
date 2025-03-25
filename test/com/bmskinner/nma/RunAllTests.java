@@ -21,7 +21,7 @@ import com.bmskinner.nma.utility.UtilityTestSuite;
  * This suite runs the test file creators, then runs the tests that depend on
  * them
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

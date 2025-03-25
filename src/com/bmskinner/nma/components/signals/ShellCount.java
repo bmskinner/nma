@@ -22,7 +22,7 @@ import com.bmskinner.nma.io.XmlSerializable;
 /**
  * Store the individual counts per shell keyed to a source object
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class ShellCount implements XmlSerializable {

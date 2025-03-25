@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Implements an equals method for float array comparisons.
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

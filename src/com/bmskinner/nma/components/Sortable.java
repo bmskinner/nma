@@ -21,7 +21,7 @@ import java.util.UUID;
 
 /**
  * Defines the sorting operations for child datasets for display in the UI
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

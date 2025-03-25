@@ -38,7 +38,7 @@ import org.jfree.data.category.CategoryDataset;
  * distribution is on the negative y axis, and must keep full bar width.
  * Observed series are positive, and cna have shrinking widths.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

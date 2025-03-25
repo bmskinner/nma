@@ -21,7 +21,7 @@ import com.bmskinner.nma.components.MissingDataException;
 /**
  * Thrown when an expected option is not found
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class MissingOptionException extends MissingDataException {

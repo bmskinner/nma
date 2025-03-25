@@ -66,7 +66,7 @@ import ij.gui.Roi;
  * Positions around the border of the component can be tagged; the profiles will
  * track the tags. Default was false
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

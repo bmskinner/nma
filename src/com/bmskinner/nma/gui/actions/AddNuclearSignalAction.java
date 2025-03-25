@@ -44,7 +44,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Show the setup screen to detect nuclear signals, and run a detection analysis
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class AddNuclearSignalAction extends SingleDatasetResultAction {

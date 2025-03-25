@@ -26,7 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Hold version information, and parsing methods
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.12.0
  *
  */
@@ -199,7 +199,7 @@ public class Version implements Serializable {
 	/**
 	 * Throw if the version being deserialised is not supported
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public static class UnsupportedVersionException extends IOException {

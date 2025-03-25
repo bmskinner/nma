@@ -22,7 +22,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 
 /**
  * Describes a vertex within a {@link Mesh}
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

@@ -49,7 +49,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 /**
  * Create scatter chart datasets
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOptions> {

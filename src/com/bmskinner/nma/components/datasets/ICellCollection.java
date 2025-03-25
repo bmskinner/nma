@@ -48,7 +48,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * This interface will provides the primary access to cell data, as well as the
  * aggregate statistics and profile collection.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

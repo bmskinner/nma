@@ -7,7 +7,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Interface for handlers of consensus rotation and translation
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

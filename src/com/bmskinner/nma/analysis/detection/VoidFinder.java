@@ -32,7 +32,7 @@ import com.bmskinner.nma.io.ImageImporter.ImageImportException;
  * An implementation of the Finder for analyses that don't return values. For
  * example, FISH remapping and signal assignment
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */

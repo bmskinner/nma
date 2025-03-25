@@ -43,7 +43,7 @@ import ij.process.FloatPolygon;
  * Calculate basic stats for cellular components. Used to fill in missing values
  * when objects were not created using a detector
  *
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */

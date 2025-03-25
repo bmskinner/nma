@@ -19,7 +19,7 @@ package com.bmskinner.nma.gui;
 /**
  * Adds a cancel method to a Runnable
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public interface CancellableRunnable extends Runnable {

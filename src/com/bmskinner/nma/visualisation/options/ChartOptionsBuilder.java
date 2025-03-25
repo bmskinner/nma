@@ -44,7 +44,7 @@ import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel.Prof
  * options when not all parameters need to be set. It also makes it easier to
  * remember which boolean option is which.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class ChartOptionsBuilder {

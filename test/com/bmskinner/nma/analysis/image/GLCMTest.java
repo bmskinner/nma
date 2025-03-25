@@ -23,7 +23,7 @@ import ij.process.ImageProcessor;
 /**
  * Tests to confirm the GLCM generates the same results as the ImageJ plugin
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class GLCMTest {

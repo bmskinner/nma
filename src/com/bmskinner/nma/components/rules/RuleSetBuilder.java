@@ -27,7 +27,7 @@ import com.bmskinner.nma.components.rules.Rule.RuleType;
  * Use readable instructions to create a ruleset describing how to find a
  * feature in a profile
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class RuleSetBuilder {

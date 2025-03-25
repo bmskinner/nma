@@ -12,7 +12,7 @@ import com.bmskinner.nma.components.rules.PriorityAxis;
 /**
  * Objects that can be oriented via rules
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

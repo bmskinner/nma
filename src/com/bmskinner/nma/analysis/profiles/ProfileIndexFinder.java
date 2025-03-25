@@ -43,7 +43,7 @@ import com.bmskinner.nma.stats.Stats;
 /**
  * Allows rule based identification of indexes in a profile.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.0
  *
  */

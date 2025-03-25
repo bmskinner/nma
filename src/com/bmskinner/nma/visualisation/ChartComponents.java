@@ -27,7 +27,7 @@ import org.jfree.chart.util.ShapeUtils;
 /**
  * Define standard components for charts
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class ChartComponents {

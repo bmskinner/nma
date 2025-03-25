@@ -5,7 +5,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Notify the listener that swatch has changed in the given datasets.
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public interface SwatchUpdatedListener {

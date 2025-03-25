@@ -23,7 +23,7 @@ import com.bmskinner.nma.gui.components.SelectableCellIcon;
  * Track cell selections and allow for creation of new child collections based
  * on selected cells
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.19.2
  *
  */

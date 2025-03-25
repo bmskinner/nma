@@ -53,7 +53,7 @@ import com.bmskinner.nma.stats.Stats;
  * The method for profiling nuclei within a dataset. This detects the optimal
  * indexes to assign landmarks within each nucleus
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

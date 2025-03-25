@@ -24,7 +24,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 /**
  * Test the profile charting functions
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

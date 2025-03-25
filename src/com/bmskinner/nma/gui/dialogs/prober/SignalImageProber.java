@@ -41,7 +41,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Show the results of a signal detection with given options
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

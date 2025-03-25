@@ -32,11 +32,11 @@ import com.bmskinner.nma.io.XmlSerializable;
 
 /**
  * The interface for options classes. Store options as key value pairs
- * @author bms41
+ * @author Ben Skinner
  *
  */
 /**
- * @author ben
+ * @author Ben Skinner
  *
  */
 public interface HashOptions extends Serializable, XmlSerializable {

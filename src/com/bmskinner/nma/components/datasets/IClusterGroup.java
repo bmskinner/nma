@@ -28,7 +28,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * The cluster group saves a list of child datasets with a group name and a
  * Newick tree of the clustered nuclei within the datasets.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public interface IClusterGroup extends Serializable, XmlSerializable {

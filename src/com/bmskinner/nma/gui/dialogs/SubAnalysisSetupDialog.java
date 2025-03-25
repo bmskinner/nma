@@ -36,7 +36,7 @@ import com.bmskinner.nma.components.options.MissingOptionException;
  * the main analysis window to make the dialog modal It can return an
  * IAnalysisMethod preconfigured for running
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

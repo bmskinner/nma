@@ -41,7 +41,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Method to read a dataset from file
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

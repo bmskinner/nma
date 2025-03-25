@@ -42,7 +42,7 @@ import ij.process.FloatPolygon;
 /**
  * Constructs factories for components.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */
@@ -58,7 +58,7 @@ public class ComponentBuilderFactory {
 	 * profile window proportions that are common across all nuclei to be created to
 	 * simplify the building code.
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 2.0.0
 	 *
 	 */
@@ -88,7 +88,7 @@ public class ComponentBuilderFactory {
 		/**
 		 * Builder for nuclei, using global parameters from the enclosing factory
 		 * 
-		 * @author ben
+		 * @author Ben Skinner
 		 * @since 2.0.0
 		 *
 		 */
@@ -224,7 +224,7 @@ public class ComponentBuilderFactory {
 	 * Factory for signal builders. This can be initialised with fields that are
 	 * common across all signals to be created to simplify the building code.
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 2.0.0
 	 *
 	 */
@@ -245,7 +245,7 @@ public class ComponentBuilderFactory {
 		/**
 		 * Builder for nuclei, using global parameters from the enclosing factory
 		 * 
-		 * @author ben
+		 * @author Ben Skinner
 		 * @since 2.0.0
 		 *
 		 */

@@ -34,7 +34,7 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 /**
  * Tests for implementations of the Taggable interface
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

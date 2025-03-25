@@ -37,7 +37,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Allow cell collections to be filtered based on
  * the shell result in each cell.
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */
@@ -56,7 +56,7 @@ public class ShellResultCellFilterer {
 	
 	/**
 	 * The possible ways in which a shell result can be filtered
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.14.0
 	 *
 	 */

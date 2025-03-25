@@ -3,7 +3,7 @@ package com.bmskinner.nma.analysis.profiles;
 /**
  * Thrown when no indexes are found by a ruleset
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.6
  *
  */

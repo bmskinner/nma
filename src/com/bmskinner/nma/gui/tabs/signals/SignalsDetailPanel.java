@@ -29,7 +29,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * The top level tab panel showing information on signals at the dataset level
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

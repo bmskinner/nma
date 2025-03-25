@@ -28,7 +28,7 @@ import com.bmskinner.nma.components.profiles.ProfileType;
  * This is an options panel holding a group of radio buttons for the available
  * profile types.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.11.5
  *
  */

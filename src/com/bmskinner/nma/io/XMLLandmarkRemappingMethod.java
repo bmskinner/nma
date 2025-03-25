@@ -21,7 +21,7 @@ import com.bmskinner.nma.io.Io.Importer;
 /**
  * Remap landmarks in XML nmd files
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class XMLLandmarkRemappingMethod extends AbstractAnalysisMethod implements Importer {

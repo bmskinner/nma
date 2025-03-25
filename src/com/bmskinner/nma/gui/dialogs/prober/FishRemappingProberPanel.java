@@ -60,7 +60,7 @@ import com.bmskinner.nma.gui.components.ColourSelecter;
  * The image panel for FISH remapping. Stores the cells selected for remapping
  * and colours them appropriately.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

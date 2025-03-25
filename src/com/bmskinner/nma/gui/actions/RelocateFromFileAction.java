@@ -33,7 +33,7 @@ import com.bmskinner.nma.gui.events.UIController;
 /**
  * Creates child datasets from a .cell mapping file
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class RelocateFromFileAction extends SingleDatasetResultAction {

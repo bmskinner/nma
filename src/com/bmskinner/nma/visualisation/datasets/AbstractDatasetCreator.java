@@ -24,7 +24,7 @@ import com.bmskinner.nma.visualisation.options.DisplayOptions;
 /**
  * Base class for chart dataset creators
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  * @param <E> the options type describing the chart to build
  */

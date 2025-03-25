@@ -52,7 +52,7 @@ import com.bmskinner.nma.components.signals.ISignalGroup;
 /**
  * Tests for implementations of the ICellCollection interface
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

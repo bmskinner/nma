@@ -41,7 +41,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Handle the deletion of selected datasets in the populations panel
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

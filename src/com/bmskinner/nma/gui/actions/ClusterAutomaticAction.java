@@ -43,7 +43,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Setup a clustering of the given dataset.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ClusterAutomaticAction extends SingleDatasetResultAction {

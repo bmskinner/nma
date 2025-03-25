@@ -21,7 +21,7 @@ import com.bmskinner.nma.components.options.HashOptions;
 /**
  * The top level settings class for detection options
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

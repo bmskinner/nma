@@ -7,7 +7,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Notify the listener that datasets have been selected for display
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public interface DatasetSelectionUpdatedListener {

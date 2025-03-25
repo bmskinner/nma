@@ -27,7 +27,7 @@ import ij.process.ImageProcessor;
 /**
  * Map a cell to a display image for use in curation dialogs
  * and individual cell images
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class SelectableCellIcon extends ImageIcon {

@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Sends update requests for segments
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

@@ -34,7 +34,7 @@ import ij.plugin.BrowserLauncher;
  * A dialog that displays current version info and allows the user to check for
  * updates
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.15.0
  *
  */

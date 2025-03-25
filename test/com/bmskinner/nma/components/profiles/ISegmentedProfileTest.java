@@ -29,7 +29,7 @@ import com.bmskinner.nma.samples.dummy.DummySegmentedCellularComponent;
  * Test the common methods for profile classes implementing the
  * ISegmentedFloatProfile interface.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

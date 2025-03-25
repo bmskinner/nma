@@ -18,7 +18,7 @@ import com.bmskinner.nma.gui.events.UIController;
  * A runnable linking the main actions of an analysis: profiling, segmentation,
  * refolding and saving.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class MorphologyAnalysis implements Runnable {

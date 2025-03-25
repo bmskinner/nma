@@ -186,7 +186,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * Overrides the methods of the DefaultXYItemRenderer to use a consistent point
 	 * shape and not display lines.
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.13.4
 	 *
 	 */

@@ -84,7 +84,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 /**
  * Display panel for cell outlines, including segments and landmarks
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

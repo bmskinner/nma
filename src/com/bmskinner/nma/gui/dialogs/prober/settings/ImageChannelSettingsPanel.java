@@ -37,7 +37,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Panel for image channel settings
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

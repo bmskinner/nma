@@ -63,7 +63,7 @@ import com.javadocking.model.FloatDockModel;
 /**
  * An alternative main window for testing docking frameworks
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

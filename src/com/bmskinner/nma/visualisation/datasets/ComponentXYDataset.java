@@ -7,7 +7,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 
 /**
  * An XY dataset mapping components to their XY coordinates
- * @author ben
+ * @author Ben Skinner
  * @since 1.16.0
  * @param T the type of component to be held
  *

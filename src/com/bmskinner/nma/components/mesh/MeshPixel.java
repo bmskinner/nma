@@ -19,7 +19,7 @@ package com.bmskinner.nma.components.mesh;
 /**
  * Stores a value at a MeshFaceCoordinate
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

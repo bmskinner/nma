@@ -28,7 +28,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 /**
  * Utility functions involving circles
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */

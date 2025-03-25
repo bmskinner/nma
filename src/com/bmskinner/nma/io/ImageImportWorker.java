@@ -45,7 +45,7 @@ import ij.process.ImageProcessor;
  * Handles the import of all images within a given AnalysisDataset and sizing
  * for display
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableCellIcon> {

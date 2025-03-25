@@ -68,7 +68,7 @@ import ij.process.ShortProcessor;
  * This version of GLCM is based on Toby Cornish's GLCM_Texture_Too, from
  * {@link https://github.com/cornish/GLCM-TextureToo}.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.16.1
  *
  */
@@ -89,7 +89,7 @@ public class GLCM {
 	/**
 	 * The step angles possible in a GLCM analysis
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public enum GLCMStepAngle {
@@ -107,7 +107,7 @@ public class GLCM {
 	/**
 	 * The parameters calculated from the GCLM
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public enum GLCMParameter {
@@ -153,7 +153,7 @@ public class GLCM {
 	 * Store results of the GLCM calculations from a single tile in an image. Does
 	 * not store the entire matrix, just the output parameters
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public class GLCMTile {
@@ -267,7 +267,7 @@ public class GLCM {
 	/**
 	 * Stores GLCM tiles covering an image
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	public class GLCMTilePath {
@@ -358,7 +358,7 @@ public class GLCM {
 	/**
 	 * Calculates GLCM probabilities across a matrix and parameters
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	private class GLCMMatrix {
@@ -371,7 +371,7 @@ public class GLCM {
 		/**
 		 * Internal store for overall stats on the GLCM matrix
 		 * 
-		 * @author ben
+		 * @author Ben Skinner
 		 *
 		 */
 		private class GLCMStats {

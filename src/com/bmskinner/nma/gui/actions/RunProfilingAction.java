@@ -34,7 +34,7 @@ import com.bmskinner.nma.logging.Loggable;
  * Launch a profiling action that will create object profiles, and automatically
  * detect tags using the built-in rules
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class RunProfilingAction extends SingleDatasetResultAction {

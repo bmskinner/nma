@@ -27,7 +27,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
  * The default implementation of IAnalysisResult, which provides access to
  * datasets produced or modified in an IAnalysisMethod
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

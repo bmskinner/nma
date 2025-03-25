@@ -41,7 +41,7 @@ import com.bmskinner.nma.components.rules.OrientationMark;
  * Objects implementing this interface can have Landmarks assigned to points
  * around their periphery.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public interface Taggable extends CellularComponent, Orientable {

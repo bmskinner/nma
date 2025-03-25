@@ -38,7 +38,7 @@ import com.bmskinner.nma.io.Io;
 /**
  * The default implementation of the IAnalysisOptions interface
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

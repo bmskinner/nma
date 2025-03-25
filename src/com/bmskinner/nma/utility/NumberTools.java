@@ -3,7 +3,7 @@ package com.bmskinner.nma.utility;
 /**
  * Utility class to help manage common number tasks
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.19.4
  *
  */

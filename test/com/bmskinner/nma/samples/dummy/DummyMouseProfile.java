@@ -29,7 +29,7 @@ import com.bmskinner.nma.components.profiles.ProfileException;
  * MF1XYRII strain sperm nucleus, with a small random offset applied to each
  * point
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class DummyMouseProfile extends DefaultSegmentedProfile {

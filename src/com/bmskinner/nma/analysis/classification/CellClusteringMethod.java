@@ -42,7 +42,7 @@ import weka.core.Instances;
  * This provides an interface between subclassing methods and the weka library
  * being used
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

@@ -8,7 +8,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
  * Listener for updates to the file paths with a dataset. Used when nucleus
  * image paths need to be updated.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public interface FilePathUpdatedListener {

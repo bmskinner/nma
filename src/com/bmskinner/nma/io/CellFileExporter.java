@@ -37,7 +37,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Export the locations of the centre of mass of nuclei in a dataset to a file
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class CellFileExporter extends MultipleDatasetAnalysisMethod implements Io {

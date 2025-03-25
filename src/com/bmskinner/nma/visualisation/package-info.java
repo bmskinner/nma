@@ -16,7 +16,7 @@
  ******************************************************************************/
 /**
  * Packages and classes for creating charts and tables displayed in the UI.
- * @author bms41
+ * @author Ben Skinner
  *
  */
 package com.bmskinner.nma.visualisation;

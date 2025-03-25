@@ -6,7 +6,7 @@ import com.bmskinner.nma.io.XmlSerializable;
 /**
  * Wrapper for consensus objects allowing offsets and rotations
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.15.0
  *
  * @param <E> the type of object this is a consensus of

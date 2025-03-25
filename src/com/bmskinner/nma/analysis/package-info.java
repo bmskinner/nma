@@ -16,7 +16,7 @@
  ******************************************************************************/
 /**
  * Packages and classes implementing the types of analysis methods.
- * @author bms41
+ * @author Ben Skinner
  *
  */
 package com.bmskinner.nma.analysis;

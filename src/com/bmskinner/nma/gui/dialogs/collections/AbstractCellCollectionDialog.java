@@ -40,7 +40,7 @@ import com.bmskinner.nma.logging.Loggable;
  * Display collections of images from a dataset. Uses a SwingWorker to import
  * the images.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.7
  *
  */

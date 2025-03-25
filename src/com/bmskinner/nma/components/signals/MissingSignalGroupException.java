@@ -21,7 +21,7 @@ import com.bmskinner.nma.components.MissingDataException;
 /**
  * Thrown when a requested signal group is not present within a dataset or cell
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

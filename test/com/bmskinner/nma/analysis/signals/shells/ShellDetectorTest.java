@@ -52,7 +52,7 @@ import ij.process.ImageProcessor;
 
 /**
  * Test the shell detector is functioning
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ShellDetectorTest {

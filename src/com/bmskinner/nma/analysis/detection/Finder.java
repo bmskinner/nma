@@ -32,7 +32,7 @@ import ij.process.ImageProcessor;
  * Interface for all detection piplines. Replacing the DetectionPipeline
  * classes.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @param <E> the type of element to find
  * @since 1.13.5
  *
@@ -149,7 +149,7 @@ public interface Finder<E> {
 	 * Interface implemented by probers to be notified that a new image is available
 	 * for display
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.13.5
 	 *
 	 */
@@ -166,7 +166,7 @@ public interface Finder<E> {
 	/**
 	 * Fired when an image has been processed to detect components.
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.13.5
 	 *
 	 */
@@ -214,7 +214,7 @@ public interface Finder<E> {
 	/**
 	 * Fired when an image has been processed to detect components.
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.13.5
 	 *
 	 */

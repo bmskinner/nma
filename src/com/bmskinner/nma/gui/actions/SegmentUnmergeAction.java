@@ -18,7 +18,7 @@ import com.bmskinner.nma.gui.events.UIController;
  * Unmerge segments in a dataset collection and its children, as long as the
  * collection is real.
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class SegmentUnmergeAction extends SingleDatasetResultAction {

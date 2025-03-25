@@ -35,7 +35,7 @@ import com.bmskinner.nma.io.DatasetExportMethod;
 /**
  * Export one or more datasets into nmd format
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class ExportDatasetAction extends SingleDatasetResultAction {

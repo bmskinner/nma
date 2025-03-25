@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
  * An extension to the Point2D.Float providing methods for calculating distances
  * between points implementing the {@link IPoint} interface.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

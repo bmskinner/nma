@@ -27,7 +27,7 @@ import ij.process.ImageProcessor;
  * face of a Mesh. It provides the mechanisms to convert a mesh back into an
  * image given a template Mesh
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

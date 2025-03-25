@@ -31,7 +31,7 @@ import com.bmskinner.nma.logging.Loggable;
  * Import files. This class attempts to determine the file type and dispatch the
  * file to the correct importer.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class GenericFileImporter extends VoidResultAction implements Importer {

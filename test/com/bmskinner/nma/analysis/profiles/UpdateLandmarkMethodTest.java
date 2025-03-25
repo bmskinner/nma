@@ -40,7 +40,7 @@ import com.bmskinner.nma.stats.Stats;
 /**
  * Test methods for landmark updates
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @RunWith(Parameterized.class)

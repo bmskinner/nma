@@ -16,7 +16,7 @@ import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
  * Utility runnable that resegments the given dataset from scratch, and builds a
  * new consensus nucleus
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class SegmentAndRefold implements Runnable {

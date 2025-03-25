@@ -13,7 +13,7 @@ import com.bmskinner.nma.components.rules.PriorityAxis;
 /**
  * Calculate rotation angles and flips needed source images
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

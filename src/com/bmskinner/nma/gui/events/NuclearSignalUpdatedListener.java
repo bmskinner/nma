@@ -7,7 +7,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Notify the listener that nuclear signals have changed in datasets.
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public interface NuclearSignalUpdatedListener {

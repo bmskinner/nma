@@ -42,7 +42,7 @@ import com.bmskinner.nma.stats.Stats;
  * The assumption is that there is a population of profiles within the
  * collection that are more similar to each other than noisy profiles.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

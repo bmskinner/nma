@@ -28,7 +28,7 @@ import org.eclipse.jdt.annotation.NonNull;
  * ProgressableAction contains a progress bar, updated by an IAnalysisWorker,
  * which contains the IAnalysisMethod.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

@@ -32,7 +32,7 @@ import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel.Prof
  * This interface describes the values that should be checkable by
  * ChartFactories. Implementing classes must provide sensible defaults.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public interface ChartOptions extends DisplayOptions {

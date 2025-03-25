@@ -16,7 +16,7 @@ import com.bmskinner.nma.components.profiles.ProfileException;
  * Handle dataset creation from XML to ensure any linking of child datasests and
  * profile collections is properly handled
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

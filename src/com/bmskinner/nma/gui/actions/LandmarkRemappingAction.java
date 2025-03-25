@@ -21,7 +21,7 @@ import com.bmskinner.nma.io.XMLReader.XMLReadingException;
 /**
  * Action to remap landmarks between equivalent cells in nmd files
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class LandmarkRemappingAction extends VoidResultAction {

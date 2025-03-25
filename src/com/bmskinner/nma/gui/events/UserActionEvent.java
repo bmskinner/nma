@@ -28,7 +28,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * An event class to signal a UI event has been triggered
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class UserActionEvent extends EventObject {

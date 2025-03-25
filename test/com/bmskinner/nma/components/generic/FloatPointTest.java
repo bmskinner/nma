@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 /**
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class FloatPointTest {

@@ -22,7 +22,7 @@ import java.util.UUID;
  * Holds the shortest distance between signals in two signal groups within a
  * nucleus.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

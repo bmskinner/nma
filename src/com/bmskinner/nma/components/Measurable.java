@@ -29,7 +29,7 @@ import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateExcept
  * This interface allows for the retrieval of measurements from cells and their
  * components
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

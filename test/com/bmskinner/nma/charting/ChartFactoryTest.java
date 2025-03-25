@@ -32,7 +32,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
  * Base class for testing the charting functions. This provides methods for
  * displaying charts onscreen for manual examination.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

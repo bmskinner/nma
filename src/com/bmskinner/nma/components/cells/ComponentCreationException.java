@@ -4,7 +4,7 @@ package com.bmskinner.nma.components.cells;
  * Thrown when a component cannot be created or initialised (includes when
  * profile collection or segmented profile has no assigned segments)
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

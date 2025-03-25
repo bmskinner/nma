@@ -23,7 +23,7 @@ import org.eclipse.jdt.annotation.NonNull;
 /**
  * Allow custom points of interest to be added to a nucleus.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class DefaultLandmark implements Landmark {

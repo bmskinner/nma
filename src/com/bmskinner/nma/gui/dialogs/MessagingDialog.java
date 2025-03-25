@@ -28,7 +28,7 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
 /**
  * This extension to a JDialog contains an input supplier for user interaction
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

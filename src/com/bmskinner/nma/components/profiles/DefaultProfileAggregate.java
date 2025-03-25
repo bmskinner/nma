@@ -28,7 +28,7 @@ import com.bmskinner.nma.stats.Stats;
  * Aggregate profiles from individual nuclei for calculation of median and
  * quartile profiles
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

@@ -26,7 +26,7 @@ import com.bmskinner.nma.core.ThreadManager;
 /**
  * This monitors the length of the task queue once per second,
  * and writes the value to a text label. 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

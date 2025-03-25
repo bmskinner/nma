@@ -3,7 +3,7 @@ package com.bmskinner.nma.utility;
 /**
  * Utility methods for arrays
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class ArrayUtils {

@@ -2,7 +2,7 @@ package com.bmskinner.nma.analysis.detection;
 
 /**
  * Switch between finder types
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

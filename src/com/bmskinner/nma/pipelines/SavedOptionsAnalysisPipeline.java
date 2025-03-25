@@ -59,7 +59,7 @@ import com.bmskinner.nma.reports.ShellReportMethod;
 /**
  * A class to replicate a saved xml options file
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

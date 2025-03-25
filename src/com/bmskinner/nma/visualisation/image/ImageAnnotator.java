@@ -64,7 +64,7 @@ import ij.process.ImageProcessor;
 /**
  * Draw components and features on image processors.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ImageAnnotator extends ImageFilterer {

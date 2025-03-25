@@ -93,7 +93,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * endpoints, and segmentation in the program will not be calculated properly.
  * <p>
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */
@@ -831,7 +831,7 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	/**
 	 * Thrown when a segment update attempt fails
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.13.4
 	 *
 	 */

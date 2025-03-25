@@ -20,7 +20,7 @@ import com.bmskinner.nma.stats.Stats;
 /**
  * Test the ability of the segmenter to properly segment profiles
  * TODO: switch from visual inspection to asserts
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

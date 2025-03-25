@@ -27,7 +27,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Tests for profilable objects
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

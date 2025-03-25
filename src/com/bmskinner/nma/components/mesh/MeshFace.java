@@ -23,7 +23,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 
 /**
  * A face is composed of three vertices linked by three edges.
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

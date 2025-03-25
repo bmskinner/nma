@@ -32,7 +32,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Panel to set parameter options for clustering
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

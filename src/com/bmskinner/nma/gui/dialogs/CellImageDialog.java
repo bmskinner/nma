@@ -27,7 +27,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * View a cell annotated onto its original source image
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

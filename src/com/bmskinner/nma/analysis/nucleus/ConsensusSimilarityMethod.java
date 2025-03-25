@@ -34,7 +34,7 @@ import com.bmskinner.nma.stats.Stats;
 /**
  * Choose the nucleus most similar to a dataset median profile as the consensus
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class ConsensusSimilarityMethod extends SingleDatasetAnalysisMethod {

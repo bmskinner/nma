@@ -37,7 +37,7 @@ import com.bmskinner.nma.logging.Loggable;
  * window is closed, and offers to save changed datasets before completing the
  * close.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

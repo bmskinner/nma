@@ -27,7 +27,7 @@ import com.bmskinner.nma.components.options.HashOptions;
 
 /**
  * Options panel for clustering setup
- * @author ben
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

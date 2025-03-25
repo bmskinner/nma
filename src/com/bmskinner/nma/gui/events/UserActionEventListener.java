@@ -3,7 +3,7 @@ package com.bmskinner.nma.gui.events;
 /**
  * Interface for handlers of user actions
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public interface UserActionEventListener {

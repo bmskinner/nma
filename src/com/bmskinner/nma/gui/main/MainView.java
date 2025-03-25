@@ -22,7 +22,7 @@ import java.awt.event.WindowListener;
  * Interface for the main frame of the program. Used while debugging the
  * dockable framework
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

@@ -62,7 +62,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 /**
  * Plot the number of signals per nucleus/per cell
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

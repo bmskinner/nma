@@ -2,7 +2,7 @@ package com.bmskinner.nma.analysis;
 
 /**
  * Generic exception for errors in analysis methods
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

@@ -13,7 +13,7 @@ import com.bmskinner.nma.core.DatasetListManager;
 
 /**
  * Base class for settings panels allowing detection options to be copied from an existing dataset
- * @author bms41
+ * @author Ben Skinner
  * @since 1.15.0
  *
  */

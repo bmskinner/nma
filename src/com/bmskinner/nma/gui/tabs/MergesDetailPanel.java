@@ -53,7 +53,7 @@ import com.bmskinner.nma.visualisation.tables.AnalysisDatasetTableCreator;
  * This panel shows any merge sources for a merged dataset, and the analysis
  * options used to create the merge
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.9.0
  *
  */
@@ -217,7 +217,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 	 * Render a button in a cell. Note, this is non-functional - it just paints a
 	 * button shape. Use a mouse listener on the table for functionality
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.16.0
 	 *
 	 */

@@ -30,7 +30,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * Interface for profiles within a cell collection. Handles generation of median
  * profiles from individual nuclei.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public interface IProfileCollection extends XmlSerializable {

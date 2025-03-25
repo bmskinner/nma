@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.generic.IPoint;
  * Objects implementing this interface can be rotated by arbirtary amounts, and
  * can have specific border points positioned to the bottom.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public interface Rotatable {

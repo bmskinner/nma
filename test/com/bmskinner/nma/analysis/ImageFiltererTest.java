@@ -4,7 +4,7 @@ import ij.process.ByteProcessor;
 
 /**
  * Tests for image filterer
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class ImageFiltererTest {

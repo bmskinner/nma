@@ -24,7 +24,7 @@ import java.util.logging.LogRecord;
 /**
  * Format log records for display in the log panel
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class LogPanelFormatter extends Formatter {

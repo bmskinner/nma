@@ -39,7 +39,7 @@ import ij.process.FloatPolygon;
  * This interface provides the basic methods for a component of a cell - an
  * object with a border, a source image, and a size in microns.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.11.0
  *
  */

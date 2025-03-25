@@ -22,7 +22,7 @@ import com.bmskinner.nma.components.measure.MeasurementDimension;
  * Describes the types of profiles that can be generated during the morphology
  * analysis.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public enum ProfileType {

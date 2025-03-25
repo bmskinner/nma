@@ -17,7 +17,7 @@ import com.bmskinner.nma.io.SampleDatasetReader;
 
 /**
  * Tests for the default mesh
- * @author ben
+ * @author Ben Skinner
  * @since 1.18.3
  *
  */

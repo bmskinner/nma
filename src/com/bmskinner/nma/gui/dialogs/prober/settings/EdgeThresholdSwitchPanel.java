@@ -34,7 +34,7 @@ import com.bmskinner.nma.components.options.HashOptions;
  * Holds a canny settings panel and a threshold settings panel. Uses a card
  * layout to switch between them
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

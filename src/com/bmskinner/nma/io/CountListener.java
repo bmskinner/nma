@@ -18,7 +18,7 @@ package com.bmskinner.nma.io;
 
 /**
  * Listener for count events in a CountedInputStream or CountedOutputStream
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

@@ -23,7 +23,7 @@ import com.bmskinner.nma.components.XMLNames;
 /**
  * Allows for arbitrary measurements to be stored with dimensionality
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

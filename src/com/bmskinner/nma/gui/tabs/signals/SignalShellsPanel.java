@@ -83,7 +83,7 @@ import com.bmskinner.nma.visualisation.tables.NuclearSignalTableCreator;
  * Holds information on shell analysis results, and allows new shell analyses to
  * be run
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

@@ -21,7 +21,7 @@ package com.bmskinner.nma.io;
  * file that has become unavailable, and signals to other modules that they
  * should not try to process the source image
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class UnloadableImageException extends Exception {

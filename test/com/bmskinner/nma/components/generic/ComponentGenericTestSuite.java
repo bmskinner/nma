@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * Runs all test classes in the components.generic package
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

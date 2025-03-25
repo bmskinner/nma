@@ -18,7 +18,7 @@ import com.google.gson.JsonSyntaxException;
 /**
  * Check for updates to the program on the Bitbucket repository
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.15.0
  */
 public class UpdateChecker {

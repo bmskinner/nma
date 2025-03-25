@@ -21,7 +21,7 @@ package com.bmskinner.nma.components.cells;
  * discrete component so that an ICell does not need to implement
  * CellularComponent, and can thus be constructed with only a Nucleus.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

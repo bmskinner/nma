@@ -21,7 +21,7 @@ package com.bmskinner.nma.components.measure;
  * is captured by the camera. If a conversion factor is provided, this can be
  * shown in real units.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public enum MeasurementScale {

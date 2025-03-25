@@ -23,7 +23,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * Describes the results that can be obtained from an IAnalysisMethod
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

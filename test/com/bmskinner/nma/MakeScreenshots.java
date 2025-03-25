@@ -17,7 +17,7 @@ import com.bmskinner.nma.logging.Loggable;
  * This suite runs the test file creators, then takes screenshots for inclusion
  * in the user guide
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

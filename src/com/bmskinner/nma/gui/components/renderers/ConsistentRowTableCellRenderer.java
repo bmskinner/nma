@@ -24,7 +24,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 /**
  * Cell renderer which colours rows if all columns other than the 
  * first contain the same values
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

@@ -59,7 +59,7 @@ import com.bmskinner.nma.visualisation.options.DisplayOptions;
 /**
  * Generate the stats tables for a single cell
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class CellTableDatasetCreator extends AbstractCellDatasetCreator {

@@ -39,7 +39,7 @@ import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
  * Builder for a TableOptions object. This simplifies the creation of the
  * options when not all parameters need to be set.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class TableOptionsBuilder {

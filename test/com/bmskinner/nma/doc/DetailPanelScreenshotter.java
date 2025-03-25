@@ -37,7 +37,7 @@ import com.bmskinner.nma.io.Io;
 /**
  * Take screenshots of a detail panel and all the sub-panels
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

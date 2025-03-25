@@ -44,7 +44,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 /**
  * Creator for violin datasets
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {

@@ -58,7 +58,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
 /**
  * This is a test class to play around with exporting charts and
  * tables.
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 /**
  * Interface for painters
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public interface ImagePainter {

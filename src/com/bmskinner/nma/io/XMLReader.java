@@ -22,7 +22,7 @@ import com.bmskinner.nma.components.workspaces.IWorkspace;
 /**
  * Base class for XML readers
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  */
 public abstract class XMLReader {
@@ -116,7 +116,7 @@ public abstract class XMLReader {
 	/**
 	 * Thrown when an xml file cannot be read
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.14.0
 	 *
 	 */

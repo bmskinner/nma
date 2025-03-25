@@ -32,7 +32,7 @@ import com.bmskinner.nma.logging.Loggable;
  * the package structure can be updated without old datasets breaking. From
  * http://stackoverflow.com/questions/10936625/using-readclassdescriptor-and-maybe-resolveclass-to-permit-serialization-ver/14608062#14608062
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

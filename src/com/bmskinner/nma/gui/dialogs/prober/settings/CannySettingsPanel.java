@@ -36,7 +36,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * A panel that allows changes to be made to a CannyOptions
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

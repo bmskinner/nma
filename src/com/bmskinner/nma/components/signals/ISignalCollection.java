@@ -39,7 +39,7 @@ import ij.process.ImageProcessor;
  * Implementing classes will track the signal group each signal belongs to, plus
  * the source image the signal was detected in.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

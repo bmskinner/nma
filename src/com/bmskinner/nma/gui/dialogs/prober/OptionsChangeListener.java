@@ -18,7 +18,7 @@ package com.bmskinner.nma.gui.dialogs.prober;
 
 /**
  * Listen for changes in selected analysis options
- * @author ben
+ * @author Ben Skinner
  *
  */
 public interface OptionsChangeListener {

@@ -12,7 +12,7 @@ import com.bmskinner.nma.io.Io;
 /**
  * Test the export pipeline is working
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class ExportDataPipelineTest {

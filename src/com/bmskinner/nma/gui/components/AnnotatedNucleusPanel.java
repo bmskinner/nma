@@ -37,7 +37,7 @@ import ij.process.ImageProcessor;
 /**
  * Display the original image for a cell, with the nucleus outlines drawn on it.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

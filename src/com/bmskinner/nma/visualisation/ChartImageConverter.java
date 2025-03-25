@@ -25,7 +25,7 @@ import org.jfree.svg.SVGUnits;
 /**
  * Given a chart, produce an image suitable for a report or export
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class ChartImageConverter {

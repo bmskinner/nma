@@ -47,7 +47,7 @@ import com.bmskinner.nma.visualisation.options.TableOptions;
 /**
  * Creates the tables for display in the UI.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class AnalysisDatasetTableCreator extends AbstractTableCreator {

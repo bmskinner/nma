@@ -35,7 +35,7 @@ import com.bmskinner.nma.components.signals.ISignalGroup;
 /**
  * Simplify the creation of test datasets using a builder pattern
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

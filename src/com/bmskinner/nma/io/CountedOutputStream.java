@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Count the number of bytes written in an output stream, and 
  * inform count listeners. Used for tracking saving of datasets
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

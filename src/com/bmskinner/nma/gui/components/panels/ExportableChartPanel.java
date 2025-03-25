@@ -83,7 +83,7 @@ import com.bmskinner.nma.visualisation.datasets.ShellResultDataset;
  * give the chart a fixed aspect ratio. This replaces the dedicated
  * FixedAspectRatioChartPanel class
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")
@@ -798,7 +798,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	/**
 	 * Change the zoom of the chart based on scrolling
 	 * 
-	 * @author bs19022
+	 * @author Ben Skinner
 	 *
 	 */
 	public class ScrollWheelZoomListener implements MouseWheelListener {

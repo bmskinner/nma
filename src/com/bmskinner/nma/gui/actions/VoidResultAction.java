@@ -38,7 +38,7 @@ import com.bmskinner.nma.gui.ProgressBarAcceptor;
 /**
  * The base of all progressible actions. Handles progress bars and workers
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.6
  *
  */

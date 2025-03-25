@@ -55,7 +55,7 @@ import com.bmskinner.nma.stats.Stats;
  * representative median 3) For each nucleus, use iterative segment fitting to
  * map the segments
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
@@ -72,7 +72,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	/**
 	 * The types of segmentation that can be performed
 	 * 
-	 * @author bs19022
+	 * @author Ben Skinner
 	 *
 	 */
 	public enum MorphologyAnalysisMode {

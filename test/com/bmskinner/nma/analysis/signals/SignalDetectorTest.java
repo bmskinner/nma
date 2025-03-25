@@ -29,7 +29,7 @@ import ij.process.ImageProcessor;
 /**
  * Test that the signal detector is able to find signals in test images
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

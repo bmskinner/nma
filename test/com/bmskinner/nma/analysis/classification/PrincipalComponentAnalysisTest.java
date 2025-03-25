@@ -24,7 +24,7 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 /**
  * Tests for principal component analysis
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

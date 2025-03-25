@@ -42,7 +42,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * This describes an analysis dataset, which packages a collection of cells with
  * clusters, merge sources, and the options used for the detection of the cells.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

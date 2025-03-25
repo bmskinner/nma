@@ -10,7 +10,7 @@ import com.bmskinner.nma.core.DatasetListManager;
 /**
  * Utility class for common dataset methods
  * 
- * @author bs19022
+ * @author Ben Skinner
  * @since 2.2.0
  *
  */

@@ -15,7 +15,7 @@ import ij.process.ImageProcessor;
 
 /**
  * Tests for MS-SSIM*
- * @author bms41
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

@@ -22,7 +22,7 @@ import com.bmskinner.nma.components.cells.CellularComponent;
  * The methods available to a nuclear signal, which is a type of cellular
  * component
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

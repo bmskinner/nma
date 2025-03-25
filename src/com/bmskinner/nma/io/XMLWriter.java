@@ -31,7 +31,7 @@ import org.jdom2.output.XMLOutputter;
 
 /**
  * Base class for XML writers
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

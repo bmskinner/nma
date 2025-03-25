@@ -53,7 +53,7 @@ import weka.core.SparseInstance;
 /**
  * An implementation of principle component analysis
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

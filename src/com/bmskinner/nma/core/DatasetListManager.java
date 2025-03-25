@@ -42,7 +42,7 @@ import com.bmskinner.nma.logging.Loggable;
  * every component needs to have a consistent view of what is open or selected
  * at any time.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public final class DatasetListManager implements DatasetAddedListener {

@@ -43,7 +43,7 @@ import com.bmskinner.nma.stats.Stats;
 /**
  * Test methods for segment splitting
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @RunWith(Parameterized.class)

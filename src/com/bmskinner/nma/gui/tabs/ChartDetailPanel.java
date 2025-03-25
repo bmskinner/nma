@@ -87,7 +87,7 @@ public abstract class ChartDetailPanel extends DetailPanel {
 	 * imported for outline charts. This worker will keep the chart generation off
 	 * the EDT
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 *
 	 */
 	protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void>

@@ -23,7 +23,7 @@ import java.util.EventObject;
  * ExportableChartPanels when setChart() is invoked, and allows the UI to update
  * chart panels as soon as the new chart is in place
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public interface ChartSetEventListener {

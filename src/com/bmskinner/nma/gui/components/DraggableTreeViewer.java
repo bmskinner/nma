@@ -30,7 +30,7 @@ import jebl.gui.trees.treeviewer.TreeViewer;
 
 /**
  * An extension to jebl's tree viewer that allows lines to be added to the tree
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

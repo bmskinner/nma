@@ -79,7 +79,7 @@ public class SignalTablePanel extends TableDetailPanel
 	/**
 	 * Listener for interaction with the signal stats table
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.15.0
 	 *
 	 */

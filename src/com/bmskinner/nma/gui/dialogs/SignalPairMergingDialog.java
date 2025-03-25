@@ -43,7 +43,7 @@ import com.bmskinner.nma.gui.components.panels.SignalGroupSelectionPanel;
  * Allows options to be set when merging datasets. E.g. which signal groups are
  * equivalent.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

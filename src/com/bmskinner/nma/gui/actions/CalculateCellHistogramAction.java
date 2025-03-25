@@ -27,7 +27,7 @@ import com.bmskinner.nma.io.ImageImporter;
 /**
  * Create an action to run histogram calculation and signal the UI
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class CalculateCellHistogramAction extends SingleDatasetResultAction {
@@ -76,7 +76,7 @@ public class CalculateCellHistogramAction extends SingleDatasetResultAction {
 	/**
 	 * Configure the exported parameters
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.18.4
 	 *
 	 */

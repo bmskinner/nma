@@ -23,7 +23,7 @@ import ij.process.FloatPolygon;
 /**
  * Provide methods for a dummy component
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

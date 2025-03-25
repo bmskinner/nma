@@ -23,7 +23,7 @@ import ij.Prefs;
 /**
  * Test the workflows can save a valid dataset
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

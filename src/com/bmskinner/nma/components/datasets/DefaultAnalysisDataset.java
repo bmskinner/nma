@@ -51,7 +51,7 @@ import com.bmskinner.nma.logging.Loggable;
  * versions 1.14.0 onwards. The first field in the object is the version,
  * allowing deserialisation to choose an appropriate path in the future.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

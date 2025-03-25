@@ -38,7 +38,7 @@ import com.bmskinner.nma.utility.DatasetUtils;
 /**
  * Abstract exporter
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

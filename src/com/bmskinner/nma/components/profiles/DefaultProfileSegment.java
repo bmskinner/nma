@@ -43,7 +43,7 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 /**
  * The default implementation of the {@link IProfileSegment} interface.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

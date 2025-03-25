@@ -21,7 +21,7 @@ package com.bmskinner.nma.io.conversion;
 
 /**
  * Test conversion and opening of old dataset versions
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

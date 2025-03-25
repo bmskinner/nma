@@ -51,7 +51,7 @@ import ij.gui.Roi;
  * This specification can be changed, provided that the detection options specify
  * the zero-indexed columns to use under the keys provided in this class.
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class TextFileNucleusFinder extends CellFinder {

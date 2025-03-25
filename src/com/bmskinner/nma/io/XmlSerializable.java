@@ -5,7 +5,7 @@ import org.jdom2.Element;
 /**
  * Interface implemented by all objects that can be serialized to XML
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

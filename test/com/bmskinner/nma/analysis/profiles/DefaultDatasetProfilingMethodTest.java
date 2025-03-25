@@ -38,7 +38,7 @@ import ij.Prefs;
 /**
  * Test methods for the dataset profiling
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

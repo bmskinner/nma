@@ -10,7 +10,7 @@ import com.bmskinner.nma.io.xml.IoXmlTestSuite;
 /**
  * Runs all test classes in the io package
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

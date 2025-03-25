@@ -30,7 +30,7 @@ import com.bmskinner.nma.components.profiles.ProfileException;
  * Describes the methods for retrieving aggregate stats from collections of
  * objects implementing the Statistical interface
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

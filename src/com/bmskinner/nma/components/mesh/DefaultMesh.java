@@ -42,7 +42,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * A default implementation of the mesh
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class DefaultMesh implements Mesh {

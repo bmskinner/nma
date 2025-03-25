@@ -32,7 +32,7 @@ import com.bmskinner.nma.visualisation.charts.DimensionalityChartFactory;
  * Display tSNE results. This is a temporary class for testing. It can display
  * any 2D charts - currently testing PCA
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

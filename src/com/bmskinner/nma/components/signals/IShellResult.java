@@ -28,7 +28,7 @@ import com.bmskinner.nma.io.XmlSerializable;
 /**
  * The interface for shell analysis results
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */
@@ -41,7 +41,7 @@ public interface IShellResult extends XmlSerializable {
      * The types of shrinking that can be used to generate shells.
      * An area shrinking will attempt to keep all shells at equal area.
      * A radius shrinking will attempt to make shells evenly spaced from the centre
-     * @author bms41
+     * @author Ben Skinner
      * @since 1.13.8
      *
      */
@@ -57,7 +57,7 @@ public interface IShellResult extends XmlSerializable {
     
     /**
      * The types of pixel value that can be stored
-     * @author bms41
+     * @author Ben Skinner
      * @since 1.13.8
      *
      */
@@ -72,7 +72,7 @@ public interface IShellResult extends XmlSerializable {
     
     /**
      * The types of normalisation that can be applied to pixels
-     * @author bms41
+     * @author Ben Skinner
      * @since 1.13.8
      *
      */
@@ -87,7 +87,7 @@ public interface IShellResult extends XmlSerializable {
     /**
      * How pixels within a nucleus should be analysed: only the pixels within defined signals,
      * or any pixel in the nucleus 
-     * @author bms41
+     * @author Ben Skinner
      * @since 1.13.8
      *
      */

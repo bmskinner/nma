@@ -49,7 +49,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Extract virtual merge source datasets into real root datasets.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

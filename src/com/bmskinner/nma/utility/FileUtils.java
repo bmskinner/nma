@@ -27,7 +27,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 /**
  * File handling utility methods
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.15.1
  *
  */

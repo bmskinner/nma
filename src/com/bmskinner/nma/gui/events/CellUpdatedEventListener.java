@@ -23,7 +23,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
  * Signal that a cell in a dataset has been updated - that is, it's data has
  * changed.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */
@@ -37,7 +37,7 @@ public interface CellUpdatedEventListener {
 	/**
 	 * An update event for a single cell.
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.14.0
 	 *
 	 */

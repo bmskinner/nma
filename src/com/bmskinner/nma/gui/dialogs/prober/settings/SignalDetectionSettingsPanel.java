@@ -36,7 +36,7 @@ import com.bmskinner.nma.logging.Loggable;
  * included in an image prober, and will fire a prober reload event when
  * settings are changed.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

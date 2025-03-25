@@ -88,7 +88,7 @@ import com.bmskinner.nma.utility.FileUtils;
 /**
  * Controller for all user actions
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 2.0.0
  *
  */

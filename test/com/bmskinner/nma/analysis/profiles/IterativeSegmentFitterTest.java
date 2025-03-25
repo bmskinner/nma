@@ -27,7 +27,7 @@ import com.bmskinner.nma.stats.Stats;
 
 /** 
  * Tests for the iterative segment fitting
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

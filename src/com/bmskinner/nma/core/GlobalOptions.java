@@ -25,7 +25,7 @@ import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
 /**
  * This holds the options set globally for the program
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

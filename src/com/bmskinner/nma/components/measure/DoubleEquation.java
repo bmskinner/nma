@@ -25,7 +25,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 /**
  * Describes line equations of the form y=m*x + c
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class DoubleEquation implements LineEquation {

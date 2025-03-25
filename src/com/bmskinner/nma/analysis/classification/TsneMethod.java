@@ -38,7 +38,7 @@ import com.jujutsu.utils.TSneUtils;
  * also does not easily allow for testing hyperparameters to choose the best
  * options.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.16.0
  *
  */

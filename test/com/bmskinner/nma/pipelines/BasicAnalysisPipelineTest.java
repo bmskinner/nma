@@ -47,7 +47,7 @@ import ij.Prefs;
  * datasets. The test sets should have been created using the
  * {@link TestImageDatasetCreator} before these tests are invoked.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

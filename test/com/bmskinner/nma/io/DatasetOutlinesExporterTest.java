@@ -27,7 +27,7 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 /**
  * Tests for the outline exporter
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class DatasetOutlinesExporterTest {

@@ -52,7 +52,7 @@ import ij.gui.Roi;
  * The standard round nucleus, implementing {@link Nucleus}. All non-round
  * nuclei extend this.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

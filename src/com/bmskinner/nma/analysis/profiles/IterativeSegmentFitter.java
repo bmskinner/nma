@@ -37,7 +37,7 @@ import com.bmskinner.nma.components.profiles.ProfileException;
  * Carry out iterative fitting of segments from a target profile to match a
  * template profile
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

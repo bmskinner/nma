@@ -23,7 +23,7 @@ import java.util.EventObject;
  * are used in RecursiveActions and ForkJoinTasks, where a direct signal to an
  * encompassing ProgressableAction is not possible.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.12.0
  *
  */

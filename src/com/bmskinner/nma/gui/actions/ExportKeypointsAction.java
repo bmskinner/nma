@@ -20,7 +20,7 @@ import com.bmskinner.nma.io.DatasetLandmarkExportMethod;
 /**
  * Export keypoints and bounding boxes of nuclei in images in JSON format
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class ExportKeypointsAction extends MultiDatasetResultAction {

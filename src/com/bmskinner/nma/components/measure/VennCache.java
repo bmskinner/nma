@@ -28,7 +28,7 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 /**
  * Store the number of cells overlapping between cell collections
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

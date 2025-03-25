@@ -35,7 +35,7 @@ import com.bmskinner.nma.components.options.HashOptions;
  * Provides basic settings parameters for detection of components. Values such
  * as size, circularity and scale.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

@@ -41,7 +41,7 @@ import com.bmskinner.nma.io.Io;
  * A test pipeline to be run from the command line. Analyse a folder with
  * default settings, save the nmd, and export a nuclear stats file
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

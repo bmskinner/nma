@@ -28,7 +28,7 @@ import com.bmskinner.nma.visualisation.options.TableOptions;
 /**
  * Abstract class for making tables
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

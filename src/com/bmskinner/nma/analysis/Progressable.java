@@ -3,7 +3,7 @@ package com.bmskinner.nma.analysis;
 /**
  * Interface for methods that can progress
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public interface Progressable {

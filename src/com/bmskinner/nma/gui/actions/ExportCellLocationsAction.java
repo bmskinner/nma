@@ -14,7 +14,7 @@ import com.bmskinner.nma.io.CellFileExporter;
 /**
  * The action for exporting cell locations from datasets
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

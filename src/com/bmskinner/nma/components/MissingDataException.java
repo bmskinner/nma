@@ -20,7 +20,7 @@ package com.bmskinner.nma.components;
  * The exception class to be thrown when a component of a profile or nuclear
  * object is not present. This is subclassed for the various components.
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.3
  *
  */

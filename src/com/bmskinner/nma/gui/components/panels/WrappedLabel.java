@@ -24,7 +24,7 @@ import javax.swing.UIManager;
 /**
  * An extension to a JTextArea that allows for 
  * word wrapped labels
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

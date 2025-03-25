@@ -37,7 +37,7 @@ import com.bmskinner.nma.logging.Loggable;
  * A size settings panel for signals, which replaces the max size with a max
  * fraction option.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

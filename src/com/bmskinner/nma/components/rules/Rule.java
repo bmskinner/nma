@@ -31,7 +31,7 @@ import com.bmskinner.nma.io.XmlSerializable;
 /**
  * An instruction for finding an index in a profile
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class Rule implements XmlSerializable {
@@ -158,7 +158,7 @@ public class Rule implements XmlSerializable {
 	/**
 	 * A type of instruction to follow
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 *
 	 */
 	public enum RuleType {

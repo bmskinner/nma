@@ -20,7 +20,7 @@ package com.bmskinner.nma.components.profiles;
  * Thrown when something goes wrong in a profile that is not covered by another
  * exception.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class ProfileException extends Exception {

@@ -4,7 +4,7 @@ package com.bmskinner.nma.components.signals;
  * Interface for nuclear signal collections to inform their host that their
  * contents has changed
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public interface NuclearSignalAddedListener {

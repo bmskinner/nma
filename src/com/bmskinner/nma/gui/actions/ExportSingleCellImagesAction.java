@@ -31,7 +31,7 @@ import com.bmskinner.nma.io.CellImageExportMethod;
 /**
  * Export each nucleus to a separate image
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ExportSingleCellImagesAction extends MultiDatasetResultAction {

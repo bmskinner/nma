@@ -28,7 +28,7 @@ import com.bmskinner.nma.gui.events.UserActionEvent;
  * Allow typed commands for functions that are not ready to expose through the
  * GUI
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")
@@ -110,7 +110,7 @@ public class Console extends JPanel implements ActionListener {
 	/**
 	 * A command name, its help description and the runnable
 	 * 
-	 * @author bs19022
+	 * @author Ben Skinner
 	 *
 	 */
 	private record Command(String name, String desc, Runnable func) {

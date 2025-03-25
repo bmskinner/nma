@@ -12,7 +12,7 @@ import com.bmskinner.nma.components.options.HashOptions;
 /**
  * Convert old version datasets to match the current version
  * 
- * @author bs19022
+ * @author Ben Skinner
  *
  */
 public class DatasetConverter {

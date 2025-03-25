@@ -24,7 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
 /**
  * The interface for 2D points. It provides some extra methods beyond what
  * is in the Point2D classes.
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public interface IPoint {

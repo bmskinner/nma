@@ -51,7 +51,7 @@ import ij.Prefs;
  * comparison testing with older versions by other classes. This class should be
  * run first in test suites.
  * 
- * @author ben
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

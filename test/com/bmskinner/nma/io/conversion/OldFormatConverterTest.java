@@ -32,7 +32,7 @@ import com.bmskinner.nma.io.SampleDatasetReader;
 
 /**
  * Tests that old datasets can be opened
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

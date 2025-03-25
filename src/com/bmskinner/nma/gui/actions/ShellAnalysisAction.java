@@ -54,7 +54,7 @@ import com.bmskinner.nma.gui.events.UIController;
 /**
  * Prepare and run a shell analysis on the provided dataset.
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class ShellAnalysisAction extends SingleDatasetResultAction {

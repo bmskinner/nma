@@ -31,7 +31,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Read the config file and assign values to the global options of the program
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

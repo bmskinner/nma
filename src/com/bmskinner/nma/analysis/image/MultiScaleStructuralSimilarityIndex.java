@@ -74,7 +74,7 @@ public class MultiScaleStructuralSimilarityIndex {
 	
 	/**
 	 * All the values calculated by MS-SSIM
-	 * @author ben
+	 * @author Ben Skinner
 	 * @since 1.15.0
 	 *
 	 */

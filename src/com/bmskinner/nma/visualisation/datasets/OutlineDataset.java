@@ -23,7 +23,7 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 /**
  * Adds storage of cellular components to an XYDataset
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  * @param <E>
  *            A cellular component to be drawn

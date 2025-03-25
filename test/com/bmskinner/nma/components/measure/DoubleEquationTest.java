@@ -34,7 +34,7 @@ import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 
 /**
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class DoubleEquationTest {

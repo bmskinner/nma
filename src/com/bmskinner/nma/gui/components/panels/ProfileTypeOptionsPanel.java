@@ -24,7 +24,7 @@ import com.bmskinner.nma.components.profiles.ProfileType;
 /**
  * Provides a drop down list with the displayable profile types.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 @SuppressWarnings("serial")

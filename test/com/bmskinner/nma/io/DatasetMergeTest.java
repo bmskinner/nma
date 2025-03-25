@@ -40,7 +40,7 @@ import com.bmskinner.nma.gui.dialogs.DatasetArithmeticSetupDialog.BooleanOperati
 /**
  * This class tests the dataset merging functionality
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.8
  *
  */

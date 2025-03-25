@@ -33,7 +33,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Tests for the nucleus clustering
  * 
- * @author ben
+ * @author Ben Skinner
  *
  */
 public class NucleusClusteringMethodTest {

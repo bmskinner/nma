@@ -28,7 +28,7 @@ import com.bmskinner.nma.components.options.HashOptions;
  * This interface describes the values that should be checkable by table dataset
  * creators. Implementing classes must provide sensible defaults.
  * 
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public interface TableOptions extends DisplayOptions, HashOptions {

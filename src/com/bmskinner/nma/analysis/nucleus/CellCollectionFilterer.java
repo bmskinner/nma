@@ -35,7 +35,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Filters cell collections on measured values
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.5
  *
  */
@@ -186,7 +186,7 @@ public class CellCollectionFilterer {
 	/**
 	 * Thrown when a cell collection cannot be filtered
 	 * 
-	 * @author bms41
+	 * @author Ben Skinner
 	 * @since 1.13.3
 	 *
 	 */

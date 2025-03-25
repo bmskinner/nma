@@ -24,7 +24,7 @@ import javax.swing.JPopupMenu;
 /**
  * The base class for popup menus
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.14.0
  *
  */

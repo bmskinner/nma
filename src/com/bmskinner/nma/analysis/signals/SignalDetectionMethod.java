@@ -53,7 +53,7 @@ import com.bmskinner.nma.logging.Loggable;
 /**
  * Method to detect nuclear signals in a dataset
  * 
- * @author bms41
+ * @author Ben Skinner
  * @since 1.13.4
  *
  */

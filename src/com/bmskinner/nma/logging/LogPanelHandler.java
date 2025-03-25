@@ -23,7 +23,7 @@ import com.bmskinner.nma.gui.LogPanel;
 
 /**
  * Handle publishing of log messages to the log panel
- * @author bms41
+ * @author Ben Skinner
  *
  */
 public class LogPanelHandler extends StreamHandler {

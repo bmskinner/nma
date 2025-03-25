@@ -23,7 +23,7 @@ public interface FileImportEventListener {
 	/**
 	 * Values relating to file import
 	 * 
-	 * @author ben
+	 * @author Ben Skinner
 	 *
 	 */
 	record FileImportEvent(Object source, File file, String type, Document document) {

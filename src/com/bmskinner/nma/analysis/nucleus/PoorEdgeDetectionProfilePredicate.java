@@ -20,7 +20,7 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
  * Test a profile of the nuclei in a cell for proper edge detection. Extreme
  * profile values or rapid changes in value are signs of poor edge detection.
  * 
- * @author bs19022
+ * @author Ben Skinner
  * @since 2.2.0
  *
  */
