@@ -104,10 +104,9 @@ java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar merge --
 
 ## Detection of nuclei from text files {#text-analysis}
 
-This is available from the File menu 'New analysis' > 'Use text file of nucleus coordinates'. You will be asked to choose a folder containing one or more text files that describe the outlines of objects to analyse.
+This is available from the File menu 'New analysis' > 'Use text file of nucleus coordinates'. An analysis setup screen will be shown where you will be asked to choose a folder containing one or more text files that describe the outlines of objects to analyse.
 
-A separate text file should be present for each source image to be analysed. The files should contain tab separated values with columns `Image`, `Object`, `x` and `y`. `Image` contains the path to the source image. `Object` is an integer containing the object to which an outline coordinate belongs. `x` and `y` contain the floating point pixel coordinates of a point in the object outline.
-
+A separate text file should be present for each source image to be analysed. The files should contain tab separated values. The default settings would expect columns `Image`, `Object`, `x` and `y`. `Image` contains the path to the source image. `Object` is an integer containing the object to which an outline coordinate belongs. `x` and `y` contain the floating point pixel coordinates of a point in the object outline.
 
 For example, this shows the first three points in the outline of the first object within the file `image_a.jpg`:
 ```
@@ -117,4 +116,17 @@ Image	Object	x	y
 /path/to/image_a.jpg	0	202.5	984.14996
 ```
 
-Profiles will be calculated, but no segmentation will be applied. 
+If your file has columns in a different order, you can specify the column indexes that correspond to the required columns. The column names in your file do not need to match those given here.
+
+You may also optionally add a landmark file. This is a single file that contains the locations of landmarks in the cells. The landmark file is a tab-separated file with the following format:
+```
+Dataset	ImageFile	CellID	NucleusID	BoundingXMin	BoundingXMax	BoundingYMin	BoundingYMax	LandmarkName	LandmarkX	LandmarkY
+Mouse	/path/to/image_a.jpg	70e1f840-67ec-4b7e-bd7d-cd2b03c13de5	00000000-2d16-bf21-ffff-ffffee0cd821	560.035888671875	675.563232421875	334.50482177734375	430.5233154296875	Tip of hook	675.242431640625	421.01898193359375	
+Mouse	/path/to/image_a.jpg	70e1f840-67ec-4b7e-bd7d-cd2b03c13de5	00000000-2d16-bf21-ffff-ffffee0cd821	560.035888671875	675.563232421875	334.50482177734375	430.5233154296875	Ventral upper	631.1483764648438	395.4069519042969	
+```
+
+Each line contains one landmark in one cell. The cell bounding box is provided to allow landmarks to be matched to the correct cell. The values in the `ImageFile` column must match the values in the `Image` column from the outlines file, as this is how corresponding images are matched. The Dataset, CellID and NucleusID values are not used to identify cells.
+
+If no landmark file is provided, landmarks will be detected using profiles via the standard method.
+
+Profiles will only be segmented if the Segment profiles option is selected.
