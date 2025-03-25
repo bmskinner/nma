@@ -80,7 +80,7 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
 						IAnalysisDataset newDataset = dataset
 								.getChildDataset(newCollection.getId());
 						final CountDownLatch latch = new CountDownLatch(1);
-						new RunSegmentationAction(newDataset, dataset, flag,
+						new RunSegmentationAction(newDataset, dataset,
 								progressAcceptors.get(0), latch);
 					}
 				} else {

@@ -82,7 +82,7 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 				LOGGER.info("Reapplying morphology...");
 
 				CountDownLatch latch = new CountDownLatch(1);
-				new RunSegmentationAction(newList, dataset, NO_FLAG, progressAcceptors.get(0),
+				new RunSegmentationAction(newList, dataset, progressAcceptors.get(0),
 						latch).run();
 				new Thread(() -> {
 					try {

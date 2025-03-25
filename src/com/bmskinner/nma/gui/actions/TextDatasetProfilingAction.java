@@ -12,7 +12,6 @@ import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.profiles.TextDatasetProfilingMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
@@ -20,6 +19,11 @@ import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 
+/**
+ * Action invoked through the user interface to set up dataset detection and profiling via text outlines.
+ * 
+ * @since 2.3.0
+ */
 public class TextDatasetProfilingAction  extends SingleDatasetResultAction {
 
 	private static final Logger LOGGER = Logger.getLogger(RunProfilingAction.class.getName());

@@ -57,32 +57,28 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 	 * @param downFlag the next analyses to perform
 	 */
 	public RunSegmentationAction(IAnalysisDataset dataset, MorphologyAnalysisMode mode,
-			int downFlag,
 			@NonNull final ProgressBarAcceptor acceptor, CountDownLatch latch) {
-		super(dataset, PROGRESS_LBL, acceptor, downFlag);
+		super(dataset, PROGRESS_LBL, acceptor);
 		this.mode = mode;
 		setLatch(latch);
 	}
 
 	public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode,
-			int downFlag,
 			@NonNull final ProgressBarAcceptor acceptor) {
-		super(list, PROGRESS_LBL, acceptor, downFlag);
+		super(list, PROGRESS_LBL, acceptor);
 		this.mode = mode;
 	}
 
 	public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode,
-			int downFlag,
 			@NonNull final ProgressBarAcceptor acceptor, CountDownLatch latch) {
-		super(list, PROGRESS_LBL, acceptor, downFlag);
+		super(list, PROGRESS_LBL, acceptor);
 		this.mode = mode;
 		setLatch(latch);
 	}
 
-	public RunSegmentationAction(IAnalysisDataset dataset, IAnalysisDataset source, int downFlag,
+	public RunSegmentationAction(IAnalysisDataset dataset, IAnalysisDataset source,
 			@NonNull final ProgressBarAcceptor acceptor, CountDownLatch latch) {
 		super(dataset, "Copying morphology to " + dataset.getName(), acceptor);
-		this.downFlag = downFlag;
 		setLatch(latch);
 		this.mode = MorphologyAnalysisMode.COPY_FROM_OTHER_DATASET;
 		this.source = source;
@@ -95,10 +91,9 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 	 * @param list
 	 * @param source
 	 */
-	public RunSegmentationAction(List<IAnalysisDataset> list, IAnalysisDataset source, int downFlag,
+	public RunSegmentationAction(List<IAnalysisDataset> list, IAnalysisDataset source,
 			@NonNull final ProgressBarAcceptor acceptor, CountDownLatch latch) {
 		super(list, PROGRESS_LBL, acceptor);
-		this.downFlag = downFlag;
 		this.mode = MorphologyAnalysisMode.COPY_FROM_OTHER_DATASET;
 		this.source = source;
 		setLatch(latch);
@@ -187,10 +182,8 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 
 					Runnable task = mode.equals(MorphologyAnalysisMode.COPY_FROM_OTHER_DATASET)
 							? new RunSegmentationAction(getRemainingDatasetsToProcess(), source,
-									downFlag,
 									progressAcceptors.get(0), getLatch().get())
 							: new RunSegmentationAction(getRemainingDatasetsToProcess(), mode,
-									downFlag,
 									progressAcceptors.get(0), getLatch().get());
 
 					task.run();

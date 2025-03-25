@@ -26,10 +26,8 @@ import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
-import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.logging.Loggable;
 
 /**
@@ -45,26 +43,26 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 
 	private static final @NonNull String PROGRESS_BAR_LABEL = "Profiling";
 
-	public RunProfilingAction(@NonNull final IAnalysisDataset dataset, int downFlag,
+	public RunProfilingAction(@NonNull final IAnalysisDataset dataset,
 			@NonNull final ProgressBarAcceptor acceptor) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, downFlag);
+		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 	}
 
-	public RunProfilingAction(@NonNull final List<IAnalysisDataset> list, int downFlag,
+	public RunProfilingAction(@NonNull final List<IAnalysisDataset> list,
 			@NonNull final ProgressBarAcceptor acceptor) {
-		super(list, PROGRESS_BAR_LABEL, acceptor, downFlag);
+		super(list, PROGRESS_BAR_LABEL, acceptor);
 	}
 
-	public RunProfilingAction(@NonNull final IAnalysisDataset dataset, int downFlag,
+	public RunProfilingAction(@NonNull final IAnalysisDataset dataset,
 			@NonNull final ProgressBarAcceptor acceptor, CountDownLatch latch) {
-		super(dataset, PROGRESS_BAR_LABEL, acceptor, downFlag);
+		super(dataset, PROGRESS_BAR_LABEL, acceptor);
 		this.setLatch(latch);
 
 	}
 
-	public RunProfilingAction(@NonNull final List<IAnalysisDataset> list, int downFlag,
+	public RunProfilingAction(@NonNull final List<IAnalysisDataset> list,
 			@NonNull final ProgressBarAcceptor acceptor, CountDownLatch latch) {
-		super(list, PROGRESS_BAR_LABEL, acceptor, downFlag);
+		super(list, PROGRESS_BAR_LABEL, acceptor);
 		this.setLatch(latch);
 
 	}
@@ -98,12 +96,6 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 
 		Runnable task = () -> {
 
-			if ((downFlag & ADD_POPULATION) == ADD_POPULATION) {
-				DatasetListManager.getInstance().addDataset(dataset);
-				UIController.getInstance().fireDatasetAdded(dataset);
-
-			}
-
 			// if no list was provided, or no more entries remain,
 			// call the finish
 			if (!hasRemainingDatasetsToProcess()) {
@@ -115,7 +107,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 				// otherwise analyse the next item in the list
 				cancel(); // remove progress bar
 
-				Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, progressAcceptors.get(0),
+				Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0),
 						getLatch().get());
 				p.run();
 

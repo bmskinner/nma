@@ -25,24 +25,13 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 
 /**
- * Extends the VoidResultAction to include a dataset or list of datasets to be
- * processed in the action
+ * An action invoked from the UI. This extends the VoidResultAction to include a 
+ * dataset or list of datasets to be processed in the action.
  * 
  * @since 1.13.6
  *
  */
 public abstract class SingleDatasetResultAction extends VoidResultAction {
-
-	// Flags to pass to ProgressableActions to determine the analyses
-	// to carry out in subsequently
-	public static final int NO_FLAG = 0;
-	public static final int ADD_POPULATION = 1;
-	public static final int STATS_EXPORT = 2;
-	public static final int NUCLEUS_ANNOTATE = 4;
-	public static final int CURVE_REFOLD = 8;
-	public static final int EXPORT_COMPOSITE = 16;
-	public static final int SAVE_DATASET = 32;
-	public static final int ASSIGN_SEGMENTS = 64;
 
 	// the dataset being worked on
 	protected IAnalysisDataset dataset = null;
@@ -79,37 +68,6 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
 		this(list.get(0), barMessage, acceptor);
 		processList.addAll(list);
 		processList.remove(0); // remove the first entry
-	}
-
-	/**
-	 * Construct using a list of datasets to be processed. The first is analysed,
-	 * and the rest stored.
-	 * 
-	 * @param list
-	 * @param barMessage
-	 * @param mw
-	 * @param flag
-	 */
-	protected SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list,
-			@NonNull String barMessage,
-			@NonNull ProgressBarAcceptor acceptor, int flag) {
-		this(list, barMessage, acceptor);
-		this.downFlag = flag;
-	}
-
-	/**
-	 * Constructor including a flag for downstream analyses to be carried out
-	 * 
-	 * @param dataset
-	 * @param barMessage
-	 * @param mw
-	 * @param flag
-	 */
-	protected SingleDatasetResultAction(@NonNull IAnalysisDataset dataset,
-			@NonNull String barMessage,
-			@NonNull ProgressBarAcceptor acceptor, int flag) {
-		this(dataset, barMessage, acceptor);
-		this.downFlag = flag;
 	}
 
 	protected synchronized List<IAnalysisDataset> getRemainingDatasetsToProcess() {

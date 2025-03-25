@@ -38,8 +38,7 @@ public class SegmentAndRefold implements Runnable {
 
 		new Thread(() -> { // run segmentation
 			new RunSegmentationAction(dataset,
-					MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH,
-					SingleDatasetResultAction.NO_FLAG, acceptor,
+					MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH, acceptor,
 					segmentLatch).run();
 		}).start();
 

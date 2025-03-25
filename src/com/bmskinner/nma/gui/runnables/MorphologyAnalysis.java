@@ -49,7 +49,7 @@ public class MorphologyAnalysis implements Runnable {
 
 		new Thread(() -> { // run profiling
 			LOGGER.fine("Starting profiling");
-			new RunProfilingAction(datasets, SingleDatasetResultAction.NO_FLAG, pa, profileLatch).run();
+			new RunProfilingAction(datasets, pa, profileLatch).run();
 
 		}).start();
 
@@ -57,7 +57,7 @@ public class MorphologyAnalysis implements Runnable {
 			try {
 				profileLatch.await();
 				LOGGER.fine("Starting segmentation");
-				new RunSegmentationAction(datasets, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH, SingleDatasetResultAction.NO_FLAG, pa,
+				new RunSegmentationAction(datasets, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH, pa,
 						segmentLatch).run();
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();

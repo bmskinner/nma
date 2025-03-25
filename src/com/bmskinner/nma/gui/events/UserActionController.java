@@ -286,13 +286,11 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.type().equals(UserActionEvent.SEGMENTATION_ACTION))
 			return new RunSegmentationAction(event.getDatasets(),
-					MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH,
-					SingleDatasetResultAction.NO_FLAG, acceptor);
+					MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH, acceptor);
 
 		if (event.type().equals(UserActionEvent.APPLY_MEDIAN_TO_NUCLEI))
 			return new RunSegmentationAction(event.getDatasets(),
-					MorphologyAnalysisMode.APPLY_MEDIAN_TO_NUCLEI,
-					SingleDatasetResultAction.NO_FLAG, acceptor);
+					MorphologyAnalysisMode.APPLY_MEDIAN_TO_NUCLEI, acceptor);
 
 		if (event.type().equals(UserActionEvent.SAVE)) {
 			return () -> {
@@ -311,8 +309,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				final CountDownLatch segmentLatch = new CountDownLatch(1);
 				new Thread(() -> { // wait for profiling and run segmentation
 					LOGGER.fine("Starting segmentation action");
-					new RunSegmentationAction(event.getDatasets(), source,
-							SingleDatasetResultAction.NO_FLAG, acceptor,
+					new RunSegmentationAction(event.getDatasets(), source, acceptor,
 							segmentLatch).run();
 				}).start();
 
@@ -342,8 +339,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 			return () -> {
 				final CountDownLatch latch = new CountDownLatch(1);
 				new Thread(() -> {
-					new RunProfilingAction(event.getDatasets(), SingleDatasetResultAction.NO_FLAG,
-							acceptor, latch).run();
+					new RunProfilingAction(event.getDatasets(), acceptor, latch).run();
 				}).start();
 
 				new Thread(() -> { // wait for profiling to complete and recache charts

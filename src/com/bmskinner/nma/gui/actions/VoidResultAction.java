@@ -45,7 +45,6 @@ import com.bmskinner.nma.gui.ProgressBarAcceptor;
 public abstract class VoidResultAction implements PropertyChangeListener, Runnable {
 
 	protected IAnalysisWorker worker = null;
-	protected int downFlag = 0; // flags for next action
 
 	protected List<JProgressBar> progressBars = new ArrayList<>(); // jcomponents can't be shared
 																	// across components
