@@ -43,7 +43,6 @@ import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.IShellResult;
 import com.bmskinner.nma.components.signals.SignalManager;
 import com.bmskinner.nma.gui.Labels;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.visualisation.options.TableOptions;
 
@@ -168,7 +167,7 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 					}
 				} catch (MissingDataException | SegmentUpdateException
 						| ComponentCreationException e) {
-					LOGGER.log(Loggable.STACK, "Cannot get measurement for cell", e);
+					LOGGER.log(Level.SEVERE, "Cannot get measurement for cell", e);
 					statAValue = 0;
 					statBValue = 0;
 				}

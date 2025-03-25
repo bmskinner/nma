@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -44,7 +45,7 @@ import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.io.XMLReader.XMLReadingException;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * Holds other nucleus detection options. E.g. profile window
@@ -175,7 +176,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 				options.setAngleWindowProportion((Double) j.getValue());
 			} catch (Exception e1) {
 				LOGGER.warning("Parsing error in spinner");
-				LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+				LOGGER.log(Level.SEVERE, "Parsing error in JSpinner", e1);
 			}
 
 		});

@@ -51,7 +51,7 @@ import com.bmskinner.nma.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nma.io.UpdateChecker;
 import com.bmskinner.nma.logging.LogPanelFormatter;
 import com.bmskinner.nma.logging.LogPanelHandler;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.javadocking.DockingManager;
 import com.javadocking.dock.Position;
 import com.javadocking.dock.TabDock;
@@ -181,7 +181,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 		LogPanelHandler textHandler = new LogPanelHandler(logPanel);
 		textHandler.setLevel(Level.INFO);
 		textHandler.setFormatter(new LogPanelFormatter());
-		Logger.getLogger(Loggable.PROJECT_LOGGER).addHandler(textHandler);
+		Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).addHandler(textHandler);
 		return logPanel;
 	}
 

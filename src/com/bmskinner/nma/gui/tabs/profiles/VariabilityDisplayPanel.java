@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JPanel;
 
@@ -36,7 +37,7 @@ import com.bmskinner.nma.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
@@ -101,7 +102,7 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 		try {
 			setChart(options);
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error in plotting variability chart", e);
+			LOGGER.log(Level.SEVERE, "Error in plotting variability chart", e);
 		}
 	}
 

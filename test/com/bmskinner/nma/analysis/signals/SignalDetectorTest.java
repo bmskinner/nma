@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.junit.Test;
 
@@ -21,7 +22,7 @@ import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.SampleDatasetReader;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
-import com.bmskinner.nma.logging.Loggable;
+
 
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
@@ -35,7 +36,7 @@ import ij.process.ImageProcessor;
  */
 public class SignalDetectorTest {
 
-	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	static {
 		for (Handler h : LOGGER.getHandlers())

@@ -25,6 +25,7 @@ import java.awt.Robot;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.annotation.NonNull;

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,6 @@ import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.signals.DefaultSignalGroup;
 import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.ISignalGroup;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Extract virtual merge source datasets into real root datasets.
@@ -95,7 +95,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 			} catch (MissingDataException | SegmentUpdateException e) {
 				LOGGER.warning("Missing analysis options or landmark; skipping "
 						+ virtualMergeSource.getName());
-				LOGGER.log(Loggable.STACK,
+				LOGGER.log(Level.SEVERE,
 						"Missing analysis options in dataset " + virtualMergeSource.getName(), e);
 			}
 
@@ -149,7 +149,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 			// Child datasets are not present in merge sources
 
 		} catch (MissingProfileException e) {
-			LOGGER.log(Loggable.STACK, "Cannot copy profile offsets to recovered merge source", e);
+			LOGGER.log(Level.SEVERE, "Cannot copy profile offsets to recovered merge source", e);
 		}
 
 		Optional<IAnalysisOptions> op = template.getAnalysisOptions();

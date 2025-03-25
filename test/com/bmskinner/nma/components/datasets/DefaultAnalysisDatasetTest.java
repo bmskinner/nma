@@ -29,6 +29,7 @@ import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.jdom2.Element;
 import org.junit.Before;
@@ -54,7 +55,7 @@ import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
-import com.bmskinner.nma.logging.Loggable;
+
 
 import ij.Prefs;
 
@@ -67,7 +68,7 @@ import ij.Prefs;
  */
 public class DefaultAnalysisDatasetTest extends ComponentTester {
 
-	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	private IAnalysisDataset d;
 	private static final UUID CHILD_ID_1 = UUID.fromString("00000000-0000-0000-0000-000000000001");

@@ -18,6 +18,7 @@ package com.bmskinner.nma.gui.tabs.segments;
 
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,7 +34,7 @@ import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.renderers.WilcoxonTableCellRenderer;
 import com.bmskinner.nma.gui.tabs.AbstractPairwiseDetailPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
@@ -78,7 +79,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel {
 						.getSegments(OrientationMark.REFERENCE);
 			} catch (MissingLandmarkException | SegmentUpdateException e) {
 				LOGGER.warning("Cannot get segments");
-				LOGGER.log(Loggable.STACK, "Cannot get segments", e);
+				LOGGER.log(Level.SEVERE, "Cannot get segments", e);
 				return;
 			}
 

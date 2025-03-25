@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -89,7 +90,6 @@ import com.bmskinner.nma.components.signals.IShellResult;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.components.signals.SignalManager;
 import com.bmskinner.nma.io.XmlSerializable;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.utility.StreamUtils;
 
@@ -579,7 +579,7 @@ public class DefaultCellCollection implements ICellCollection {
 																// than square degrees
 
 			} catch (MissingDataException | SegmentUpdateException e) {
-				LOGGER.log(Loggable.STACK, "Error getting nucleus profile", e);
+				LOGGER.log(Level.SEVERE, "Error getting nucleus profile", e);
 				return Double.NaN;
 			}
 		}).toArray();

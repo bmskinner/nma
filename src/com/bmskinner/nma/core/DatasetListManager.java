@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,6 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.gui.events.DatasetAddedListener;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Track the open datasets in the program. Implemented as a singleton, since
@@ -238,7 +238,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 			}
 
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error refreshing clusters", e);
+			LOGGER.log(Level.SEVERE, "Error refreshing clusters", e);
 		}
 	}
 

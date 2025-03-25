@@ -25,6 +25,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JLabel;
@@ -42,7 +43,6 @@ import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateExcept
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.SettingsDialog;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Allow a random subset of cells to be extracted as a child of the given
@@ -92,7 +92,7 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 					UIController.getInstance().fireDatasetAdded(d);
 				} catch (MissingDataException | SegmentUpdateException e) {
 					LOGGER.warning("Error copying collection offsets");
-					LOGGER.log(Loggable.STACK, "Error in offsetting", e);
+					LOGGER.log(Level.SEVERE, "Error in offsetting", e);
 				}
 			}
 

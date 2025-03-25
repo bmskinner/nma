@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
@@ -21,7 +22,7 @@ import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.io.XMLReader.XMLReadingException;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * Button that allows nuclear signal detection options to be copied from an open
@@ -64,7 +65,7 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 										.orElseThrow(MissingSignalGroupException::new)
 										.getGroupName());
 					} catch (MissingSignalGroupException e) {
-						LOGGER.log(Loggable.STACK,
+						LOGGER.log(Level.SEVERE,
 								"No signal group with id %s".formatted(signalGroupId), e);
 						return "%s - No signal id".formatted(d.getName());
 					}
@@ -149,7 +150,7 @@ public class CopySignalDetectionSettingsFromOpenDatasetPanel extends CopyFromOpe
 				fireOptionsChangeEvent();
 
 			} catch (XMLReadingException | ComponentCreationException e1) {
-				LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
+				LOGGER.log(Level.SEVERE, e1.getMessage(), e1);
 			}
 		};
 	}

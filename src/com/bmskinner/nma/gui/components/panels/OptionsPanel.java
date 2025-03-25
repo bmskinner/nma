@@ -8,6 +8,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.Box;
 import javax.swing.JLabel;
@@ -16,7 +17,7 @@ import javax.swing.JSpinner;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * A panel that allows options to be selected for downstream analyses
@@ -56,7 +57,7 @@ public abstract class OptionsPanel extends JPanel {
 			options.setInt(key, (Integer) spinner.getValue());
 		} catch (Exception e) {
 			LOGGER.warning("Error reading value in spinner");
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
     }
     
@@ -72,7 +73,7 @@ public abstract class OptionsPanel extends JPanel {
 			options.setDouble(key, (Double) spinner.getValue());
 		} catch (Exception e) {
 			LOGGER.warning("Error reading value in spinner");
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
     }
 	

@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bmskinner.nma.analysis.DefaultAnalysisResult;
@@ -40,7 +41,6 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Find cells from a .cell file and assign them to child datasets.
@@ -84,7 +84,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 			findCells();
 		} catch (Exception e) {
 			LOGGER.warning("Error selecting cells");
-			LOGGER.log(Loggable.STACK, "Error selecting cells", e);
+			LOGGER.log(Level.SEVERE, "Error selecting cells", e);
 		}
 	}
 
@@ -93,7 +93,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 		try {
 			newDatasets = parsePathList();
 		} catch (CellRelocationException | MissingDataException | SegmentUpdateException e) {
-			LOGGER.log(Loggable.STACK, "Error relocating cells", e);
+			LOGGER.log(Level.SEVERE, "Error relocating cells", e);
 			return;
 		}
 
@@ -112,7 +112,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 				}
 			} catch (MissingDataException | SegmentUpdateException e) {
 				LOGGER.warning("Unable to profile new collections");
-				LOGGER.log(Loggable.STACK, "Unable to profile new collections", e);
+				LOGGER.log(Level.SEVERE, "Unable to profile new collections", e);
 			}
 		}
 

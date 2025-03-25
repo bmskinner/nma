@@ -17,6 +17,7 @@
 package com.bmskinner.nma.gui.actions;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -28,7 +29,6 @@ import com.bmskinner.nma.components.datasets.DefaultCellCollection;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
-import com.bmskinner.nma.logging.Loggable;
 
 public class SplitCollectionAction extends SingleDatasetResultAction {
 
@@ -92,7 +92,7 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
 			}
 
 		} catch (Exception e1) {
-			LOGGER.log(Loggable.STACK, "Error splitting collection", e1);
+			LOGGER.log(Level.SEVERE, "Error splitting collection", e1);
 		} finally {
 			cancel();
 		}

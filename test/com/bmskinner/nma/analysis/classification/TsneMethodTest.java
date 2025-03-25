@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.junit.Before;
 import org.junit.Rule;

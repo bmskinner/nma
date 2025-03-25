@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;

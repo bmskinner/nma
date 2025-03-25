@@ -60,7 +60,6 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.charts.ProfileChartFactory;
@@ -85,7 +84,7 @@ public class AngleWindowSizeExplorer extends MessagingDialog implements ChangeLi
 		try {
 			createUI();
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error creating angle window explorer UI", e);
+			LOGGER.log(Level.SEVERE, "Error creating angle window explorer UI", e);
 		}
 		this.setModal(false);
 		this.pack();
@@ -196,7 +195,7 @@ public class AngleWindowSizeExplorer extends MessagingDialog implements ChangeLi
 			stepSizeSpinner.commitEdit();
 		} catch (ParseException e) {
 			LOGGER.warning("Error setting values in spinners");
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
 
 		double windowSizeMin = (double) windowSizeMinSpinner.getValue();
@@ -246,7 +245,7 @@ public class AngleWindowSizeExplorer extends MessagingDialog implements ChangeLi
 		} catch (MissingDataException
 				| ComponentCreationException | SegmentUpdateException e) {
 			LOGGER.warning("Error making profile collections");
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
 		setAnalysing(false);
 		LOGGER.fine("Profiling complete");
@@ -347,7 +346,7 @@ public class AngleWindowSizeExplorer extends MessagingDialog implements ChangeLi
 			}
 
 		} catch (ParseException e1) {
-			LOGGER.log(Loggable.STACK, "Error in spinners", e1);
+			LOGGER.log(Level.SEVERE, "Error in spinners", e1);
 		}
 
 	}

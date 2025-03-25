@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -47,7 +48,7 @@ import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
 import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.BoxplotsTabPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
@@ -109,7 +110,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 				segments = collection.getProfileCollection().getSegments(OrientationMark.REFERENCE);
 			} catch (MissingLandmarkException | SegmentUpdateException e) {
 				LOGGER.warning("Cannot get segments");
-				LOGGER.log(Loggable.STACK, "Cannot get segments", e);
+				LOGGER.log(Level.SEVERE, "Cannot get segments", e);
 				return;
 			}
 

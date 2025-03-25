@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -57,7 +58,6 @@ import com.bmskinner.nma.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.PriorityAxis;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
-import com.bmskinner.nma.logging.Loggable;
 
 import ij.gui.Roi;
 
@@ -513,7 +513,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 		} catch (MissingDataException
 				| ComponentCreationException
 				| SegmentUpdateException e) {
-			LOGGER.log(Loggable.STACK, "Unable to set window proportion: " + e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, "Unable to set window proportion: " + e.getMessage(), e);
 		}
 
 	}

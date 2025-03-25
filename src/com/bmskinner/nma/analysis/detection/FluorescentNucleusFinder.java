@@ -45,7 +45,6 @@ import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateExcept
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
@@ -198,7 +197,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 
 				list.add(n);
 			} catch (ComponentCreationException e) {
-				LOGGER.log(Loggable.STACK, "Unable to create nucleus from roi: %s; skipping"
+				LOGGER.log(Level.SEVERE, "Unable to create nucleus from roi: %s; skipping"
 						.formatted(e.getMessage()), e);
 			}
 		}

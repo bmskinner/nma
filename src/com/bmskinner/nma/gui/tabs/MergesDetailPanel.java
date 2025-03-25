@@ -22,6 +22,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
@@ -42,7 +43,6 @@ import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.renderers.JTextAreaCellRenderer;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.options.AbstractOptions;
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
@@ -76,7 +76,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 		try {
 			createUI();
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error creating merge panel", e);
+			LOGGER.log(Level.SEVERE, "Error creating merge panel", e);
 		}
 	}
 

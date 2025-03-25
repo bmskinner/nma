@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.junit.Test;
 
@@ -22,7 +23,7 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * Tests for profilable objects
@@ -33,7 +34,7 @@ import com.bmskinner.nma.logging.Loggable;
  */
 public class ProfilableCellularComponentTest {
 
-	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	static {
 		for (Handler h : LOGGER.getHandlers())

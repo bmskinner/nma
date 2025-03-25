@@ -69,7 +69,6 @@ import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.events.FilePathUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.FileUtils;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
@@ -193,7 +192,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 					ImageIO.write(img, "png", f);
 				} catch (IOException e) {
 					LOGGER.warning("Cannot save image: " + e.getMessage());
-					LOGGER.log(Loggable.STACK, "Error saving annotated image", e);
+					LOGGER.log(Level.SEVERE, "Error saving annotated image", e);
 				} finally {
 					g2d.dispose();
 				}
@@ -283,7 +282,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 					int i2 = Integer.parseInt(s2);
 					return i1 - i2;
 				} catch (NumberFormatException e) {
-					LOGGER.log(Loggable.STACK, "Error parsing number", e);
+					LOGGER.log(Level.SEVERE, "Error parsing number", e);
 					return f1.compareTo(f2);
 				}
 			}

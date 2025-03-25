@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.jdom2.Element;
 import org.junit.Test;
@@ -26,13 +27,13 @@ import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
-import com.bmskinner.nma.logging.Loggable;
+
 
 import ij.Prefs;
 
 public class FluorescentNucleusFinderTest {
 	
-	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	static {		
 		Prefs.setThreads(2); // Attempt to avoid issue 162

@@ -44,7 +44,7 @@ public class LogFileFormatter extends Formatter {
 		buffer.append(record.getMessage());
 		buffer.append(NEWLINE);
 
-		if (record.getLevel() == Level.SEVERE || record.getLevel() == Loggable.STACK) {
+		if (record.getLevel() == Level.SEVERE || record.getLevel() == Level.SEVERE) {
 
 			if (record.getThrown() != null) {
 				Throwable t = record.getThrown();

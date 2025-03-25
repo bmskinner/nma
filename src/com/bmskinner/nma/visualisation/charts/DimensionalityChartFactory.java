@@ -46,7 +46,6 @@ import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog.ColourByType;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.ScatterChartFactory.ScatterChartRenderer;
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.ComponentOutlineDataset;
@@ -424,7 +423,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			});
 		} catch (InvocationTargetException | InterruptedException | MissingDataException
 				| ComponentCreationException | SegmentUpdateException e) {
-			LOGGER.log(Loggable.STACK, "Error adding annotation to chart", e);
+			LOGGER.log(Level.SEVERE, "Error adding annotation to chart", e);
 		}
 
 		chart.setNotify(true);

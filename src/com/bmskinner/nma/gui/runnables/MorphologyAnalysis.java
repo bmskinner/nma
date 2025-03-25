@@ -11,7 +11,6 @@ import com.bmskinner.nma.gui.actions.CreateConsensusAction;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
 import com.bmskinner.nma.gui.actions.RunProfilingAction;
 import com.bmskinner.nma.gui.actions.RunSegmentationAction;
-import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nma.gui.events.UIController;
 
 /**

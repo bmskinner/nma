@@ -72,7 +72,6 @@ import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.UpdateChecker;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.FileUtils;
 
 import ij.plugin.BrowserLauncher;
@@ -387,7 +386,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 			} catch (Exception e) {
 				LOGGER.warning("Unable to open user guide; see log for details");
-				LOGGER.log(Loggable.STACK,
+				LOGGER.log(Level.SEVERE,
 						"Error extracting user guide: %s".formatted(e.getMessage()), e);
 			}
 		};

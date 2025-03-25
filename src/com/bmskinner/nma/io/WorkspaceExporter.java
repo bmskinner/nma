@@ -19,6 +19,7 @@ package com.bmskinner.nma.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -26,7 +27,6 @@ import org.jdom2.Document;
 
 import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.core.DatasetListManager;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Saves a workspace to a *.wrk file
@@ -56,7 +56,7 @@ public class WorkspaceExporter extends XMLWriter implements Io {
 			// Confirm save
 			DatasetListManager.getInstance().updateHashCode(w);
 		} catch (IOException e) {
-			LOGGER.log(Loggable.STACK, "Unable to export workspace", e);
+			LOGGER.log(Level.SEVERE, "Unable to export workspace", e);
 		}
 
 	}

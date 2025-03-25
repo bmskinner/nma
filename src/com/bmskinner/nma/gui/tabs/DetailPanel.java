@@ -21,6 +21,7 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JPanel;
@@ -37,7 +38,6 @@ import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nma.gui.events.DatasetSelectionUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.Cache;
 
 /**
@@ -289,7 +289,7 @@ public abstract class DetailPanel extends JPanel
 
 		} catch (Exception e) {
 			LOGGER.fine("Error updating panel " + this.getClass().getName());
-			LOGGER.log(Loggable.STACK, "Error updating panel", e); // save detail for fine
+			LOGGER.log(Level.SEVERE, "Error updating panel", e); // save detail for fine
 																	// logging
 
 			try {
@@ -297,7 +297,7 @@ public abstract class DetailPanel extends JPanel
 			} catch (Exception e1) {
 				LOGGER.fine(this.getClass().getName()
 						+ ": Error recovering from error updating panel");
-				LOGGER.log(Loggable.STACK, "Error recovering from error updating panel", e1);
+				LOGGER.log(Level.SEVERE, "Error recovering from error updating panel", e1);
 			}
 		} finally {
 			setUpdating(false);

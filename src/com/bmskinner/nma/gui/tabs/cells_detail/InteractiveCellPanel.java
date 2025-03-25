@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -56,7 +57,7 @@ import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.panels.MagnifiableImagePanel;
 import com.bmskinner.nma.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nma.gui.events.SegmentEventListener;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.image.CellImagePainter;
 import com.bmskinner.nma.visualisation.image.ImagePainter;
 import com.bmskinner.nma.visualisation.image.WarpedCellPainter;
@@ -310,7 +311,7 @@ public class InteractiveCellPanel extends JPanel {
 				});
 				popupMenu.add(nextItem);
 			} catch (MissingDataException | SegmentUpdateException e) {
-				LOGGER.log(Loggable.STACK, "Cannot get border tag index", e);
+				LOGGER.log(Level.SEVERE, "Cannot get border tag index", e);
 			}
 		}
 

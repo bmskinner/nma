@@ -3,6 +3,7 @@ package com.bmskinner.nma.gui.tabs.signals.warping;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 

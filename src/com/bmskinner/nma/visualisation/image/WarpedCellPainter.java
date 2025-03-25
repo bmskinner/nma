@@ -1,6 +1,7 @@
 package com.bmskinner.nma.visualisation.image;
 
 import java.awt.image.BufferedImage;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bmskinner.nma.components.cells.ComponentCreationException;
@@ -16,7 +17,6 @@ import com.bmskinner.nma.components.mesh.MeshImageCreationException;
 import com.bmskinner.nma.components.mesh.UncomparableMeshImageException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.logging.Loggable;
 
 import ij.process.ImageProcessor;
 
@@ -54,7 +54,7 @@ public class WarpedCellPainter implements ImagePainter {
 				ip.flipVertical();
 			}
 		} catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException | MissingLandmarkException | ComponentCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error making mesh or loading image", e);
+			LOGGER.log(Level.SEVERE, "Error making mesh or loading image", e);
 		}
 		return ImageAnnotator.resizeKeepingAspect(ip, w, h).getBufferedImage();
 	}

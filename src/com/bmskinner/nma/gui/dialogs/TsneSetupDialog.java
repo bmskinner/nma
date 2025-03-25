@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JComboBox;
@@ -23,7 +24,6 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.profiles.ProfileType;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Analysis setup dialog for tSNE method
@@ -131,7 +131,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
 				iterationsSpinner.commitEdit();
 				options.setInt(TsneMethod.MAX_ITERATIONS_KEY, (Integer) iterationsSpinner.getValue());
 			} catch (ParseException e) {
-				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
+				LOGGER.log(Level.SEVERE, "Parse error in spinner", e);
 			}
         	
         });
@@ -158,7 +158,7 @@ public class TsneSetupDialog extends SubAnalysisSetupDialog {
         		perplexitySpinner.commitEdit();
 				options.setDouble(TsneMethod.PERPLEXITY_KEY, (Double) perplexitySpinner.getValue());
 			} catch (ParseException e) {
-				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
+				LOGGER.log(Level.SEVERE, "Parse error in spinner", e);
 			}
         	
         });  

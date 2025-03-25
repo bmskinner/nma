@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -26,7 +27,6 @@ import javax.swing.UIManager;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.gui.main.MainView;
 import com.bmskinner.nma.io.Io;
-import com.bmskinner.nma.logging.Loggable;
 
 import ij.plugin.BrowserLauncher;
 
@@ -61,7 +61,7 @@ public class VersionHelpDialog extends SettingsDialog {
 			this.add(createMainPanel(), BorderLayout.CENTER);
 			this.add(createFooter(), BorderLayout.SOUTH);
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error creating help dialog", e);
+			LOGGER.log(Level.SEVERE, "Error creating help dialog", e);
 		}
 		this.setLocationRelativeTo(null);
 		this.setMinimumSize(new Dimension(100, 70));

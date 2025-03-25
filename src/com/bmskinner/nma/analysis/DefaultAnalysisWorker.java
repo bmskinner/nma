@@ -18,11 +18,10 @@ package com.bmskinner.nma.analysis;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
-
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * The default implementation of IAnalysisWorker, using a SwingWorker.
@@ -128,16 +127,16 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long>
 
 		} catch (StackOverflowError e) {
 			LOGGER.warning("Stack overflow detected! Close the software and restart.");
-			LOGGER.log(Loggable.STACK, "Stack overflow in worker", e);
+			LOGGER.log(Level.SEVERE, "Stack overflow in worker", e);
 			firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
 		} catch (InterruptedException e) {
 			LOGGER.warning("Task was interrupted: " + e.getMessage());
-			LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
+			LOGGER.log(Level.SEVERE, "Interruption to swing worker", e);
 			firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
 			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
 			LOGGER.warning("Error completing task: " + e.getCause().getMessage());
-			LOGGER.log(Loggable.STACK, "Analysis worker failed", e.getCause());
+			LOGGER.log(Level.SEVERE, "Analysis worker failed", e.getCause());
 			firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
 		}
 

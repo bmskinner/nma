@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -31,7 +32,6 @@ import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.logging.Loggable;
 
 public class ClusterManualAction extends SingleDatasetResultAction {
 
@@ -194,7 +194,7 @@ public class ClusterManualAction extends SingleDatasetResultAction {
 					} catch (MissingDataException
 							| SegmentUpdateException e) {
 						LOGGER.warning("Error copying collection offsets");
-						LOGGER.log(Loggable.STACK, "Error in offsetting", e);
+						LOGGER.log(Level.SEVERE, "Error in offsetting", e);
 					}
 				}
 

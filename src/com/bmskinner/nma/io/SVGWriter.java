@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -38,7 +39,6 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Write cellular components to svg format.
@@ -119,7 +119,7 @@ public class SVGWriter implements Io {
 
     		write(g2);
     	} catch(MissingLandmarkException | ComponentCreationException e) {
-    		LOGGER.log(Loggable.STACK, "Unable to orient consensus", e);
+    		LOGGER.log(Level.SEVERE, "Unable to orient consensus", e);
     	}
     }
     
@@ -240,7 +240,7 @@ public class SVGWriter implements Io {
 
         } catch (FileNotFoundException e) {
             LOGGER.warning("File not found");
-            LOGGER.log(Loggable.STACK, e.getMessage(), e);
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 

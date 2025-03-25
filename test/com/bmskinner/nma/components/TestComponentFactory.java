@@ -4,6 +4,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 import java.io.File;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.junit.Test;
 
@@ -20,7 +21,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.components.signals.DefaultNuclearSignal;
 import com.bmskinner.nma.components.signals.INuclearSignal;
-import com.bmskinner.nma.logging.Loggable;
+
 
 import ij.gui.OvalRoi;
 import ij.gui.PolygonRoi;
@@ -36,7 +37,7 @@ import ij.process.FloatPolygon;
  */
 public class TestComponentFactory {
 
-	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	public static final int DEFAULT_X_BASE = 10;
 	public static final int DEFAULT_Y_BASE = 10;

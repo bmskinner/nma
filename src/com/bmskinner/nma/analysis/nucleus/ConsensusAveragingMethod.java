@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -53,7 +54,6 @@ import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 
 /**
@@ -285,7 +285,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 				v.moveCentreOfMass(oldCoM);
 			}
 		} catch (Exception e1) {
-			LOGGER.log(Loggable.STACK, "Error calculating perimeter points in nuclei", e1);
+			LOGGER.log(Level.SEVERE, "Error calculating perimeter points in nuclei", e1);
 		}
 
 		// Avoid errors in border calculation due to identical points by

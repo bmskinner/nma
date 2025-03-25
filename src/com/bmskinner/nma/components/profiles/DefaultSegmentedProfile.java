@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -27,7 +28,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.io.Io;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * The default implementation of a segmented profile.
@@ -649,7 +649,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 					&& IProfileSegment.isLongEnough(splitIndex, segment.getEndIndex(),
 							segment.getProfileLength());
 		} catch (MissingDataException e) {
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			return false;
 		}
 

@@ -19,6 +19,7 @@ package com.bmskinner.nma.components.profiles;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -29,7 +30,6 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.rules.OrientationMark;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 
 /**
@@ -60,7 +60,7 @@ public class ProfileManager {
 		try {
 			return pc.getSegments(OrientationMark.REFERENCE).size();
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK,
+			LOGGER.log(Level.SEVERE,
 					"Error getting segment count from collection " + collection.getName(), e);
 			return 0;
 		}

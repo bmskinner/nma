@@ -23,8 +23,6 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bmskinner.nma.logging.Loggable;
-
 /**
  * Top level interface for IO operations. Track the common file extensions and
  * provide access to the separate import and export operations.
@@ -109,7 +107,7 @@ public interface Io {
 		} catch (URISyntaxException e) {
 			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING,
 					"Error getting program dir");
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Loggable.STACK, e.getMessage(), e);
+			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.SEVERE, e.getMessage(), e);
 			return null;
 		}
 

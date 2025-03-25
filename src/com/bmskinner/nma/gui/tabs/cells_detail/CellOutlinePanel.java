@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -70,7 +71,7 @@ import com.bmskinner.nma.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nma.gui.events.SegmentStartIndexUpdateEvent;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.events.UserActionController;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.OutlineChartFactory;
@@ -353,7 +354,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 			popupMenu.add(nextItem);
 		} catch (MissingDataException
 				| ComponentCreationException | SegmentUpdateException e) {
-			LOGGER.log(Loggable.STACK, "Cannot create segment popup", e);
+			LOGGER.log(Level.SEVERE, "Cannot create segment popup", e);
 		}
 	}
 
@@ -391,14 +392,14 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 						update();
 					} catch (IndexOutOfBoundsException | MissingDataException
 							| SegmentUpdateException e) {
-						LOGGER.log(Loggable.STACK, "Cannot update landmark", e);
+						LOGGER.log(Level.SEVERE, "Cannot update landmark", e);
 					}
 				});
 				popupMenu.add(item);
 				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
 			}
 		} catch (MissingLandmarkException | ComponentCreationException e) {
-			LOGGER.log(Loggable.STACK, "Cannot create landmark popup", e);
+			LOGGER.log(Level.SEVERE, "Cannot create landmark popup", e);
 		}
 	}
 

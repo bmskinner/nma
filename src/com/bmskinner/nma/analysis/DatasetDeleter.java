@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -36,7 +37,6 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Handle the deletion of selected datasets in the populations panel
@@ -83,7 +83,7 @@ public class DatasetDeleter extends MultipleDatasetAnalysisMethod {
 
 		} catch (Exception e) {
 			LOGGER.warning("Error deleting dataset");
-			LOGGER.log(Loggable.STACK, "Error deleting dataset", e);
+			LOGGER.log(Level.SEVERE, "Error deleting dataset", e);
 		}
 		return new DefaultAnalysisResult(datasets);
 	}
@@ -112,7 +112,7 @@ public class DatasetDeleter extends MultipleDatasetAnalysisMethod {
 				} catch (RequestCancelledException e) {
 					// No action needed
 				} catch (InterruptedException e) {
-					LOGGER.log(Loggable.STACK, "Error deleting dataset", e);
+					LOGGER.log(Level.SEVERE, "Error deleting dataset", e);
 				}
 
 			}

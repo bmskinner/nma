@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,6 @@ import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * A default implementation of the mesh
@@ -108,7 +108,7 @@ public class DefaultMesh implements Mesh {
 			createEdgesAndFaces();
 
 		} catch (IllegalArgumentException e) {
-			LOGGER.log(Loggable.STACK, "Unable to create mesh for component", e);
+			LOGGER.log(Level.SEVERE, "Unable to create mesh for component", e);
 			throw new MeshCreationException("Unable to create mesh for component", e);
 		}
 	}
@@ -707,7 +707,7 @@ public class DefaultMesh implements Mesh {
 			}
 
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error linking edges and vertices in mesh", e);
+			LOGGER.log(Level.SEVERE, "Error linking edges and vertices in mesh", e);
 		}
 
 	}

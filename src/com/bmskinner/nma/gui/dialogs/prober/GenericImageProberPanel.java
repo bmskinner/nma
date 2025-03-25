@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
@@ -54,7 +55,7 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * An basic implementation of the image prober panel
@@ -537,7 +538,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 				}
 
 			} catch (Exception e) {
-				LOGGER.log(Loggable.STACK, "Prober cell renderer error", e);
+				LOGGER.log(Level.SEVERE, "Prober cell renderer error", e);
 				setIcon(null);
 				setText("");
 			}

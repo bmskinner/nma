@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
@@ -49,7 +50,6 @@ import com.bmskinner.nma.gui.tabs.signals.warping.SignalWarpingRunSettings;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.io.UnloadableImageException;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
 
 import ij.process.ImageProcessor;
@@ -110,7 +110,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 			// Create the consensus mesh to warp each cell onto
 			meshConsensus = new DefaultMesh(target);
 		} catch (MeshCreationException | MissingLandmarkException | ComponentCreationException e2) {
-			LOGGER.log(Loggable.STACK, "Error creating mesh", e2);
+			LOGGER.log(Level.SEVERE, "Error creating mesh", e2);
 			throw new IllegalArgumentException("Could not create mesh", e2);
 		}
 	}
@@ -146,11 +146,11 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 				firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
 			}
 		} catch (InterruptedException e) {
-			LOGGER.log(Loggable.STACK, "Interruption error in worker", e);
+			LOGGER.log(Level.SEVERE, "Interruption error in worker", e);
 			firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
 			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
-			LOGGER.log(Loggable.STACK, "Execution error in worker", e);
+			LOGGER.log(Level.SEVERE, "Execution error in worker", e);
 			firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
 		}
 	}
@@ -233,7 +233,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 
 		} catch (IllegalArgumentException | MeshCreationException | UncomparableMeshImageException
 				| MeshImageCreationException | UnloadableImageException e) {
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			return createEmptyProcessor();
 		}
 
@@ -277,7 +277,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> {
 			}
 			return ip;
 		} catch (UnloadableImageException | ImageImportException e) {
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			return createEmptyProcessor();
 		}
 	}

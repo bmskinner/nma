@@ -36,7 +36,6 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.gui.components.ColourSelecter;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.ScatterChartDatasetCreator;
@@ -94,7 +93,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 				return createSignalStatisticScatterChart();
 
 		} catch (ChartDatasetCreationException e) {
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			return createErrorChart();
 		}
 

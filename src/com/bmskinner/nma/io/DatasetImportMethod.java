@@ -36,7 +36,6 @@ import com.bmskinner.nma.components.datasets.DatasetRepairer;
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.io.Io.Importer;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Method to read a dataset from file
@@ -135,10 +134,10 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 		DatasetValidator dv = new DatasetValidator();
 		if (!dv.validate(dataset)) {
 			for (String s : dv.getSummary()) {
-				LOGGER.log(Loggable.STACK, s);
+				LOGGER.log(Level.SEVERE, s);
 			}
 			for (String s : dv.getErrors()) {
-				LOGGER.log(Loggable.STACK, s);
+				LOGGER.log(Level.SEVERE, s);
 			}
 
 			LOGGER.warning("The dataset is not properly segmented");

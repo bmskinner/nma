@@ -22,7 +22,6 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
-import com.bmskinner.nma.logging.Loggable;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -161,10 +160,10 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 					fireProgressEvent();
 
 				} catch (UnloadableImageException | ImageImportException e) {
-					LOGGER.log(Loggable.STACK,
+					LOGGER.log(Level.SEVERE,
 							"Unable to load image for nucleus " + n.getNameAndNumber(), e);
 				} catch (MissingLandmarkException e) {
-					LOGGER.log(Loggable.STACK,
+					LOGGER.log(Level.SEVERE,
 							"Unable to save keypoints for nucleus " + n.getNameAndNumber(), e);
 				}
 			}
@@ -313,7 +312,7 @@ public class CellImageExportMethod extends MultipleDatasetAnalysisMethod impleme
 			Files.deleteIfExists(exportFile.toPath());
 		} catch (IOException e) {
 			LOGGER.log(Level.WARNING, "Unable to delete file: " + fileName);
-			LOGGER.log(Loggable.STACK, "Unable to delete existing file", e);
+			LOGGER.log(Level.SEVERE, "Unable to delete existing file", e);
 		}
 
 		IJ.append(bbox, exportFile.getAbsolutePath());

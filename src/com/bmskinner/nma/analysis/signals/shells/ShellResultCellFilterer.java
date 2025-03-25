@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.stream.LongStream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -32,7 +33,7 @@ import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.signals.IShellResult;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.components.signals.IShellResult.CountType;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * Allow cell collections to be filtered based on
@@ -123,7 +124,7 @@ public class ShellResultCellFilterer {
 					}
 				} catch(Exception e) {
 					cellPasses &= false;
-					LOGGER.log(Loggable.STACK, "Unable to filter cells", e);
+					LOGGER.log(Level.SEVERE, "Unable to filter cells", e);
 				}
 			}
 			return cellPasses;

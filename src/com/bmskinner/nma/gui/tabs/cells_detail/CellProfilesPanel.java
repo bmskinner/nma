@@ -21,6 +21,7 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -43,7 +44,7 @@ import com.bmskinner.nma.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
@@ -127,7 +128,7 @@ public class CellProfilesPanel extends ChartDetailPanel
 				// Trigger refresh of dataset median profile and charts
 				activeDataset().getCollection().getProfileCollection().calculateProfiles();
 			} catch (MissingDataException | SegmentUpdateException | ComponentCreationException e) {
-				LOGGER.log(Loggable.STACK, "Error recalculating profile aggregate", e);
+				LOGGER.log(Level.SEVERE, "Error recalculating profile aggregate", e);
 			}
 		}
 	}
@@ -165,7 +166,7 @@ public class CellProfilesPanel extends ChartDetailPanel
 			}
 
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error updating cell panel", e);
+			LOGGER.log(Level.SEVERE, "Error updating cell panel", e);
 			chartPanel.setChart(ProfileChartFactory.createErrorChart());
 			buttonsPanel.setEnabled(false);
 		}

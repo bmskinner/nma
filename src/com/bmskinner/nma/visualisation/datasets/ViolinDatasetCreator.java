@@ -19,6 +19,7 @@ package com.bmskinner.nma.visualisation.datasets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -37,7 +38,6 @@ import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.signals.ISignalGroup;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
@@ -327,9 +327,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 						.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
 								Stats.MEDIAN)
 						.getSegments().get(options.getSegPosition());
-//                        .getSegmentAt(segPosition);
 			} catch (MissingDataException | SegmentUpdateException e) {
-				LOGGER.log(Loggable.STACK, "Unable to get segmented median profile", e);
+				LOGGER.log(Level.SEVERE, "Unable to get segmented median profile", e);
 				throw new ChartDatasetCreationException("Cannot get median profile");
 			}
 
@@ -347,7 +346,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 					double displacement = profile.getDisplacement(seg);
 					list.add(displacement);
 				} catch (MissingDataException | SegmentUpdateException e) {
-					LOGGER.log(Loggable.STACK, "Error getting segmented profile", e);
+					LOGGER.log(Level.SEVERE, "Error getting segmented profile", e);
 					throw new ChartDatasetCreationException("Cannot get segmented profile", e);
 				}
 

@@ -10,7 +10,6 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.actions.CreateConsensusAction;
 import com.bmskinner.nma.gui.actions.RunSegmentationAction;
-import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
 
 /**
  * Utility runnable that resegments the given dataset from scratch, and builds a

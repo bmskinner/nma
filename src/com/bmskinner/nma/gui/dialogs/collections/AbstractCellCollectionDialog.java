@@ -21,6 +21,7 @@ import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,7 +35,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.components.SelectableCellIcon;
 import com.bmskinner.nma.gui.dialogs.MessagingDialog;
 import com.bmskinner.nma.io.ImageImportWorker;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * Display collections of images from a dataset. Uses a SwingWorker to import
@@ -139,7 +140,7 @@ public abstract class AbstractCellCollectionDialog extends MessagingDialog
 			}
 
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error getting value from property change", e);
+			LOGGER.log(Level.SEVERE, "Error getting value from property change", e);
 		}
 
 	}

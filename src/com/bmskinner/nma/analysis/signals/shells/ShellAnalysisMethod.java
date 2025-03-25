@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -57,7 +58,7 @@ import com.bmskinner.nma.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
-import com.bmskinner.nma.logging.Loggable;
+
 
 import ij.ImageStack;
 
@@ -319,7 +320,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 								.valueOf(options.getString(HashOptions.SHELL_EROSION_METHOD_KEY)));
 			} catch (ShellAnalysisException e1) {
 				LOGGER.warning("Unable to make shells for " + n.getNameAndNumber());
-				LOGGER.log(Loggable.STACK, "Error in shell detector", e1);
+				LOGGER.log(Level.SEVERE, "Error in shell detector", e1);
 				return;
 			}
 

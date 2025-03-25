@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -39,7 +40,6 @@ import com.bmskinner.nma.gui.dialogs.prober.SignalImageProber;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Show the setup screen to detect nuclear signals, and run a detection analysis
@@ -110,7 +110,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 		} catch (Exception e) {
 			super.finished();
 			LOGGER.warning("Error in signal detection");
-			LOGGER.log(Loggable.STACK, "Error in signal detection", e);
+			LOGGER.log(Level.SEVERE, "Error in signal detection", e);
 		}
 	}
 

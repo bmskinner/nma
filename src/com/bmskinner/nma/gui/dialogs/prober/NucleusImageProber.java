@@ -25,6 +25,7 @@ import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -51,7 +52,7 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.gui.dialogs.prober.settings.ConstructableSettingsPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * An image prober for detecting nuclei
@@ -137,7 +138,7 @@ public class NucleusImageProber extends IntegratedImageProber
 
 		} catch (Exception e) {
 			LOGGER.warning("Error launching analysis window");
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			this.dispose();
 		}
 

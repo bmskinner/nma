@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,7 +32,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * A size settings panel for signals, which replaces the max size with a max
@@ -96,7 +97,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel {
         		minSizeSpinner.commitEdit();
         		updateOptions(HashOptions.MIN_SIZE_PIXELS, (Integer) minSizeSpinner.getValue());
         	} catch(ParseException e1) {
-        		LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+        		LOGGER.log(Level.SEVERE, "Parsing error in JSpinner", e1);
         	}
         	
         });
@@ -106,7 +107,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel {
         		maxSizeSpinner.commitEdit();
         		updateOptions(HashOptions.SIGNAL_MAX_FRACTION, (Double) maxSizeSpinner.getValue());
         	} catch(ParseException e1) {
-        		LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+        		LOGGER.log(Level.SEVERE, "Parsing error in JSpinner", e1);
         	}
         });
         
@@ -121,7 +122,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel {
 
         		updateOptions(HashOptions.MIN_CIRC, (Double) minCircSpinner.getValue());
         	} catch(ParseException e1) {
-        		LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+        		LOGGER.log(Level.SEVERE, "Parsing error in JSpinner", e1);
         	}
         });
         
@@ -136,7 +137,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel {
 
         		updateOptions(HashOptions.MAX_CIRC, (Double) maxCircSpinner.getValue());
         	} catch(ParseException e1) {
-        		LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+        		LOGGER.log(Level.SEVERE, "Parsing error in JSpinner", e1);
         	}
         });
     }

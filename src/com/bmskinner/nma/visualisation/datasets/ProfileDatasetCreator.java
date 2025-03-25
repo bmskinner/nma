@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -45,7 +46,6 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
@@ -585,7 +585,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				ds.addLines(MEDIAN_SERIES_PREFIX + "0", data, 0);
 			}
 		} catch (MissingDataException | SegmentUpdateException e) {
-			LOGGER.log(Loggable.STACK,
+			LOGGER.log(Level.SEVERE,
 					"Error creating single dataset variability data: %s".formatted(e.getMessage()),
 					e);
 			throw new ChartDatasetCreationException(

@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -43,7 +44,6 @@ import com.bmskinner.nma.components.signals.IShellResult.Aggregation;
 import com.bmskinner.nma.components.signals.IShellResult.Normalisation;
 import com.bmskinner.nma.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nma.components.signals.ISignalGroup;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
@@ -170,7 +170,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 			c = new ShellDetector(options.firstDataset().getCollection().getConsensus(), shellCount, type);
 
 		} catch (ShellAnalysisException | MissingLandmarkException | ComponentCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error making shells in consensus", e);
+			LOGGER.log(Level.SEVERE, "Error making shells in consensus", e);
 			throw new ChartDatasetCreationException("Error making shells", e);
 		}
 

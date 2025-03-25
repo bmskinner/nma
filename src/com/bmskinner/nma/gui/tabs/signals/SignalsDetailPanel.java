@@ -18,13 +18,14 @@ package com.bmskinner.nma.gui.tabs.signals;
 
 import java.awt.BorderLayout;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 import com.bmskinner.nma.gui.tabs.signals.warping.SignalWarpingMainPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * The top level tab panel showing information on signals at the dataset level
@@ -74,7 +75,7 @@ public class SignalsDetailPanel extends DetailPanel {
 			this.add(signalsTabPane, BorderLayout.CENTER);
 
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error making signal panel", e);
+			LOGGER.log(Level.SEVERE, "Error making signal panel", e);
 		}
 	}
 }

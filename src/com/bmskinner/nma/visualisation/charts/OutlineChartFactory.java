@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -63,7 +64,6 @@ import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.gui.RotationMode;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.ComponentOutlineDataset;
@@ -124,7 +124,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			return makeSignalCoMNucleusOutlineChart();
 		} catch (ChartCreationException e) {
 			LOGGER.warning("Error making signal chart");
-			LOGGER.log(Loggable.STACK, "Error making signal chart", e);
+			LOGGER.log(Level.SEVERE, "Error making signal chart", e);
 			return createErrorChart();
 		}
 
@@ -244,7 +244,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				| ComponentCreationException
 				| MeshImageCreationException | UncomparableMeshImageException e) {
 			LOGGER.warning("Error creating cell outline chart");
-			LOGGER.log(Loggable.STACK, "Error creating cell outline chart", e);
+			LOGGER.log(Level.SEVERE, "Error creating cell outline chart", e);
 			return createErrorChart();
 		}
 
@@ -295,7 +295,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			applyDefaultAxisOptions(chart);
 			return chart;
 		} catch (ChartDatasetCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error making cytoplasm outline", e);
+			LOGGER.log(Level.SEVERE, "Error making cytoplasm outline", e);
 			return createErrorChart();
 		}
 	}
@@ -556,8 +556,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 			} catch (MissingDataException
 					| ComponentCreationException | SegmentUpdateException e) {
-				LOGGER.log(Loggable.STACK, "Error getting segments for mesh", e);
-				LOGGER.log(Loggable.STACK, "Falling back to old mesh face annotation");
+				LOGGER.log(Level.SEVERE, "Error getting segments for mesh", e);
+				LOGGER.log(Level.SEVERE, "Falling back to old mesh face annotation");
 
 				for (MeshFace f : mesh.getFaces()) {
 

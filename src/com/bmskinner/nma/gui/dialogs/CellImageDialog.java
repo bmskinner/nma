@@ -17,12 +17,12 @@
 package com.bmskinner.nma.gui.dialogs;
 
 import java.awt.BorderLayout;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.gui.components.AnnotatedNucleusPanel;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * View a cell annotated onto its original source image
@@ -73,7 +73,7 @@ public class CellImageDialog extends MessagingDialog {
 
 		} catch (Exception e) {
 			LOGGER.warning("Cannot make cell image dialog");
-			LOGGER.log(Loggable.STACK, "Error making dialog", e);
+			LOGGER.log(Level.SEVERE, "Error making dialog", e);
 		}
 		this.setModal(false);
 		this.pack();

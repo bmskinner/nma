@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -49,7 +50,6 @@ import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.components.signals.ISignalGroup;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 import weka.estimators.KernelEstimator;
@@ -219,7 +219,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				}
 			}
 		} catch (ChartDatasetCreationException e) {
-			LOGGER.log(Loggable.STACK, "Unable to add signal to dataset", e);
+			LOGGER.log(Level.SEVERE, "Unable to add signal to dataset", e);
 		}
 		return result;
 	}

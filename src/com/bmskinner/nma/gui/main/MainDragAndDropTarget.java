@@ -26,12 +26,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bmskinner.nma.gui.events.FileImportEventListener.FileImportEvent;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class MainDragAndDropTarget extends DropTarget {
@@ -77,9 +77,9 @@ public class MainDragAndDropTarget extends DropTarget {
 			}
 
 		} catch (UnsupportedFlavorException e) {
-			LOGGER.log(Loggable.STACK, "Error in DnD", e);
+			LOGGER.log(Level.SEVERE, "Error in DnD", e);
 		} catch (IOException e) {
-			LOGGER.log(Loggable.STACK, "IO error in DnD", e);
+			LOGGER.log(Level.SEVERE, "IO error in DnD", e);
 		}
 	}
 }

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -48,7 +49,7 @@ import com.bmskinner.nma.gui.components.SelectableCellIcon;
 import com.bmskinner.nma.io.ImageImportWorker;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.Io;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 
@@ -176,7 +177,7 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 				}
 			} catch (ShellAnalysisException e1) {
 				LOGGER.warning("Error making shells");
-				LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
+				LOGGER.log(Level.SEVERE, e1.getMessage(), e1);
 			}
 
 			ISignalCollection signalCollection = n.getSignalCollection();
@@ -207,7 +208,7 @@ public class ShellOverviewDialog extends AbstractCellCollectionDialog {
 				try {
 					ip = rotateToVertical(c, ip);
 				} catch (MissingLandmarkException e) {
-					LOGGER.log(Loggable.STACK, "Unable to rotate", e);
+					LOGGER.log(Level.SEVERE, "Unable to rotate", e);
 				}
 				ip.flipVertical(); // Y axis needs inverting
 			}

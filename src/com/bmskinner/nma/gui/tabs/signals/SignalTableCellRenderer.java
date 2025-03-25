@@ -18,10 +18,11 @@ package com.bmskinner.nma.gui.tabs.signals;
 
 import java.awt.Color;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.renderers.ConsistentRowTableCellRenderer;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.datasets.SignalTableCell;
 
 /**
@@ -67,7 +68,7 @@ public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error in signal renderer", e);
+			LOGGER.log(Level.SEVERE, "Error in signal renderer", e);
 			colour = Color.WHITE;
 		}
 

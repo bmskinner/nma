@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -42,7 +43,7 @@ import com.bmskinner.nma.io.WorkspaceExporter;
 import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
-import com.bmskinner.nma.logging.Loggable;
+
 
 import ij.Prefs;
 
@@ -57,7 +58,7 @@ import ij.Prefs;
  */
 public class TestImageDatasetCreator {
 
-	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	public static final UUID RED_SIGNAL_ID = UUID
 			.fromString("00000000-0000-0000-0000-100000000001");

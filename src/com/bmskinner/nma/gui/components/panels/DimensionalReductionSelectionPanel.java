@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -27,7 +28,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.gui.Labels;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.utility.NumberTools;
 
 public class DimensionalReductionSelectionPanel extends OptionsPanel {
@@ -241,7 +242,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 				options.setInt(UMAPMethod.N_NEIGHBOUR_KEY,
 						(Integer) spinner.getValue());
 			} catch (ParseException e) {
-				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
+				LOGGER.log(Level.SEVERE, "Parse error in spinner", e);
 			}
 
 		});
@@ -266,7 +267,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 				options.setFloat(UMAPMethod.MIN_DISTANCE_KEY,
 						((Double) spinner.getValue()).floatValue());
 			} catch (ParseException e) {
-				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
+				LOGGER.log(Level.SEVERE, "Parse error in spinner", e);
 			}
 
 		});
@@ -294,7 +295,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 				options.setInt(TsneMethod.MAX_ITERATIONS_KEY,
 						(Integer) iterationsSpinner.getValue());
 			} catch (ParseException e) {
-				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
+				LOGGER.log(Level.SEVERE, "Parse error in spinner", e);
 			}
 
 		});
@@ -329,7 +330,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 				perplexitySpinner.commitEdit();
 				options.setDouble(TsneMethod.PERPLEXITY_KEY, (Double) perplexitySpinner.getValue());
 			} catch (ParseException e) {
-				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
+				LOGGER.log(Level.SEVERE, "Parse error in spinner", e);
 			}
 
 		});
@@ -355,7 +356,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 				options.setDouble(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY,
 						(Double) spinner.getValue());
 			} catch (ParseException e) {
-				LOGGER.log(Loggable.STACK, "Parse error in spinner", e);
+				LOGGER.log(Level.SEVERE, "Parse error in spinner", e);
 			}
 
 		});

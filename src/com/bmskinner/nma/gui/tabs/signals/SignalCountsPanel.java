@@ -22,6 +22,7 @@ import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -53,7 +54,7 @@ import com.bmskinner.nma.gui.dialogs.SettingsDialog;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.ViolinChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
@@ -217,7 +218,7 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 
 			} catch (CollectionFilteringException | MissingDataException
 					| SegmentUpdateException e1) {
-				LOGGER.log(Loggable.STACK,
+				LOGGER.log(Level.SEVERE,
 						"Unable to filter collection for %s".formatted(dataset.getName()),
 						e1);
 			}

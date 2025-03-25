@@ -21,7 +21,6 @@ import com.bmskinner.nma.components.mesh.Mesh;
 import com.bmskinner.nma.components.mesh.MeshCreationException;
 import com.bmskinner.nma.components.mesh.MeshVertex;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.logging.Loggable;
 
 import ij.IJ;
 
@@ -52,7 +51,7 @@ public class TPSexporter extends SingleDatasetAnalysisMethod implements Io {
 			Files.deleteIfExists(exportFile.toPath());
 		} catch (IOException e) {
 			LOGGER.log(Level.WARNING, "Unable to delete file: "+exportFile);
-			LOGGER.log(Loggable.STACK, "Unable to delete existing file", e);
+			LOGGER.log(Level.SEVERE, "Unable to delete existing file", e);
 		}
 	}
 	

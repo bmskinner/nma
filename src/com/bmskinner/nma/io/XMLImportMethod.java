@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -16,7 +17,6 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.io.Io.Importer;
-import com.bmskinner.nma.logging.Loggable;
 
 public class XMLImportMethod extends AbstractAnalysisMethod implements Importer {
 
@@ -52,7 +52,7 @@ public class XMLImportMethod extends AbstractAnalysisMethod implements Importer 
 			doc = saxBuilder.build(cis);
 			fireIndeterminateState();
 		} catch (IOException | JDOMException e) {
-			LOGGER.log(Loggable.STACK,
+			LOGGER.log(Level.SEVERE,
 					"Could not parse file as XML: " + file.getName() + ": " + e.getMessage(), e);
 		}
 	}

@@ -16,7 +16,6 @@ import com.bmskinner.nma.core.InterfaceUpdater;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.CancellableRunnable;
 import com.bmskinner.nma.gui.components.ExportableTable;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.TableCache;
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
@@ -133,7 +132,7 @@ public abstract class TableDetailPanel extends DetailPanel {
 			try {
 				model = createPanelTableType(options);
 			} catch (Exception e) {
-				LOGGER.log(Loggable.STACK, "Error creating table", e);
+				LOGGER.log(Level.SEVERE, "Error creating table", e);
 				model = AbstractTableCreator.createBlankTable();
 			}
 			cache.add(options, model);
@@ -206,7 +205,7 @@ public abstract class TableDetailPanel extends DetailPanel {
 				return model;
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Error creating table model");
-				LOGGER.log(Loggable.STACK, "Error creating table model", e);
+				LOGGER.log(Level.SEVERE, "Error creating table model", e);
 				return null;
 			}
 

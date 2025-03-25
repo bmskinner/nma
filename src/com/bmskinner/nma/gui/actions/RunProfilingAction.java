@@ -18,6 +18,7 @@ package com.bmskinner.nma.gui.actions;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -28,7 +29,6 @@ import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Launch a profiling action that will create object profiles, and automatically
@@ -84,7 +84,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 			ThreadManager.getInstance().submit(worker);
 		} catch (Exception e) {
 			this.cancel();
-			LOGGER.log(Loggable.STACK, "Error in morphology analysis", e);
+			LOGGER.log(Level.SEVERE, "Error in morphology analysis", e);
 		}
 	}
 

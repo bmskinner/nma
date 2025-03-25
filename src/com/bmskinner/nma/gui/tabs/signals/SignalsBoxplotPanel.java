@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
 
@@ -33,7 +34,7 @@ import com.bmskinner.nma.gui.components.panels.ViolinChartPanel;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
 import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
 import com.bmskinner.nma.gui.tabs.BoxplotsTabPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.charts.ViolinChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
@@ -72,7 +73,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel
 				chart = new ViolinChartFactory(options)
 						.createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
 			} catch (Exception e) {
-				LOGGER.log(Loggable.STACK, "Error creating boxplots panel", e);
+				LOGGER.log(Level.SEVERE, "Error creating boxplots panel", e);
 			}
 
 			ViolinChartPanel panel = new ViolinChartPanel(chart);

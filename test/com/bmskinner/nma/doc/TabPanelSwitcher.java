@@ -20,6 +20,7 @@ import java.awt.Component;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.bmskinner.nma.gui.main.DockableMainWindow;
 import com.bmskinner.nma.gui.tabs.DetailPanel;

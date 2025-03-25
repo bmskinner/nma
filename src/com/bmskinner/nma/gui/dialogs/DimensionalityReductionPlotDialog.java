@@ -7,6 +7,7 @@ import java.awt.Paint;
 import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
@@ -24,7 +25,6 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.DimensionalityChartFactory;
 
@@ -117,7 +117,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 					ThreadManager.getInstance().submit(r);
 				}
 			} catch (ParseException e1) {
-				LOGGER.log(Loggable.STACK, "Error parsing input", e);
+				LOGGER.log(Level.SEVERE, "Error parsing input", e);
 			}
 		});
 

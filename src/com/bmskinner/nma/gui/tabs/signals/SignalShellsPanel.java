@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -69,7 +70,7 @@ import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.reports.DemoReportGenerator;
 import com.bmskinner.nma.visualisation.charts.ShellChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
@@ -366,7 +367,7 @@ public class SignalShellsPanel extends DetailPanel
 
 			} catch (CollectionFilteringException | MissingDataException
 					| SegmentUpdateException e1) {
-				LOGGER.log(Loggable.STACK,
+				LOGGER.log(Level.SEVERE,
 						"Unable to filter collection for %s".formatted(dataset.getName()),
 						e1);
 			}

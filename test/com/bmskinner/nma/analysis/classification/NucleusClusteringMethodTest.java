@@ -28,7 +28,7 @@ import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.io.SampleDatasetReader;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * Tests for the nucleus clustering
@@ -38,7 +38,7 @@ import com.bmskinner.nma.logging.Loggable;
  */
 public class NucleusClusteringMethodTest {
 
-	static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	static {
 		for (Handler h : LOGGER.getHandlers())

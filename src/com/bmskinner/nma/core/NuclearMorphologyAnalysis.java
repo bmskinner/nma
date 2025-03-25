@@ -41,7 +41,7 @@ import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.io.XMLReader.XMLReadingException;
 import com.bmskinner.nma.io.XMLWriter;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.pipelines.BasicAnalysisPipeline;
 import com.bmskinner.nma.pipelines.ExportDataPipeline;
 import com.bmskinner.nma.pipelines.MergeFilesPipeline;
@@ -70,7 +70,7 @@ public class NuclearMorphologyAnalysis {
 	public static DockableMainWindow mw = null;
 
 	/** Initialise the logger for the project namespace */
-	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(NuclearMorphologyAnalysis.class.getName());
 
 	static {
 
@@ -403,7 +403,7 @@ public class NuclearMorphologyAnalysis {
 				LOGGER.fine("Removed v1 log file: " + oldLog.getName());
 			}
 		} catch (IOException e) {
-			LOGGER.log(Loggable.STACK, "Unable to delete old v1 log file", e);
+			LOGGER.log(Level.SEVERE, "Unable to delete old v1 log file", e);
 		}
 	}
 

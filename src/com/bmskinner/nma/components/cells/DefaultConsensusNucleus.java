@@ -18,6 +18,7 @@ package com.bmskinner.nma.components.cells;
 
 import java.awt.Shape;
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jdom2.Element;
@@ -28,7 +29,6 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.UnprofilableObjectException;
 import com.bmskinner.nma.io.XmlSerializable;
-import com.bmskinner.nma.logging.Loggable;
 
 import ij.process.FloatPolygon;
 
@@ -152,7 +152,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 		try {
 			return new DefaultConsensusNucleus(this);
 		} catch (UnprofilableObjectException | ComponentCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error duplicating consensus", e);
+			LOGGER.log(Level.SEVERE, "Error duplicating consensus", e);
 			return null;
 		}
 	}

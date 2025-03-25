@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -45,7 +46,6 @@ import com.bmskinner.nma.components.datasets.VirtualDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Allow clusters to be assigned to a dataset, based on their map in a file.
@@ -179,7 +179,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 				fireProgressEvent();
 			}
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error parsing mapping file", e);
+			LOGGER.log(Level.SEVERE, "Error parsing mapping file", e);
 			throw new ClusteringMethodException("Invalid mapping file format");
 		}
 	}
@@ -263,7 +263,7 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 					dataset.getCollection().setSharedCount(c, c.size());
 
 				} catch (MissingDataException | SegmentUpdateException e) {
-					LOGGER.log(Loggable.STACK,
+					LOGGER.log(Level.SEVERE,
 							"Error copying segments or landmarks from " + dataset.getName(), e);
 				}
 

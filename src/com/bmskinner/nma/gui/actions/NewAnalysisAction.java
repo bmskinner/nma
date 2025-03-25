@@ -24,9 +24,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.swing.JFileChooser;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -49,7 +48,6 @@ import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.prober.NucleusImageProber;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Run a new analysis
@@ -173,11 +171,11 @@ public class NewAnalysisAction extends VoidResultAction {
 
 		} catch (InterruptedException e) {
 			LOGGER.warning("Interruption to swing worker");
-			LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
+			LOGGER.log(Level.SEVERE, "Interruption to swing worker", e);
 			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
 			LOGGER.warning("Execution error in swing worker");
-			LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);
+			LOGGER.log(Level.SEVERE, "Execution error in swing worker", e);
 		}
 
 		super.finished();

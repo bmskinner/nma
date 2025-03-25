@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -38,7 +39,7 @@ import javax.swing.tree.TreePath;
 
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.logging.Loggable;
+
 
 @SuppressWarnings("serial")
 public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelectionListener {
@@ -220,7 +221,7 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 
 			} catch (Exception e1) {
 				LOGGER.log(Level.WARNING, "Error fetching cell");
-				LOGGER.log(Loggable.STACK, "Error fetching cell", e1);
+				LOGGER.log(Level.SEVERE, "Error fetching cell", e1);
 			}
 		}
 

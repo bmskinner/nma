@@ -17,6 +17,7 @@
 package com.bmskinner.nma.gui.actions;
 
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -38,7 +39,6 @@ import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Setup a clustering of the given dataset.
@@ -172,7 +172,7 @@ public class ClusterAutomaticAction extends SingleDatasetResultAction {
 
 		} catch (InterruptedException | ExecutionException e) {
 			LOGGER.warning("Error clustering");
-			LOGGER.log(Loggable.STACK, "Error clustering", e);
+			LOGGER.log(Level.SEVERE, "Error clustering", e);
 			Thread.currentThread().interrupt();
 		}
 

@@ -3,6 +3,7 @@ package com.bmskinner.nma;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -13,7 +14,7 @@ import com.bmskinner.nma.components.ComponentTestSuite;
 import com.bmskinner.nma.io.IoTestSuite;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.pipelines.ApiTestSuite;
 import com.bmskinner.nma.utility.UtilityTestSuite;
 
@@ -36,7 +37,7 @@ import com.bmskinner.nma.utility.UtilityTestSuite;
 })
 public class RunAllTests {
 
-	static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	static {
 		for (Handler h : LOGGER.getHandlers())

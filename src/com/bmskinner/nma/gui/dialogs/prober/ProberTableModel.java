@@ -17,6 +17,7 @@
 package com.bmskinner.nma.gui.dialogs.prober;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
 import javax.swing.table.DefaultTableModel;

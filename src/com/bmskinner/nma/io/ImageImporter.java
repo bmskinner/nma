@@ -30,7 +30,6 @@ import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.io.Io.Importer;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
 

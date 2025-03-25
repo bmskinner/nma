@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -44,7 +45,6 @@ import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.FileUtils;
 
 /**
@@ -250,7 +250,7 @@ public class CosmeticHandler {
 		} catch (RequestCancelledException e) {
 			// user cancelled, ignore
 		} catch (MissingOptionException e) {
-			LOGGER.log(Loggable.STACK, "Error updating signal source", e);
+			LOGGER.log(Level.SEVERE, "Error updating signal source", e);
 		}
 
 	}

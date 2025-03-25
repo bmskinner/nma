@@ -24,6 +24,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
@@ -34,7 +35,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.ViolinChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
@@ -103,7 +103,7 @@ public abstract class BoxplotsTabPanel extends ChartDetailPanel implements Actio
 
 			this.setEnabled(false);
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error creating panel", e);
+			LOGGER.log(Level.SEVERE, "Error creating panel", e);
 		}
 	}
 

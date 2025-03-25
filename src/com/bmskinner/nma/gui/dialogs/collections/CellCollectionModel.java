@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import javax.swing.table.DefaultTableModel;

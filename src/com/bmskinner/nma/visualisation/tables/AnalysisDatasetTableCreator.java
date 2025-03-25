@@ -19,6 +19,7 @@ package com.bmskinner.nma.visualisation.tables;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.table.TableModel;
@@ -38,7 +39,6 @@ import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.DatasetListManager;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.stats.Stats.WilcoxonRankSumResult;
 import com.bmskinner.nma.visualisation.options.AbstractOptions;
@@ -205,7 +205,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				return new WilcoxonTableModel(options.getDatasets(), results);
 			}
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error creating Wilcoxon table", e);
+			LOGGER.log(Level.SEVERE, "Error creating Wilcoxon table", e);
 			return createBlankTable();
 		}
 
@@ -331,7 +331,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				return new MagnitudeTableModel(options.getDatasets(), results);
 			}
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error creating magnitude table", e);
+			LOGGER.log(Level.SEVERE, "Error creating magnitude table", e);
 			return createBlankTable();
 		}
 

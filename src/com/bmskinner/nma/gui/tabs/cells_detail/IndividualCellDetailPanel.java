@@ -21,13 +21,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nma.gui.tabs.DetailPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 
 @SuppressWarnings("serial")
 public class IndividualCellDetailPanel extends DetailPanel {
@@ -68,7 +69,7 @@ public class IndividualCellDetailPanel extends DetailPanel {
 
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Error creating cell detail panel");
-			LOGGER.log(Loggable.STACK, "Error creating cell detail panel", e);
+			LOGGER.log(Level.SEVERE, "Error creating cell detail panel", e);
 		}
 	}
 

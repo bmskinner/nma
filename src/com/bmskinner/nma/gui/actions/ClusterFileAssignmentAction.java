@@ -18,6 +18,7 @@ package com.bmskinner.nma.gui.actions;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -33,7 +34,6 @@ import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Action to trigger assignment of nuclei to clusters based on an input
@@ -93,7 +93,7 @@ public class ClusterFileAssignmentAction extends SingleDatasetResultAction {
 			UIController.getInstance().fireClusterGroupAdded(dataset, r.getGroup());
 		} catch (InterruptedException | ExecutionException e) {
 			LOGGER.warning("Error clustering");
-			LOGGER.log(Loggable.STACK, "Error clustering", e);
+			LOGGER.log(Level.SEVERE, "Error clustering", e);
 			Thread.currentThread().interrupt();
 		}
 

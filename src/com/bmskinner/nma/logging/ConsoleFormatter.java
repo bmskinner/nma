@@ -34,7 +34,7 @@ public class ConsoleFormatter extends Formatter {
 		buffer.append(SEPARATOR);
 		buffer.append(record.getMessage());
 
-		if (record.getLevel() == Level.SEVERE || record.getLevel() == Loggable.STACK) {
+		if (record.getLevel() == Level.SEVERE || record.getLevel() == Level.SEVERE) {
 
 			if (record.getThrown() != null) {
 				Throwable t = record.getThrown();

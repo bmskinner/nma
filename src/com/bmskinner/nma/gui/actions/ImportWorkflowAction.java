@@ -19,6 +19,7 @@ package com.bmskinner.nma.gui.actions;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -33,7 +34,6 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.io.Io;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.pipelines.AnalysisPipeline.AnalysisPipelineException;
 import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;
 
@@ -99,11 +99,11 @@ public class ImportWorkflowAction extends VoidResultAction {
 			}
 		} catch (InterruptedException e) {
 			LOGGER.warning("Interruption to swing worker");
-			LOGGER.log(Loggable.STACK, "Interruption to swing worker", e);
+			LOGGER.log(Level.SEVERE, "Interruption to swing worker", e);
 			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
 			LOGGER.warning("Execution error in swing worker");
-			LOGGER.log(Loggable.STACK, "Execution error in swing worker", e);
+			LOGGER.log(Level.SEVERE, "Execution error in swing worker", e);
 		}
 
 		super.finished();

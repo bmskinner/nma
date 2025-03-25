@@ -46,7 +46,7 @@ import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleApplicationType;
 import com.bmskinner.nma.components.rules.RuleSet;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.stats.Stats;
 
 /**
@@ -59,7 +59,7 @@ import com.bmskinner.nma.stats.Stats;
  */
 public class DefaultDatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
-	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(DefaultDatasetProfilingMethod.class.getName());
 
 	public static final int RECALCULATE_MEDIAN = 0;
 

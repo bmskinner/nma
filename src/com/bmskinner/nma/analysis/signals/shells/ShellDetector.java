@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -42,7 +43,7 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.signals.IShellResult.ShrinkType;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.UnloadableImageException;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.stats.Stats;
 
 import ij.ImageStack;
@@ -186,7 +187,7 @@ public class ShellDetector extends Detector {
 			}
 		} catch (UnloadableImageException e) {
 			LOGGER.warning("Unable to load image for signal");
-			LOGGER.log(Loggable.STACK, "Error loading image", e);
+			LOGGER.log(Level.SEVERE, "Error loading image", e);
 			return makeZeroArray();
 		}
 		result = correctNestedValues(result);

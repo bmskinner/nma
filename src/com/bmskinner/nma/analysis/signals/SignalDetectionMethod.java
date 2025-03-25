@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -48,7 +49,6 @@ import com.bmskinner.nma.components.signals.ISignalCollection;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Method to detect nuclear signals in a dataset
@@ -177,7 +177,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		} catch (ImageImportException | UnavailableBorderPointException | MissingLandmarkException
 				| ComponentCreationException e) {
 			LOGGER.warning("Cannot open " + imageFile.getAbsolutePath());
-			LOGGER.log(Loggable.STACK, "Cannot load image", e);
+			LOGGER.log(Level.SEVERE, "Cannot load image", e);
 		}
 	}
 

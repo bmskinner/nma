@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.junit.Test;
 

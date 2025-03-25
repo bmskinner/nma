@@ -23,6 +23,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -32,7 +33,7 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * Panel for image channel settings
@@ -101,7 +102,7 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 				options.setDouble(HashOptions.SCALE, (Double) j.getValue());
 
 			} catch (ParseException e1) {
-				LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+				LOGGER.log(Level.SEVERE, "Parsing error in JSpinner", e1);
 			}
 		});
 	}

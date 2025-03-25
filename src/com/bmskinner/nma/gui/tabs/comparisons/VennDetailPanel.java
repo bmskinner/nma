@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -30,7 +31,7 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
 import com.bmskinner.nma.visualisation.tables.AnalysisDatasetTableCreator;
@@ -72,7 +73,7 @@ public class VennDetailPanel extends TableDetailPanel {
 			vennTable.setEnabled(false);
 
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error creating venn panel", e);
+			LOGGER.log(Level.SEVERE, "Error creating venn panel", e);
 		}
 
 	}

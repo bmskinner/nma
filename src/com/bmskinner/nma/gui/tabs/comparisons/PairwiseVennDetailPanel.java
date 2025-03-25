@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -31,7 +32,7 @@ import javax.swing.table.TableModel;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
@@ -78,7 +79,7 @@ public class PairwiseVennDetailPanel extends TableDetailPanel {
 			pairwiseVennTable.setEnabled(false);
 
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error updating pairwise venn table", e);
+			LOGGER.log(Level.SEVERE, "Error updating pairwise venn table", e);
 		}
 
 	}

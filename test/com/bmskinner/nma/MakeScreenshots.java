@@ -3,6 +3,7 @@ package com.bmskinner.nma;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -11,7 +12,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.bmskinner.nma.doc.Screenshotter;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * This suite runs the test file creators, then takes screenshots for inclusion
@@ -28,7 +29,7 @@ import com.bmskinner.nma.logging.Loggable;
 })
 public class MakeScreenshots {
 
-	static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	static {
 		for (Handler h : LOGGER.getHandlers())

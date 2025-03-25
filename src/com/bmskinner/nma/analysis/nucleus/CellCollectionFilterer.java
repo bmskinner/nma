@@ -19,6 +19,7 @@ package com.bmskinner.nma.analysis.nucleus;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,6 @@ import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.DefaultCellCollection;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Filters cell collections on measured values
@@ -177,7 +177,7 @@ public class CellCollectionFilterer {
 
 		} catch (MissingDataException | SegmentUpdateException e) {
 			LOGGER.warning("Error copying collection offsets");
-			LOGGER.log(Loggable.STACK, "Error in offsetting", e);
+			LOGGER.log(Level.SEVERE, "Error in offsetting", e);
 			throw new CollectionFilteringException(e);
 		}
 		return subCollection;

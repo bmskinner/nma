@@ -17,6 +17,7 @@
 package com.bmskinner.nma.gui.tabs.cells_detail;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;

@@ -19,6 +19,7 @@ package com.bmskinner.nma.gui.dialogs.prober.settings;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -29,7 +30,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.gui.dialogs.prober.OptionsChangeEvent;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * The settings panel for detection nuclear signals. This is designed to be
@@ -66,7 +67,7 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
 
 			this.add(createPanel(), BorderLayout.CENTER);
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
 	}
 

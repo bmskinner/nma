@@ -18,6 +18,7 @@ package com.bmskinner.nma.gui.actions;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -30,7 +31,6 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.logging.Loggable;
 
 public class MergeSourceExtractionAction extends MultiDatasetResultAction {
 
@@ -71,11 +71,11 @@ public class MergeSourceExtractionAction extends MultiDatasetResultAction {
 
 		} catch (InterruptedException e) {
 			LOGGER.warning("Unable to extract merge source" + e.getMessage());
-			LOGGER.log(Loggable.STACK, "Unable to extract merge source", e);
+			LOGGER.log(Level.SEVERE, "Unable to extract merge source", e);
 			return;
 		} catch (ExecutionException e) {
 			LOGGER.warning("Unable to extract merge source" + e.getMessage());
-			LOGGER.log(Loggable.STACK, "Unable to extract merge source", e);
+			LOGGER.log(Level.SEVERE, "Unable to extract merge source", e);
 			return;
 		}
 

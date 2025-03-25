@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -48,7 +49,6 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.io.Io;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * The method for finding nuclei in fluorescence images
@@ -189,7 +189,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
 			} catch (Exception e) {
 				LOGGER.warning("Cannot create collection: " + e.getMessage());
-				LOGGER.log(Loggable.STACK, "Error in nucleus detection", e);
+				LOGGER.log(Level.SEVERE, "Error in nucleus detection", e);
 			}
 		}
 
@@ -236,7 +236,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 			fc.addAll(cells);
 
 		} catch (ImageImportException e) {
-			LOGGER.log(Loggable.STACK, "Error searching folder: %s".formatted(e.getMessage()), e);
+			LOGGER.log(Level.SEVERE, "Error searching folder: %s".formatted(e.getMessage()), e);
 		}
 
 		// Add the new collection to the group

@@ -1,6 +1,7 @@
 package com.bmskinner.nma.analysis.profiles;
 
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -21,7 +22,6 @@ import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 
 /**
@@ -250,7 +250,7 @@ public class SegmentSplitMethod extends SingleDatasetAnalysisMethod {
 			int targetIndex = nSeg.getProportionalIndex(proportion);
 			return profile.isSplittable(id, targetIndex);
 		} catch (MissingDataException | SegmentUpdateException e) {
-			LOGGER.log(Loggable.STACK, "Error getting profile", e);
+			LOGGER.log(Level.SEVERE, "Error getting profile", e);
 			return false;
 		}
 

@@ -17,6 +17,7 @@
 package com.bmskinner.nma.analysis.profiles;
 
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -37,7 +38,6 @@ import com.bmskinner.nma.components.rules.Rule;
 import com.bmskinner.nma.components.rules.Rule.RuleType;
 import com.bmskinner.nma.components.rules.RuleSet;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 
 /**
@@ -82,7 +82,7 @@ public class ProfileIndexFinder {
 					n.setLandmark(lm, index);
 				}
 			} catch (MissingProfileException | SegmentUpdateException e) {
-				LOGGER.log(Loggable.STACK, "Error getting profile type", e);
+				LOGGER.log(Level.SEVERE, "Error getting profile type", e);
 			} catch (NoDetectedIndexException e) {
 				LOGGER.finer(n.getNameAndNumber() + ": Unable to detect " + lm
 						+ " in nucleus, setting to zero");
@@ -91,13 +91,13 @@ public class ProfileIndexFinder {
 				} catch (IndexOutOfBoundsException
 						| MissingDataException
 						| SegmentUpdateException e1) {
-					LOGGER.log(Loggable.STACK, "Error setting landmark to zero", e);
+					LOGGER.log(Level.SEVERE, "Error setting landmark to zero", e);
 
 				} // default to the zero index
 			} catch (IndexOutOfBoundsException e) {
-				LOGGER.log(Loggable.STACK, "Index out of bounds", e);
+				LOGGER.log(Level.SEVERE, "Index out of bounds", e);
 			} catch (MissingDataException e) {
-				LOGGER.log(Loggable.STACK, "Data not present", e);
+				LOGGER.log(Level.SEVERE, "Data not present", e);
 			}
 		}
 	}

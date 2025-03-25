@@ -66,7 +66,6 @@ import com.bmskinner.nma.gui.components.VariableNodePainter;
 import com.bmskinner.nma.gui.components.panels.ClusterGroupSelectionPanel;
 import com.bmskinner.nma.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.logging.Loggable;
 
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
@@ -147,7 +146,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 		} catch (Exception e) {
 
 			LOGGER.log(Level.WARNING, "Error creating tree view");
-			LOGGER.log(Loggable.STACK, "Error creating tree view", e);
+			LOGGER.log(Level.SEVERE, "Error creating tree view", e);
 			this.dispose();
 		}
 	}
@@ -185,13 +184,13 @@ public class ClusterTreeDialog extends MessagingDialog {
 			}
 		} catch (IOException e) {
 			LOGGER.log(Level.WARNING, "Unable to display tree: Error reading data");
-			LOGGER.log(Loggable.STACK, "Error reading tree", e);
+			LOGGER.log(Level.SEVERE, "Error reading tree", e);
 		} catch (DuplicateTaxaException e) {
 			LOGGER.log(Level.WARNING, "Unable to display tree: duplicate taxon names");
-			LOGGER.log(Loggable.STACK, "Duplicate taxon names", e);
+			LOGGER.log(Level.SEVERE, "Duplicate taxon names", e);
 		} catch (ImportException e) {
 			LOGGER.log(Level.WARNING, "Unable to display tree: error importing newick tree");
-			LOGGER.log(Loggable.STACK, "Error in tree IO", e);
+			LOGGER.log(Level.SEVERE, "Error in tree IO", e);
 		}
 		return topTree;
 	}
@@ -260,7 +259,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 				extractSelectedNodesToCluster();
 			} catch (Exception e) {
 				LOGGER.warning("Error extracting cells");
-				LOGGER.log(Loggable.STACK, "Error extracting cells", e);
+				LOGGER.log(Level.SEVERE, "Error extracting cells", e);
 			}
 		});
 		panel.add(extractButton);
@@ -496,7 +495,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 
 				} catch (MissingDataException | SegmentUpdateException e) {
 					LOGGER.warning("Error copying collection offsets");
-					LOGGER.log(Loggable.STACK, "Error in offsetting", e);
+					LOGGER.log(Level.SEVERE, "Error in offsetting", e);
 				}
 
 			}

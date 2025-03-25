@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -51,7 +52,6 @@ import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.ArrayUtils;
 
 /**
@@ -492,7 +492,7 @@ public class DatasetMeasurementsExportMethod extends MeasurementsExportMethod {
 			}
 		} catch (MissingDataException
 				| SegmentUpdateException e) {
-			LOGGER.log(Loggable.STACK, "Unable to get profile: " + e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, "Unable to get profile: " + e.getMessage(), e);
 			LOGGER.fine("Unable to get a profile, defaulting to default profile length of "
 					+ DEFAULT_PROFILE_LENGTH);
 		}

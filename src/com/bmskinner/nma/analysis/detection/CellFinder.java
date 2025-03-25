@@ -33,7 +33,6 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * An implementation of the Finder for cells
@@ -91,7 +90,7 @@ public abstract class CellFinder extends AbstractFinder<ICell> {
 				list.addAll(findInFile(f));
 				LOGGER.finer(() -> "Found images in %s".formatted(f.getName()));
 			} catch (ImageImportException e) {
-				LOGGER.log(Loggable.STACK, "Error searching image", e);
+				LOGGER.log(Level.SEVERE, "Error searching image", e);
 			}
 		}
 

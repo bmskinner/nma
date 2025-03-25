@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -26,7 +27,6 @@ import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.io.Io;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Create nuclei from a text file describing their outlines. For example, as
@@ -189,7 +189,7 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 			fc.addAll(cells);
 
 		} catch (ImageImportException e) {
-			LOGGER.log(Loggable.STACK, "Error searching folder: %s".formatted(e.getMessage()), e);
+			LOGGER.log(Level.SEVERE, "Error searching folder: %s".formatted(e.getMessage()), e);
 		}
 
 		// Add the new collection to the group

@@ -71,7 +71,6 @@ import com.bmskinner.nma.gui.actions.SegmentSplitAction;
 import com.bmskinner.nma.gui.actions.SegmentUnmergeAction;
 import com.bmskinner.nma.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nma.gui.actions.SignalWarpingAction;
-import com.bmskinner.nma.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nma.gui.actions.TextDatasetProfilingAction;
 import com.bmskinner.nma.gui.actions.TextFileAnalysisAction;
 import com.bmskinner.nma.gui.actions.UpdateLandmarkAction;

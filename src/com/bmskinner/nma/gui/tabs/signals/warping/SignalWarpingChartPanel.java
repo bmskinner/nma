@@ -3,6 +3,7 @@ package com.bmskinner.nma.gui.tabs.signals.warping;
 import java.awt.BorderLayout;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;

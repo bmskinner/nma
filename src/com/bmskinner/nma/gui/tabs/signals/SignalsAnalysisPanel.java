@@ -22,6 +22,7 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;

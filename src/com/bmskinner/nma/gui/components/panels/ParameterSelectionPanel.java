@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -27,7 +28,7 @@ import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.GlobalOptions;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * Panel to set parameter options for clustering
@@ -196,7 +197,7 @@ public class ParameterSelectionPanel extends OptionsPanel {
 				fields.add(box);
 			}
 		} catch (MissingLandmarkException | SegmentUpdateException e) {
-			LOGGER.log(Loggable.STACK, "Unable to get segments", e);
+			LOGGER.log(Level.SEVERE, "Unable to get segments", e);
 		}
 		addLabelTextRows(labels, fields, layout, panel);
 		return panel;

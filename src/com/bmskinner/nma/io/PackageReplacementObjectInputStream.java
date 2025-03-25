@@ -23,9 +23,8 @@ import java.io.ObjectStreamClass;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Specifies a map of new package names for classes being deserialised, so that
@@ -71,7 +70,7 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream {
                     f.setAccessible(true);
                     f.set(resultClassDescriptor, replacement);  
                 } catch (Exception e) {
-                    LOGGER.log(Loggable.STACK, "Error while replacing class name: " + e.getMessage(), e);
+                    LOGGER.log(Level.SEVERE, "Error while replacing class name: " + e.getMessage(), e);
                     throw new ClassNotFoundException("Package replacement of class "+oldName+" was unsuccessful", e);
                 }
             }

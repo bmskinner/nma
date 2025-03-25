@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -16,7 +17,7 @@ import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
-import com.bmskinner.nma.logging.Loggable;
+
 
 import ij.Prefs;
 
@@ -29,7 +30,7 @@ import ij.Prefs;
  */
 public class SavedOptionsAnalysisPipelineTest extends AnalysisPipelineTest {
 
-	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	static {
 		for (Handler h : LOGGER.getHandlers())

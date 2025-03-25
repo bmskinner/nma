@@ -46,7 +46,6 @@ import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateExcept
 import com.bmskinner.nma.components.signals.INuclearSignal;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
 import com.bmskinner.nma.visualisation.image.ImageConverter;
 import com.bmskinner.nma.visualisation.image.ImageFilterer;
@@ -105,7 +104,7 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 				try {
 					list.addAll(findInFile(f));
 				} catch (ImageImportException e) {
-					LOGGER.log(Loggable.STACK, "Error searching image", e);
+					LOGGER.log(Level.SEVERE, "Error searching image", e);
 				}
 			}
 		}
@@ -239,7 +238,7 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 				i++;
 
 			} catch (Exception e) {
-				LOGGER.log(Loggable.STACK, "Error in signal detector", e);
+				LOGGER.log(Level.SEVERE, "Error in signal detector", e);
 			}
 		}
 
@@ -307,7 +306,7 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 				}
 
 			} catch (Exception e) {
-				LOGGER.log(Loggable.STACK, "Error in detector", e);
+				LOGGER.log(Level.SEVERE, "Error in detector", e);
 			}
 		}
 		return list;

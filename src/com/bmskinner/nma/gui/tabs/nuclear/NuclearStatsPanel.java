@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -31,7 +32,7 @@ import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
@@ -138,7 +139,7 @@ public class NuclearStatsPanel extends TableDetailPanel implements ScaleUpdatedL
 
 		} catch (Exception e) {
 			LOGGER.warning("Error making nuclear stats panel");
-			LOGGER.log(Loggable.STACK, "Error creating stats panel", e);
+			LOGGER.log(Level.SEVERE, "Error creating stats panel", e);
 		}
 		return scrollPane;
 	}

@@ -1,6 +1,7 @@
 package com.bmskinner.nma.charting;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -8,7 +9,7 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.ProfileDatasetCreator;
@@ -43,7 +44,7 @@ public class ProfileTestChartFactory extends ProfileChartFactory {
 		try {
 			ds = new ProfileDatasetCreator(options).createProfileDataset(profile);
 		} catch (ChartDatasetCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error creating profile chart", e);
+			LOGGER.log(Level.SEVERE, "Error creating profile chart", e);
 			return createErrorChart();
 		}
 

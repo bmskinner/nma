@@ -22,6 +22,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -30,7 +31,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.logging.Loggable;
+
 
 public class WatershedSettingsPanel extends DetectionSettingsPanel {
 	
@@ -81,7 +82,7 @@ public class WatershedSettingsPanel extends DetectionSettingsPanel {
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing error in JSpinner");
-                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+                LOGGER.log(Level.SEVERE, "Parsing error in JSpinner", e1);
             }
         });
 
@@ -97,7 +98,7 @@ public class WatershedSettingsPanel extends DetectionSettingsPanel {
                 fireOptionsChangeEvent();
             } catch (ParseException e1) {
                 LOGGER.warning("Parsing error in JSpinner");
-                LOGGER.log(Loggable.STACK, "Parsing error in JSpinner", e1);
+                LOGGER.log(Level.SEVERE, "Parsing error in JSpinner", e1);
             }
         });
 

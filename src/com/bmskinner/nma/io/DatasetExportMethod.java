@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -33,7 +34,6 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Export the dataset to an nmd file
@@ -126,7 +126,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 		try {
 			copyFile(saveFile, backupFile);
 		} catch (IOException e) {
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
 	}
 

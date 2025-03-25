@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -41,7 +42,6 @@ import com.bmskinner.nma.gui.dialogs.SignalPairMergingDialog;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.io.Io;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.utility.FileUtils;
 
 /**
@@ -146,7 +146,7 @@ public class BooleanOperationAction extends MultiDatasetResultAction {
 			r = worker.get();
 		} catch (InterruptedException | ExecutionException e) {
 			LOGGER.warning("Error merging datasets");
-			LOGGER.log(Loggable.STACK, "Error merging datasets", e);
+			LOGGER.log(Level.SEVERE, "Error merging datasets", e);
 			this.cancel();
 			Thread.currentThread().interrupt();
 			return;

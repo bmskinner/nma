@@ -19,6 +19,7 @@ package com.bmskinner.nma.visualisation.charts;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,7 +56,6 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
@@ -192,7 +192,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		try {
 			ds = new ProfileDatasetCreator(options).createProfileDataset(n);
 		} catch (ChartDatasetCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error creating profile chart", e);
+			LOGGER.log(Level.SEVERE, "Error creating profile chart", e);
 			return createErrorChart();
 		}
 		JFreeChart chart = makeProfileChart(ds,
@@ -210,7 +210,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 						options.getOrientationMark());
 				addSegmentTextAnnotations(profile, chart.getXYPlot());
 			} catch (MissingDataException | SegmentUpdateException e) {
-				LOGGER.log(Loggable.STACK, "Error adding segment annotations", e);
+				LOGGER.log(Level.SEVERE, "Error adding segment annotations", e);
 				return createErrorChart();
 			}
 		}
@@ -234,7 +234,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			ds = new ProfileDatasetCreator(options).createProfileDataset();
 
 		} catch (ChartDatasetCreationException e) {
-			LOGGER.log(Loggable.STACK, "Error making profile dataset", e);
+			LOGGER.log(Level.SEVERE, "Error making profile dataset", e);
 			return createErrorChart();
 		}
 
@@ -295,7 +295,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 						options.getOrientationMark(), Stats.MEDIAN);
 				addSegmentTextAnnotations(profile, plot);
 			} catch (MissingDataException | SegmentUpdateException e) {
-				LOGGER.log(Loggable.STACK, "Error adding segment annotations", e);
+				LOGGER.log(Level.SEVERE, "Error adding segment annotations", e);
 				return createErrorChart();
 			}
 		}
@@ -316,7 +316,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		try {
 			profiles = new ProfileDatasetCreator(options).createProfileDataset();
 		} catch (ChartDatasetCreationException e) {
-			LOGGER.log(Loggable.STACK, "Unable to create profile dataset", e);
+			LOGGER.log(Level.SEVERE, "Unable to create profile dataset", e);
 			return createErrorChart();
 		}
 
@@ -487,7 +487,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				addDomainMarkerToXYPlot(plot, lm, index, 180);
 
 			} catch (MissingLandmarkException e) {
-				LOGGER.log(Loggable.STACK, "Border tag not available", e);
+				LOGGER.log(Level.SEVERE, "Border tag not available", e);
 			}
 		}
 	}

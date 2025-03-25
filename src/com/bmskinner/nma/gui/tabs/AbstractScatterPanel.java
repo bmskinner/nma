@@ -60,7 +60,6 @@ import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.ScatterChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
@@ -271,7 +270,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 					UIController.getInstance().fireDatasetAdded(child);
 				} catch (CollectionFilteringException | MissingDataException
 						| SegmentUpdateException e1) {
-					LOGGER.log(Loggable.STACK, e1,
+					LOGGER.log(Level.SEVERE, e1,
 							() -> "Unable to filter collection for '%s'".formatted(d.getName()));
 				}
 			}

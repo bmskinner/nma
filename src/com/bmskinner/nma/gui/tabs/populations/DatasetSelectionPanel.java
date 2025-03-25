@@ -9,6 +9,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListSelectionModel;
@@ -30,7 +31,7 @@ import com.bmskinner.nma.gui.events.DatasetAddedListener;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.events.WorkspaceAddedListener;
 import com.bmskinner.nma.gui.tabs.DetailPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 
 @SuppressWarnings("serial")
 public class DatasetSelectionPanel extends DetailPanel
@@ -281,7 +282,7 @@ public class DatasetSelectionPanel extends DetailPanel
 				DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
 
 			} catch (Exception ex) {
-				LOGGER.log(Loggable.STACK, "Error in tree selection handler: " + ex.getMessage(),
+				LOGGER.log(Level.SEVERE, "Error in tree selection handler: " + ex.getMessage(),
 						ex);
 			}
 		}

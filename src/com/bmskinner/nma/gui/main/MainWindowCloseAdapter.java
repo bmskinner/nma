@@ -30,7 +30,6 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
 import com.bmskinner.nma.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nma.gui.events.UserActionController;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * This window adapter is used to check if datasets have changed when the main
@@ -143,7 +142,7 @@ public class MainWindowCloseAdapter extends WindowAdapter {
 			try {
 				latch.await();
 			} catch (InterruptedException e) {
-				LOGGER.log(Loggable.STACK, e.getMessage(), e);
+				LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			}
 			close();
 		};

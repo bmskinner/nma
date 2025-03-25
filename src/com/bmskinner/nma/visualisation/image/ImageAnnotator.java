@@ -54,7 +54,6 @@ import com.bmskinner.nma.components.signals.ISignalCollection;
 import com.bmskinner.nma.components.signals.IWarpedSignal;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.components.ColourSelecter;
-import com.bmskinner.nma.logging.Loggable;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -181,7 +180,7 @@ public class ImageAnnotator extends ImageFilterer {
 				}
 			}
 		} catch (MissingDataException | SegmentUpdateException e) {
-			LOGGER.log(Loggable.STACK, "Error annotating nucleus", e);
+			LOGGER.log(Level.SEVERE, "Error annotating nucleus", e);
 		}
 		return this;
 	}
@@ -209,7 +208,7 @@ public class ImageAnnotator extends ImageFilterer {
 				}
 			}
 		} catch (MissingDataException | SegmentUpdateException e) {
-			LOGGER.log(Loggable.STACK, "Error annotating nucleus", e);
+			LOGGER.log(Level.SEVERE, "Error annotating nucleus", e);
 		}
 		return this;
 	}
@@ -368,7 +367,7 @@ public class ImageAnnotator extends ImageFilterer {
 		try {
 			return annotatePoint(n.getBorderPoint(lm), getDefaultColour(lm));
 		} catch (MissingLandmarkException e) {
-			LOGGER.log(Loggable.STACK, "Cannot find border tag " + lm, e);
+			LOGGER.log(Level.SEVERE, "Cannot find border tag " + lm, e);
 		}
 		return this;
 	}
@@ -613,7 +612,7 @@ public class ImageAnnotator extends ImageFilterer {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error annotating segments", e);
+			LOGGER.log(Level.SEVERE, "Error annotating segments", e);
 		}
 		return this;
 	}

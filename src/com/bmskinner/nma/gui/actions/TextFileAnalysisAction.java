@@ -1,8 +1,6 @@
 package com.bmskinner.nma.gui.actions;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -11,7 +9,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -20,16 +17,12 @@ import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 
@@ -42,33 +35,27 @@ import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.detection.TextFileDetectionMethod;
 import com.bmskinner.nma.analysis.detection.TextFileNucleusFinder;
-import com.bmskinner.nma.analysis.profiles.TextDatasetProfilingMethod;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
-import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.profiles.DefaultLandmark;
 import com.bmskinner.nma.components.profiles.Landmark;
-import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.core.GlobalOptions;
-import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.SettingsDialog;
-import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nma.gui.dialogs.prober.settings.ImageChannelSettingsPanel;
 import com.bmskinner.nma.gui.dialogs.prober.settings.NucleusProfileSettingsPanel;
 import com.bmskinner.nma.gui.dialogs.prober.settings.SettingsPanel;
-import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Analysis of a new dataset from text files (e.g. YOLO segmentation model). See

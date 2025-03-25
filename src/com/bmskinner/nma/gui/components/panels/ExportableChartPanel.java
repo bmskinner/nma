@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -70,7 +71,7 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
 import com.bmskinner.nma.io.ChartDataExtracter;
 import com.bmskinner.nma.io.Io;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.utility.FileUtils;
 import com.bmskinner.nma.visualisation.ChartImageConverter;
 import com.bmskinner.nma.visualisation.datasets.FloatXYDataset;
@@ -468,7 +469,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			plot.getDomainAxis().setRange(xMin, xMax);
 
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error restoring auto bounds, falling back to default", e);
+			LOGGER.log(Level.SEVERE, "Error restoring auto bounds, falling back to default", e);
 			if (getChart() != null) {
 				super.restoreAutoBounds();
 			}
@@ -537,7 +538,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 					out.println(string);
 				} catch (FileNotFoundException e) {
 					LOGGER.warning("Cannot export to file");
-					LOGGER.log(Loggable.STACK, "Error exporting", e);
+					LOGGER.log(Level.SEVERE, "Error exporting", e);
 				}
 			}).start();
 		} catch (RequestCancelledException e) {
@@ -576,9 +577,9 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				LOGGER.info("Chart saved as '" + file.getName() + "'");
 
 			} catch (IOException e) {
-				LOGGER.log(Loggable.STACK, "Unable to save chart as png", e);
+				LOGGER.log(Level.SEVERE, "Unable to save chart as png", e);
 			} catch (TranscoderException e) {
-				LOGGER.log(Loggable.STACK, "Unable to transcode chart to png", e);
+				LOGGER.log(Level.SEVERE, "Unable to transcode chart to png", e);
 			}
 
 		} catch (RequestCancelledException e) {

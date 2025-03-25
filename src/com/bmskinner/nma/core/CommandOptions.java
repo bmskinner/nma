@@ -3,10 +3,10 @@ package com.bmskinner.nma.core;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bmskinner.nma.io.Io;
-import com.bmskinner.nma.logging.Loggable;
 
 import net.sourceforge.argparse4j.annotation.Arg;
 
@@ -96,7 +96,7 @@ public class CommandOptions {
 				if (f.get(this) != null)
 					return true;
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				LOGGER.log(Loggable.STACK,
+				LOGGER.log(Level.SEVERE,
 						"Error accessing command options: %s".formatted(e.getMessage()),
 						e);
 				return false;
@@ -113,7 +113,7 @@ public class CommandOptions {
 			try {
 				sb.append(f.getName() + ": " + f.get(this) + Io.NEWLINE);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				LOGGER.log(Loggable.STACK,
+				LOGGER.log(Level.SEVERE,
 						"Error accessing command options: %s".formatted(e.getMessage()),
 						e);
 				return sb.toString();

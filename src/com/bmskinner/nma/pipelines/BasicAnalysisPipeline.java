@@ -27,9 +27,9 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.analysis.nucleus.NucleusDetectionMethod;
-import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.IAnalysisOptions;

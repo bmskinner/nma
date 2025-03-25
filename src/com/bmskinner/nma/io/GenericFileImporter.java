@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
@@ -25,7 +26,6 @@ import com.bmskinner.nma.gui.actions.VoidResultAction;
 import com.bmskinner.nma.gui.events.FileImportEventListener.FileImportEvent;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.io.Io.Importer;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Import files. This class attempts to determine the file type and dispatch the
@@ -152,7 +152,7 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 			byte[] b = is.readNBytes(4);
 			return Arrays.equals(b, NMD_V1_SIGNATURE);
 		} catch (IOException e) {
-			LOGGER.log(Loggable.STACK, "Error reading first bytes of file", e);
+			LOGGER.log(Level.SEVERE, "Error reading first bytes of file", e);
 			return false;
 		}
 	}

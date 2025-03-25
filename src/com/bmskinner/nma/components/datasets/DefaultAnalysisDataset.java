@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,6 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.io.ImageImporter;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * This is the replacement analysis dataset designed to use less memory from
@@ -142,7 +142,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 					collection);
 			return addChildDataset(v);
 		} catch (MissingDataException | SegmentUpdateException e) {
-			LOGGER.log(Loggable.STACK, "Unable to add child collection: " + e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, "Unable to add child collection: " + e.getMessage(), e);
 		}
 		return null;
 	}

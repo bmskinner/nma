@@ -19,11 +19,10 @@ package com.bmskinner.nma.analysis;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
-
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Stores the basic methods for an IAnalysisMethod. The logic for an analysis
@@ -145,7 +144,7 @@ public abstract class AbstractAnalysisMethod
 			try {
 				Thread.sleep(millisToSleep);
 			} catch (InterruptedException e) {
-				LOGGER.log(Loggable.STACK, "Thread interrupted", e);
+				LOGGER.log(Level.SEVERE, "Thread interrupted", e);
 				Thread.currentThread().interrupt();
 
 				// End loop early

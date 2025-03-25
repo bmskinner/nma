@@ -13,7 +13,6 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nma.core.InterfaceUpdater;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.CancellableRunnable;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.ChartCache;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
@@ -114,7 +113,7 @@ public abstract class ChartDetailPanel extends DetailPanel {
 				return chart;
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Error creating chart");
-				LOGGER.log(Loggable.STACK, "Error creating chart", e);
+				LOGGER.log(Level.SEVERE, "Error creating chart", e);
 				return null;
 			}
 
@@ -129,10 +128,10 @@ public abstract class ChartDetailPanel extends DetailPanel {
 					options.getTarget().setCursor(Cursor.getDefaultCursor());
 				}
 			} catch (InterruptedException e) {
-				LOGGER.log(Loggable.STACK, "Interruption to charting", e);
+				LOGGER.log(Level.SEVERE, "Interruption to charting", e);
 				Thread.currentThread().interrupt();
 			} catch (ExecutionException e) {
-				LOGGER.log(Loggable.STACK, "Excecution error charting", e);
+				LOGGER.log(Level.SEVERE, "Excecution error charting", e);
 			}
 		}
 

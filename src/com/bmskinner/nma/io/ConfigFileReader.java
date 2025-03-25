@@ -21,12 +21,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Read the config file and assign values to the global options of the program
@@ -58,7 +58,7 @@ public class ConfigFileReader {
 			}
 
 		} catch (IOException e) {
-			LOGGER.log(Loggable.STACK, "Error reading ini file", e);
+			LOGGER.log(Level.SEVERE, "Error reading ini file", e);
 		}
 
 	}

@@ -25,6 +25,7 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.Box;
@@ -36,7 +37,6 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Contains methods for laying out panels in settings dialog options
@@ -203,7 +203,7 @@ public abstract class SettingsDialog extends JDialog {
 			spinner.commitEdit();
 			options.setInt(key, (Integer) spinner.getValue());
 		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error reading value in spinner", e);
+			LOGGER.log(Level.SEVERE, "Error reading value in spinner", e);
 		}
 	}
 

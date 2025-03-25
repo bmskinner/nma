@@ -20,6 +20,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
@@ -31,7 +32,7 @@ import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.gui.components.FileSelector;
 import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.io.XMLReader.XMLReadingException;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * A copy button that allows nuclear detection options to be copied from an open
@@ -109,7 +110,7 @@ public class CopyNucleusDetectionSettingsFromOpenDatasetPanel extends CopyFromOp
 				fireOptionsChangeEvent();
 
 			} catch (XMLReadingException | ComponentCreationException e1) {
-				LOGGER.log(Loggable.STACK, e1.getMessage(), e1);
+				LOGGER.log(Level.SEVERE, e1.getMessage(), e1);
 			}
 		};
 	}

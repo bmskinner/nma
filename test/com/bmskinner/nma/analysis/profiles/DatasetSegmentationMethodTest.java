@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,13 +22,13 @@ import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
-import com.bmskinner.nma.logging.Loggable;
+
 
 import ij.Prefs;
 
 public class DatasetSegmentationMethodTest extends AbstractProfileMethodTest {
 
-	private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();

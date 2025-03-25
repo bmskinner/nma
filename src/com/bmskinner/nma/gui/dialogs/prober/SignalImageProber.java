@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JPanel;
 
@@ -36,7 +37,7 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.dialogs.prober.settings.SignalDetectionSettingsPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 
 /**
  * Show the results of a signal detection with given options
@@ -99,7 +100,7 @@ public class SignalImageProber extends IntegratedImageProber {
 
 		} catch (Exception e) {
 			LOGGER.warning("Error launching analysis window");
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			this.dispose();
 		}
 

@@ -42,6 +42,7 @@ import java.awt.Rectangle;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -57,7 +58,6 @@ import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.UnloadableImageException;
-import com.bmskinner.nma.logging.Loggable;
 
 import ij.ImageStack;
 import ij.gui.Roi;
@@ -808,7 +808,7 @@ public class GLCM {
 				r.setIdentifier(component.getId().toString());
 			return r;
 		} catch (UnloadableImageException e) {
-			LOGGER.log(Loggable.STACK, "Cannot open component image", e);
+			LOGGER.log(Level.SEVERE, "Cannot open component image", e);
 			return new GLCMTile();
 		}
 	}

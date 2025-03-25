@@ -3,6 +3,7 @@ package com.bmskinner.nma.gui.actions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -16,7 +17,6 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.SignalPairMergingDialog;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Trigger signal merging action
@@ -77,7 +77,7 @@ public class MergeSignalsAction extends SingleDatasetResultAction {
 		try {
 			worker.get();
 		} catch (InterruptedException | ExecutionException e) {
-			LOGGER.log(Loggable.STACK, "Error merging signals", e);
+			LOGGER.log(Level.SEVERE, "Error merging signals", e);
 			this.cancel();
 			Thread.currentThread().interrupt();
 			return;

@@ -5,20 +5,21 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.junit.Before;
 
 import com.bmskinner.nma.components.datasets.DatasetValidator;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.io.SampleDatasetReader;
-import com.bmskinner.nma.logging.Loggable;
+
 
 import ij.IJ;
 
 public abstract class AnalysisPipelineTest {
 	
 
-    private static final Logger LOGGER = Logger.getLogger(Loggable.PROJECT_LOGGER);
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     
     @Before
 	public void setUp(){

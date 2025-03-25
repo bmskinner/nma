@@ -18,6 +18,7 @@ package com.bmskinner.nma.gui.actions;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -30,7 +31,6 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Refold the consensus nucleus for the selected dataset using default
@@ -90,7 +90,7 @@ public class CreateConsensusAction extends SingleDatasetResultAction {
 		} catch (Exception e1) {
 			this.cancel();
 			LOGGER.warning("Error refolding nucleus");
-			LOGGER.log(Loggable.STACK, "Error refolding nucleus", e1);
+			LOGGER.log(Level.SEVERE, "Error refolding nucleus", e1);
 		}
 	}
 

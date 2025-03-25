@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -32,7 +33,6 @@ import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.core.GlobalOptions;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Export the locations of the centre of mass of nuclei in a dataset to a file
@@ -104,7 +104,7 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements I
 		try {
 			export(builder.toString(), exportFile);
 		} catch (FileNotFoundException e) {
-			LOGGER.log(Loggable.STACK, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			return false;
 		}
 		return true;

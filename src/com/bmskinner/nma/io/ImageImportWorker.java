@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
@@ -35,7 +36,6 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.gui.components.SelectableCellIcon;
 import com.bmskinner.nma.gui.dialogs.collections.ManualCurationDialog;
-import com.bmskinner.nma.logging.Loggable;
 
 import ij.process.Blitter;
 import ij.process.ColorProcessor;
@@ -78,7 +78,7 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
             	SelectableCellIcon ic = importCellImage(c);
                 publish(ic);
             } catch (Exception e) {
-                LOGGER.log(Loggable.STACK, "Error importing cell image: "+c.getPrimaryNucleus().getNameAndNumber(), e);
+                LOGGER.log(Level.SEVERE, "Error importing cell image: "+c.getPrimaryNucleus().getNameAndNumber(), e);
             }
         }
         return true;
@@ -97,10 +97,10 @@ public abstract class ImageImportWorker extends SwingWorker<Boolean, SelectableC
             else
                 firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         } catch (InterruptedException e) {
-            LOGGER.log(Loggable.STACK, "Interruption error in worker", e);
+            LOGGER.log(Level.SEVERE, "Interruption error in worker", e);
             firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         } catch (ExecutionException e) {
-        	LOGGER.log(Loggable.STACK, "Execution error in worker", e);
+        	LOGGER.log(Level.SEVERE, "Execution error in worker", e);
             firePropertyChange(IAnalysisWorker.ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
         }
     }

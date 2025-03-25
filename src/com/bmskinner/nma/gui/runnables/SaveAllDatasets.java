@@ -3,13 +3,13 @@ package com.bmskinner.nma.gui.runnables;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.actions.ExportDatasetAction;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Action to save all open datasets
@@ -50,7 +50,7 @@ public class SaveAllDatasets implements Runnable {
 			try {
 				latch.await();
 			} catch (InterruptedException e) {
-				LOGGER.log(Loggable.STACK, "Interruption to thread", e);
+				LOGGER.log(Level.SEVERE, "Interruption to thread", e);
 				Thread.currentThread().interrupt();
 			}
 		}

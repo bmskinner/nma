@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
 

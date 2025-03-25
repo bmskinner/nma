@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,7 +33,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
-import com.bmskinner.nma.logging.Loggable;
+
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
 import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
@@ -113,7 +114,7 @@ public class CellSignalStatsPanel extends TableDetailPanel implements CellEditin
 
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Error updating cell stats table");
-			LOGGER.log(Loggable.STACK, "Error updating cell stats table", e);
+			LOGGER.log(Level.SEVERE, "Error updating cell stats table", e);
 		}
 	}
 

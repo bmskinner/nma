@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.bmskinner.nma.reports;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -24,7 +25,6 @@ import com.bmskinner.nma.analysis.DefaultAnalysisResult;
 import com.bmskinner.nma.analysis.IAnalysisResult;
 import com.bmskinner.nma.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
-import com.bmskinner.nma.logging.Loggable;
 
 /**
  * Method containined the shell report generator
@@ -54,7 +54,7 @@ public class ShellReportMethod extends SingleDatasetAnalysisMethod {
 			fireProgressEvent();
 		} catch(Exception e) {
 			LOGGER.warning("Could not generate report for dataset "+dataset.getName()+": "+e.getMessage());
-			LOGGER.log(Loggable.STACK, "Could not generate report for dataset "+dataset.getName(),  e);
+			LOGGER.log(Level.SEVERE, "Could not generate report for dataset "+dataset.getName(),  e);
 		}
 		
 	}
