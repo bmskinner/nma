@@ -54,7 +54,7 @@ public class Screenshotter {
 	private static final int SLEEP_TIME_MILLIS = 150;
 
 	/** Sleep time after loading a dataset */
-	private static final int LOAD_TIME_MILLIS = 2000;
+	private static final int LOAD_TIME_MILLIS = 3000;
 
 	private static final String SCREENSHOT_FOLDER = "res/screens/" + System.getProperty("os.name");
 
@@ -147,8 +147,10 @@ public class Screenshotter {
 				file, XMLNames.XML_ANALYSIS_DATASET, null));
 
 		// Wait for the dataset to load
+		LOGGER.fine("Waiting for dataset to load");
 		Thread.sleep(LOAD_TIME_MILLIS);
-
+		
+		LOGGER.fine("Selecting loaded dataset");
 		dlm.setSelectedDatasets(dlm.getRootDatasets());
 
 		takeScreenshots(rootFolder, file.getName());
