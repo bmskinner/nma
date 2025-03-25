@@ -19,8 +19,7 @@ package com.bmskinner.nma.components.profiles;
 import java.io.Serializable;
 
 /**
- * This interface accesses the tagged points around the periphery of an object.
- * Default tags are provided.
+ * This interface defines landmark points around the periphery of an object
  * 
  * @author Ben Skinner
  * @since 1.13.3

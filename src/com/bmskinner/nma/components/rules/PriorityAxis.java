@@ -8,5 +8,15 @@ package com.bmskinner.nma.components.rules;
  * @since 2.0.0
  */
 public enum PriorityAxis {
-	X, Y
+	
+	
+	/**
+	 * The object should be preferentially oriented according to X-axis landmarks
+	 */
+	X, 
+	
+	/**
+	 * The object should be preferentially oriented according to Y-axis landmarks
+	 */
+	Y
 }

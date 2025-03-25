@@ -52,10 +52,19 @@ public enum ProfileType {
 		return this.name;
 	}
 
+	/**
+	 * Get the charrt label of this ProfileType
+	 * @return
+	 */
 	public String getLabel() {
 		return this.label;
 	}
 
+	/**
+	 * Create from a string. The string must match the name field of a ProfileType.
+	 * @param s
+	 * @return
+	 */
 	public static ProfileType fromString(String s) {
 		for (ProfileType p : ProfileType.values()) {
 			if (s.equals(p.name)) {
@@ -65,6 +74,10 @@ public enum ProfileType {
 		return null;
 	}
 
+	/**
+	 * Get the dimension of this ProfileType
+	 * @return
+	 */
 	public MeasurementDimension getDimension() {
 		return this.dimension;
 	}

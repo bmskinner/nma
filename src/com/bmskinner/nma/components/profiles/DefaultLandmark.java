@@ -21,7 +21,8 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
- * Allow custom points of interest to be added to a nucleus.
+ * The default implementation of a {@link Landmark}. Defines a point of interest
+ * in an object.
  * 
  * @author Ben Skinner
  *

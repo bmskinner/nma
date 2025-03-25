@@ -152,7 +152,8 @@ public interface IAnalysisOptions extends XmlSerializable {
 	double getProfileWindowProportion();
 
 	/**
-	 * Get the options for profiling and segmenting
+	 * Get the options for profiling and segmenting. This is a convenience method
+	 * for {@code getSecondaryOptions(IAnalysisOptions.PROFILING_OPTIONS)}
 	 * 
 	 * @return
 	 */

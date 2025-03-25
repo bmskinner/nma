@@ -50,8 +50,13 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 	/** Store the folders used to detect objects - keys mirror detectionOptions */
 	private Map<String, File> detectionFolders = new HashMap<>();
 
+	/** Store rulesets used to identify landmarks and orient objects */
 	private RuleSetCollection rulesets;
 
+	/**
+	 * The time the analysis began, in seconds since the UTC epoch. See
+	 * {@link System.currentTimeMillis()}
+	 */
 	private long analysisTime;
 
 	/*
@@ -68,11 +73,9 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 		analysisTime = System.currentTimeMillis();
 
 		HashOptions profilingOptions = new DefaultOptions();
-		profilingOptions.setBoolean(HashOptions.IS_SEGMENT_PROFILES,
-				HashOptions.DEFAULT_IS_SEGMENT_PROFILES);
+		profilingOptions.setBoolean(HashOptions.IS_SEGMENT_PROFILES, HashOptions.DEFAULT_IS_SEGMENT_PROFILES);
 
-		profilingOptions.setDouble(HashOptions.PROFILE_WINDOW_SIZE,
-				HashOptions.DEFAULT_PROFILE_WINDOW);
+		profilingOptions.setDouble(HashOptions.PROFILE_WINDOW_SIZE, HashOptions.DEFAULT_PROFILE_WINDOW);
 
 		secondaryOptions.put(IAnalysisOptions.PROFILING_OPTIONS, profilingOptions);
 	}
@@ -97,22 +100,24 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 		analysisTime = template.getAnalysisTime();
 	}
 
+	/**
+	 * Construct from an XML element. Used when unmarshalling an XML format NMD file.
+	 * @param e the element describing the options
+	 * @throws ComponentCreationException if the options cannot be created
+	 */
 	public DefaultAnalysisOptions(@NonNull Element e) throws ComponentCreationException {
 
 		// Add the detection folders
 		for (Element i : e.getChildren(XMLNames.XML_FOLDER))
-			detectionFolders.put(i.getAttributeValue(XMLNames.XML_NAME),
-					new File(i.getText()));
+			detectionFolders.put(i.getAttributeValue(XMLNames.XML_NAME), new File(i.getText()));
 
 		// Add the detection options
 		for (Element i : e.getChildren(XMLNames.XML_DETECTION)) {
 			String name = i.getAttributeValue(XMLNames.XML_NAME);
-			detectionOptions.put(name,
-					new DefaultOptions(i.getChild(XMLNames.XML_OPTIONS)));
+			detectionOptions.put(name, new DefaultOptions(i.getChild(XMLNames.XML_OPTIONS)));
 
 			if (i.getAttribute(XMLNames.XML_FOLDER) != null)
-				detectionFolders.put(name,
-						new File(i.getAttributeValue(XMLNames.XML_FOLDER)));
+				detectionFolders.put(name, new File(i.getAttributeValue(XMLNames.XML_FOLDER)));
 		}
 
 		if (e.getAttribute(XMLNames.XML_ANALYSIS_TIME) != null)
@@ -293,8 +298,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
 	@Override
 	public void setAngleWindowProportion(double proportion) {
-		secondaryOptions.get(PROFILING_OPTIONS).setDouble(HashOptions.PROFILE_WINDOW_SIZE,
-				proportion);
+		secondaryOptions.get(PROFILING_OPTIONS).setDouble(HashOptions.PROFILE_WINDOW_SIZE, proportion);
 
 	}
 
@@ -319,16 +323,17 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(detectionOptions, detectionFolders, rulesets,
-				secondaryOptions);
+		return Objects.hash(detectionOptions, detectionFolders, rulesets, secondaryOptions);
 	}
 
-	/**
-	 * Note that we don't include analysis time in equality comparison since it is
-	 * necessarily different and not informative
-	 */
+
 	@Override
 	public boolean equals(Object obj) {
+		/**
+		 * Note that we don't include analysis time in equality comparison since it is
+		 * necessarily different and not informative
+		 */
+		
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -336,8 +341,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultAnalysisOptions other = (DefaultAnalysisOptions) obj;
-		return Objects.equals(detectionOptions, other.detectionOptions)
-				&& Objects.equals(rulesets, other.rulesets)
+		return Objects.equals(detectionOptions, other.detectionOptions) && Objects.equals(rulesets, other.rulesets)
 				&& Objects.equals(detectionFolders, other.detectionFolders)
 				&& Objects.equals(secondaryOptions, other.secondaryOptions);
 	}
@@ -366,11 +370,9 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
 		// Add the detection options, including folder if set
 		for (Entry<String, HashOptions> entry : detectionOptions.entrySet()) {
-			Element el = new Element(XMLNames.XML_DETECTION)
-					.setAttribute(XMLNames.XML_NAME, entry.getKey());
+			Element el = new Element(XMLNames.XML_DETECTION).setAttribute(XMLNames.XML_NAME, entry.getKey());
 			if (detectionFolders.get(entry.getKey()) != null) {
-				el.setAttribute(XMLNames.XML_FOLDER,
-						detectionFolders.get(entry.getKey()).getAbsolutePath());
+				el.setAttribute(XMLNames.XML_FOLDER, detectionFolders.get(entry.getKey()).getAbsolutePath());
 			}
 			el.addContent(entry.getValue().toXmlElement());
 			e.addContent(el);
@@ -378,8 +380,7 @@ public class DefaultAnalysisOptions implements IAnalysisOptions {
 
 		// Add the secondary options
 		for (Entry<String, HashOptions> entry : secondaryOptions.entrySet()) {
-			e.addContent(new Element(XMLNames.XML_SECONDARY)
-					.setAttribute(XMLNames.XML_NAME, entry.getKey())
+			e.addContent(new Element(XMLNames.XML_SECONDARY).setAttribute(XMLNames.XML_NAME, entry.getKey())
 					.addContent(entry.getValue().toXmlElement()));
 		}
 

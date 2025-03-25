@@ -9,5 +9,37 @@ package com.bmskinner.nma.components.rules;
  */
 public enum OrientationMark {
 
-	LEFT, RIGHT, TOP, BOTTOM, X, Y, REFERENCE
+	/**
+	 * A landmark found left of the centre of mass of an oriented object
+	 */
+	LEFT, 
+	
+	/**
+	 * A landmark found right of the centre of mass of an oriented object
+	 */
+	RIGHT, 
+	
+	/**
+	 * A landmark found above the centre of mass of an oriented object
+	 */
+	TOP, 
+	
+	/**
+	 * A landmark found below the centre of mass of an oriented object
+	 */
+	BOTTOM, 
+	
+	/**
+	 * A landmark directly left of the centre of mass of an oriented object
+	 */
+	X, 
+	/**
+	 * A landmark directly below the centre of mass of an oriented object
+	 */
+	Y, 
+	
+	/**
+	 * A landmark used as the starting index for profiles
+	 */
+	REFERENCE
 }

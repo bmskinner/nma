@@ -82,7 +82,7 @@ public interface HashOptions extends Serializable, XmlSerializable {
 
 	int DEFAULT_CHANNEL = 2;
 	boolean DEFAULT_NORMALISE_CONTRAST = false;
-	
+
 	/** Constants relating to nucleus detection via text file **/
 	String LANDMARK_LOCATION_FILE_KEY = "LandmarkLocation";
 	String LANDMARK_RP_NAME = "LandmarkRPName";
@@ -419,22 +419,25 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	 * @param value
 	 */
 	void setUUID(String key, UUID value);
-	
+
 	/**
-	 * Get a file with the given key
+	 * Get a file with the given key. This is a convenience method that converts a
+	 * stored string to a File
+	 * 
 	 * @param s
 	 * @return
 	 */
 	File getFile(String s);
-	
+
 	/**
-	 * Store a file with the given key
+	 * Store a file with the given key. This is a convenience method that stores the
+	 * file path as a string.
 	 * 
 	 * @param key
 	 * @param value
 	 */
 	void setFile(String s, File f);
-	
+
 	/**
 	 * Get the keys to all the boolean values in this options.
 	 * 
