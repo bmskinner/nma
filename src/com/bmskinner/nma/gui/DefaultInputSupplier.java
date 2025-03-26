@@ -126,7 +126,7 @@ public class DefaultInputSupplier implements InputSupplier {
 			throw new RequestCancelledException();
 		return f;
 	}
-
+	
 	@Override
 	public File requestFile(@Nullable String message, @Nullable File defaultFolder,
 			@Nullable String extension,

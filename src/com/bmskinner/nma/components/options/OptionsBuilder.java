@@ -1,5 +1,6 @@
 package com.bmskinner.nma.components.options;
 
+import java.io.File;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -63,6 +64,11 @@ public class OptionsBuilder {
 
 	public OptionsBuilder withValue(String key, UUID id) {
 		options.setUUID(key, id);
+		return this;
+	}
+	
+	public OptionsBuilder withValue(String key, File file) {
+		options.setFile(key, file);
 		return this;
 	}
 

@@ -127,16 +127,13 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long>
 
 		} catch (StackOverflowError e) {
 			LOGGER.warning("Stack overflow detected! Close the software and restart.");
-			LOGGER.log(Level.SEVERE, "Stack overflow in worker", e);
 			firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
 		} catch (InterruptedException e) {
-			LOGGER.warning("Task was interrupted: " + e.getMessage());
-			LOGGER.log(Level.SEVERE, "Interruption to swing worker", e);
+			// Error with relevant stack trace will already be logged
 			firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
 			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
-			LOGGER.warning("Error completing task: " + e.getCause().getMessage());
-			LOGGER.log(Level.SEVERE, "Analysis worker failed", e.getCause());
+			// Error with relevant stack trace will already be logged
 			firePropertyChange(ERROR_PROPERTY, getProgress(), IAnalysisWorker.ERROR);
 		}
 

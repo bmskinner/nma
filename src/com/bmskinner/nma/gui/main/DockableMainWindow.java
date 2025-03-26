@@ -181,7 +181,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 		LogPanelHandler textHandler = new LogPanelHandler(logPanel);
 		textHandler.setLevel(Level.INFO);
 		textHandler.setFormatter(new LogPanelFormatter());
-		Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).addHandler(textHandler);
+		Logger.getLogger("com.bmskinner.nma").addHandler(textHandler);
 		return logPanel;
 	}
 

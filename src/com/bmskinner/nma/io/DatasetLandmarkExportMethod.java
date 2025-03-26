@@ -19,9 +19,8 @@ import com.bmskinner.nma.components.profiles.Landmark;
  * 
  * <pre>
  * Dataset name
- * Image folder name
- * Image file name
- * Cell ID
+ * Image file
+ * Cell Id
  * Nucleus ID (under the generic name component ID)
  * Nucleus bounding box x min
  * Nucleus bounding box x max
@@ -91,8 +90,7 @@ public class DatasetLandmarkExportMethod extends MeasurementsExportMethod implem
 						IPoint p = n.getBorderPoint(l);
 
 						outLine.append(d.getName() + TAB)
-						.append(n.getSourceFolder() + TAB)
-						.append(n.getSourceFileName() + TAB)
+						.append(n.getSourceFile().getAbsolutePath() + TAB)
 						.append(cell.getId() + TAB)
 						.append(n.getId() + TAB)
 						.append(base.getX() + TAB)
@@ -101,7 +99,7 @@ public class DatasetLandmarkExportMethod extends MeasurementsExportMethod implem
 						.append(base.getY()+n.getHeight() + TAB)
 						.append(l.getName() + TAB)
 						.append(p.getX() + TAB)
-						.append(p.getY()+TAB);
+						.append(p.getY());
 
 						outLine.append(NEWLINE);
 					}

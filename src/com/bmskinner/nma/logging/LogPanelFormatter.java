@@ -28,9 +28,8 @@ import java.util.logging.LogRecord;
  *
  */
 public class LogPanelFormatter extends Formatter {
-
-	private static final String NEWLINE = System.getProperty("line.separator");
-
+	
+	private static SimpleDateFormat DF = new SimpleDateFormat("HH:mm:ss");
 	/**
 	 * The log panel controls the paragraph indent for the text. We don't need to
 	 * use a tab.
@@ -42,7 +41,7 @@ public class LogPanelFormatter extends Formatter {
 
 		StringBuilder buffer = new StringBuilder();
 
-		String date = calcDate(record.getMillis());
+		String date = calcTime(record.getMillis());
 
 		String formattedMsg = formatMessage(record);
 
@@ -52,11 +51,9 @@ public class LogPanelFormatter extends Formatter {
 		return buffer.toString();
 	}
 
-	private String calcDate(long millisecs) {
-
-		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+	private static String calcTime(long millisecs) {
 		Date date = new Date(millisecs);
-		return df.format(date);
+		return DF.format(date);
 	}
 
 }

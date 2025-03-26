@@ -4,6 +4,8 @@ import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
@@ -37,7 +39,6 @@ import com.bmskinner.nma.components.profiles.DefaultLandmark;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.io.DatasetLandmarkExportMethod;
 import com.bmskinner.nma.io.Io;
 
 /**
@@ -145,75 +146,79 @@ public class TextDatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 	
 	/**
 	 * Assign all landmarks from the given file to the nuclei in the dataset.
-	 * @param landmarkFile the tsv file with landmark locations. Fields are given in {@link DatasetLandmarkExportMethod}
-	 * @throws Exception
+	 * @param landmarkFile the tsv file with landmark locations. Fields are given in {@link DatasetLandmarkImporttMethod}
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
+	 * @throws AnalysisMethodException 
+	 * @throws SegmentUpdateException 
+	 * @throws MissingDataException 
+	 * @throws IndexOutOfBoundsException 
 	 */
-	private void readLandmarks(File landmarkFile) throws Exception {
+	private void readLandmarks(File landmarkFile) throws FileNotFoundException, IOException, AnalysisMethodException, IndexOutOfBoundsException, MissingDataException, SegmentUpdateException   {
 
 		try (FileInputStream fstream = new FileInputStream(landmarkFile);
-				BufferedReader br = new BufferedReader(
-						new InputStreamReader(fstream, StandardCharsets.ISO_8859_1));) {
+				BufferedReader br = new BufferedReader(new InputStreamReader(fstream, StandardCharsets.ISO_8859_1));) {
 
 			String strLine;
 			boolean isHeader = true;
 
-			// Following fields in {@link DatasetKeypointExportMethod}
 			while ((strLine = br.readLine()) != null) {
-				if(isHeader) {
+				
+				String[] arr = strLine.split(Io.TAB);
+				if (isHeader) {
+					if(arr.length<8)
+						throw new AnalysisMethodException("Not enough tab-separated input columns in landmark file. Expected 8, found %s".formatted(arr.length));
 					isHeader = false;
 					continue;
 				}
-				String[] arr = strLine.split(Io.TAB);
 
-				String datasetName = arr[0];
-				// Image folder and file
-				String imageFolder = arr[1];
-				String imageFileName = arr[2];
-				File imageFile = new File(imageFolder, imageFileName);
-				
-				String cellID = arr[3];
-				String nucleusID = arr[4];
+				// Image folder and object id
+				File imageFile = new File(arr[0]);
 
 				// Bounding box
-				int xmin = Double.valueOf(arr[5]).intValue();
-				int xmax = Double.valueOf(arr[6]).intValue();
-				int ymin = Double.valueOf(arr[7]).intValue();
-				int ymax = Double.valueOf(arr[8]).intValue();
+				int xmin = Double.valueOf(arr[1]).intValue();
+				int xmax = Double.valueOf(arr[2]).intValue();
+				int ymin = Double.valueOf(arr[3]).intValue();
+				int ymax = Double.valueOf(arr[4]).intValue();
 				Rectangle r = new Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
 
 				Optional<Nucleus> oN = dataset.getCollection().getNuclei(imageFile).stream()
-						.filter(n -> r.contains(n.getOriginalCentreOfMass().toPoint2D()))
-						.findFirst();
+						.filter(n -> r.contains(n.getOriginalCentreOfMass().toPoint2D())).findFirst();
 
-				// If there is a nucleus at the given position, set the landmark
+				// If there is a nucleus at the given position, update the landmark
 				if (oN.isPresent()) {
 
 					// Landmark name
-					String lmName = arr[9];
-					Landmark l = new DefaultLandmark(lmName);					
-					
-					float lmx = Float.valueOf(arr[10]);
-					float lmy = Float.valueOf(arr[11]);
+					String lmName = arr[5];
 
+					float lmx = Float.valueOf(arr[6]);
+					float lmy = Float.valueOf(arr[7]);
+
+					Landmark l = new DefaultLandmark(lmName);
 					IPoint lm = new FloatPoint(lmx, lmy);
 
 					// Find the closest point to the new landmark in the border
 					IPoint newLm = oN.get().getBorderList().stream()
-							.min(Comparator
-									.comparing(point -> Math.abs(point.getLengthTo(lm))))
-							.get();
+							.min(Comparator.comparing(point -> Math.abs(point.getLengthTo(lm)))).get();
 
-					// Get the index of this point and update the landmark to this index
+					// Get the index of this point
 					int newIdx = oN.get().getBorderIndex(newLm);
 					oN.get().setLandmark(l, newIdx);
-					LOGGER.fine("Set '%s' in '%s' to point %s".formatted(lmName, imageFileName, lm));
+					LOGGER.finer("Set '%s' in '%s' to %s".formatted(lmName, imageFile, newIdx));
 				} else {
-					LOGGER.fine("No nucleus found in '%s' at x %s-%s y %s-%s".formatted(imageFileName, xmin, xmax, ymin, ymax));
+					LOGGER.fine("No nucleus found in '%s' at x %s-%s y %s-%s".formatted(imageFile, xmin, xmax, ymin,
+							ymax));
 				}
 
 				fireProgressEvent();
 			}
+		} catch(NumberFormatException e) {
+			LOGGER.severe(
+					"When reading x and y coordinates, unable to parse a string as a number. %s. Check input file columns are in the correct order."
+							.formatted(e.getMessage()));
+			throw new AnalysisMethodException("Unable to read object coordinates from file", e);
 		}
+
 	}
 
 	
@@ -221,6 +226,8 @@ public class TextDatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 		
 //		IProfile rpMedian =  dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
 //				Stats.MEDIAN);
+		
+		// TODO: this uses rulesets for index finding. Change to use ProfileAggregate instead
 		
 		// Find the unique landmarks in the nuclei
 		Set<Landmark> lms =  dataset.getCollection().getNuclei().stream()

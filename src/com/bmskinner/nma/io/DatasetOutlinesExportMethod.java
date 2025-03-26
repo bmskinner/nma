@@ -26,11 +26,19 @@ import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.utility.ArrayUtils;
 
 /**
- * Export the outlines of cellular components
+ * Export the outlines of cellular components. This is a tab-delimited long tidy
+ * format file with the following columns:
  * 
- * @author Ben Skinner
- * @since 1.18.0
- *
+ * <pre>
+ * Dataset name
+ * Cell Id
+ * Cell component (under the generic name component ID)
+ * Image file
+ * Outline x coordinate
+ * Outline y coordinate
+ * Oriented object x coordinate
+ * Oriented object y coordinate
+ * </pre>
  */
 public class DatasetOutlinesExportMethod extends MeasurementsExportMethod {
 
@@ -61,13 +69,11 @@ public class DatasetOutlinesExportMethod extends MeasurementsExportMethod {
 		outLine.append("Dataset").append(TAB)
 				.append("CellID").append(TAB)
 				.append("Component").append(TAB)
-				.append("Folder").append(TAB)
-				.append("Image").append(TAB)
+				.append("ImageFile").append(TAB)
 				.append("RawX").append(TAB)
 				.append("RawY").append(TAB)
 				.append("OrientedX").append(TAB)
-				.append("OrientedY")
-				.append(NEWLINE);
+				.append("OrientedY").append(NEWLINE);
 	}
 
 	/**
@@ -80,21 +86,17 @@ public class DatasetOutlinesExportMethod extends MeasurementsExportMethod {
 	 * @throws ProfileException
 	 */
 	@Override
-	protected void append(@NonNull IAnalysisDataset d, @NonNull PrintWriter pw)
-			throws Exception {
+	protected void append(@NonNull IAnalysisDataset d, @NonNull PrintWriter pw) throws Exception {
 
-		String datasetCols = d.getName() + TAB; 
+		String datasetCols = d.getName() + TAB;
 
 		for (ICell cell : d.getCollection().getCells()) {
 
 			String cellCols = cell.getId() + TAB;
 
 			for (Nucleus n : cell.getNuclei()) {
-				StringBuilder constantCols = new StringBuilder()
-						.append(datasetCols)
-						.append(cellCols)
+				StringBuilder constantCols = new StringBuilder().append(datasetCols).append(cellCols)
 						.append(CellularComponent.NUCLEUS + "_" + n.getNameAndNumber() + TAB)
-						.append(n.getSourceFolder() + TAB)
 						.append(n.getSourceFile().getAbsolutePath() + TAB);
 
 				String nString = appendNucleusOutline(constantCols.toString(), n);
@@ -104,29 +106,25 @@ public class DatasetOutlinesExportMethod extends MeasurementsExportMethod {
 		}
 	}
 
-
 	private String appendNucleusOutline(String constantColumns, Nucleus n) {
-		
+
 		StringBuilder outLine = new StringBuilder();
 		try {
 			// Get normalised coordinates for raw and oriented nuclei
 			List<IPoint> rawCoords = getOutlinePoints(n);
-			
+
 			Nucleus o = n.getOrientedNucleus();
 			o.moveCentreOfMass(IPoint.atOrigin());
 			List<IPoint> orientedCoords = getOutlinePoints(o);
-			
+
 			// Add the outline coordinates to the output line
-			for(int i=0; i<rawCoords.size(); i++) {
-				
+			for (int i = 0; i < rawCoords.size(); i++) {
+
 				IPoint raw = rawCoords.get(i);
 				IPoint ori = orientedCoords.get(i);
 
-				outLine.append(constantColumns)
-					.append(raw.getX()).append(TAB)
-					.append(raw.getY()).append(TAB)
-					.append(ori.getX()).append(TAB)
-					.append(ori.getY()).append(NEWLINE);
+				outLine.append(constantColumns).append(raw.getX()).append(TAB).append(raw.getY()).append(TAB)
+						.append(ori.getX()).append(TAB).append(ori.getY()).append(NEWLINE);
 
 			}
 
@@ -149,25 +147,21 @@ public class DatasetOutlinesExportMethod extends MeasurementsExportMethod {
 	 * @throws MissingLandmarkException
 	 * @throws SegmentUpdateException
 	 */
-	private List<IPoint> getOutlinePoints(Nucleus n)
-			throws MissingLandmarkException, SegmentUpdateException {
+	private List<IPoint> getOutlinePoints(Nucleus n) throws MissingLandmarkException, SegmentUpdateException {
 		// If a landmark to offset has been specified, lmOffset will not be null
 		OrientationMark lmOffset = null;
 		for (OrientationMark lm : n.getOrientationMarks()) {
-			if (lm.name().equals(
-					options.getString(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY))) {
+			if (lm.name().equals(options.getString(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY))) {
 				lmOffset = lm;
 			}
 		}
 
 		// Get the borders offset to requested landmark (if present in options)
-		List<IPoint> borderList = lmOffset == null ? n.getBorderList()
-				: n.getBorderList(lmOffset);
+		List<IPoint> borderList = lmOffset == null ? n.getBorderList() : n.getBorderList(lmOffset);
 
 		// Normalise border list - if required - to given number of points
 		if (options.getBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY)) {
-			borderList = changeBorderLength(borderList,
-					options.getInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY));
+			borderList = changeBorderLength(borderList, options.getInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY));
 		}
 
 		return borderList;
@@ -180,18 +174,15 @@ public class DatasetOutlinesExportMethod extends MeasurementsExportMethod {
 	 * @return
 	 * @throws SegmentUpdateException
 	 */
-	private List<IPoint> changeBorderLength(List<IPoint> inputBorder, int nPoints)
-			throws SegmentUpdateException {
+	private List<IPoint> changeBorderLength(List<IPoint> inputBorder, int nPoints) throws SegmentUpdateException {
 
 		if (nPoints == inputBorder.size())
 			return inputBorder;
 
 		// This is basically the same interpolation as a profile, but for two
 		// dimensions, x and y. Convert to two profiles
-		float[] xpoints = ArrayUtils
-				.toFloat(inputBorder.stream().mapToDouble(IPoint::getX).toArray());
-		float[] ypoints = ArrayUtils
-				.toFloat(inputBorder.stream().mapToDouble(IPoint::getY).toArray());
+		float[] xpoints = ArrayUtils.toFloat(inputBorder.stream().mapToDouble(IPoint::getX).toArray());
+		float[] ypoints = ArrayUtils.toFloat(inputBorder.stream().mapToDouble(IPoint::getY).toArray());
 
 		IProfile xprofile = new DefaultProfile(xpoints);
 		IProfile yprofile = new DefaultProfile(ypoints);

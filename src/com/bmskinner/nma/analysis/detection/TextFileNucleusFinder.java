@@ -35,42 +35,51 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 
 /**
- * Read a text file with outlines of objects, and convert to nuclei. Compatible
- * with outputs of e.g. YOLO segmentation models
+ * Read a text file containing the outlines of objects, and use to create nuclei.
+ * <p>
+ * The text file format is four tab-separated columns with a header line. Each
+ * line contains an XY coordinate for one point in an object outline. The column
+ * names are not important.<br>
  * <br>
  * 
- * The default text file format is 4 tab-separated columns with a header line.
- * Each line contains an XY coordinate for one point in an object outline:<br>
- * <br>
+ * The file contains the following columns:
+ * <pre>
+ * 0 - Path of the image file.
+ * 1 - Object identifier. Any string that uniquely identifies 
+ *     the object within this file.
+ * 2 - x coordinate of the point in integer or float precision
+ * 3 - y coordinate of the point in integer or float precision
+ * </pre>
  * 
- * {@code Image	Object	x	y}<br>
- * {@code /path/to/image.jpg	0	1563.3	1020.6}<br>
- * {@code /path/to/image.jpg	0	1561.275	1022.625}<br>
- * 
- * <br>
- * This specification can be changed, provided that the detection options specify
- * the zero-indexed columns to use under the keys provided in this class.
+ * Example:<br>
+ * <pre>
+ * ImageFile	ObjectID	x	y
+ * /path/to/image.jpg	0	1563.3	1020.6
+ * /path/to/image.jpg	0	1561.275	1022.625
+ * </pre>
  * 
  * @author Ben Skinner
  *
  */
 public class TextFileNucleusFinder extends CellFinder {
 
-	private static final Logger LOGGER = Logger
-			.getLogger(TextFileNucleusFinder.class.getName());
-	
+	private static final Logger LOGGER = Logger.getLogger(TextFileNucleusFinder.class.getName());
+
 	/** Options keys for columns to read */
 	public static final String IMAGE_FILE_COL = "ImageFileColumn";
 	public static final String NUCLEUS_ID_COL = "NucleusIDColumn";
 	public static final String X_COORDINATE_COL = "XCoordColumn";
 	public static final String Y_COORDINATE_COL = "YCoordColumn";
-	
-	/** Default column indexes for text files. These columns will be used unless otherwise specified */
+
+	/**
+	 * Default column indexes for text files. These columns will be used unless
+	 * otherwise specified
+	 */
 	private static final int DEFAULT_IMAGE_FILE_COL = 0;
 	private static final int DEFAULT_NUCLEUS_ID_COL = 1;
 	private static final int DEFAULT_X_COORDINATE_COL = 2;
 	private static final int DEFAULT_Y_COORDINATE_COL = 3;
-	
+
 	/** Column indexes for text files */
 	private int imageFileCol = DEFAULT_IMAGE_FILE_COL;
 	private int nucleusCol = DEFAULT_NUCLEUS_ID_COL;
@@ -80,41 +89,40 @@ public class TextFileNucleusFinder extends CellFinder {
 	/**
 	 * The fields in a text file that define a coordinate
 	 * 
-	 *  @param object the object number
-	 *  @param imageName the path to the image file 
-	 *  @param x the x coordinate of the point
-	 *  @param y the y coordinate of the point
+	 * @param object    the object number
+	 * @param imageName the path to the image file
+	 * @param x         the x coordinate of the point
+	 * @param y         the y coordinate of the point
 	 */
 	record CoordinateLine(String object, String imageName, float x, float y) {
 	}
 
 	private final NucleusBuilderFactory factory;
 	private final HashOptions nucleusOptions;
-	
 
 	protected TextFileNucleusFinder(@NonNull IAnalysisOptions op) {
 		super(op);
 
 		if (op.getRuleSetCollection() == null)
 			throw new IllegalArgumentException("No ruleset provided");
-		
+
 		nucleusOptions = op.getNucleusDetectionOptions().get();
-		
+
 		// Check if the options override the default input columns
-		if(nucleusOptions.hasInt(IMAGE_FILE_COL)) {
+		if (nucleusOptions.hasInt(IMAGE_FILE_COL)) {
 			imageFileCol = nucleusOptions.getInt(IMAGE_FILE_COL);
 		}
-		if(nucleusOptions.hasInt(NUCLEUS_ID_COL)) {
+		if (nucleusOptions.hasInt(NUCLEUS_ID_COL)) {
 			nucleusCol = nucleusOptions.getInt(NUCLEUS_ID_COL);
 		}
-		if(nucleusOptions.hasInt(X_COORDINATE_COL)) {
+		if (nucleusOptions.hasInt(X_COORDINATE_COL)) {
 			xCol = nucleusOptions.getInt(X_COORDINATE_COL);
 		}
-		if(nucleusOptions.hasInt(Y_COORDINATE_COL)) {
+		if (nucleusOptions.hasInt(Y_COORDINATE_COL)) {
 			yCol = nucleusOptions.getInt(Y_COORDINATE_COL);
 		}
-		
-		LOGGER.fine("Searching columns image %s, nucleus %s, x %s, y %s".formatted(imageFileCol, nucleusCol, xCol, yCol));
+
+//		LOGGER.fine("Searching columns image %s, nucleus %s, x %s, y %s".formatted(imageFileCol, nucleusCol, xCol, yCol));
 
 		factory = ComponentBuilderFactory.createNucleusBuilderFactory(op.getRuleSetCollection(),
 				options.getProfileWindowProportion(), 1d); // scale is hardcoded for now
@@ -131,16 +139,16 @@ public class TextFileNucleusFinder extends CellFinder {
 		for (File f : arr) {
 
 			// Check we are good to use this file
-			if (Thread.interrupted()
-					|| f.isDirectory()
-					|| !f.getName().endsWith(Io.TEXT_FILE_EXTENSION)) // Only look at text files
+			if (Thread.interrupted() || f.isDirectory() || !f.getName().endsWith(Io.TEXT_FILE_EXTENSION)) // Only look
+																											// at text
+																											// files
 				continue;
 
 			try {
 				list.addAll(findInFile(f));
-				LOGGER.finer(() -> "Found images in %s".formatted(f.getName()));
+				LOGGER.finer(() -> "Found text files in %s".formatted(f.getName()));
 			} catch (ImageImportException e) {
-				LOGGER.log(Level.SEVERE, "Error searching image: %s".formatted(e.getMessage()), e);
+				LOGGER.log(Level.SEVERE, "Error searching file: %s".formatted(e.getMessage()), e);
 			}
 		}
 
@@ -156,8 +164,7 @@ public class TextFileNucleusFinder extends CellFinder {
 //		Invoke NucleusBuilder
 		List<CoordinateLine> coordinates = new ArrayList<>();
 		try (FileInputStream fstream = new FileInputStream(textFile);
-				BufferedReader br = new BufferedReader(
-						new InputStreamReader(fstream, StandardCharsets.UTF_8));) {
+				BufferedReader br = new BufferedReader(new InputStreamReader(fstream, StandardCharsets.UTF_8));) {
 			String strLine;
 			int row = 0;
 			while ((strLine = br.readLine()) != null) {
@@ -166,8 +173,8 @@ public class TextFileNucleusFinder extends CellFinder {
 					continue;
 				}
 				String[] arr = strLine.split(Io.TAB);
-				coordinates.add(new CoordinateLine(arr[nucleusCol],arr[imageFileCol],
-						Float.parseFloat(arr[xCol]), Float.parseFloat(arr[yCol])));
+				coordinates.add(new CoordinateLine(arr[nucleusCol], arr[imageFileCol], Float.parseFloat(arr[xCol]),
+						Float.parseFloat(arr[yCol])));
 			}
 		} catch (FileNotFoundException e) {
 			LOGGER.severe("Cannot find input file: %s".formatted(textFile.getAbsolutePath()));
@@ -175,12 +182,18 @@ public class TextFileNucleusFinder extends CellFinder {
 		} catch (IOException e) {
 			LOGGER.severe("Cannot read input file: %s".formatted(textFile.getAbsolutePath()));
 			throw new ImageImportException(e);
+		} catch (NumberFormatException e) {
+			LOGGER.severe(
+					"When reading x and y coordinates, unable to parse a string as a number. %s. Check input file columns are in the correct order."
+							.formatted(e.getMessage()));
+			throw new ImageImportException("Unable to read object coordinates from file", e);
+		} catch (Exception e) {
+			LOGGER.severe("Error parsing coordinate file: %s".formatted(e.getMessage()));
+			throw new ImageImportException("Unable to read object coordinates from file", e);
 		}
 
 		List<Nucleus> nuclei = coordinates.stream()
-				.collect(Collectors.groupingBy(CoordinateLine::object,
-						Collectors.toList()))
-				.values().stream()
+				.collect(Collectors.groupingBy(CoordinateLine::object, Collectors.toList())).values().stream()
 				.map(l -> {
 					try {
 						return makeNucleus(l);
@@ -188,8 +201,7 @@ public class TextFileNucleusFinder extends CellFinder {
 						LOGGER.fine("Could not make a nucleus: %s".formatted(e.getMessage()));
 					}
 					return null;
-				})
-				.toList();
+				}).toList();
 
 		List<ICell> result = new ArrayList<>();
 		for (Nucleus n : nuclei) {
@@ -202,11 +214,9 @@ public class TextFileNucleusFinder extends CellFinder {
 		return result;
 	}
 
-	private Nucleus makeNucleus(List<CoordinateLine> coordinates)
-			throws ComponentCreationException {
+	private Nucleus makeNucleus(List<CoordinateLine> coordinates) throws ComponentCreationException {
 
-		
-		String image = coordinates.stream().map(c -> c.imageName).findFirst().get(); 
+		String image = coordinates.stream().map(c -> c.imageName).findFirst().get();
 		File imageFile = new File(image);
 		Float[] xPoints = coordinates.stream().map(CoordinateLine::x).toArray(Float[]::new);
 		Float[] yPoints = coordinates.stream().map(CoordinateLine::y).toArray(Float[]::new);
@@ -225,12 +235,8 @@ public class TextFileNucleusFinder extends CellFinder {
 
 		Roi r = new PolygonRoi(x, y, Roi.POLYGON);
 
-		return factory.newBuilder()
-				.fromRoi(r)
-				.withFile(imageFile)
-				.withCoM(com)
-				.withChannel(nucleusOptions.getInt(HashOptions.CHANNEL))
-				.build();
+		return factory.newBuilder().fromRoi(r).withFile(imageFile).withCoM(com)
+				.withChannel(nucleusOptions.getInt(HashOptions.CHANNEL)).build();
 	}
 
 	@Override

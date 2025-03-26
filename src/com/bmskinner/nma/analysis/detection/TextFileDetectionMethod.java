@@ -24,6 +24,7 @@ import com.bmskinner.nma.components.datasets.DefaultCellCollection;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 import com.bmskinner.nma.io.Io;
@@ -82,18 +83,21 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 	 * @throws AnalysisMethodException
 	 */
 	public void run() throws AnalysisMethodException {
-		int i = countTotalFilesToAnalyse();
-		if (i == 0) {
-			throw new AnalysisMethodException("No analysable images");
-		}
+		
 
 		LOGGER.info("Running nucleus detector");
 
 		// Detect the nuclei in the folders selected
-		File filePath = templateOptions.getNucleusDetectionFolder().get();
-		processFolder(filePath);
+		File coordinateFile = templateOptions.getNucleusDetectionOptions().get()
+				.getFile(HashOptions.COORDINATE_LOCATION_FILE_KEY);
 
-		LOGGER.fine(() -> "Detected nuclei in %s".formatted(filePath.getAbsolutePath()));
+		if (!coordinateFile.exists()) {
+			throw new AnalysisMethodException("Coordinate file '%s' does not exist".formatted(coordinateFile.getAbsolutePath()));
+		}
+		
+		processCoordinateFile(coordinateFile);
+
+		LOGGER.fine("Finished detecting nuclei in '%s'".formatted(coordinateFile.getAbsolutePath()));
 
 		if (Thread.interrupted())
 			return;
@@ -104,7 +108,7 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 			throw new AnalysisMethodException("No datasets returned");
 
 		datasets.addAll(analysedDatasets);
-		LOGGER.fine(() -> "Nucleus detection complete for %d folders"
+		LOGGER.fine("Nucleus detection complete for"
 				.formatted(analysedDatasets.size()));
 	}
 
@@ -151,30 +155,18 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 	}
 
 	/**
-	 * Go through the input folder. Check if each file is suitable for analysis, and
+	 * Go through the input file. Check if the file is suitable for analysis, and
 	 * if so, call the analyser.
 	 *
-	 * @param folder the folder of images to be analysed
+	 * @param coordinateFile the file of coordinates to be analysed
 	 */
-	protected void processFolder(@NonNull final File folder) {
-		File[] arr = folder.listFiles();
-		if (arr == null)
-			return;
-		if (Thread.interrupted())
-			return;
-
-		// Recurse over all folders in the supplied folder
-		for (File f : arr) {
-			if (f.isDirectory())
-				processFolder(f);
-		}
-
-		if (!containsTextFiles(folder))
+	protected void processCoordinateFile(@NonNull final File coordinateFile) {
+		if(!coordinateFile.isFile())
 			return;
 
 		// Make an empty cell collection
 		ICellCollection fc = new DefaultCellCollection(templateOptions.getRuleSetCollection(),
-				folder.getName(), UUID.randomUUID());
+				coordinateFile.getName(), UUID.randomUUID());
 
 //		// Make a cell finder
 		final Finder<ICell> finder = new TextFileNucleusFinder(templateOptions);
@@ -182,82 +174,18 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 
 		// Detect cells and add to collection
 		try {
-			final Collection<ICell> cells = finder.findInFolder(folder);
+			final Collection<ICell> cells = finder.findInFile(coordinateFile);
 
 			if (!cells.isEmpty() && !outputFolder.exists())
 				outputFolder.mkdir();
 			fc.addAll(cells);
 
 		} catch (ImageImportException e) {
-			LOGGER.log(Level.SEVERE, "Error searching folder: %s".formatted(e.getMessage()), e);
+			LOGGER.log(Level.SEVERE, "Error searching directory: %s".formatted(e.getMessage()), e);
 		}
 
 		// Add the new collection to the group
-		collectionGroup.put(folder, fc);
+		collectionGroup.put(coordinateFile, fc);
 
 	}
-
-	/**
-	 * Test if the given folder has any files that can be analysed
-	 * 
-	 * @param folder the folder to test
-	 * @return
-	 */
-	protected boolean containsTextFiles(@NonNull final File folder) {
-		if (!folder.isDirectory())
-			return false;
-		File[] arr = folder.listFiles();
-		if (arr == null)
-			return false;
-		for (File f : arr)
-			if (f.getName().endsWith(Io.TEXT_FILE_EXTENSION))
-				return true;
-		return false;
-	}
-
-	/**
-	 * Count the number of outline files that are available to be analysed across
-	 * all folders
-	 * 
-	 * @return
-	 */
-	private int countTotalFilesToAnalyse() {
-
-		if (templateOptions.getNucleusDetectionFolder().isEmpty()) {
-			LOGGER.fine("No detection folder provided");
-			return 0;
-		}
-
-		File folder = templateOptions.getNucleusDetectionFolder().get();
-		int totalImages = countSuitableFiles(folder);
-		fireUpdateProgressTotalLength(totalImages);
-		LOGGER.info(() -> "Analysing %d images".formatted(totalImages));
-		return totalImages;
-	}
-
-	/**
-	 * Count the number of files in the given folder that are suitable for analysis.
-	 * Rcursive over subfolders.
-	 * 
-	 * @param folder the folder to count
-	 * @return the number of analysable text files in this folder or subfolders
-	 */
-	private static int countSuitableFiles(@NonNull final File folder) {
-		final File[] listOfFiles = folder.listFiles();
-		if (listOfFiles == null)
-			return 0;
-		int result = 0;
-
-		for (File file : listOfFiles) {
-			boolean ok = file.getName().endsWith(Io.TEXT_FILE_EXTENSION);
-			if (ok) {
-				result++;
-			} else {
-				if (file.isDirectory())// recurse over any sub folders
-					result += countSuitableFiles(file);
-			}
-		}
-		return result;
-	}
-
 }

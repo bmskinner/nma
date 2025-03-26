@@ -84,7 +84,8 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	boolean DEFAULT_NORMALISE_CONTRAST = false;
 
 	/** Constants relating to nucleus detection via text file **/
-	String LANDMARK_LOCATION_FILE_KEY = "LandmarkLocation";
+	String COORDINATE_LOCATION_FILE_KEY = "CoordinateLocationFile";
+	String LANDMARK_LOCATION_FILE_KEY = "LandmarkLocationFile";
 	String LANDMARK_RP_NAME = "LandmarkRPName";
 
 	/** Constants relating to signals **/
