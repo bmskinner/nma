@@ -1,5 +1,7 @@
 package com.bmskinner.nma.utility;
 
+import java.util.Arrays;
+
 /**
  * Utility methods for arrays
  * 
@@ -10,6 +12,24 @@ public class ArrayUtils {
 
 	private ArrayUtils() {
 		// only uses static methods
+	}
+	
+	/**
+	 * Unbox the given array
+	 * @param arr
+	 * @return
+	 */
+	public static int[] unbox(Integer[] arr) {
+		return Arrays.stream(arr).mapToInt(Integer::intValue).toArray();
+	}
+	
+	/**
+	 * Unbox the given array
+	 * @param arr
+	 * @return
+	 */
+	public static double[] unbox(Double[] arr) {
+		return Arrays.stream(arr).mapToDouble(Double::doubleValue).toArray();
 	}
 
 	/**

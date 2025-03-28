@@ -372,6 +372,33 @@ public class Stats {
 			ds.addValue(d);
 		return ds.getPercentile(quartile);
 	}
+	
+	/**
+	 * Get the median of a given array. Shortcut to {@code quartile(values, Stats.MEDIAN}
+	 * @param values
+	 * @return
+	 */
+	public static double median(double[] values) {
+		return quartile(values, Stats.MEDIAN);
+	}
+	
+	/**
+	 * Get the median of a given array. Shortcut to {@code quartile(values, Stats.MEDIAN}
+	 * @param values
+	 * @return
+	 */
+	public static double median(int[] values) {
+		return quartile(values, Stats.MEDIAN);
+	}
+	
+	/**
+	 * Get the median of a given array. Shortcut to {@code quartile(values, Stats.MEDIAN}
+	 * @param values
+	 * @return
+	 */
+	public static double median(float[] values) {
+		return quartile(values, Stats.MEDIAN);
+	}
 
 	/**
 	 * Get the mean for a int array
