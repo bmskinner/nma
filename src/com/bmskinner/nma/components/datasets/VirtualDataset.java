@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
@@ -117,7 +118,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	private ProfileManager profileManager = new ProfileManager(this);
 	private SignalManager signalManager = new SignalManager(this);
 	private MeasurementCache statsCache = new MeasurementCache();
-
+	
 	/**
 	 * Construct from a parent dataset (of which this will be a child). The new
 	 * dataset will have a random UUID
@@ -143,6 +144,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		this.name = name;
 		this.parentDataset = parent;
 		profileCollection = new DefaultProfileCollection();
+		isRecalcHashcode = true;
 	}
 
 	/**
@@ -164,6 +166,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		addAll(cells);
 		profileCollection.calculateProfiles();
 		parent.getCollection().getProfileManager().copySegmentsAndLandmarksTo(this);
+		isRecalcHashcode = true;
 	}
 
 	public VirtualDataset(@NonNull Element e)
@@ -197,7 +200,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			warpedSignals.computeIfAbsent(id, k -> new ArrayList<>());
 			warpedSignals.get(id).add(s);
 		}
-
+		isRecalcHashcode = true;
 		// Note we cannot calculate profiles at this stage because the parent objects
 		// are not fully constructed yet
 	}
@@ -227,7 +230,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 				for (IWarpedSignal s : c.getValue())
 					warpedSignals.get(c.getKey()).add(s.duplicate());
 			}
-
+			isRecalcHashcode = true;
 		} catch (SegmentUpdateException e) {
 			throw new ComponentCreationException("Could not duplicate profile collection", e);
 		}
@@ -270,7 +273,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public void setName(@NonNull String s) {
 		this.name = s;
-
+		isRecalcHashcode = true;
 	}
 
 	@Override
@@ -296,8 +299,10 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public boolean add(ICell e) {
 		boolean b = cellIDs.add(e.getId());
-		if (b)
+		if (b) {
 			statsCache.clear();
+			isRecalcHashcode = true;
+		}
 		return b;
 	}
 
@@ -306,6 +311,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		boolean b = cellIDs.addAll(c.stream().map(ICell::getId).collect(Collectors.toSet()));
 		if (b)
 			statsCache.clear();
+		isRecalcHashcode = true;
 		return b;
 	}
 
@@ -313,6 +319,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	public void clear() {
 		cellIDs.clear();
 		statsCache.clear();
+		isRecalcHashcode = true;
 	}
 
 	@Override
@@ -350,6 +357,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			boolean b = cellIDs.remove(c.getId());
 			if (b)
 				statsCache.clear();
+			isRecalcHashcode = true;
 			return b;
 		}
 		return false;
@@ -362,13 +370,16 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			b |= remove(o);
 		if (b)
 			statsCache.clear();
+		isRecalcHashcode = true;
 		return b;
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
 		// TODO operate on the real list
-		return getCells().retainAll(c);
+		boolean b = getCells().retainAll(c);
+		isRecalcHashcode = true;
+		return b;
 	}
 
 	@Override
@@ -466,6 +477,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public void setConsensus(@Nullable Consensus n) {
 		consensusNucleus = n;
+		isRecalcHashcode = true;
 	}
 
 	@Override
@@ -482,12 +494,14 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	public void offsetConsensus(double xOffset, double yOffset) {
 		if (consensusNucleus != null)
 			consensusNucleus.offset(xOffset, yOffset);
+		isRecalcHashcode = true;
 	}
 
 	@Override
 	public void rotateConsensus(double degrees) {
 		if (consensusNucleus != null)
 			consensusNucleus.addRotation(degrees);
+		isRecalcHashcode = true;
 	}
 
 	@Override
@@ -537,6 +551,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	public void setCellsLocked(boolean b) {
 		for (Nucleus n : this.getNuclei())
 			n.setLocked(b);
+		isRecalcHashcode = true;
 	}
 
 	@Override
@@ -558,6 +573,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public void removeSignalGroup(@NonNull UUID id) {
 		parentDataset.getCollection().removeSignalGroup(id);
+		isRecalcHashcode = true;
 	}
 
 	@Override
@@ -644,6 +660,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public void addSignalGroup(@NonNull ISignalGroup newGroup) {
 		parentDataset.getCollection().addSignalGroup(newGroup);
+		isRecalcHashcode = true;
 	}
 
 	@Override
@@ -659,6 +676,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public void setSourceFolder(@NonNull File expectedImageDirectory) {
 		parentDataset.getCollection().setSourceFolder(expectedImageDirectory);
+		isRecalcHashcode = true;
 	}
 
 	/**
@@ -1067,14 +1085,23 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		return Math.sqrt(diff / FIXED_PROFILE_LENGTH);
 
 	}
-
+	
 	@Override
-	public int hashCode() {
+	protected int recalculateHashcodeCache() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = super.recalculateHashcodeCache();
 		result = prime * result + Objects.hash(cellIDs, consensusNucleus, name, profileCollection,
 				shellResults, uuid);
 		return result;
+	}
+	
+	@Override
+	public int hashCode() {
+		if(isRecalcHashcode) { // default undeclared value
+			hashcodeCache = recalculateHashcodeCache();
+			isRecalcHashcode = false;
+		}
+		return hashcodeCache;
 	}
 
 	@Override
@@ -1364,7 +1391,8 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	public IAnalysisDataset copy() throws ComponentCreationException {
 		return new VirtualDataset(this);
 	}
-
+	
+	
 	/**
 	 * Store the median profiles
 	 * 

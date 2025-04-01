@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
+import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
@@ -378,6 +379,28 @@ public class DummyCellularComponent implements CellularComponent {
 	@Override
 	public boolean hasMeasurement(@NonNull Measurement measurement) {
 		return component.hasMeasurement(measurement);
+	}
+
+	@Override
+	public void fireComponentUpdated() {
+		component.fireComponentUpdated();
+		
+	}
+
+	@Override
+	public void addComponentUpdateListener(ComponentUpdateListener l) {
+		component.addComponentUpdateListener(l);
+		
+	}
+
+	@Override
+	public void removeComponentUpdateListener(ComponentUpdateListener l) {
+		component.removeComponentUpdateListener(l);
+	}
+
+	@Override
+	public void componentUpdated(ComponentUpdateEvent e) {
+		component.componentUpdated(e);
 	}
 
 }

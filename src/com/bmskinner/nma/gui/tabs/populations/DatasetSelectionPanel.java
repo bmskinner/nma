@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListSelectionModel;
@@ -141,14 +141,15 @@ public class DatasetSelectionPanel extends DetailPanel
 		for (IAnalysisDataset d : datasets) {
 
 			// The first item in the path is the root node - don't expand this
-			Runnable r = () -> model.addDataset(d);
+			Runnable r = () -> {
+				model.addDataset(d);
+				
+				// Get the path for the dataset node to expand
+				TreePath path = new TreePath(model.getPathToRoot(model.getNode(d)));
+				expandAll(path);
+			};
 			// Keep off the EDT
 			ThreadManager.getInstance().submitUIUpdate(r);
-			
-
-			// Get the path for the dataset node to expand
-			TreePath path = new TreePath(model.getPathToRoot(model.getNode(d)));
-			expandAll(path);
 		}
 	}
 

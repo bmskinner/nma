@@ -104,7 +104,7 @@ public class RuleSetCollection implements XmlSerializable {
 			@Nullable Landmark right, @Nullable Landmark top, @Nullable Landmark bottom,
 			@Nullable Landmark seondaryX,
 			@Nullable Landmark seondaryY, @Nullable PriorityAxis priorityAxis,
-			RuleApplicationType type, @NonNull HashOptions otherOptions) {
+			@Nullable RuleApplicationType type, @NonNull HashOptions otherOptions) {
 		this.name = name;
 
 		orientationMarks.put(OrientationMark.REFERENCE, rp);
@@ -127,12 +127,16 @@ public class RuleSetCollection implements XmlSerializable {
 		if (seondaryY != null)
 			orientationMarks.put(OrientationMark.Y, seondaryY);
 
-		this.priorityAxis = priorityAxis;
-		this.ruleApplicationType = type;
+		this.priorityAxis = null==priorityAxis ? PriorityAxis.Y : priorityAxis;
+		this.ruleApplicationType = null==type ? RuleApplicationType.VIA_MEDIAN : type;
 		this.otherOptions.set(otherOptions);
 		this.versionCreated = Version.currentVersion();
 	}
 
+	/**
+	 * Create from the given RuleSetCollection
+	 * @param rsc
+	 */
 	protected RuleSetCollection(RuleSetCollection rsc) {
 		name = rsc.name;
 

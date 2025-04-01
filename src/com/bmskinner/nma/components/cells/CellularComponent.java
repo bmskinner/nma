@@ -22,10 +22,12 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.Imageable;
 import com.bmskinner.nma.components.Measurable;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Rotatable;
+import com.bmskinner.nma.components.Updatable;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
@@ -44,7 +46,7 @@ import ij.process.FloatPolygon;
  *
  */
 public interface CellularComponent extends Imageable, XmlSerializable,
-		Rotatable, Measurable {
+		Rotatable, Measurable, Updatable, ComponentUpdateListener {
 
 	// Standard components
 	String WHOLE_CELL = "Cell";

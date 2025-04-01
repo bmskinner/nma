@@ -73,6 +73,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 		xOffset = n.currentOffset().getX();
 		yOffset = n.currentOffset().getY();
 		rOffset = n.currentRotation();
+		fireComponentUpdated();
 	}
 
 	/**
@@ -92,6 +93,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 			rOffset = Double
 					.valueOf(e.getChild(XMLNames.XML_OFFSET).getAttributeValue(XMLNames.XML_R));
 		}
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -109,11 +111,13 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 	public void setOffset(double xOffset, double yOffset) {
 		this.xOffset = xOffset;
 		this.yOffset = yOffset;
+		fireComponentUpdated();
 	}
 
 	@Override
 	public void addRotation(double angle) {
 		this.rOffset = angle;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -167,13 +171,22 @@ public class DefaultConsensusNucleus extends DefaultNucleus implements Consensus
 		sb.append("Rotation: " + rOffset);
 		return sb.toString();
 	}
+	
+	@Override
+	protected int recalculateHashcodeCache() {
+		final int prime = 31;
+		int result = super.recalculateHashcodeCache();
+		result = prime * result + Objects.hash(rOffset, xOffset, yOffset);
+		return result;
+	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Objects.hash(rOffset, xOffset, yOffset);
-		return result;
+		if(isRecalcHashcode) { // default undeclared value
+			hashcodeCache = recalculateHashcodeCache();
+			isRecalcHashcode = false;
+		}
+		return hashcodeCache;
 	}
 
 	@Override

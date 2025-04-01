@@ -89,6 +89,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 		super(roi, centreOfMass, source, channel, id, rsc);
 		this.nucleusNumber = number;
 		signalCollection.addNuclearSignalAddedListener(this);
+		fireComponentUpdated();
 	}
 
 	/**
@@ -120,6 +121,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 		nucleusNumber = n.getNucleusNumber();
 		signalCollection = n.getSignalCollection().duplicate();
 		signalCollection.addNuclearSignalAddedListener(this);
+		fireComponentUpdated();
 	}
 
 	/**
@@ -134,6 +136,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 
 		signalCollection = new DefaultSignalCollection(e.getChild(XMLNames.XML_SIGNAL_COLLECTION));
 		signalCollection.addNuclearSignalAddedListener(this);
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -179,11 +182,13 @@ public class DefaultNucleus extends ProfileableCellularComponent
 		for (INuclearSignal s : signalCollection.getAllSignals()) {
 			s.setScale(scale);
 		}
+		fireComponentUpdated();
 	}
 
 	protected void setSignals(ISignalCollection collection) {
 		signalCollection = collection.duplicate();
 		signalCollection.addNuclearSignalAddedListener(this);
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -193,6 +198,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 
 	public void updateSignalAngle(UUID channel, int signal, double angle) {
 		signalCollection.getSignals(channel).get(signal).setMeasurement(Measurement.ANGLE, angle);
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -204,6 +210,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 		// the orientation, clear the cached data
 		if (orientationMarks.containsKey(lm))
 			orientedNucleus = null;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -215,6 +222,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 		// the orientation, clear the cached data
 		if (profileLandmarks.containsKey(lm))
 			orientedNucleus = null;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -224,6 +232,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 
 		// New segments must be drawn when we get the nucleus
 		orientedNucleus = null;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -232,6 +241,8 @@ public class DefaultNucleus extends ProfileableCellularComponent
 
 		// Ensure recalculation is on a fresh nucleus
 		orientedNucleus = null;
+		hashcodeCache = recalculateHashcodeCache();
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -260,16 +271,21 @@ public class DefaultNucleus extends ProfileableCellularComponent
 			s.offset(xOffset, yOffset);
 			assert (s.containsPoint(s.getCentreOfMass()));
 		}
+		fireComponentUpdated();
 	}
 
 	/*
-	 * ############################################# Methods implementing the
-	 * Rotatable interface #############################################
+	 * #############################################
+	 * 
+	 *  Methods implementing the Rotatable interface
+	 *  
+	 *  ############################################
 	 */
 
 	@Override
 	public void orient() throws MissingLandmarkException {
 		ComponentOrienter.orient(this);
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -291,6 +307,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 
 		for (INuclearSignal s : signalCollection.getAllSignals())
 			s.flipHorizontal(p);
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -299,7 +316,7 @@ public class DefaultNucleus extends ProfileableCellularComponent
 
 		for (INuclearSignal s : signalCollection.getAllSignals())
 			s.flipVertical(p);
-
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -309,8 +326,8 @@ public class DefaultNucleus extends ProfileableCellularComponent
 			// Rotate signals
 			for (INuclearSignal s : signalCollection.getAllSignals())
 				s.rotate(angle, anchor);
-
 		}
+		fireComponentUpdated();
 	}
 
 	/**
@@ -355,13 +372,22 @@ public class DefaultNucleus extends ProfileableCellularComponent
 		return byName;
 
 	}
+	
+	@Override
+	protected int recalculateHashcodeCache() {
+		final int prime = 31;
+		int result = super.recalculateHashcodeCache();
+		result = prime * result + Objects.hash(nucleusNumber, signalCollection);
+		return result;
+	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Objects.hash(nucleusNumber, signalCollection);
-		return result;
+		if(isRecalcHashcode) { // default undeclared value
+			hashcodeCache = recalculateHashcodeCache();
+			isRecalcHashcode = false;
+		}
+		return hashcodeCache;
 	}
 
 	@Override
@@ -382,5 +408,6 @@ public class DefaultNucleus extends ProfileableCellularComponent
 	@Override
 	public void nuclearSignalAdded() {
 		orientedNucleus = null; // we need to clear it so signals will be duplicated with it
+		fireComponentUpdated();
 	}
 }

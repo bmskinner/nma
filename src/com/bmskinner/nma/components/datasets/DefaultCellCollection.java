@@ -51,6 +51,7 @@ import org.jdom2.Element;
 
 import com.bmskinner.nma.analysis.ProgressEvent;
 import com.bmskinner.nma.analysis.ProgressListener;
+import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.XMLNames;
@@ -148,6 +149,11 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@NonNull
 	private final ProfileManager profileManager = new ProfileManager(this);
+	
+	transient protected List<ComponentUpdateListener> componentUpdateListeners = new ArrayList<>();
+	
+	transient protected boolean isRecalcHashcode = true;
+	transient protected int hashcodeCache = 0;
 
 	/**
 	 * Constructor
@@ -233,6 +239,7 @@ public class DefaultCellCollection implements ICellCollection {
 				l.progressEventReceived(new ProgressEvent(this));
 		}
 		ruleSets = new RuleSetCollection(e.getChild(XMLNames.XML_RULESET_COLLECTION));
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -304,16 +311,20 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public boolean add(ICell e) {
 		boolean b = cells.add(e);
-		if (b)
+		if (b) {
 			statsCache.clear();
+			fireComponentUpdated();
+		}
 		return b;
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends ICell> c) {
 		boolean b = cells.addAll(c);
-		if (b)
+		if (b) {
 			statsCache.clear();
+			fireComponentUpdated();
+		}
 		return b;
 	}
 
@@ -321,6 +332,7 @@ public class DefaultCellCollection implements ICellCollection {
 	public void clear() {
 		statsCache.clear();
 		cells.clear();
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -346,24 +358,30 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public boolean remove(Object o) {
 		boolean b = cells.remove(o);
-		if (b)
+		if (b) {
 			statsCache.clear();
+			fireComponentUpdated();
+		}
 		return b;
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
 		boolean b = cells.removeAll(c);
-		if (b)
+		if (b) {
 			statsCache.clear();
+			fireComponentUpdated();
+		}
 		return b;
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
 		boolean b = cells.retainAll(c);
-		if (b)
+		if (b) {
 			statsCache.clear();
+			fireComponentUpdated();
+		}
 		return b;
 	}
 
@@ -407,6 +425,7 @@ public class DefaultCellCollection implements ICellCollection {
 		for (Nucleus n : this.getNuclei()) {
 			n.setLocked(b);
 		}
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -435,6 +454,7 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public void setConsensus(@Nullable Consensus n) {
 		consensusNucleus = n;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -451,12 +471,14 @@ public class DefaultCellCollection implements ICellCollection {
 	public void offsetConsensus(double xOffset, double yOffset) {
 		if (consensusNucleus != null)
 			consensusNucleus.setOffset(xOffset, yOffset);
+		fireComponentUpdated();
 	}
 
 	@Override
 	public void rotateConsensus(double degrees) {
 		if (consensusNucleus != null)
 			consensusNucleus.addRotation(degrees);
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -910,6 +932,7 @@ public class DefaultCellCollection implements ICellCollection {
 			});
 
 		});
+		isRecalcHashcode = true;
 
 	}
 
@@ -963,6 +986,7 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public void addSignalGroup(@NonNull ISignalGroup group) {
 		signalGroups.add(group);
+		isRecalcHashcode = true;
 	}
 
 	@Override
@@ -980,6 +1004,7 @@ public class DefaultCellCollection implements ICellCollection {
 		signalGroups.removeIf(s -> s.getId().equals(id));
 		cells.stream().flatMap(c -> c.getNuclei().stream())
 				.forEach(n -> n.getSignalCollection().removeSignals(id));
+		isRecalcHashcode = true;
 	}
 
 	/**
@@ -1081,8 +1106,7 @@ public class DefaultCellCollection implements ICellCollection {
 		return b.toString();
 	}
 
-	@Override
-	public int hashCode() {
+	protected int recalculateHashcodeCache() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((consensusNucleus == null) ? 0 : consensusNucleus.hashCode());
@@ -1093,6 +1117,15 @@ public class DefaultCellCollection implements ICellCollection {
 		result = prime * result + signalGroups.hashCode();
 		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
 		return result;
+	}
+	
+	@Override
+	public int hashCode() {
+		if(isRecalcHashcode) { // default undeclared value
+			hashcodeCache = recalculateHashcodeCache();
+			isRecalcHashcode = false;
+		}
+		return hashcodeCache;
 	}
 
 	@Override
@@ -1134,6 +1167,34 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		return true;
+	}
+	
+	@Override
+	public void componentUpdated(ComponentUpdateEvent e) {
+		// Recalc hash and pass update onwards
+		fireComponentUpdated();
+	}
+
+
+	@Override
+	public void fireComponentUpdated() {
+		isRecalcHashcode = true;
+		for(ComponentUpdateListener l : componentUpdateListeners)
+			l.componentUpdated(new ComponentUpdateEvent(this));
+	}
+
+
+
+	@Override
+	public void addComponentUpdateListener(ComponentUpdateListener l) {
+		componentUpdateListeners.add(l);
+	}
+
+
+
+	@Override
+	public void removeComponentUpdateListener(ComponentUpdateListener l) {
+		componentUpdateListeners.remove(l);
 	}
 
 	/**

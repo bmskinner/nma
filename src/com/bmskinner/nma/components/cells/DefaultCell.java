@@ -31,8 +31,10 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.ComponentMeasurer;
+import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
+import com.bmskinner.nma.components.Updatable;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.measure.DefaultMeasurement;
 import com.bmskinner.nma.components.measure.Measurement;
@@ -48,16 +50,21 @@ import com.bmskinner.nma.io.XmlSerializable;
  * @author Ben Skinner
  * @since 1.13.3
  */
-public class DefaultCell implements ICell {
+public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultCell.class.getName());
 
 	protected UUID uuid;
 	protected ICytoplasm cytoplasm = null;
 	protected List<Nucleus> nuclei = new ArrayList<>();
+	
+	transient protected boolean isRecalcHashcode = true;
+	transient protected int hashcodeCache = 0;
 
 	/** The statistical values stored for this object */
 	private Map<Measurement, Double> measurements = new HashMap<>();
+	
+	transient protected List<ComponentUpdateListener> componentUpdateListeners = new ArrayList<>();
 
 	/**
 	 * Create a new cell with a random ID
@@ -65,6 +72,8 @@ public class DefaultCell implements ICell {
 	protected DefaultCell() {
 		this(UUID.randomUUID());
 	}
+	
+	
 
 	/**
 	 * Construct from an XML element. Use for unmarshalling. The element should
@@ -76,7 +85,9 @@ public class DefaultCell implements ICell {
 		uuid = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
 
 		for (Element el : e.getChildren(XMLNames.XML_NUCLEUS)) {
-			nuclei.add(new DefaultNucleus(el));
+			Nucleus n = new DefaultNucleus(el);
+			n.addComponentUpdateListener(this);
+			nuclei.add(n);
 		}
 
 		// Add measurements
@@ -118,11 +129,15 @@ public class DefaultCell implements ICell {
 
 		nuclei = new ArrayList<>(0);
 		for (Nucleus m : c.getNuclei()) {
-			nuclei.add(m.duplicate());
+			Nucleus n = m.duplicate();
+			n.addComponentUpdateListener(this);
+			nuclei.add(n);
 		}
 
-		if (c.hasCytoplasm())
-			this.cytoplasm = c.getCytoplasm().duplicate();
+		if (c.hasCytoplasm()) {
+			cytoplasm = c.getCytoplasm().duplicate();
+			cytoplasm.addComponentUpdateListener(this);
+		}
 
 		measurements = new HashMap<>();
 		for (Measurement stat : c.getMeasurements())
@@ -213,6 +228,7 @@ public class DefaultCell implements ICell {
 	@Override
 	public void addNucleus(Nucleus nucleus) {
 		nuclei.add(nucleus);
+		nucleus.addComponentUpdateListener(this);
 		measurements.clear();
 		for (Measurement m : Measurement.getCellStats())
 			try {
@@ -221,7 +237,7 @@ public class DefaultCell implements ICell {
 				LOGGER.log(Level.SEVERE,
 						"Unable to calculate cell measurements when adding new nucleus", e);
 			}
-
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -242,6 +258,8 @@ public class DefaultCell implements ICell {
 	@Override
 	public void setCytoplasm(ICytoplasm cytoplasm) {
 		this.cytoplasm = cytoplasm;
+		cytoplasm.addComponentUpdateListener(this);
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -269,6 +287,7 @@ public class DefaultCell implements ICell {
 		nuclei.stream().forEach(n -> n.setScale(scale));
 		if (cytoplasm != null)
 			cytoplasm.setScale(scale);
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -332,10 +351,18 @@ public class DefaultCell implements ICell {
 				&& Objects.equals(measurements, other.measurements)
 				&& Objects.equals(uuid, other.uuid);
 	}
+	
+	protected int recalculateHashcodeCache() {
+		return Objects.hash(cytoplasm, nuclei, measurements, uuid);
+	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cytoplasm, nuclei, measurements, uuid);
+		if(isRecalcHashcode) { // default undeclared value
+			hashcodeCache = recalculateHashcodeCache();
+			isRecalcHashcode = false;
+		}
+		return hashcodeCache;
 	}
 
 	@Override
@@ -343,5 +370,35 @@ public class DefaultCell implements ICell {
 		return "Cell " + this.uuid.toString() + ":\n" + measurements.toString() + "\n"
 				+ nuclei.toString() + "\n";
 	}
+
+	@Override
+	public void componentUpdated(ComponentUpdateEvent e) {
+		// Recalc hash and pass update onwards
+		isRecalcHashcode = true;
+		fireComponentUpdated();
+	}
+
+	@Override
+	public void fireComponentUpdated() {
+		isRecalcHashcode = true;
+		for(ComponentUpdateListener l : componentUpdateListeners)
+			l.componentUpdated(new ComponentUpdateEvent(this));
+	}
+
+
+
+	@Override
+	public void addComponentUpdateListener(ComponentUpdateListener l) {
+		componentUpdateListeners.add(l);
+	}
+
+
+
+	@Override
+	public void removeComponentUpdateListener(ComponentUpdateListener l) {
+		componentUpdateListeners.remove(l);
+	}
+	
+	
 
 }

@@ -158,6 +158,7 @@ public class NewAnalysisAction extends VoidResultAction {
 	public void finished() {
 
 		try {
+			LOGGER.fine("New analysis action finished");
 			IAnalysisResult r = worker.get();
 			List<IAnalysisDataset> datasets = r.getDatasets();
 

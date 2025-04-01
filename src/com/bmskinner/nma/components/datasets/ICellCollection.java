@@ -26,11 +26,13 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.Filterable;
 import com.bmskinner.nma.components.MeasureableCollection;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Refoldable;
 import com.bmskinner.nma.components.Taggable;
+import com.bmskinner.nma.components.Updatable;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -53,7 +55,8 @@ import com.bmskinner.nma.io.XmlSerializable;
  *
  */
 public interface ICellCollection
-		extends XmlSerializable, Filterable, MeasureableCollection, Refoldable, Collection<ICell> {
+		extends XmlSerializable, Filterable, MeasureableCollection, Refoldable, Collection<ICell>,
+		ComponentUpdateListener, Updatable {
 
 	/** The length to interpolate profiles for comparisons between objects */
 	int FIXED_PROFILE_LENGTH = 500;

@@ -27,7 +27,9 @@ import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.components.Updatable;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
@@ -46,7 +48,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * @since 1.13.3
  *
  */
-public interface IAnalysisDataset extends XmlSerializable {
+public interface IAnalysisDataset extends XmlSerializable, ComponentUpdateListener, Updatable {
 
 	static final Logger LOGGER = Logger.getLogger(IAnalysisDataset.class.getName());
 

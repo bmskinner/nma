@@ -357,8 +357,6 @@ public abstract class ComponentTester extends FloatArrayTester {
 		for (int i = 0; i < sr.size(); i++) {
 			assertTrue("Segment " + i + " should match ", Arrays.equals(sr.get(i), tr.get(i)));
 		}
-//		for(double[] d : sr)
-//			System.out.println(Arrays.toString(d));
 
 		return true;
 	}

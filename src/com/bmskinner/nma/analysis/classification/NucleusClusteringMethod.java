@@ -150,6 +150,7 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
 
 		if (cm.equals(ClusteringMethod.EM)) {
 			EM clusterer = new EM(); // new instance of clusterer
+			clusterer.setSeed(42);
 			clusterer.setOptions(optionArray); // set the options
 			clusterer.buildClusterer(instances); // build the clusterer
 			assignClusters(clusterer);

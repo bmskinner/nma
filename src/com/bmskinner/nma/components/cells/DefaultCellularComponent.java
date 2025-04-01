@@ -41,9 +41,11 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.ComponentMeasurer;
+import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.Imageable;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.XMLNames;
+import com.bmskinner.nma.components.Updatable.ComponentUpdateEvent;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.DefaultMeasurement;
@@ -114,6 +116,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	/** The object bounding box */
 	private Rectangle2D bounds;
+	
+	transient protected List<ComponentUpdateListener> componentUpdateListeners = new ArrayList<>();
+	
+	transient protected boolean isRecalcHashcode = true;
+	transient protected int hashcodeCache = 0;
 
 	/**
 	 * Create a UUID from an ROI and centre of mass. This hashes shapes to
@@ -333,6 +340,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		double h = yMax - yMin;
 
 		bounds = new Rectangle2D.Double(xMin, yMin, w, h);
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -386,6 +394,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public void setSourceFolder(@NonNull File sourceFolder) {
 		File newFile = new File(sourceFolder, sourceFile.getName());
 		sourceFile = newFile;
+		fireComponentUpdated();
 	}
 
 	/**
@@ -402,6 +411,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public void setSourceFile(@NonNull File sourceFile) {
 		this.sourceFile = sourceFile;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -434,6 +444,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public void setScale(double scale) {
 		this.scale = scale;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -457,6 +468,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public synchronized void setMeasurement(@NonNull final Measurement stat, double d) {
 		measurements.put(stat, d);
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -467,6 +479,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public synchronized void clearMeasurement(@NonNull final Measurement stat) {
 		measurements.remove(stat);
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -479,6 +492,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public void clearMeasurements() {
 		measurements.clear();
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -635,6 +649,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		double xNew = xCentre + dx;
 		centreOfMass.setX(xNew);
 		updateBounds();
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -658,6 +673,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		double yNew = yCentre + dy;
 		centreOfMass.setY(yNew);
 		updateBounds();
+		fireComponentUpdated();
 	}
 
 	/**
@@ -694,6 +710,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		centreOfMass.offset(xOffset, yOffset);
 		updateBounds();
+		fireComponentUpdated();
 
 	}
 
@@ -702,6 +719,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			throws MissingDataException, SegmentUpdateException, ComponentCreationException {
 		isReversed = !isReversed;
 		makeBorderList(); // Recreate the border list from the new key points
+		fireComponentUpdated();
 	}
 
 	/**
@@ -992,18 +1010,25 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		e.addContent(new Element(XMLNames.XML_YPOINTS).setText(Arrays.toString(ypoints)));
 		return e;
 	}
-
-	@Override
-	public int hashCode() {
+	
+	protected int recalculateHashcodeCache() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(xpoints);
 		result = prime * result + Arrays.hashCode(ypoints);
 
-		result = prime * result
+		return prime * result
 				+ Objects.hash(centreOfMass, sourceFile, channel, uuid, originalCentreOfMass, scale,
 						measurements);
-		return result;
+	}
+
+	@Override
+	public int hashCode() {
+		if(isRecalcHashcode) { // default undeclared value
+			hashcodeCache = recalculateHashcodeCache();
+			isRecalcHashcode = false;
+		}
+		return hashcodeCache;
 	}
 
 	@Override
@@ -1042,8 +1067,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	}
 
 	/*
-	 * ############################################# Methods implementing the
-	 * Rotatable interface #############################################
+	 * ############################################# 
+	 * 
+	 * Methods implementing the Rotatable interface
+	 * 
+	 * #############################################
 	 */
 
 	@Override
@@ -1075,5 +1103,30 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			centreOfMass.set(newCoM);
 		}
 		updateBounds();
+		fireComponentUpdated();
+	}
+	
+	@Override
+	public void componentUpdated(ComponentUpdateEvent e) {
+		fireComponentUpdated();
+	}
+
+
+	@Override
+	public void fireComponentUpdated() {
+		isRecalcHashcode = true;
+		for(ComponentUpdateListener l : componentUpdateListeners)
+			l.componentUpdated(new ComponentUpdateEvent(this));
+	}
+	
+	@Override
+	public void addComponentUpdateListener(ComponentUpdateListener l) {
+		componentUpdateListeners.add(l);
+		
+	}
+
+	@Override
+	public void removeComponentUpdateListener(ComponentUpdateListener l) {
+		componentUpdateListeners.remove(l);
 	}
 }
