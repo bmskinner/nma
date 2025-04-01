@@ -2,6 +2,8 @@ package com.bmskinner.nma.gui.tabs.populations;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
@@ -41,18 +43,27 @@ public class DatasetTreeTable extends JXTreeTable {
 		TableColumn tableColumn = getColumnModel().getColumn(column);
 		tableColumn.setMinWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));
 
+		
+		List<Integer> hashcodes = DatasetListManager.getInstance().getSelectedDatasets()
+				.stream().map(IAnalysisDataset::hashCode)
+				.collect(Collectors.toList());
+		
 		// add custom rendering here
+		// Note that this method runs on the EDT
 		if (column == 2) {
 			Object c0 = getValueAt(row, 0);
 			Color colour = Color.WHITE;
-			if (c0 instanceof IAnalysisDataset d
-					&& DatasetListManager.getInstance().getSelectedDatasets().contains(d)) {
-				if (d.hasDatasetColour()) {
-					colour = d.getDatasetColour().get();
-				} else {
-					int index = DatasetListManager.getInstance().getSelectedDatasets().indexOf(d);
-					if (index > -1)
-						colour = d.getDatasetColour().orElse(ColourSelecter.getColor(index));
+
+			if (c0 instanceof IAnalysisDataset d) {
+				// Is the dataset currently selected?
+				if(hashcodes.contains(d.hashCode())) {
+					if (d.hasDatasetColour()) {
+						colour = d.getDatasetColour().get();
+					} else {
+						int index = hashcodes.indexOf(d.hashCode());
+						if (index > -1)
+							colour = d.getDatasetColour().orElse(ColourSelecter.getColor(index));
+					}
 				}
 			}
 			c.setBackground(colour);

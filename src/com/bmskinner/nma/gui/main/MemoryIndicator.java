@@ -19,6 +19,9 @@ package com.bmskinner.nma.gui.main;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.text.DecimalFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -32,6 +35,8 @@ import javax.swing.JPanel;
  */
 public class MemoryIndicator extends JPanel
     implements Runnable {
+	
+	private static final Logger LOGGER = Logger.getLogger(MemoryIndicator.class.getName());
     
     private static final long serialVersionUID = 1L;
     private static final Color DARK_GREEN = new Color(0, 180, 0);
@@ -39,7 +44,15 @@ public class MemoryIndicator extends JPanel
     private static final Color DARK_RED = new Color(180, 0, 0);
     
     private static final String LOW_MEMORY_TTL = "Low memory";
-    private static final String LOW_MEMORY_MSG = "Memory is running low!";
+    private static final String LOW_MEMORY_MSG = "Memory is running low! There is %s available to NMA.";
+    
+    private static final long SLEEP_TIME = 500L;
+    
+    protected static final String DEFAULT_DECIMAL_FORMAT = "#0.00";
+	protected static final DecimalFormat DF = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+	
+    private static final int PREFERRED_WIDTH = 100;
+    private static final int PREFERRED_HEIGHT = 20;
     
     private boolean hasWarned = false;
     private boolean mustWarn = false;
@@ -48,17 +61,15 @@ public class MemoryIndicator extends JPanel
       Thread t = new Thread(this);
       t.setName("Memory use tracking thread");
       t.start();
-      long max = Runtime.getRuntime().maxMemory();
-      this.setToolTipText("Maximum memory "+formatMemory(max));
     }
     
     @Override
     public void run() {
       do  {
         try {
-          Thread.sleep(1000L);
+          Thread.sleep(SLEEP_TIME);
         } catch (InterruptedException e) {
-            // do nothing
+        	LOGGER.log(Level.SEVERE, "Error in memory monitoring thread: %s".formatted(e.getMessage()));
         }
         
         if (mustWarn && !hasWarned)
@@ -69,14 +80,14 @@ public class MemoryIndicator extends JPanel
     
     @Override
     public Dimension getPreferredSize(){
-      return new Dimension(100, 20);
+      return new Dimension(PREFERRED_WIDTH, PREFERRED_HEIGHT);
     }
     
     private synchronized void showMemoryWarning(){
       if (this.hasWarned)
         return;
       hasWarned = true;
-      JOptionPane.showMessageDialog(null, LOW_MEMORY_MSG, LOW_MEMORY_TTL, JOptionPane.WARNING_MESSAGE);
+      JOptionPane.showMessageDialog(null, LOW_MEMORY_MSG.formatted(formatMemory(Runtime.getRuntime().maxMemory())), LOW_MEMORY_TTL, JOptionPane.WARNING_MESSAGE);
     }
     
     @Override
@@ -93,6 +104,8 @@ public class MemoryIndicator extends JPanel
       long max = Runtime.getRuntime().maxMemory();
       long allocated = Runtime.getRuntime().totalMemory();
       long used = allocated - Runtime.getRuntime().freeMemory();
+      
+      this.setToolTipText("Using %s of %s".formatted(formatMemory(used), formatMemory(max)));
 
       g.setColor(DARK_GREEN);
       g.fillRect(xStart, 0, xWidth, getHeight());
@@ -114,9 +127,11 @@ public class MemoryIndicator extends JPanel
       }
     }
     
-    private String formatMemory(long value) {
-    	int mb = 1024 * 1024;
-    	long m = value/mb;
-    	return  m+" MiB";
+    private static String formatMemory(long value) {
+    	double mb = 1024 * 1024;
+    	double gb = mb * 1024;
+    	double m = value/mb;
+    	double g = value/gb;
+    	return g < 1 ? "%s MiB".formatted(DF.format(m)) : "%s GiB".formatted(DF.format(g));
     }
 }

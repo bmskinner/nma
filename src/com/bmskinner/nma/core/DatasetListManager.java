@@ -406,11 +406,16 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @param d
 	 */
 	public final void addDataset(@NonNull IAnalysisDataset d) {
-		if (d.isRoot() && !rootDatasets.contains(d)) {
-			rootDatasets.add(d);
-			LOGGER.fine(() -> "Added dataset %s".formatted(d.getName()));
-			datasetHashcodeMap.put(d.getId(), d.hashCode());
-		}
+		// Ensure not run on the EDT
+		Runnable r = () ->{
+			if (d.isRoot() && !rootDatasets.contains(d)) {
+				rootDatasets.add(d);
+				LOGGER.fine(() -> "Added dataset %s".formatted(d.getName()));
+				datasetHashcodeMap.put(d.getId(), d.hashCode());
+			}
+		};
+		ThreadManager.getInstance().submit(r);
+		
 	}
 
 	/**

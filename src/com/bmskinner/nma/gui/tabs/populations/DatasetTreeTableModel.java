@@ -307,9 +307,9 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 
 	/**
 	 * Get the node in the tree corresponding to the given dataset, or null if no
-	 * group is found
+	 * matching node is found. Searches all nodes from the root node in a depth-first manner.
 	 * 
-	 * @param g
+	 * @param obj the dataset whose node to fetch
 	 * @return
 	 */
 	public MutableTreeTableNode getNode(@NonNull Object obj) {
@@ -318,11 +318,19 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 
 	private static MutableTreeTableNode getNode(MutableTreeTableNode node, Object obj) {
 		Enumeration<? extends MutableTreeTableNode> en = node.children();
+		
+		IAnalysisDataset target = (IAnalysisDataset)obj;
 
 		while (en.hasMoreElements()) {
 			MutableTreeTableNode p = en.nextElement();
-			if (p != null && obj.equals(p.getUserObject()))
-				return p;
+			
+			if(p != null && p.getUserObject() instanceof IAnalysisDataset d) {
+				if(target.hashCode()==d.hashCode())
+					return p;
+			}
+			
+//			if (p != null && obj.equals(p.getUserObject()))
+//				return p;
 			MutableTreeTableNode n = getNode(p, obj);
 			if (n != null)
 				return n;

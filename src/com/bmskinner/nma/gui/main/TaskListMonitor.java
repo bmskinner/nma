@@ -17,6 +17,8 @@
 package com.bmskinner.nma.gui.main;
 
 import java.awt.Dimension;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -33,11 +35,13 @@ import com.bmskinner.nma.core.ThreadManager;
 @SuppressWarnings("serial")
 public class TaskListMonitor extends JLabel
 implements Runnable {
+	
+	private static final Logger LOGGER = Logger.getLogger(TaskListMonitor.class.getName());
     
     private static final int PREFERRED_WIDTH = 50;
     private static final int PREFERRED_HEIGHT = 20;
     
-    private static final long SLEEP_TIME = 1000L;
+    private static final long SLEEP_TIME = 500L;
 	
 	/**
 	 * Create with default parameters.
@@ -55,12 +59,13 @@ implements Runnable {
 			try {
 				Thread.sleep(SLEEP_TIME);
 			} catch (InterruptedException e) {
-
+				LOGGER.log(Level.SEVERE, "Error in task monitoring thread: %s".formatted(e.getMessage()));
 			}
 			
 			int l = ThreadManager.getInstance().uiQueueLength();
 			int m = ThreadManager.getInstance().methodQueueLength();
-			setText(l+"/"+m);
+			setText( "%s : %s".formatted(l, m));
+			setToolTipText("%s UI updates queued and %s analysis tasks".formatted(l, m));
 		} while(true);
 	}
 

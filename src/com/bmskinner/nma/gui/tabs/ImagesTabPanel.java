@@ -450,11 +450,16 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 		}
 	}
 
+	/**
+	 * A node in the file tree. May be a file or a directory
+	 * 
+	 */
 	private class ImageTreeNode extends DefaultMutableTreeNode {
 
 		private transient IAnalysisDataset dataset;
 		private String name;
 		boolean isFile = false;
+		boolean isDir = false;
 
 		public ImageTreeNode(String s) {
 			super();
@@ -488,6 +493,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 			if (f == null)
 				return;
 			name = f.getAbsolutePath();
+			isDir = f.isDirectory();
 
 			// Update each file within the node to the new folder
 			Enumeration<ImageTreeNode> children = convertChildren();
@@ -530,7 +536,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 		@Override
 		public String toString() {
 			File f = new File(name);
-			if (f.isDirectory())
+			if (isDir)
 				return f.getAbsolutePath();
 			return f.getName();
 		}

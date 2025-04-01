@@ -9,6 +9,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
@@ -25,6 +26,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.core.DatasetListManager;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.CtrlPressedListener;
 import com.bmskinner.nma.gui.events.ClusterGroupsUpdatedListener;
 import com.bmskinner.nma.gui.events.DatasetAddedListener;
@@ -139,7 +141,10 @@ public class DatasetSelectionPanel extends DetailPanel
 		for (IAnalysisDataset d : datasets) {
 
 			// The first item in the path is the root node - don't expand this
-			model.addDataset(d);
+			Runnable r = () -> model.addDataset(d);
+			// Keep off the EDT
+			ThreadManager.getInstance().submitUIUpdate(r);
+			
 
 			// Get the path for the dataset node to expand
 			TreePath path = new TreePath(model.getPathToRoot(model.getNode(d)));
@@ -282,7 +287,7 @@ public class DatasetSelectionPanel extends DetailPanel
 				DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
 
 			} catch (Exception ex) {
-				LOGGER.log(Level.SEVERE, "Error in tree selection handler: " + ex.getMessage(),
+				LOGGER.log(Level.SEVERE, "Error in tree selection handler: %s".formatted(ex.getMessage()),
 						ex);
 			}
 		}
@@ -299,13 +304,19 @@ public class DatasetSelectionPanel extends DetailPanel
 
 			// Add all the datasets in the selection to a new list
 			int[] selectedRows = lsm.getSelectionRows();
+			List<Integer> currentHashCodes = datasetSelectionOrder.stream()
+					.map(IAnalysisDataset::hashCode) .collect(Collectors.toCollection(ArrayList::new));
+			
 			List<IAnalysisDataset> datasets = new ArrayList<>();
+			
 			for (int i = 0; i < selectedRows.length; i++) {
 
 				if (treeTable.getValueAt(selectedRows[i], 0)instanceof IAnalysisDataset d) {
 					datasets.add(d);
-					if (!datasetSelectionOrder.contains(d))
+					if (!currentHashCodes.contains(d.hashCode())) {
 						datasetSelectionOrder.add(d);
+						currentHashCodes.add(d.hashCode());
+					}
 				}
 			}
 
