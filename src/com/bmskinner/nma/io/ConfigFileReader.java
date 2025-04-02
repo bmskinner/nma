@@ -39,7 +39,14 @@ public class ConfigFileReader {
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigFileReader.class.getName());
 
-	public ConfigFileReader() {
+	private ConfigFileReader() {
+		// static access only
+	}
+	
+	/**
+	 * Read the NMA config file into the Global Options
+	 */
+	public static void readConfigFile() {
 		try {
 			File ini = Io.getConfigFile();
 			LOGGER.config(
@@ -50,7 +57,7 @@ public class ConfigFileReader {
 				Properties properties = new Properties();
 				properties.load(new FileInputStream(ini));
 
-				assignOptions(properties);
+				assignGlobalOptions(properties);
 			} else {
 				LOGGER.config("Config file does not exist; creating with default values");
 				Properties properties = createDefaultProperties();
@@ -58,12 +65,12 @@ public class ConfigFileReader {
 			}
 
 		} catch (IOException e) {
-			LOGGER.log(Level.SEVERE, "Error reading ini file", e);
+			LOGGER.log(Level.SEVERE, "Error reading config ini file", e);
 		}
 
 	}
 
-	private Properties createDefaultProperties() {
+	private static Properties createDefaultProperties() {
 		Properties properties = new Properties();
 
 		GlobalOptions op = GlobalOptions.getInstance();
@@ -97,7 +104,7 @@ public class ConfigFileReader {
 
 	}
 
-	private void assignOptions(Properties properties) {
+	private static void assignGlobalOptions(Properties properties) {
 
 		GlobalOptions op = GlobalOptions.getInstance();
 

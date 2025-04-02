@@ -319,9 +319,9 @@ public class NuclearMorphologyAnalysis {
 	 */
 	private static void loadConfigAndLaunch(CommandOptions opt) {
 		instance = new NuclearMorphologyAnalysis();
-
-		// load the config file
-		new ConfigFileReader();
+		
+		ConfigFileReader.readConfigFile();
+		
 		int ijThreads = GlobalOptions.getInstance().getInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY);
 		Prefs.setThreads(ijThreads);
 		LOGGER.finer(
