@@ -19,12 +19,19 @@ package com.bmskinner.nma.gui.main;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.text.DecimalFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import com.bmskinner.nma.core.GlobalOptions;
 
 /**
  * Display the memory in use. Based on the monitor in 
@@ -54,13 +61,37 @@ public class MemoryIndicator extends JPanel
     private static final int PREFERRED_WIDTH = 100;
     private static final int PREFERRED_HEIGHT = 20;
     
+    /** The lowest fraction of total system memory that the JVM can access before a notification is made */
+    private static final double MEMORY_LOW_WARN_RATIO = 0.5;
+    
     private boolean hasWarned = false;
     private boolean mustWarn = false;
     
     public MemoryIndicator() {
-      Thread t = new Thread(this);
-      t.setName("Memory use tracking thread");
-      t.start();
+    	Thread t = new Thread(this);
+    	t.setName("Memory use tracking thread");
+    	t.start();
+
+    	// If we are warning on low available JVM memory
+    	if(GlobalOptions.getInstance().getBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION)) {
+    		try {
+    			// Get the total system memory
+    			OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+    			Method method = operatingSystemMXBean.getClass().getMethod("getTotalPhysicalMemorySize");
+    			method.setAccessible(true);
+
+    			Long totalMemory = (Long) method.invoke(operatingSystemMXBean);
+    			long jvmMaxMem =  Runtime.getRuntime().maxMemory();
+    			double availableMemoryToJVM = jvmMaxMem / totalMemory;
+    			if(availableMemoryToJVM<MEMORY_LOW_WARN_RATIO) {
+    				LOGGER.info("NMA has only %s memory available of the system %s. You may wish to run NMA from standalone jar via command line with option -Xmx to increase maximum memory. To disable this message, set WARN_LOW_JVM_MEMORY_FRACTION=false in the config file (Help>Open config file)"
+    						.formatted(formatMemory(jvmMaxMem), formatMemory(totalMemory)));
+    			}
+
+    		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e) {
+    			LOGGER.log(Level.SEVERE, "Error getting total system memory: %s".formatted(e.getMessage()));
+    		}
+    	}
     }
     
     @Override
@@ -82,12 +113,15 @@ public class MemoryIndicator extends JPanel
     public Dimension getPreferredSize(){
       return new Dimension(PREFERRED_WIDTH, PREFERRED_HEIGHT);
     }
-    
+
     private synchronized void showMemoryWarning(){
-      if (this.hasWarned)
-        return;
-      hasWarned = true;
-      JOptionPane.showMessageDialog(null, LOW_MEMORY_MSG.formatted(formatMemory(Runtime.getRuntime().maxMemory())), LOW_MEMORY_TTL, JOptionPane.WARNING_MESSAGE);
+    	if (this.hasWarned)
+    		return;
+    	hasWarned = true;
+
+    	
+
+    	JOptionPane.showMessageDialog(null, LOW_MEMORY_MSG.formatted(formatMemory(Runtime.getRuntime().maxMemory())), LOW_MEMORY_TTL, JOptionPane.WARNING_MESSAGE);
     }
     
     @Override

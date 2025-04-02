@@ -72,6 +72,8 @@ public class GlobalOptions extends DefaultOptions {
 	public static final String ALLOW_UPDATE_CHECK_KEY = "CHECK_FOR_UPDATES";
 
 	public static final String IS_SINGLE_THREADED_DETECTION = "USE_SINGLE_THREAD_DETECTION";
+	
+	public static final String WARN_LOW_JVM_MEMORY_FRACTION = "WARN_LOW_JVM_MEMORY_FRACTION";
 
 	private File defaultDir; // where to fall back to for finding images or
 								// saving files
@@ -120,6 +122,7 @@ public class GlobalOptions extends DefaultOptions {
 		setString(DEFAULT_RULESET_KEY, DEFAULT_RULESET);
 		setBoolean(ALLOW_UPDATE_CHECK_KEY, true);
 		setBoolean(IS_SINGLE_THREADED_DETECTION, false);
+		setBoolean(WARN_LOW_JVM_MEMORY_FRACTION, true);
 	}
 
 	public synchronized MeasurementScale getScale() {
