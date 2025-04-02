@@ -86,7 +86,7 @@ public class MemoryIndicator extends JPanel
     			double availableMemoryToJVM = (double)jvmMaxMem /  (double)totalMemory;
     			long egMemory =  Double.valueOf(totalMemory*0.8d).longValue()/(1024*1024);
     			if(availableMemoryToJVM<MEMORY_LOW_WARN_RATIO) {
-    				LOGGER.info("NMA has only %s memory available of the system %s (%s%%). To increase maximum memory, you may wish to run the NMA standalone jar file from command line via 'java -Xmx%sm -jar Nuclear_Morphology_Analysis_%s.jar'. To disable this message, set WARN_LOW_JVM_MEMORY_FRACTION=false in the config file (Help>Open config file)"
+    				LOGGER.info("NMA has only %s memory available of the system %s (%s%%). To increase maximum memory, you may wish to run the NMA standalone jar file from command line via 'java -Xmx%sm -jar Nuclear_Morphology_Analysis_%s.jar'. Disable this message via View>Preferences"
     						.formatted(formatMemory(jvmMaxMem), 
     								formatMemory(totalMemory),
     								DF.format(availableMemoryToJVM*100),

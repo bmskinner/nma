@@ -53,7 +53,7 @@ public class NuclearSignalMeasurementsTableModel extends DatasetTableModel {
 		colNames = makeColNames(datasets);
 		int colCount = colNames.length;
 
-		MeasurementScale scale = GlobalOptions.getInstance().getScale();
+		MeasurementScale scale = GlobalOptions.getInstance().getDisplayScale();
 
 		// Make an instance of row names
 		List<Object> rowNames = new ArrayList<>();

@@ -64,6 +64,7 @@ import com.bmskinner.nma.gui.MenuFactory.ContextualMenu;
 import com.bmskinner.nma.gui.MenuFactory.ContextualMenuItem;
 import com.bmskinner.nma.gui.actions.NewAnalysisAction;
 import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
+import com.bmskinner.nma.gui.dialogs.MainPreferencesDialog;
 import com.bmskinner.nma.gui.dialogs.VersionHelpDialog;
 import com.bmskinner.nma.gui.events.DatasetSelectionUpdatedListener;
 import com.bmskinner.nma.gui.events.FileImportEventListener.FileImportEvent;
@@ -130,6 +131,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	private static final String FILL_CONSENSUS_ITEM_LBL = "Fill consensus";
 	private static final String SWATCH_ITEM_LBL = "Colour palette";
 	private static final String SCALE_ITEM_LBL = "Scale";
+	private static final String PREFERENCES_ITEM_LBL = "Preferences";
 
 	private static final String OPEN_CONFIG_FILE_LBL = "Open config file";
 
@@ -269,11 +271,11 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		for (MeasurementScale m : MeasurementScale.values()) {
 			JMenuItem j = new JRadioButtonMenuItem(m.toString());
 			g.add(j);
-			if (m.equals(GlobalOptions.getInstance().getScale())) // default config file scale
+			if (m.equals(GlobalOptions.getInstance().getDisplayScale())) // default config file scale
 				j.setSelected(true);
 			j.addActionListener(e -> {
 				Runnable r = () -> {
-					GlobalOptions.getInstance().setScale(m);
+					GlobalOptions.getInstance().setDisplayScale(m);
 					UIController.getInstance().fireScaleUpdated();
 				};
 				ThreadManager.getInstance().execute(r);
@@ -313,6 +315,11 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		JCheckBoxMenuItem monitorItem = new JCheckBoxMenuItem(TASK_MONITOR_ITEM_LBL, false);
 		monitorItem.addActionListener(e -> monitorPanel.setVisible(!monitorPanel.isVisible()));
 		menu.add(monitorItem);
+		
+		
+		JMenuItem prefs = new JMenuItem(PREFERENCES_ITEM_LBL);
+		prefs.addActionListener(e -> new MainPreferencesDialog());
+		menu.add(prefs);
 
 		return menu;
 	}

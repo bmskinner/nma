@@ -42,6 +42,8 @@ import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.core.GlobalOptions;
+import com.bmskinner.nma.io.ConfigFileReader;
+import com.bmskinner.nma.io.ConfigFileReader.RulesetEntry;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.io.XMLReader.XMLReadingException;
@@ -76,14 +78,8 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
 	private JCheckBox segmentBox;
 
-	private RulesetEntry[] availableRules = getAvailableRulesets();
+	private RulesetEntry[] availableRules = ConfigFileReader.getAvailableRulesets();
 
-	private record RulesetEntry(File file, RuleSetCollection rsc) {
-		@Override
-		public String toString() {
-			return rsc.getName() + " (" + rsc.getRulesetVersion() + ")";
-		}
-	}
 
 	public NucleusProfileSettingsPanel(final IAnalysisOptions op) {
 		super();
@@ -91,28 +87,9 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 		this.add(createPanel(), BorderLayout.CENTER);
 	}
 
-	private RulesetEntry[] getAvailableRulesets() {
-		LOGGER.finer("Reading available rulesets from disk");
-		File[] files = Io.getRulesetDir()
-				.listFiles((d, s) -> s.toLowerCase().endsWith(Io.XML_FILE_EXTENSION));
-
-		return Arrays.stream(files)
-				.map(f -> {
-					try {
-						return new RulesetEntry(f,
-								XMLReader.readRulesetCollection(f));
-					} catch (XMLReadingException | ComponentCreationException e) {
-						LOGGER.log(Level.SEVERE,
-								"Unable to read ruleset from file: %s".formatted(e.getMessage()),
-								e);
-						return new RulesetEntry(null, null);
-					}
-				})
-				.toArray(RulesetEntry[]::new);
-	}
 
 	private void setRuleset(RulesetEntry f) {
-		options.setRuleSetCollection(f.rsc);
+		options.setRuleSetCollection(f.rsc());
 		fireOptionsChangeEvent();
 		fireProberReloadEvent();
 	}
@@ -144,9 +121,9 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 		// If there are multiple matching names, choose the most recent
 		// version
 		Optional<RulesetEntry> defaultEntry = Arrays.stream(availableRules)
-				.filter(r -> r.rsc.getName().equals(defaultRulesetName))
-				.sorted((r1, r2) -> r1.rsc.getRulesetVersion()
-						.isNewerThan(r2.rsc.getRulesetVersion())
+				.filter(r -> r.rsc().getName().equals(defaultRulesetName))
+				.sorted((r1, r2) -> r1.rsc().getRulesetVersion()
+						.isNewerThan(r2.rsc().getRulesetVersion())
 								? -1
 								: 1)
 				.findFirst();
@@ -217,12 +194,12 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 	protected void update() {
 		super.update();
 
-		availableRules = getAvailableRulesets();
+		availableRules = ConfigFileReader.getAvailableRulesets();
 		profileWindow.setValue(options.getProfileWindowProportion());
 		RuleSetCollection rsc = options.getRuleSetCollection();
 
 		Arrays.stream(availableRules)
-				.filter(r -> r.rsc.equals(rsc))
+				.filter(r -> r.rsc().equals(rsc))
 				.findFirst().ifPresent(r -> typeBox.setSelectedItem(r));
 	}
 

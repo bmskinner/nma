@@ -57,7 +57,7 @@ public class ChartOptionsBuilder {
 	 */
 	public ChartOptionsBuilder() {
 		options = new DefaultChartOptions((List<IAnalysisDataset>) null);
-		options.setScale(GlobalOptions.getInstance().getScale());
+		options.setScale(GlobalOptions.getInstance().getDisplayScale());
 		options.setSwatch(GlobalOptions.getInstance().getSwatch());
 	}
 

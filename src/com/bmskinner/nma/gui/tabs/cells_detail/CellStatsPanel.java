@@ -171,7 +171,7 @@ public class CellStatsPanel extends TableDetailPanel
 
 		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
 				.setCell(model.getCell())
-				.setScale(GlobalOptions.getInstance().getScale()).setTarget(table)
+				.setScale(GlobalOptions.getInstance().getDisplayScale()).setTarget(table)
 				.setColumnRenderer(TableOptions.ALL_COLUMNS, new StatsTableCellRenderer()).build();
 
 		setTable(options);

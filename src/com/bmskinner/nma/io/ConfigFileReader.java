@@ -18,15 +18,20 @@ package com.bmskinner.nma.io;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
+import com.bmskinner.nma.io.XMLReader.XMLReadingException;
 
 /**
  * Read the config file and assign values to the global options of the program
@@ -49,19 +54,16 @@ public class ConfigFileReader {
 	public static void readConfigFile() {
 		try {
 			File ini = Io.getConfigFile();
-			LOGGER.config(
-					() -> "Configuration file read from: %s".formatted(ini.getAbsolutePath()));
+			LOGGER.config("Configuration file read from: %s".formatted(ini.getAbsolutePath()));
 
 			if (ini.exists()) {
 				// Read the properties
 				Properties properties = new Properties();
 				properties.load(new FileInputStream(ini));
-
 				assignGlobalOptions(properties);
 			} else {
 				LOGGER.config("Config file does not exist; creating with default values");
-				Properties properties = createDefaultProperties();
-				properties.store(new FileOutputStream(ini), null);
+				writeGlobalOptionsToConfigFile();
 			}
 
 		} catch (IOException e) {
@@ -69,8 +71,40 @@ public class ConfigFileReader {
 		}
 
 	}
+	
+	public static void writeGlobalOptionsToConfigFile() throws FileNotFoundException, IOException {
+		Properties properties = createPropertiesFromGlobalOptions();
+		properties.store(new FileOutputStream(Io.getConfigFile()), null);
+	}
+	
+	public record RulesetEntry(File file, RuleSetCollection rsc) {
+		@Override
+		public String toString() {
+			return rsc.getName() + " (" + rsc.getRulesetVersion() + ")";
+		}
+	}
 
-	private static Properties createDefaultProperties() {
+	public static RulesetEntry[] getAvailableRulesets() {
+		LOGGER.finer("Reading available rulesets from disk");
+		File[] files = Io.getRulesetDir()
+				.listFiles((d, s) -> s.toLowerCase().endsWith(Io.XML_FILE_EXTENSION));
+
+		return Arrays.stream(files)
+				.map(f -> {
+					try {
+						return new RulesetEntry(f,
+								XMLReader.readRulesetCollection(f));
+					} catch (XMLReadingException | ComponentCreationException e) {
+						LOGGER.log(Level.SEVERE,
+								"Unable to read ruleset from file: %s".formatted(e.getMessage()),
+								e);
+						return new RulesetEntry(null, null);
+					}
+				})
+				.toArray(RulesetEntry[]::new);
+	}
+	
+	private static Properties createPropertiesFromGlobalOptions() {
 		Properties properties = new Properties();
 
 		GlobalOptions op = GlobalOptions.getInstance();
@@ -81,7 +115,7 @@ public class ConfigFileReader {
 		properties.setProperty(GlobalOptions.DEFAULT_IMAGE_SCALE_KEY,
 				String.valueOf(op.getImageScale()));
 		properties.setProperty(GlobalOptions.DEFAULT_DISPLAY_SCALE_KEY,
-				String.valueOf(op.getScale().name()));
+				String.valueOf(op.getDisplayScale().name()));
 		properties.setProperty(GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY,
 				String.valueOf(op.isFillConsensus()));
 		properties.setProperty(GlobalOptions.DEFAULT_USE_ANTIALIASING_KEY,
@@ -124,7 +158,7 @@ public class ConfigFileReader {
 				op.setImageScale(Double.valueOf(value));
 
 			if (GlobalOptions.DEFAULT_DISPLAY_SCALE_KEY.equals(key))
-				op.setScale(MeasurementScale.valueOf(value));
+				op.setDisplayScale(MeasurementScale.valueOf(value));
 
 			if (GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY.equals(key))
 				op.setFillConsensus(Boolean.valueOf(value));

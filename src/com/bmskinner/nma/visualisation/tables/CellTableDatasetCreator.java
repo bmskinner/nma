@@ -208,9 +208,9 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		ICytoplasm cyto = c.getCytoplasm();
 		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 		for (Measurement stat : Measurement.getComponentStats()) {
-			fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
+			fieldNames.add(stat.label(GlobalOptions.getInstance().getDisplayScale()));
 
-			double value = cyto.getMeasurement(stat, GlobalOptions.getInstance().getScale());
+			double value = cyto.getMeasurement(stat, GlobalOptions.getInstance().getDisplayScale());
 			rowData.add(df.format(value));
 		}
 
@@ -313,9 +313,9 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 			if (!stat.equals(Measurement.VARIABILITY)) {
 
-				fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
+				fieldNames.add(stat.label(GlobalOptions.getInstance().getDisplayScale()));
 
-				double value = n.getMeasurement(stat, GlobalOptions.getInstance().getScale());
+				double value = n.getMeasurement(stat, GlobalOptions.getInstance().getDisplayScale());
 				rowData.add(df.format(value));
 			}
 
@@ -404,9 +404,9 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 		for (Measurement stat : Measurement.getSignalStats()) {
 
-			fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
+			fieldNames.add(stat.label(GlobalOptions.getInstance().getDisplayScale()));
 
-			double value = s.getMeasurement(stat, GlobalOptions.getInstance().getScale());
+			double value = s.getMeasurement(stat, GlobalOptions.getInstance().getDisplayScale());
 
 			rowData.add(df.format(value));
 		}

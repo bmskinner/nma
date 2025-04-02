@@ -108,7 +108,7 @@ public class NuclearStatsPanel extends TableDetailPanel implements ScaleUpdatedL
 		LOGGER.finest("Updating stats panel");
 
 		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
-				.setScale(GlobalOptions.getInstance().getScale()).setTarget(tablePopulationStats)
+				.setScale(GlobalOptions.getInstance().getDisplayScale()).setTarget(tablePopulationStats)
 				.build();
 
 		setTable(options);

@@ -308,7 +308,7 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 		showMeshFacesBox.setEnabled(showMeshBox.isSelected());
 
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-				.setScale(GlobalOptions.getInstance().getScale())
+				.setScale(GlobalOptions.getInstance().getDisplayScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setShowMesh(showMeshBox.isSelected())
 				.setShowMeshVertices(showMeshVerticesBox.isSelected())
@@ -342,7 +342,7 @@ public class ConsensusNucleusPanel extends ChartDetailPanel
 		ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setFillConsensus(GlobalOptions.getInstance().isFillConsensus())
-				.setScale(GlobalOptions.getInstance().getScale())
+				.setScale(GlobalOptions.getInstance().getDisplayScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setTarget(consensusChartPanel)
 				.build();

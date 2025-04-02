@@ -232,7 +232,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			if (result == 0)
 				return;
 
-			MeasurementScale scale = GlobalOptions.getInstance().getScale();
+			MeasurementScale scale = GlobalOptions.getInstance().getDisplayScale();
 
 			Range domain = getDomainBounds();
 			Range range = getRangeBounds();

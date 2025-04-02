@@ -199,7 +199,7 @@ public class SignalConsensusPanel extends ChartDetailPanel
 		ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setShowWarp(false)
-				.setScale(GlobalOptions.getInstance().getScale())
+				.setScale(GlobalOptions.getInstance().getDisplayScale())
 				.setTarget(chartPanel)
 				.setFillConsensus(false)
 				.setShowXAxis(false)

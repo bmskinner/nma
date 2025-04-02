@@ -103,7 +103,7 @@ public class CellSignalStatsPanel extends TableDetailPanel implements CellEditin
 
 		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
 				.setCell(model.getCell())
-				.setScale(GlobalOptions.getInstance().getScale()).setTarget(table)
+				.setScale(GlobalOptions.getInstance().getDisplayScale()).setTarget(table)
 				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN,
 						new CellSignalColocalisationRenderer())
 				.build();

@@ -50,13 +50,13 @@ public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 			map.put(type, button);
 		}
 		// Set the default
-		map.get(GlobalOptions.getInstance().getScale()).setSelected(true);
+		map.get(GlobalOptions.getInstance().getDisplayScale()).setSelected(true);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		GlobalOptions.getInstance().setScale(getSelected());
+		GlobalOptions.getInstance().setDisplayScale(getSelected());
 		UIController.getInstance().fireScaleUpdated();
 	}
 

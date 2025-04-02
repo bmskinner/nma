@@ -48,7 +48,7 @@ public class TableOptionsBuilder {
 
 	public TableOptionsBuilder() {
 		options = new DefaultTableOptions(null);
-		options.setScale(GlobalOptions.getInstance().getScale());
+		options.setScale(GlobalOptions.getInstance().getDisplayScale());
 	}
 
 	public TableOptionsBuilder setDatasets(@Nullable List<IAnalysisDataset> list) {

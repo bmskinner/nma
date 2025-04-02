@@ -167,7 +167,7 @@ public class SignalTablePanel extends TableDetailPanel
 
 		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
 				.setTarget(statsTable)
-				.setScale(GlobalOptions.getInstance().getScale())
+				.setScale(GlobalOptions.getInstance().getDisplayScale())
 				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN,
 						new SignalTableCellRenderer())
 				.build();

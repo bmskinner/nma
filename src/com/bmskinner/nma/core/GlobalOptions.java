@@ -20,6 +20,7 @@ import java.io.File;
 
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.DefaultOptions;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
 
 /**
@@ -125,11 +126,11 @@ public class GlobalOptions extends DefaultOptions {
 		setBoolean(WARN_LOW_JVM_MEMORY_FRACTION, true);
 	}
 
-	public synchronized MeasurementScale getScale() {
+	public synchronized MeasurementScale getDisplayScale() {
 		return scale;
 	}
 
-	public synchronized void setScale(MeasurementScale scale) {
+	public synchronized void setDisplayScale(MeasurementScale scale) {
 		this.scale = scale;
 	}
 
@@ -222,5 +223,14 @@ public class GlobalOptions extends DefaultOptions {
 			return false;
 		return true;
 	}
-
+	
+	@Override
+	public GlobalOptions duplicate() {
+		GlobalOptions other = new GlobalOptions();
+		other.set(this);
+		other.defaultDir = this.defaultDir;
+		other.scale = scale;
+		other.swatch = swatch;
+		return other;
+	}
 }

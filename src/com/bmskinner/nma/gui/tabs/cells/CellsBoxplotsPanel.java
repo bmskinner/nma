@@ -103,7 +103,7 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel
 
 			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
 					.addStatistic(stat)
-					.setScale(GlobalOptions.getInstance().getScale())
+					.setScale(GlobalOptions.getInstance().getDisplayScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setTarget(panel).build();
 

@@ -99,7 +99,7 @@ public class SignalsColocalisationPanel extends ChartDetailPanel
 	@Override
 	protected synchronized void updateSingle() {
 		ChartOptions chartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
-				.setScale(GlobalOptions.getInstance().getScale()).setTarget(violinChart).build();
+				.setScale(GlobalOptions.getInstance().getDisplayScale()).setTarget(violinChart).build();
 
 		setChart(chartOptions);
 

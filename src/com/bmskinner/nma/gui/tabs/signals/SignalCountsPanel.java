@@ -127,7 +127,7 @@ public class SignalCountsPanel extends ChartDetailPanel implements NuclearSignal
 		filterBtn.setEnabled(false);
 		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
 				.addStatistic(Measurement.NUCLEUS_SIGNAL_COUNT)
-				.setScale(GlobalOptions.getInstance().getScale())
+				.setScale(GlobalOptions.getInstance().getDisplayScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch()).setTarget(chartPanel).build();
 
 		setChart(options);

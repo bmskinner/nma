@@ -125,7 +125,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 
 				ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
 						.addStatistic(Measurement.LENGTH)
-						.setScale(GlobalOptions.getInstance().getScale())
+						.setScale(GlobalOptions.getInstance().getDisplayScale())
 						.setSwatch(GlobalOptions.getInstance().getSwatch())
 						.setSegPosition(seg.getPosition())
 						.setTarget(chartPanel).build();

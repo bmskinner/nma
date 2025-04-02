@@ -57,7 +57,7 @@ public class NucleusMeasurementsTableModel extends DatasetTableModel {
 		for (Measurement stat : stats) {
 			for (String value : DEFAULT_ROW_NAMES) {
 				String unitLabel = stat.isDimensionless() ? ""
-						: " (" + Measurement.units(GlobalOptions.getInstance().getScale(),
+						: " (" + Measurement.units(GlobalOptions.getInstance().getDisplayScale(),
 								stat.getDimension()) + ")";
 				rowNames.add(stat + value + unitLabel);
 			}
@@ -79,7 +79,7 @@ public class NucleusMeasurementsTableModel extends DatasetTableModel {
 
 				double[] vals = datasets.get(c - 1).getCollection().getRawValues(m,
 						CellularComponent.NUCLEUS,
-						GlobalOptions.getInstance().getScale());
+						GlobalOptions.getInstance().getDisplayScale());
 				double mean = DoubleStream.of(vals).average().orElse(0);
 				double sem = Stats.stderr(vals);
 				double cv = Stats.stdev(vals) / mean;
