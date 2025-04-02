@@ -410,7 +410,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 		Runnable r = () ->{
 			if (d.isRoot() && !rootDatasets.contains(d)) {
 				rootDatasets.add(d);
-				LOGGER.fine(() -> "Added dataset %s".formatted(d.getName()));
+				LOGGER.fine("Added dataset %s".formatted(d.getName()));
 				datasetHashcodeMap.put(d.getId(), d.hashCode());
 			}
 		};

@@ -50,6 +50,12 @@ public class SignalDetectionMethodTest extends ComponentTester {
 
 		// Get current hash
 		DatasetListManager.getInstance().addDataset(d);
+
+		// The hash calculation is performed via the ThreadManager; wait to ensure it is added
+		// to the DatasetListManager hash table
+		Thread.sleep(2000);
+		
+		// No changes to the dataset since saving, so the original hash code should not have changed
 		long hash = d.hashCode();
 		assertFalse(DatasetListManager.getInstance().hashCodeChanged());
 
