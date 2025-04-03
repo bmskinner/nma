@@ -130,7 +130,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	private static final String TASK_MONITOR_ITEM_LBL = "Task monitor";
 	private static final String FILL_CONSENSUS_ITEM_LBL = "Fill consensus";
 	private static final String SWATCH_ITEM_LBL = "Colour palette";
-	private static final String SCALE_ITEM_LBL = "Scale";
+	private static final String SCALE_ITEM_LBL = "Measurement units";
 	private static final String PREFERENCES_ITEM_LBL = "Preferences";
 
 	private static final String OPEN_CONFIG_FILE_LBL = "Open config file";

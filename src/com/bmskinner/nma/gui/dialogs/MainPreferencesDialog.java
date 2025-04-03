@@ -33,6 +33,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -54,19 +57,23 @@ import com.bmskinner.nma.io.ConfigFileReader.RulesetEntry;
 @SuppressWarnings("serial")
 public class MainPreferencesDialog extends SettingsDialog implements ActionListener {
 
-    private static final String DIALOG_TITLE = "Preferences";
+    private static final String DISPLAY_DEFAULTS_LBL = "Display defaults";
+	private static final String PROGRAM_DEFAULT_LBL = "Program defaults";
+	private static final String NEW_ANALYSIS_DEFAULTS_LBL = "New analysis defaults";
+
+	private static final String DIALOG_TITLE = "Preferences";
     
     private static final Logger LOGGER = Logger.getLogger(MainPreferencesDialog.class.getName());
     
     private static final String SHOW_DEBUG_UI_LBL = "Show debug UI";
-    private static final String USE_ANTIALIASING_LBL = "Use antialiasing in charts";
-    private static final String DEFAULT_RULESET_LBL = "Default ruleset";
-    private static final String DEFAULT_IMAGE_SCALE_LBL = "Default image scale";
-    private static final String DEFAULT_COLOUR_SWATCH_LBL = "Default colour palette";
-    private static final String DEFAULT_IMAGE_DIR_LBL = "Default image directory";
+    private static final String USE_ANTIALIASING_LBL = "Antialiasing in charts";
+    private static final String DEFAULT_RULESET_LBL = "Ruleset";
+    private static final String DEFAULT_IMAGE_SCALE_LBL = "Image scale";
+    private static final String DEFAULT_COLOUR_SWATCH_LBL = "Colour palette";
+    private static final String DEFAULT_IMAGE_DIR_LBL = "Image directory";
     private static final String CHECK_FOR_UPDATES_LBL = "Check for updates on startup";
-    private static final String DEFAULT_DISPLAY_SCALE_LBL = "Default display scale";
-    private static final String DEFAULT_FILL_CONSENSUS_LBL = "Default filling consensus";
+    private static final String DEFAULT_DISPLAY_SCALE_LBL = "Measurement units";
+    private static final String DEFAULT_FILL_CONSENSUS_LBL = "Fill consensus nuclei";
     private static final String WARN_LOW_JVM_MEMORY_FRACTION_LBL = "Warn of low memory on startup";
         
     private final GlobalOptions oldOptions;
@@ -122,12 +129,9 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
 
     private JPanel createMainPanel() {
         JPanel panel = new JPanel();
-        GridBagLayout layout = new GridBagLayout();
-        panel.setLayout(layout);
+        BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
+        panel.setLayout(bl);
         panel.setBorder(new EmptyBorder(5, 5, 5, 5));
-
-        List<JLabel> labels = new ArrayList<>();
-        List<Component> fields = new ArrayList<>();
 
         // Checkboxes
         
@@ -135,12 +139,7 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
         antiAliasBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.IS_USE_ANTIALIASING, 
         		antiAliasBox.isSelected()));
 
-//        JCheckBox showDebugInterfaceBox = new JCheckBox((String) null, currentOptions.getBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY));
-//        showDebugInterfaceBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY, 
-//        		showDebugInterfaceBox.isSelected()));
-        
-        
-        JCheckBox checkUpdatesBox = new JCheckBox((String) null, currentOptions.getBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY));
+        JCheckBox checkUpdatesBox = new JCheckBox("(notifies only, updates will not be downloaded)", currentOptions.getBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY));
         checkUpdatesBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY, 
         		checkUpdatesBox.isSelected()));
         
@@ -148,7 +147,7 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
         consensusBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY, 
         		consensusBox.isSelected()));
         
-        JCheckBox memoryBox = new JCheckBox((String) null, currentOptions.getBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION));
+        JCheckBox memoryBox = new JCheckBox("(less than half system memory available)", currentOptions.getBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION));
         memoryBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION, 
         		memoryBox.isSelected()));
         
@@ -209,37 +208,74 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
 				}
 			}
 		});
+		
+		
+        // Layout display options
         
-        // Layout
-        labels.add(new JLabel(CHECK_FOR_UPDATES_LBL));
-        fields.add(checkUpdatesBox);
-        
-        labels.add(new JLabel(WARN_LOW_JVM_MEMORY_FRACTION_LBL));
-        fields.add(memoryBox);
-        
-        labels.add(new JLabel(USE_ANTIALIASING_LBL));
-        fields.add(antiAliasBox);
+		JPanel displayPanel = new JPanel();
+		GridBagLayout gl = new GridBagLayout();
+		displayPanel.setLayout(gl);
+		List<JLabel> displayLabels = new ArrayList<>();
+		List<Component> displayFields = new ArrayList<>();
+		
+		displayPanel.setBorder(BorderFactory.createTitledBorder(DISPLAY_DEFAULTS_LBL));
 
-        labels.add(new JLabel(DEFAULT_FILL_CONSENSUS_LBL));
-        fields.add(consensusBox);
+        displayLabels.add(new JLabel(USE_ANTIALIASING_LBL));
+        displayFields.add(antiAliasBox);
         
-        labels.add(new JLabel(DEFAULT_COLOUR_SWATCH_LBL));
-        fields.add(paletteBox);
+        displayLabels.add(new JLabel(DEFAULT_FILL_CONSENSUS_LBL));
+        displayFields.add(consensusBox);
         
-        labels.add(new JLabel(DEFAULT_DISPLAY_SCALE_LBL));
-        fields.add(measurementScaleBox);
+        displayLabels.add(new JLabel(DEFAULT_COLOUR_SWATCH_LBL));
+        displayFields.add(paletteBox);
         
-        labels.add(new JLabel(DEFAULT_IMAGE_SCALE_LBL));
-        fields.add(scaleSpinner);
+        displayLabels.add(new JLabel(DEFAULT_DISPLAY_SCALE_LBL));
+        displayFields.add(measurementScaleBox);
         
-        labels.add(new JLabel(DEFAULT_RULESET_LBL));
-        fields.add(rulesetBox);
+        addLabelTextRows(displayLabels, displayFields, gl, displayPanel);
+		
+		
+        // Layout program options
         
-        labels.add(new JLabel(DEFAULT_IMAGE_DIR_LBL));
-        fields.add(defaultDirBox);
+        JPanel progamPanel = new JPanel();
+		GridBagLayout progamgl = new GridBagLayout();
+		progamPanel.setLayout(progamgl);
+		List<JLabel> progamLabels = new ArrayList<>();
+		List<Component> progamFields = new ArrayList<>();
+		progamPanel.setBorder(BorderFactory.createTitledBorder(PROGRAM_DEFAULT_LBL));
         
+		progamLabels.add(new JLabel(CHECK_FOR_UPDATES_LBL));
+		progamFields.add(checkUpdatesBox);
         
-        this.addLabelTextRows(labels, fields, layout, panel);
+        progamLabels.add(new JLabel(WARN_LOW_JVM_MEMORY_FRACTION_LBL));
+        progamFields.add(memoryBox);
+        addLabelTextRows(progamLabels, progamFields, progamgl, progamPanel);
+
+        // Layout analysis setup options
+        
+        JPanel analysisPanel = new JPanel();
+		GridBagLayout analysisGl = new GridBagLayout();
+		analysisPanel.setLayout(progamgl);
+		List<JLabel> analysisLabels = new ArrayList<>();
+		List<Component> analysisFields = new ArrayList<>();
+		analysisPanel.setBorder(BorderFactory.createTitledBorder(NEW_ANALYSIS_DEFAULTS_LBL));
+
+        analysisLabels.add(new JLabel(DEFAULT_IMAGE_DIR_LBL));
+        analysisFields.add(defaultDirBox);
+		
+		analysisLabels.add(new JLabel(DEFAULT_IMAGE_SCALE_LBL));
+		analysisFields.add(scaleSpinner);
+        
+        analysisLabels.add(new JLabel(DEFAULT_RULESET_LBL));
+        analysisFields.add(rulesetBox);
+
+        addLabelTextRows(analysisLabels, analysisFields, analysisGl, analysisPanel);
+        
+        panel.add(progamPanel);
+        Box.createVerticalStrut(10);
+        panel.add(analysisPanel);
+        Box.createVerticalStrut(10);
+        panel.add(displayPanel);
         return panel;
     }
 
