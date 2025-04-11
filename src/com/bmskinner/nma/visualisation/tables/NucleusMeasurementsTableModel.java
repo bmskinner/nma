@@ -40,7 +40,7 @@ public class NucleusMeasurementsTableModel extends DatasetTableModel {
 		try {
 			createTable(datasets);
 		} catch (MissingDataException | SegmentUpdateException e) {
-			LOGGER.log(Level.SEVERE, "Unable to create measurements table", e);
+			LOGGER.log(Level.SEVERE, "Unable to create measurements table: %s".formatted(e.getMessage()), e);
 			makeEmptyTable();
 		}
 
@@ -49,45 +49,46 @@ public class NucleusMeasurementsTableModel extends DatasetTableModel {
 	private void createTable(@NonNull List<IAnalysisDataset> datasets)
 			throws MissingDataException, SegmentUpdateException {
 		colNames = makeColNames(datasets);
-		int colCount = colNames.length;
+		final int colCount = colNames.length;
 
-		List<String> rowNames = new ArrayList<>();
+		final List<String> rowNames = new ArrayList<>();
 
-		List<Measurement> stats = Measurement.getNucleusStats();
-		for (Measurement stat : stats) {
-			for (String value : DEFAULT_ROW_NAMES) {
-				String unitLabel = stat.isDimensionless() ? ""
+		final List<Measurement> stats = Measurement.getNucleusStats();
+		for (final Measurement stat : stats) {
+			for (final String value : DEFAULT_ROW_NAMES) {
+				final String unitLabel = stat.isDimensionless() ? ""
 						: " (" + Measurement.units(GlobalOptions.getInstance().getDisplayScale(),
 								stat.getDimension()) + ")";
 				rowNames.add(stat + value + unitLabel);
 			}
 		}
-		int rowCount = rowNames.size();
+		final int rowCount = rowNames.size();
 
 		rowData = new String[rowCount][colCount];
 		for (int r = 0; r < rowCount; r += DEFAULT_ROW_NAMES.size()) {
-			Measurement m = stats.get(r / DEFAULT_ROW_NAMES.size());
+			final Measurement m = stats.get(r / DEFAULT_ROW_NAMES.size());
 
 			for (int c = 0; c < colCount; c++) {
 				if (c == 0) {
-					for (int k = 0; k < rowNames.size(); k++)
+					for (int k = 0; k < rowNames.size(); k++) {
 						rowData[k][0] = rowNames.get(k);
+					}
 					continue;
 				}
 
 				// Add the calculated values in each dataset as a batch
 
-				double[] vals = datasets.get(c - 1).getCollection().getRawValues(m,
+				final double[] vals = datasets.get(c - 1).getCollection().getRawValues(m,
 						CellularComponent.NUCLEUS,
 						GlobalOptions.getInstance().getDisplayScale());
-				double mean = DoubleStream.of(vals).average().orElse(0);
-				double sem = Stats.stderr(vals);
-				double cv = Stats.stdev(vals) / mean;
+				final double mean = DoubleStream.of(vals).average().orElse(0);
+				final double sem = Stats.stderr(vals);
+				final double cv = Stats.stdev(vals) / mean;
 
-				double median = Stats.quartile(vals, Stats.MEDIAN);
+				final double median = Stats.quartile(vals, Stats.MEDIAN);
 
-				ConfidenceInterval ci = new ConfidenceInterval(vals, 0.95);
-				String ciString = df.format(mean) + " ± " + df.format(ci.getSize().doubleValue());
+				final ConfidenceInterval ci = new ConfidenceInterval(vals, 0.95);
+				final String ciString = df.format(mean) + " ± " + df.format(ci.getSize().doubleValue());
 
 				rowData[r][c] = df.format(median);
 				rowData[r + 1][c] = df.format(mean);

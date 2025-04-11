@@ -89,7 +89,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
 		} catch (MissingDataException | SegmentUpdateException e) {
 			throw new ChartDatasetCreationException(
-					"Error making violin dataset for %s".formatted(component));
+					"Error making violin dataset for %s: %s".formatted(component, e.getMessage()));
 		}
 		throw new ChartDatasetCreationException(
 				"Component not recognised: %s".formatted(component));
@@ -142,8 +142,13 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	 */
 	private ViolinCategoryDataset createNucleusStatisticViolinDataset()
 			throws MissingDataException, SegmentUpdateException {
-		final List<IAnalysisDataset> datasets = options.getDatasets();
 		final Measurement stat = options.getMeasurement();
+
+		// Only make charts for the datasets for which we have these measurements
+		final List<IAnalysisDataset> datasets = options.getDatasets().stream()
+				.filter(d -> d.getAnalysisOptions().get().getRuleSetCollection().getMeasurableValues().contains(stat))
+				.toList();
+
 		final MeasurementScale scale = options.getScale();
 		final ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
