@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -60,13 +61,13 @@ public class VersionHelpDialog extends SettingsDialog {
 		try {
 			this.add(createMainPanel(), BorderLayout.CENTER);
 			this.add(createFooter(), BorderLayout.SOUTH);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error creating help dialog", e);
 		}
 		this.setLocationRelativeTo(null);
 		this.setMinimumSize(new Dimension(100, 70));
 
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setMaximumSize(
 				new Dimension((int) screenSize.getWidth(), (int) screenSize.getHeight() - 200));
 		this.pack();
@@ -75,13 +76,13 @@ public class VersionHelpDialog extends SettingsDialog {
 	}
 
 	private JPanel createMainPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 
-		JTabbedPane pane = new JTabbedPane(SwingConstants.TOP);
+		final JTabbedPane pane = new JTabbedPane(SwingConstants.TOP);
 		pane.addTab(DIALOG_TITLE, createAboutPanel());
 
-		JScrollPane licPane = createGPLLicensePanel();
-		JScrollPane depPane = createDependencyPanel();
+		final JScrollPane licPane = createGPLLicensePanel();
+		final JScrollPane depPane = createDependencyPanel();
 
 		licPane.setPreferredSize(PREF_SIZE);
 		depPane.setPreferredSize(PREF_SIZE);
@@ -93,37 +94,47 @@ public class VersionHelpDialog extends SettingsDialog {
 		return panel;
 	}
 
-	private JTextArea createAboutPanel() {
-		JTextArea textBox = new JTextArea();
-		textBox.setFont(UIManager.getFont(LABEL_FONT));
+	private JEditorPane createAboutPanel() {
 
-		String text = "Nuclear Morphology Analysis version " + Version.currentVersion() + Io.NEWLINE
-				+ Io.NEWLINE
-				+ "Help, tutorials, and the source code are available at: " + Io.NEWLINE
-				+ SITE_URL + Io.NEWLINE
-				+ "(click the button below to open the website)" + Io.NEWLINE + Io.NEWLINE
-				+ "A full guide to the software is included via Help > 'Open user guide'"
-				+ Io.NEWLINE + Io.NEWLINE
-				+ "If you use this in your research, please cite our papers!" + Io.NEWLINE
-				+ Io.NEWLINE
-				+ "Skinner et al. 2019: doi:10.1093/biolre/ioz013" + Io.NEWLINE
-				+ "Skinner 2022: doi:10.21105/joss.04767";
+		final JEditorPane textBox = new JEditorPane("text/html", "");
 
+		final String text = """
+				 <b>Nuclear Morphology Analysis version %s</b><p>
+
+				 Help, tutorials, and the source code are available at:<br>
+				 <a href=%s>%s</a><br>
+				 (click the button below to open this link in your web browser)
+				 <p>
+				 A full guide to the software is included via Help > 'Open user guide'
+				 <p>
+				 If you use this in your research, please cite our papers!
+				 <p>
+				 <b>Morphology analysis:</b><br>
+				 Skinner <i>et al.</i> (2019) <i>Biology of Reproduction</i>, 100(5), 1250-1260<br>
+				 doi:10.1093/biolre/ioz013<p>
+
+				 Skinner (2022) <i>Journal of Open Source Software</i>, 7(79), 4767<br>
+				 doi:10.21105/joss.04767<p>
+
+				 <b>Signal warping:</b><br>
+				 Skinner <i>et al.</i> (2019) <i>Genes</i>, 10(2), 109<br>
+				  doi:10.3390/genes10020109<br>
+
+				""".formatted(Version.currentVersion(), SITE_URL, SITE_URL);
 		textBox.setText(text);
 		textBox.setEditable(false);
-		textBox.setLineWrap(false);
 		return textBox;
 	}
 
 	private String readTextFile(String fileName) {
 		// Cannot use a URI since it will break when packaged to exe
-		InputStream in = getClass().getResourceAsStream(fileName);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		final InputStream in = getClass().getResourceAsStream(fileName);
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		try (Stream<String> lines = reader.lines()) {
 			lines.forEachOrdered(l -> sb.append(l + Io.NEWLINE));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.fine("Cannot read license text");
 			sb.append("Unable to read text file");
 		}
@@ -131,10 +142,10 @@ public class VersionHelpDialog extends SettingsDialog {
 	}
 
 	private JScrollPane createGPLLicensePanel() {
-		JTextArea textBox = new JTextArea();
+		final JTextArea textBox = new JTextArea();
 		textBox.setFont(UIManager.getFont(LABEL_FONT));
 
-		String fileName = "/licenses/GNU-GPLv3.txt";
+		final String fileName = "/licenses/GNU-GPLv3.txt";
 
 		textBox.setText(readTextFile(fileName));
 		textBox.setEditable(false);
@@ -144,10 +155,10 @@ public class VersionHelpDialog extends SettingsDialog {
 	}
 
 	private JScrollPane createDependencyPanel() {
-		JTextArea textBox = new JTextArea();
+		final JTextArea textBox = new JTextArea();
 		textBox.setFont(UIManager.getFont(LABEL_FONT));
 
-		String fileName = "/licenses/DependencyLicenses.txt";
+		final String fileName = "/licenses/DependencyLicenses.txt";
 
 		textBox.setText(readTextFile(fileName));
 		textBox.setEditable(false);
@@ -158,9 +169,9 @@ public class VersionHelpDialog extends SettingsDialog {
 
 	@Override
 	protected JPanel createFooter() {
-		JPanel panel = new JPanel(new FlowLayout());
+		final JPanel panel = new JPanel(new FlowLayout());
 
-		JButton websiteBtn = new JButton(VIST_WEBSITE_LBL);
+		final JButton websiteBtn = new JButton(VIST_WEBSITE_LBL);
 
 		websiteBtn.addActionListener(e -> browseToWebsite());
 		panel.add(websiteBtn);
@@ -168,19 +179,19 @@ public class VersionHelpDialog extends SettingsDialog {
 	}
 
 	private void browseToWebsite() {
-		Desktop desktop = Desktop.getDesktop();
+		final Desktop desktop = Desktop.getDesktop();
 
 		try {
-			URI uri = new URI(SITE_URL);
+			final URI uri = new URI(SITE_URL);
 			if (desktop.isSupported(Desktop.Action.BROWSE)) {
 				desktop.browse(uri);
 			} else {
 				BrowserLauncher.openURL(uri.toString());
 			}
 
-		} catch (IOException e1) {
+		} catch (final IOException e1) {
 			LOGGER.warning(e1.getMessage());
-		} catch (URISyntaxException e1) {
+		} catch (final URISyntaxException e1) {
 			LOGGER.warning("Unable to parse URI: " + e1.getMessage());
 		}
 	}
