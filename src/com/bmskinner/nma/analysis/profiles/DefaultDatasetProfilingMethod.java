@@ -46,7 +46,6 @@ import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleApplicationType;
 import com.bmskinner.nma.components.rules.RuleSet;
-
 import com.bmskinner.nma.stats.Stats;
 
 /**

@@ -51,7 +51,6 @@ import com.bmskinner.nma.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nma.io.UpdateChecker;
 import com.bmskinner.nma.logging.LogPanelFormatter;
 import com.bmskinner.nma.logging.LogPanelHandler;
-
 import com.javadocking.DockingManager;
 import com.javadocking.dock.Position;
 import com.javadocking.dock.TabDock;

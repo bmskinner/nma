@@ -24,7 +24,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jdom2.Element;
 
-import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
@@ -105,9 +104,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	 * Store shell results and warped signals separately to allow separate analysis
 	 * between parentDataset.getCollection() and child datasets
 	 */
-	private Map<UUID, IShellResult> shellResults = new HashMap<>(0);
+	private final Map<UUID, IShellResult> shellResults = new HashMap<>(0);
 
-	private Map<UUID, List<IWarpedSignal>> warpedSignals = new HashMap<>(0);
+	private final Map<UUID, List<IWarpedSignal>> warpedSignals = new HashMap<>(0);
 
 	/*
 	 * TRANSIENT FIELDS
@@ -115,9 +114,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	protected VennCache vennCache = new VennCache();
 
-	private ProfileManager profileManager = new ProfileManager(this);
-	private SignalManager signalManager = new SignalManager(this);
-	private MeasurementCache statsCache = new MeasurementCache();
+	private final ProfileManager profileManager = new ProfileManager(this);
+	private final SignalManager signalManager = new SignalManager(this);
+	private final MeasurementCache statsCache = new MeasurementCache();
 	
 	/**
 	 * Construct from a parent dataset (of which this will be a child). The new
@@ -178,25 +177,27 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		profileCollection = new DefaultProfileCollection(
 				e.getChild(XMLNames.XML_PROFILE_COLLECTION));
 
-		if (e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS) != null)
+		if (e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS) != null) {
 			consensusNucleus = new DefaultConsensusNucleus(
 					e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS));
+		}
 
-		for (Element el : e.getChildren(XMLNames.XML_CELL))
+		for (final Element el : e.getChildren(XMLNames.XML_CELL)) {
 			cellIDs.add(UUID.fromString(el.getAttributeValue(XMLNames.XML_ID)));
+		}
 
 		// Shells are not stored in signal groups for child datasets
 		// becuase signal groups can only be added to root datasets
-		for (Element el : e.getChildren(XMLNames.XML_SIGNAL_SHELL_RESULT)) {
-			UUID id = UUID.fromString(el.getAttributeValue(XMLNames.XML_ID));
-			IShellResult s = new DefaultShellResult(el);
+		for (final Element el : e.getChildren(XMLNames.XML_SIGNAL_SHELL_RESULT)) {
+			final UUID id = UUID.fromString(el.getAttributeValue(XMLNames.XML_ID));
+			final IShellResult s = new DefaultShellResult(el);
 			shellResults.put(id, s);
 		}
 		// Warped signals are not stored in signal groups for child datasets
 		// becuase signal groups can only be added to root datasets
-		for (Element el : e.getChildren(XMLNames.XML_WARPED_SIGNAL)) {
-			UUID id = UUID.fromString(el.getAttributeValue(XMLNames.XML_ID));
-			IWarpedSignal s = new DefaultWarpedSignal(el);
+		for (final Element el : e.getChildren(XMLNames.XML_WARPED_SIGNAL)) {
+			final UUID id = UUID.fromString(el.getAttributeValue(XMLNames.XML_ID));
+			final IWarpedSignal s = new DefaultWarpedSignal(el);
 			warpedSignals.computeIfAbsent(id, k -> new ArrayList<>());
 			warpedSignals.get(id).add(s);
 		}
@@ -220,46 +221,51 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			cellIDs.addAll(v.cellIDs);
 			profileCollection = v.profileCollection.duplicate();
 			parentDataset = v.parentDataset;
-			if (v.consensusNucleus != null)
+			if (v.consensusNucleus != null) {
 				consensusNucleus = v.consensusNucleus.duplicate();
-			for (Entry<UUID, IShellResult> e : v.shellResults.entrySet()) {
+			}
+			for (final Entry<UUID, IShellResult> e : v.shellResults.entrySet()) {
 				shellResults.put(e.getKey(), e.getValue().duplicate());
 			}
-			for (Entry<UUID, List<IWarpedSignal>> c : v.warpedSignals.entrySet()) {
+			for (final Entry<UUID, List<IWarpedSignal>> c : v.warpedSignals.entrySet()) {
 				warpedSignals.computeIfAbsent(c.getKey(), k -> new ArrayList<>());
-				for (IWarpedSignal s : c.getValue())
+				for (final IWarpedSignal s : c.getValue()) {
 					warpedSignals.get(c.getKey()).add(s.duplicate());
+				}
 			}
 			isRecalcHashcode = true;
-		} catch (SegmentUpdateException e) {
+		} catch (final SegmentUpdateException e) {
 			throw new ComponentCreationException("Could not duplicate profile collection", e);
 		}
 	}
 
 	@Override
 	@NonNull public Element toXmlElement() {
-		Element e = super.toXmlElement().setName(XMLNames.XML_VIRTUAL_DATASET)
+		final Element e = super.toXmlElement().setName(XMLNames.XML_VIRTUAL_DATASET)
 				.setAttribute(XMLNames.XML_ID, uuid.toString())
 				.setAttribute(XMLNames.XML_NAME, name);
 
 		// Collection content
 		e.addContent(profileCollection.toXmlElement());
 
-		if (consensusNucleus != null)
+		if (consensusNucleus != null) {
 			e.addContent(consensusNucleus.toXmlElement());
+		}
 
-		for (UUID c : cellIDs)
+		for (final UUID c : cellIDs) {
 			e.addContent(
 					new Element(XMLNames.XML_CELL).setAttribute(XMLNames.XML_ID, c.toString()));
+		}
 
-		for (Entry<UUID, IShellResult> c : shellResults.entrySet()) {
+		for (final Entry<UUID, IShellResult> c : shellResults.entrySet()) {
 			e.addContent(c.getValue().toXmlElement().setAttribute(XMLNames.XML_ID,
 					c.getKey().toString()));
 		}
 
-		for (Entry<UUID, List<IWarpedSignal>> c : warpedSignals.entrySet()) {
-			for (IWarpedSignal s : c.getValue())
+		for (final Entry<UUID, List<IWarpedSignal>> c : warpedSignals.entrySet()) {
+			for (final IWarpedSignal s : c.getValue()) {
 				e.addContent(s.toXmlElement().setAttribute(XMLNames.XML_ID, c.getKey().toString()));
+			}
 		}
 
 		return e;
@@ -298,7 +304,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public boolean add(ICell e) {
-		boolean b = cellIDs.add(e.getId());
+		final boolean b = cellIDs.add(e.getId());
 		if (b) {
 			statsCache.clear();
 			isRecalcHashcode = true;
@@ -308,9 +314,10 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public boolean addAll(Collection<? extends ICell> c) {
-		boolean b = cellIDs.addAll(c.stream().map(ICell::getId).collect(Collectors.toSet()));
-		if (b)
+		final boolean b = cellIDs.addAll(c.stream().map(ICell::getId).collect(Collectors.toSet()));
+		if (b) {
 			statsCache.clear();
+		}
 		isRecalcHashcode = true;
 		return b;
 	}
@@ -324,11 +331,10 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public boolean contains(Object o) {
-		if (o instanceof ICell c) {
+		if (o instanceof final ICell c)
 			return cellIDs.contains(c.getId());
-		}
 
-		if (o instanceof UUID u)
+		if (o instanceof final UUID u)
 			return cellIDs.contains(u);
 		return false;
 	}
@@ -336,8 +342,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public boolean containsAll(Collection<?> c) {
 		boolean b = false;
-		for (Object o : c)
+		for (final Object o : c) {
 			b |= contains(o);
+		}
 		return b;
 	}
 
@@ -353,10 +360,11 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public boolean remove(Object o) {
-		if (o instanceof ICell c) {
-			boolean b = cellIDs.remove(c.getId());
-			if (b)
+		if (o instanceof final ICell c) {
+			final boolean b = cellIDs.remove(c.getId());
+			if (b) {
 				statsCache.clear();
+			}
 			isRecalcHashcode = true;
 			return b;
 		}
@@ -366,10 +374,12 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public boolean removeAll(Collection<?> c) {
 		boolean b = false;
-		for (Object o : c)
+		for (final Object o : c) {
 			b |= remove(o);
-		if (b)
+		}
+		if (b) {
 			statsCache.clear();
+		}
 		isRecalcHashcode = true;
 		return b;
 	}
@@ -377,7 +387,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public boolean retainAll(Collection<?> c) {
 		// TODO operate on the real list
-		boolean b = getCells().retainAll(c);
+		final boolean b = getCells().retainAll(c);
 		isRecalcHashcode = true;
 		return b;
 	}
@@ -455,8 +465,8 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public Optional<Nucleus> getNucleus(@NonNull UUID id) {
-		for (ICell c : this) {
-			for (Nucleus n : c.getNuclei()) {
+		for (final ICell c : this) {
+			for (final Nucleus n : c.getNuclei()) {
 				if (n.getId().equals(id))
 					return Optional.ofNullable(n);
 			}
@@ -492,15 +502,17 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public void offsetConsensus(double xOffset, double yOffset) {
-		if (consensusNucleus != null)
+		if (consensusNucleus != null) {
 			consensusNucleus.offset(xOffset, yOffset);
+		}
 		isRecalcHashcode = true;
 	}
 
 	@Override
 	public void rotateConsensus(double degrees) {
-		if (consensusNucleus != null)
+		if (consensusNucleus != null) {
 			consensusNucleus.addRotation(degrees);
+		}
 		isRecalcHashcode = true;
 	}
 
@@ -524,7 +536,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		if (nucleus == null)
 			return false;
 
-		for (Nucleus n : getNuclei()) {
+		for (final Nucleus n : getNuclei()) {
 			if (n.getId().equals(nucleus.getId()))
 				return true;
 		}
@@ -549,8 +561,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public void setCellsLocked(boolean b) {
-		for (Nucleus n : this.getNuclei())
+		for (final Nucleus n : this.getNuclei()) {
 			n.setLocked(b);
+		}
 		isRecalcHashcode = true;
 	}
 
@@ -582,7 +595,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		if (!parentDataset.getCollection().hasSignalGroup(signalGroup))
 			return Optional.empty();
 
-		ISignalGroup result = new DefaultSignalGroup(
+		final ISignalGroup result = new DefaultSignalGroup(
 				parentDataset.getCollection().getSignalGroup(signalGroup).get()) {
 
 			@Override
@@ -600,9 +613,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			}
 
 			@Override
-			public void addWarpedSignal(@NonNull IWarpedSignal result) {
+			public void addWarpedSignal(@NonNull IWarpedSignal result1) {
 				warpedSignals.computeIfAbsent(signalGroup, s -> new ArrayList<>());
-				warpedSignals.get(signalGroup).add(result);
+				warpedSignals.get(signalGroup).add(result1);
 			}
 
 			@Override
@@ -611,8 +624,8 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			}
 
 			@Override
-			public void setShellResult(@NonNull IShellResult result) {
-				shellResults.put(signalGroup, result);
+			public void setShellResult(@NonNull IShellResult result1) {
+				shellResults.put(signalGroup, result1);
 			}
 
 			@Override
@@ -648,11 +661,12 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public Collection<ISignalGroup> getSignalGroups() {
-		List<ISignalGroup> result = new ArrayList<>();
+		final List<ISignalGroup> result = new ArrayList<>();
 
-		for (UUID id : this.getSignalGroupIDs())
-			if (getSignalGroup(id).isPresent())
+		for (final UUID id : this.getSignalGroupIDs())
+			if (getSignalGroup(id).isPresent()) {
 				result.add(getSignalGroup(id).get());
+			}
 
 		return result;
 	}
@@ -690,23 +704,22 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public Nucleus getNucleusMostSimilarToMedian(OrientationMark pointType)
 			throws SegmentUpdateException, MissingDataException {
-		List<Nucleus> list = this.getNuclei();
+		final List<Nucleus> list = this.getNuclei();
 
 		// No need to check profiles if there is only one nucleus
-		if (list.size() == 1) {
+		if (list.size() == 1)
 			return list.get(0);
-		}
 
-		IProfile medianProfile = profileCollection
+		final IProfile medianProfile = profileCollection
 				.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN)
 				.interpolate(FIXED_PROFILE_LENGTH);
 
 		Nucleus result = null;
 
 		double difference = Double.MAX_VALUE;
-		for (Nucleus p : list) {
-			IProfile profile = p.getProfile(ProfileType.ANGLE, pointType);
-			double nDifference = profile.absoluteSquareDifference(medianProfile,
+		for (final Nucleus p : list) {
+			final IProfile profile = p.getProfile(ProfileType.ANGLE, pointType);
+			final double nDifference = profile.absoluteSquareDifference(medianProfile,
 					FIXED_PROFILE_LENGTH);
 			if (nDifference < difference) {
 				difference = nDifference;
@@ -734,7 +747,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	public int countShared(@NonNull ICellCollection d2) {
 		if (vennCache.hasCount(d2))
 			return vennCache.getCount(d2);
-		int shared = countSharedNuclei(d2);
+		final int shared = countSharedNuclei(d2);
 		d2.setSharedCount(this, shared);
 		vennCache.addCount(d2, shared);
 
@@ -765,18 +778,17 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		if (!d2.getRuleSetCollection().equals(parentDataset.getCollection().getRuleSetCollection()))
 			return 0;
 
-		Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
+		final Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
 		toSearch.retainAll(cellIDs);
 		return toSearch.size();
 	}
 
 	@Override
 	public int getMedianArrayLength() {
-		if (size() == 0) {
+		if (size() == 0)
 			return 0;
-		}
 
-		int[] p = this.getArrayLengths();
+		final int[] p = this.getArrayLengths();
 		return Stats.quartile(p, Stats.MEDIAN);
 	}
 
@@ -787,11 +799,11 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	 */
 	private int[] getArrayLengths() {
 
-		int[] result = new int[this.getNuclei().size()];
+		final int[] result = new int[this.getNuclei().size()];
 
 		int i = 0;
 
-		for (Nucleus n : this.getNuclei()) {
+		for (final Nucleus n : this.getNuclei()) {
 			result[i++] = n.getBorderLength();
 		}
 
@@ -827,9 +839,8 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale)
 			throws MissingDataException, SegmentUpdateException {
-		if (this.size() == 0) {
+		if (this.size() == 0)
 			return 0;
-		}
 		return getMedianStatistic(stat, component, scale, null);
 	}
 
@@ -879,20 +890,18 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			throws MissingDataException, SegmentUpdateException {
 
 		// Handle old segment andSignalStatistic enums
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+		if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
 			return getMinStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
-		}
 
-		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
+		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
 			return getMinStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
-		}
 		return getMinStatistic(stat, component, scale, id);
 	}
 
 	private synchronized double getMinStatistic(Measurement stat, String component,
 			MeasurementScale scale, UUID id)
 			throws MissingDataException, SegmentUpdateException {
-		double[] values = getRawValues(stat, component, scale, id);
+		final double[] values = getRawValues(stat, component, scale, id);
 		return Arrays.stream(values).min().getAsDouble();
 	}
 
@@ -909,13 +918,11 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			throws MissingDataException, SegmentUpdateException {
 
 		// Handle old segment andSignalStatistic enums
-		if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+		if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
 			return getMaxStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
-		}
 
-		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
+		if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component))
 			return getMaxStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
-		}
 		return getMaxStatistic(stat, component, scale, id);
 	}
 
@@ -923,7 +930,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			UUID id)
 			throws MissingDataException, SegmentUpdateException {
 
-		double[] values = getRawValues(stat, component, scale, id);
+		final double[] values = getRawValues(stat, component, scale, id);
 		return Arrays.stream(values).max().getAsDouble();
 	}
 
@@ -946,9 +953,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 		double[] result = null;
 
-		result = getNuclei().parallelStream().mapToDouble(n -> {
-			return StreamUtils.uncheckCall(callSegMeasurement(stat, scale, id, n));
-		}).sorted().toArray();
+		result = getNuclei().parallelStream().mapToDouble(n -> StreamUtils.uncheckCall(callSegMeasurement(stat, scale, id, n))).sorted().toArray();
 
 		return result;
 	}
@@ -962,8 +967,8 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			segment = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegment(id);
 			double perimeterLength = 0;
 			if (segment != null) {
-				int indexLength = segment.length();
-				double fractionOfPerimeter = (double) indexLength
+				final int indexLength = segment.length();
+				final double fractionOfPerimeter = (double) indexLength
 						/ (double) segment.getProfileLength();
 				perimeterLength = fractionOfPerimeter
 						* n.getMeasurement(Measurement.PERIMETER, scale);
@@ -1018,9 +1023,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			@NonNull MeasurementScale scale,
 			ICell c) {
 
-		return () -> {
-			return c.getMeasurement(stat, scale);
-		};
+		return () -> c.getMeasurement(stat, scale);
 
 	}
 
@@ -1037,22 +1040,19 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(
 			OrientationMark pointType) throws SegmentUpdateException, MissingDataException {
 
-		IProfile medianProfile = this.getProfileCollection()
+		final IProfile medianProfile = this.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN)
 				.interpolate(FIXED_PROFILE_LENGTH);
 
-		return getNuclei().stream().mapToDouble(n -> {
-			return StreamUtils
-					.uncheckCall(makeDifferenceToMedianCallable(pointType, n, medianProfile));
-
-		}).toArray();
+		return getNuclei().stream().mapToDouble(n -> StreamUtils
+				.uncheckCall(makeDifferenceToMedianCallable(pointType, n, medianProfile))).toArray();
 	}
 
 	private Callable<Double> makeDifferenceToMedianCallable(OrientationMark pointType, Nucleus n,
-			IProfile medianProfile) {
+			@NonNull IProfile medianProfile) {
 		return () -> {
-			IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
-			double diff = angleProfile.absoluteSquareDifference(medianProfile,
+			final IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
+			final double diff = angleProfile.absoluteSquareDifference(medianProfile,
 					FIXED_PROFILE_LENGTH);
 			return Math.sqrt(diff / FIXED_PROFILE_LENGTH); // differences in degrees, rather
 															// than square degrees
@@ -1063,7 +1063,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			UUID id) throws MissingDataException, SegmentUpdateException {
 
 		if (!this.statsCache.has(stat, component, scale, id)) {
-			double[] values = getRawValues(stat, component, scale, id);
+			final double[] values = getRawValues(stat, component, scale, id);
 			statsCache.set(stat, component, scale, id, values);
 		}
 
@@ -1078,9 +1078,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN)
 				.interpolate(FIXED_PROFILE_LENGTH);
 
-		IProfile angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
+		final IProfile angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
 
-		double diff = angleProfile.absoluteSquareDifference(medianProfile,
+		final double diff = angleProfile.absoluteSquareDifference(medianProfile,
 				FIXED_PROFILE_LENGTH);
 		return Math.sqrt(diff / FIXED_PROFILE_LENGTH);
 
@@ -1112,7 +1112,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		VirtualDataset other = (VirtualDataset) obj;
+		final VirtualDataset other = (VirtualDataset) obj;
 		return Objects.equals(cellIDs, other.cellIDs)
 				&& Objects.equals(consensusNucleus, other.consensusNucleus)
 				&& Objects.equals(name, other.name)
@@ -1124,7 +1124,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public IAnalysisDataset addChildCollection(@NonNull ICellCollection collection)
 			throws MissingDataException, SegmentUpdateException {
-		VirtualDataset c = new VirtualDataset(this, collection.getName(), null, collection);
+		final VirtualDataset c = new VirtualDataset(this, collection.getName(), null, collection);
 		addChildDataset(c);
 		return c;
 	}
@@ -1137,7 +1137,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		if (getName().equals(dataset.getName())
 				|| childDatasets.stream().map(IAnalysisDataset::getName)
 						.anyMatch(s -> s.equals(dataset.getName()))) {
-			String newName = chooseSuffix(dataset.getName());
+			final String newName = chooseSuffix(dataset.getName());
 			dataset.setName(newName);
 		}
 		childDatasets.add(dataset);
@@ -1160,33 +1160,36 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		if (scale <= 0) // don't allow a scale to cause divide by zero errors
 			return;
 
-		Optional<IAnalysisOptions> op = getAnalysisOptions();
+		final Optional<IAnalysisOptions> op = getAnalysisOptions();
 		if (op.isPresent()) {
-			Set<String> detectionOptions = op.get().getDetectionOptionTypes();
-			for (String detectedComponent : detectionOptions) {
-				Optional<HashOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
-				if (subOptions.isPresent())
+			final Set<String> detectionOptions = op.get().getDetectionOptionTypes();
+			for (final String detectedComponent : detectionOptions) {
+				final Optional<HashOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
+				if (subOptions.isPresent()) {
 					subOptions.get().setDouble(HashOptions.SCALE, scale);
+				}
 			}
 		}
 
-		for (IAnalysisDataset child : getChildDatasets()) {
+		for (final IAnalysisDataset child : getChildDatasets()) {
 			child.setScale(scale);
 		}
 
-		for (ICell c : getCells())
+		for (final ICell c : getCells()) {
 			c.setScale(scale);
+		}
 
-		if (hasConsensus())
+		if (hasConsensus()) {
 			consensusNucleus.setScale(scale);
+		}
 
 		clear(MeasurementScale.MICRONS);
 	}
 
 	@Override
 	public Set<UUID> getChildUUIDs() {
-		Set<UUID> result = new HashSet<>(childDatasets.size());
-		for (IAnalysisDataset c : childDatasets) {
+		final Set<UUID> result = new HashSet<>(childDatasets.size());
+		for (final IAnalysisDataset c : childDatasets) {
 			result.add(c.getId());
 		}
 
@@ -1195,13 +1198,13 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public Set<UUID> getAllChildUUIDs() {
-		Set<UUID> result = new HashSet<>();
+		final Set<UUID> result = new HashSet<>();
 
-		Set<UUID> idlist = getChildUUIDs();
+		final Set<UUID> idlist = getChildUUIDs();
 		result.addAll(idlist);
 
-		for (UUID id : idlist) {
-			IAnalysisDataset d = getChildDataset(id);
+		for (final UUID id : idlist) {
+			final IAnalysisDataset d = getChildDataset(id);
 
 			result.addAll(d.getAllChildUUIDs());
 		}
@@ -1212,17 +1215,15 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	public IAnalysisDataset getChildDataset(@NonNull UUID id) {
 		if (this.hasDirectChild(id)) {
 
-			for (IAnalysisDataset c : childDatasets) {
-				if (c.getId().equals(id)) {
+			for (final IAnalysisDataset c : childDatasets) {
+				if (c.getId().equals(id))
 					return c;
-				}
 			}
 
 		} else {
-			for (IAnalysisDataset child : this.getAllChildDatasets()) {
-				if (child.getId().equals(id)) {
+			for (final IAnalysisDataset child : this.getAllChildDatasets()) {
+				if (child.getId().equals(id))
 					return child;
-				}
 			}
 		}
 		return null;
@@ -1245,10 +1246,10 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public List<IAnalysisDataset> getAllChildDatasets() {
-		List<IAnalysisDataset> result = new ArrayList<>();
+		final List<IAnalysisDataset> result = new ArrayList<>();
 		if (!childDatasets.isEmpty()) {
 
-			for (IAnalysisDataset d : childDatasets) {
+			for (final IAnalysisDataset d : childDatasets) {
 				result.add(d);
 				result.addAll(d.getAllChildDatasets());
 			}
@@ -1279,11 +1280,11 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	public void refreshClusterGroups() {
 		if (this.hasClusters()) {
 			// Find the groups that need removing
-			List<IClusterGroup> groupsToDelete = new ArrayList<>();
-			for (IClusterGroup g : this.getClusterGroups()) {
+			final List<IClusterGroup> groupsToDelete = new ArrayList<>();
+			for (final IClusterGroup g : this.getClusterGroups()) {
 				boolean clusterRemains = false;
 
-				for (UUID childID : g.getUUIDs()) {
+				for (final UUID childID : g.getUUIDs()) {
 					if (this.hasDirectChild(childID)) {
 						clusterRemains = true;
 					}
@@ -1294,7 +1295,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			}
 
 			// Remove the groups
-			for (IClusterGroup g : groupsToDelete) {
+			for (final IClusterGroup g : groupsToDelete) {
 				this.deleteClusterGroup(g);
 			}
 
@@ -1309,13 +1310,13 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public void deleteChild(@NonNull UUID id) {
-		Iterator<IAnalysisDataset> it = childDatasets.iterator();
+		final Iterator<IAnalysisDataset> it = childDatasets.iterator();
 
 		while (it.hasNext()) {
-			IAnalysisDataset child = it.next();
+			final IAnalysisDataset child = it.next();
 
 			if (child.getId().equals(id)) {
-				for (IClusterGroup g : clusterGroups) {
+				for (final IClusterGroup g : clusterGroups) {
 					if (g.hasDataset(id)) {
 						g.removeDataset(id);
 					}
@@ -1330,17 +1331,19 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	public void deleteClusterGroup(@NonNull final IClusterGroup group) {
 
 		if (hasClusterGroup(group)) {
-			UUID[] groupIds = group.getUUIDs().toArray(new UUID[0]);
+			final UUID[] groupIds = group.getUUIDs().toArray(new UUID[0]);
 
-			for (UUID id : groupIds)
+			for (final UUID id : groupIds) {
 				deleteChild(id);
+			}
 
 			// Remove saved values associated with the cluster group
 			// e.g. tSNE, PCA
-			for (Nucleus n : getCollection().getNuclei()) {
-				for (Measurement s : n.getMeasurements()) {
-					if (s.toString().endsWith(group.getId().toString()))
+			for (final Nucleus n : getCollection().getNuclei()) {
+				for (final Measurement s : n.getMeasurements()) {
+					if (s.toString().endsWith(group.getId().toString())) {
 						n.clearMeasurement(s);
+					}
 				}
 			}
 			this.clusterGroups.remove(group);
@@ -1351,12 +1354,13 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	public void deleteClusterGroups() {
 		LOGGER.fine("Deleting all cluster groups in " + getName());
 		// Use arrays to avoid concurrent modifications to cluster groups
-		Object[] ids = clusterGroups.parallelStream().map(IClusterGroup::getId).toArray();
-		for (Object id : ids) {
-			Optional<IClusterGroup> optg = clusterGroups.stream()
+		final Object[] ids = clusterGroups.parallelStream().map(IClusterGroup::getId).toArray();
+		for (final Object id : ids) {
+			final Optional<IClusterGroup> optg = clusterGroups.stream()
 					.filter(group -> group.getId().equals(id)).findFirst();
-			if (optg.isPresent())
+			if (optg.isPresent()) {
 				deleteClusterGroup(optg.get());
+			}
 		}
 	}
 
@@ -1368,10 +1372,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	@Override
 	public boolean hasDirectChild(@NonNull UUID id) {
 
-		for (IAnalysisDataset child : childDatasets) {
-			if (child.getId().equals(id)) {
+		for (final IAnalysisDataset child : childDatasets) {
+			if (child.getId().equals(id))
 				return true;
-			}
 		}
 		return false;
 	}
@@ -1402,18 +1405,14 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	 */
 	public class DefaultProfileCollection implements IProfileCollection {
 
-		private static final String XML_VALUE_ATTRIBUTE = "value";
-
-		private static final String XML_INDEX_ATTRIBUTE = "index";
-
-		private static final String XML_NAME_ATTRIBUTE = "name";
-
-		private static final String XML_LANDMARK = "Landmark";
-
-		private static final String XML_ORIENT = "Orient";
+//		private static final String XML_INDEX_ATTRIBUTE = "index";
+//
+//		private static final String XML_NAME_ATTRIBUTE = "name";
+//
+//		private static final String XML_LANDMARK = "Landmark";
 
 		/** The indexes of landmarks in the profiles and border list */
-		private Map<Landmark, Integer> landmarks = new HashMap<>();
+		private final Map<Landmark, Integer> landmarks = new HashMap<>();
 
 		/** segments in the median profile with RP at zero */
 		private List<IProfileSegment> segments = new ArrayList<>();
@@ -1426,7 +1425,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		 * default.
 		 */
 		public DefaultProfileCollection() {
-			Landmark lm = parentDataset.getCollection().getRuleSetCollection()
+			final Landmark lm = parentDataset.getCollection().getRuleSetCollection()
 					.getLandmark(OrientationMark.REFERENCE).get();
 			landmarks.put(lm, ZERO_INDEX);
 		}
@@ -1439,22 +1438,12 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		 */
 		public DefaultProfileCollection(Element e) {
 
-			for (Element el : e.getChildren(XML_LANDMARK)) {
-				landmarks.put(new DefaultLandmark(el.getAttributeValue(XML_NAME_ATTRIBUTE)),
-						Integer.parseInt(el.getAttributeValue(XML_INDEX_ATTRIBUTE)));
+			for (final Element el : e.getChildren(XMLNames.XML_LANDMARK)) {
+				landmarks.put(new DefaultLandmark(el.getAttributeValue(XMLNames.XML_NAME)),
+						Integer.parseInt(el.getAttributeValue(XMLNames.XML_INDEX)));
 			}
 
-			for (Element el : e.getChildren(XML_ORIENT)) {
-				OrientationMark name = OrientationMark
-						.valueOf(el.getAttributeValue(XML_NAME_ATTRIBUTE));
-				Landmark l = landmarks.keySet().stream()
-						.filter(lm -> lm.getName()
-								.equals(el.getAttributeValue(XML_VALUE_ATTRIBUTE)))
-						.findFirst()
-						.get();
-			}
-
-			for (Element el : e.getChildren("Segment")) {
+			for (final Element el : e.getChildren(XMLNames.XML_SEGMENT)) {
 				segments.add(new DefaultProfileSegment(el));
 			}
 
@@ -1467,11 +1456,13 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		 * @throws SegmentUpdateException
 		 */
 		private DefaultProfileCollection(DefaultProfileCollection p) throws SegmentUpdateException {
-			for (Landmark l : p.landmarks.keySet())
+			for (final Landmark l : p.landmarks.keySet()) {
 				landmarks.put(l, p.landmarks.get(l));
+			}
 
-			for (IProfileSegment s : p.segments)
+			for (final IProfileSegment s : p.segments) {
 				segments.add(s.duplicate());
+			}
 
 			cache = p.cache.duplicate();
 		}
@@ -1500,7 +1491,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 		@Override
 		public int getLandmarkIndex(@NonNull OrientationMark om) throws MissingLandmarkException {
-			Landmark lm = getLandmark(om);
+			final Landmark lm = getLandmark(om);
 			return getLandmarkIndex(lm);
 		}
 
@@ -1513,20 +1504,16 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 		@Override
 		public List<Landmark> getLandmarks() {
-			List<Landmark> result = new ArrayList<>();
-			for (Landmark s : landmarks.keySet()) {
-				result.add(s);
-			}
+			final List<Landmark> result = new ArrayList<>();
+			result.addAll(landmarks.keySet());
 			return result;
 		}
 
 		@Override
 		public List<OrientationMark> getOrientationMarks() {
-			List<OrientationMark> result = new ArrayList<>();
-			for (OrientationMark s : parentDataset.getCollection().getRuleSetCollection()
-					.getOrientionMarks()) {
-				result.add(s);
-			}
+			final List<OrientationMark> result = new ArrayList<>();
+			result.addAll(parentDataset.getCollection().getRuleSetCollection()
+					.getOrientionMarks());
 			return result;
 		}
 
@@ -1543,7 +1530,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 				throw new MissingLandmarkException(
 						"Orientation point is not present: " + om.toString());
 
-			Landmark lm = getLandmark(om);
+			final Landmark lm = getLandmark(om);
 
 			return getProfile(type, lm, quartile);
 		}
@@ -1554,11 +1541,11 @@ public class VirtualDataset extends AbstractAnalysisDataset
 				throws MissingDataException, SegmentUpdateException {
 
 			if (!cache.hasProfile(type, quartile, lm)) {
-				IProfileAggregate agg = createProfileAggregate(type,
+				final IProfileAggregate agg = createProfileAggregate(type,
 						VirtualDataset.this.getMedianArrayLength());
 
 				IProfile p = agg.getQuartile(quartile);
-				int offset = landmarks.get(lm);
+				final int offset = landmarks.get(lm);
 				p = p.startFrom(offset);
 				cache.addProfile(type, quartile, lm, p);
 			}
@@ -1576,7 +1563,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 				throw new IllegalArgumentException("Quartile must be between 0-100");
 
 			// get the profile array
-			IProfile p = getProfile(type, tag, quartile);
+			final IProfile p = getProfile(type, tag, quartile);
 			if (segments.isEmpty())
 				throw new MissingDataException("No segments assigned to profile collection");
 
@@ -1587,8 +1574,8 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		public void calculateProfiles()
 				throws MissingDataException, SegmentUpdateException {
 			cache.clear();
-			for (ProfileType t : ProfileType.values()) {
-				for (Landmark lm : landmarks.keySet()) {
+			for (final ProfileType t : ProfileType.values()) {
+				for (final Landmark lm : landmarks.keySet()) {
 					getProfile(t, lm, Stats.MEDIAN);
 					getProfile(t, lm, Stats.LOWER_QUARTILE);
 					getProfile(t, lm, Stats.UPPER_QUARTILE);
@@ -1598,10 +1585,10 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 		@Override
 		public synchronized List<UUID> getSegmentIDs() {
-			List<UUID> result = new ArrayList<>();
+			final List<UUID> result = new ArrayList<>();
 			if (segments == null)
 				return result;
-			for (IProfileSegment seg : this.segments) {
+			for (final IProfileSegment seg : this.segments) {
 				result.add(seg.getID());
 			}
 			return result;
@@ -1620,11 +1607,11 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			// this must be negative offset for segments
 			// since we are moving the pointIndex back to the beginning
 			// of the array
-			int offset = -getLandmarkIndex(tag);
+			final int offset = -getLandmarkIndex(tag);
 
-			List<IProfileSegment> result = new ArrayList<>();
+			final List<IProfileSegment> result = new ArrayList<>();
 
-			for (IProfileSegment s : segments) {
+			for (final IProfileSegment s : segments) {
 				result.add(s.duplicate().offset(offset));
 			}
 
@@ -1635,10 +1622,10 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		@Override
 		public IProfileSegment getSegmentContaining(@NonNull OrientationMark tag)
 				throws MissingLandmarkException, SegmentUpdateException {
-			List<IProfileSegment> segs = this.getSegments(tag);
+			final List<IProfileSegment> segs = this.getSegments(tag);
 
-			IProfileSegment result = null;
-			for (IProfileSegment seg : segs) {
+			final IProfileSegment result = null;
+			for (final IProfileSegment seg : segs) {
 				if (seg.contains(ZERO_INDEX))
 					return seg;
 			}
@@ -1649,7 +1636,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		@Override
 		public void setLandmark(@NonNull Landmark lm, int newIndex) {
 			// Cannot move the RP from zero
-			Landmark rp = getLandmark(OrientationMark.REFERENCE);
+			final Landmark rp = getLandmark(OrientationMark.REFERENCE);
 
 			if (rp.equals(lm))
 				return;
@@ -1663,7 +1650,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			if (n.isEmpty())
 				throw new IllegalArgumentException("String or segment list is empty");
 
-			int length = VirtualDataset.this.getMedianArrayLength();
+			final int length = VirtualDataset.this.getMedianArrayLength();
 			if (length != n.get(0).getProfileLength())
 				throw new IllegalArgumentException(
 						String.format(
@@ -1675,14 +1662,14 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			 * means the indexes must be moved forwards appropriately. Hence, add a positive
 			 * offset.
 			 */
-			int offset = getLandmarkIndex(OrientationMark.REFERENCE);
+			final int offset = getLandmarkIndex(OrientationMark.REFERENCE);
 
-			for (IProfileSegment s : n) {
+			for (final IProfileSegment s : n) {
 				s.offset(offset);
 			}
 
 			segments = new ArrayList<>();
-			for (IProfileSegment s : n) {
+			for (final IProfileSegment s : n) {
 				segments.add(s.duplicate());
 			}
 		}
@@ -1709,11 +1696,12 @@ public class VirtualDataset extends AbstractAnalysisDataset
 						IProfileCollection.DEFAULT_SEGMENT_ID));
 			}
 
-			IProfileAggregate agg = new DefaultProfileAggregate(length,
+			final IProfileAggregate agg = new DefaultProfileAggregate(length,
 					VirtualDataset.this.size());
 
-			for (Nucleus n : VirtualDataset.this.getNuclei())
+			for (final Nucleus n : VirtualDataset.this.getNuclei()) {
 				agg.addValues(n.getProfile(type, OrientationMark.REFERENCE));
+			}
 			return agg;
 
 		}
@@ -1730,27 +1718,27 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		private IProfileAggregate createProfileAggregateOfDifferentLength(@NonNull ProfileType type,
 				int length)
 				throws MissingDataException, SegmentUpdateException {
-			Landmark lm = getLandmark(OrientationMark.REFERENCE);
+			final Landmark lm = getLandmark(OrientationMark.REFERENCE);
 			landmarks.put(lm, ZERO_INDEX);
 
 			// We have no profile to use to interpolate segments.
 			// Create an arbitrary profile with the original length.
 
-			List<IProfileSegment> originalSegList = new ArrayList<>();
-			for (IProfileSegment s : segments)
-				originalSegList.add(s);
-			IProfile template = new DefaultProfile(0, segments.get(0).getProfileLength());
-			ISegmentedProfile segTemplate = new DefaultSegmentedProfile(template, originalSegList);
+			final List<IProfileSegment> originalSegList = new ArrayList<>();
+			originalSegList.addAll(segments);
+			final IProfile template = new DefaultProfile(0, segments.get(0).getProfileLength());
+			final ISegmentedProfile segTemplate = new DefaultSegmentedProfile(template, originalSegList);
 
 			// Now use the interpolation method to adjust the segment lengths
-			List<IProfileSegment> interpolatedSegments = segTemplate.interpolate(length)
+			final List<IProfileSegment> interpolatedSegments = segTemplate.interpolate(length)
 					.getSegments();
 
-			IProfileAggregate agg = new DefaultProfileAggregate(length,
+			final IProfileAggregate agg = new DefaultProfileAggregate(length,
 					VirtualDataset.this.size());
 
-			for (Nucleus n : VirtualDataset.this.getNuclei())
+			for (final Nucleus n : VirtualDataset.this.getNuclei()) {
 				agg.addValues(n.getProfile(type, OrientationMark.REFERENCE));
+			}
 
 			setSegments(interpolatedSegments);
 
@@ -1759,21 +1747,21 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 		@Override
 		public String toString() {
-			String newLine = System.getProperty("line.separator");
-			StringBuilder builder = new StringBuilder();
+			final String newLine = System.getProperty("line.separator");
+			final StringBuilder builder = new StringBuilder();
 			builder.append("Point types:" + newLine);
-			for (Entry<Landmark, Integer> e : landmarks.entrySet()) {
+			for (final Entry<Landmark, Integer> e : landmarks.entrySet()) {
 				builder.append(e.getKey() + ": " + e.getValue() + newLine);
 			}
 
 			// Show segments from RP
 			try {
 				builder.append("Segments from RP:" + newLine);
-				for (IProfileSegment s : this.getSegments(OrientationMark.REFERENCE)) {
+				for (final IProfileSegment s : this.getSegments(OrientationMark.REFERENCE)) {
 					builder.append(s.toString() + newLine);
 				}
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				builder.append("Exception fetching segments: " + e.getMessage());
 			}
 
@@ -1785,8 +1773,8 @@ public class VirtualDataset extends AbstractAnalysisDataset
 		public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
 				throws MissingDataException, SegmentUpdateException {
 
-			IProfile q25 = getProfile(type, om, Stats.LOWER_QUARTILE);
-			IProfile q75 = getProfile(type, om, Stats.UPPER_QUARTILE);
+			final IProfile q25 = getProfile(type, om, Stats.LOWER_QUARTILE);
+			final IProfile q75 = getProfile(type, om, Stats.UPPER_QUARTILE);
 
 			if (q25 == null)
 				throw new MissingDataException("Could not create q25 profile; was null");
@@ -1810,23 +1798,23 @@ public class VirtualDataset extends AbstractAnalysisDataset
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			DefaultProfileCollection other = (DefaultProfileCollection) obj;
+			final DefaultProfileCollection other = (DefaultProfileCollection) obj;
 			return Objects.equals(landmarks, other.landmarks)
 					&& Objects.equals(segments, other.segments);
 		}
 
 		@Override
 		@NonNull public Element toXmlElement() {
-			Element e = new Element("ProfileCollection");
+			final Element e = new Element(XMLNames.XML_PROFILE_COLLECTION);
 
-			for (IProfileSegment s : segments) {
+			for (final IProfileSegment s : segments) {
 				e.addContent(s.toXmlElement());
 			}
 
-			for (Entry<Landmark, Integer> entry : landmarks.entrySet()) {
-				e.addContent(new Element(XML_LANDMARK)
-						.setAttribute(XML_NAME_ATTRIBUTE, entry.getKey().toString())
-						.setAttribute(XML_INDEX_ATTRIBUTE, String.valueOf(entry.getValue())));
+			for (final Entry<Landmark, Integer> entry : landmarks.entrySet()) {
+				e.addContent(
+						new Element(XMLNames.XML_LANDMARK).setAttribute(XMLNames.XML_NAME, entry.getKey().toString())
+								.setAttribute(XMLNames.XML_INDEX, String.valueOf(entry.getValue())));
 			}
 			return e;
 		}
@@ -1885,7 +1873,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 						return false;
 					if (getClass() != obj.getClass())
 						return false;
-					ProfileKey other = (ProfileKey) obj;
+					final ProfileKey other = (ProfileKey) obj;
 					if (!getOuterType().equals(other.getOuterType()))
 						return false;
 					if (Double.doubleToLongBits(quartile) != Double
@@ -1907,17 +1895,18 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 			}
 
-			private Map<ProfileKey, IProfile> map = new HashMap<>();
+			private final Map<ProfileKey, IProfile> map = new HashMap<>();
 
 			public ProfileCache() { // no default data
 			}
 
 			public ProfileCache duplicate() throws SegmentUpdateException {
-				ProfileCache result = new ProfileCache();
-				for (ProfileKey k : map.keySet()) {
-					IProfile p = map.get(k);
-					if (p != null)
+				final ProfileCache result = new ProfileCache();
+				for (final ProfileKey k : map.keySet()) {
+					final IProfile p = map.get(k);
+					if (p != null) {
 						result.map.put(k, p.duplicate());
+					}
 				}
 				return result;
 			}
@@ -1933,19 +1922,19 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			public void addProfile(final ProfileType type, final double quartile,
 					final Landmark tag,
 					IProfile profile) {
-				ProfileKey key = new ProfileKey(type, quartile, tag);
+				final ProfileKey key = new ProfileKey(type, quartile, tag);
 				map.put(key, profile);
 			}
 
 			public boolean hasProfile(final ProfileType type, final double quartile,
 					final Landmark tag) {
-				ProfileKey key = new ProfileKey(type, quartile, tag);
+				final ProfileKey key = new ProfileKey(type, quartile, tag);
 				return map.containsKey(key);
 			}
 
 			public IProfile getProfile(final ProfileType type, final double quartile,
 					final Landmark tag) {
-				ProfileKey key = new ProfileKey(type, quartile, tag);
+				final ProfileKey key = new ProfileKey(type, quartile, tag);
 				return map.get(key);
 			}
 
@@ -1958,9 +1947,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 			public void remove(final Landmark t) {
 
-				Iterator<ProfileKey> it = map.keySet().iterator();
+				final Iterator<ProfileKey> it = map.keySet().iterator();
 				while (it.hasNext()) {
-					ProfileKey k = it.next();
+					final ProfileKey k = it.next();
 					if (k.has(t)) {
 						it.remove();
 					}
@@ -1971,7 +1960,7 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 		@Override
 		public double getProportionOfIndex(int index) {
-			int length = VirtualDataset.this.getMedianArrayLength();
+			final int length = VirtualDataset.this.getMedianArrayLength();
 			if (index < 0 || index >= length)
 				throw new IllegalArgumentException("Index out of bounds: " + index);
 			if (index == 0)
@@ -2000,12 +1989,12 @@ public class VirtualDataset extends AbstractAnalysisDataset
 			if (proportion == 0)
 				return 0;
 
-			int length = VirtualDataset.this.getMedianArrayLength();
+			final int length = VirtualDataset.this.getMedianArrayLength();
 			if (proportion == 1)
 				return length - 1;
 
-			double desiredDistanceFromStart = length * proportion;
-			int target = (int) desiredDistanceFromStart;
+			final double desiredDistanceFromStart = length * proportion;
+			final int target = (int) desiredDistanceFromStart;
 			return target;
 		}
 	}

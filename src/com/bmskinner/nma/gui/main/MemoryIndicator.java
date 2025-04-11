@@ -23,7 +23,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.text.DecimalFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;

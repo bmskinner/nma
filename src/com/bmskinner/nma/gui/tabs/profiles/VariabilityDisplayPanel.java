@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -98,7 +99,7 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 	/**
 	 * Update the profile panel with data from the given options
 	 */
-	private void updateProfiles(ChartOptions options) {
+	private void updateProfiles(@NonNull ChartOptions options) {
 		try {
 			setChart(options);
 		} catch (Exception e) {
@@ -147,7 +148,7 @@ public class VariabilityDisplayPanel extends ChartDetailPanel
 	}
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) {
+	protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
 		return new ProfileChartFactory(options).createVariabilityChart();
 	}
 

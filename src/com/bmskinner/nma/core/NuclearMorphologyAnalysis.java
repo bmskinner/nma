@@ -41,7 +41,6 @@ import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.io.XMLReader.XMLReadingException;
 import com.bmskinner.nma.io.XMLWriter;
-
 import com.bmskinner.nma.pipelines.BasicAnalysisPipeline;
 import com.bmskinner.nma.pipelines.ExportDataPipeline;
 import com.bmskinner.nma.pipelines.MergeFilesPipeline;

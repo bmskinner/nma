@@ -131,7 +131,7 @@ public class DefaultCellCollection implements ICellCollection {
 	private final Set<ISignalGroup> signalGroups = new HashSet<>(0);
 
 	/** Rules used to identify border points */
-	private RuleSetCollection ruleSets;
+	private final RuleSetCollection ruleSets;
 
 	/**
 	 * Cache statistics from the cells in the collection. This should be updated if
@@ -206,37 +206,41 @@ public class DefaultCellCollection implements ICellCollection {
 		name = e.getAttributeValue(XMLNames.XML_NAME);
 
 		// Determine how many items in the progress bar
-		List<Element> cellElements = e.getChildren(XMLNames.XML_CELL);
-		List<Element> signalElements = e.getChildren(XMLNames.XML_SIGNAL_GROUP);
+		final List<Element> cellElements = e.getChildren(XMLNames.XML_CELL);
+		final List<Element> signalElements = e.getChildren(XMLNames.XML_SIGNAL_GROUP);
 
 		// Alert listeners how many elements need to be unpacked
-		long totalElements = cellElements.size() + signalElements.size();
+		final long totalElements = cellElements.size() + signalElements.size();
 
-		if (l != null)
+		if (l != null) {
 			l.progressEventReceived(
 					new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalElements));
+		}
 
 		profileCollection = new DefaultProfileCollection(
 				e.getChild(XMLNames.XML_PROFILE_COLLECTION));
 
-		if (e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS) != null)
+		if (e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS) != null) {
 			consensusNucleus = new DefaultConsensusNucleus(
 					e.getChild(XMLNames.XML_CONSENSUS_NUCLEUS));
+		}
 
-		for (Element el : cellElements) {
+		for (final Element el : cellElements) {
 			cells.add(new DefaultCell(el));
 
 			// Fire progress update if available
-			if (l != null)
+			if (l != null) {
 				l.progressEventReceived(new ProgressEvent(this));
+			}
 		}
 
-		for (Element el : signalElements) {
+		for (final Element el : signalElements) {
 			signalGroups.add(new DefaultSignalGroup(el));
 
 			// Fire progress update if available
-			if (l != null)
+			if (l != null) {
 				l.progressEventReceived(new ProgressEvent(this));
+			}
 		}
 		ruleSets = new RuleSetCollection(e.getChild(XMLNames.XML_RULESET_COLLECTION));
 		fireComponentUpdated();
@@ -244,19 +248,22 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	@NonNull public Element toXmlElement() {
-		Element e = new Element(XMLNames.XML_CELL_COLLECTION)
+		final Element e = new Element(XMLNames.XML_CELL_COLLECTION)
 				.setAttribute(XMLNames.XML_ID, uuid.toString())
 				.setAttribute(XMLNames.XML_NAME, name);
 		e.addContent(profileCollection.toXmlElement());
 
-		if (consensusNucleus != null)
+		if (consensusNucleus != null) {
 			e.addContent(consensusNucleus.toXmlElement());
+		}
 
-		for (ICell c : cells)
+		for (final ICell c : cells) {
 			e.addContent(c.toXmlElement());
+		}
 
-		for (ISignalGroup c : signalGroups)
+		for (final ISignalGroup c : signalGroups) {
 			e.addContent(c.toXmlElement());
+		}
 
 		e.addContent(ruleSets.toXmlElement());
 
@@ -265,21 +272,23 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public ICellCollection duplicate() throws ComponentCreationException {
-		DefaultCellCollection result = new DefaultCellCollection(ruleSets, name, uuid);
+		final DefaultCellCollection result = new DefaultCellCollection(ruleSets, name, uuid);
 
-		for (ICell c : this)
+		for (final ICell c : this) {
 			result.add(c.duplicate());
+		}
 
 		result.consensusNucleus = consensusNucleus == null ? null : consensusNucleus.duplicate();
 		try {
 			result.profileCollection = profileCollection.duplicate();
-		} catch (SegmentUpdateException e) {
+		} catch (final SegmentUpdateException e) {
 			throw new ComponentCreationException("Unable to duplicate profile collection", e);
 		}
 
 		// copy the signals
-		for (ISignalGroup s : getSignalGroups())
+		for (final ISignalGroup s : getSignalGroups()) {
 			result.addSignalGroup(s.duplicate());
+		}
 		return result;
 	}
 
@@ -310,7 +319,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public boolean add(ICell e) {
-		boolean b = cells.add(e);
+		final boolean b = cells.add(e);
 		if (b) {
 			statsCache.clear();
 			fireComponentUpdated();
@@ -320,7 +329,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public boolean addAll(Collection<? extends ICell> c) {
-		boolean b = cells.addAll(c);
+		final boolean b = cells.addAll(c);
 		if (b) {
 			statsCache.clear();
 			fireComponentUpdated();
@@ -357,7 +366,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public boolean remove(Object o) {
-		boolean b = cells.remove(o);
+		final boolean b = cells.remove(o);
 		if (b) {
 			statsCache.clear();
 			fireComponentUpdated();
@@ -367,7 +376,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		boolean b = cells.removeAll(c);
+		final boolean b = cells.removeAll(c);
 		if (b) {
 			statsCache.clear();
 			fireComponentUpdated();
@@ -377,7 +386,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		boolean b = cells.retainAll(c);
+		final boolean b = cells.retainAll(c);
 		if (b) {
 			statsCache.clear();
 			fireComponentUpdated();
@@ -412,17 +421,16 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public boolean hasLockedCells() {
-		for (Nucleus n : this.getNuclei()) {
-			if (n.isLocked()) {
+		for (final Nucleus n : this.getNuclei()) {
+			if (n.isLocked())
 				return true;
-			}
 		}
 		return false;
 	}
 
 	@Override
 	public void setCellsLocked(boolean b) {
-		for (Nucleus n : this.getNuclei()) {
+		for (final Nucleus n : this.getNuclei()) {
 			n.setLocked(b);
 		}
 		fireComponentUpdated();
@@ -435,8 +443,8 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public Optional<Nucleus> getNucleus(@NonNull UUID id) {
-		for (ICell c : this) {
-			for (Nucleus n : c.getNuclei()) {
+		for (final ICell c : this) {
+			for (final Nucleus n : c.getNuclei()) {
 				if (n.getId().equals(id))
 					return Optional.ofNullable(n);
 			}
@@ -469,15 +477,17 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public void offsetConsensus(double xOffset, double yOffset) {
-		if (consensusNucleus != null)
+		if (consensusNucleus != null) {
 			consensusNucleus.setOffset(xOffset, yOffset);
+		}
 		fireComponentUpdated();
 	}
 
 	@Override
 	public void rotateConsensus(double degrees) {
-		if (consensusNucleus != null)
+		if (consensusNucleus != null) {
 			consensusNucleus.addRotation(degrees);
+		}
 		fireComponentUpdated();
 	}
 
@@ -566,7 +576,7 @@ public class DefaultCellCollection implements ICellCollection {
 	public int getMedianArrayLength() {
 		if (size() == 0)
 			return 0;
-		int[] p = this.getArrayLengths();
+		final int[] p = this.getArrayLengths();
 		return Stats.quartile(p, Stats.MEDIAN);
 	}
 
@@ -587,15 +597,15 @@ public class DefaultCellCollection implements ICellCollection {
 	 */
 	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(OrientationMark om)
 			throws SegmentUpdateException, MissingDataException {
-		IProfile medianProfile = this.getProfileCollection()
+		final IProfile medianProfile = this.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, om, Stats.MEDIAN)
 				.interpolate(FIXED_PROFILE_LENGTH);
 
 		return getNuclei().stream().mapToDouble(n -> {
 			try {
 
-				IProfile angleProfile = n.getProfile(ProfileType.ANGLE, om);
-				double diff = angleProfile.absoluteSquareDifference(medianProfile,
+				final IProfile angleProfile = n.getProfile(ProfileType.ANGLE, om);
+				final double diff = angleProfile.absoluteSquareDifference(medianProfile,
 						FIXED_PROFILE_LENGTH);
 				return Math.sqrt(diff / FIXED_PROFILE_LENGTH); // differences in degrees, rather
 																// than square degrees
@@ -622,13 +632,13 @@ public class DefaultCellCollection implements ICellCollection {
 	public double getNormalisedDifferenceToMedian(@NonNull OrientationMark om, Taggable t)
 			throws SegmentUpdateException, MissingDataException {
 
-		IProfile medianProfile = profileCollection
+		final IProfile medianProfile = profileCollection
 				.getProfile(ProfileType.ANGLE, om, Stats.MEDIAN)
 				.interpolate(FIXED_PROFILE_LENGTH);
 
-		IProfile angleProfile = t.getProfile(ProfileType.ANGLE, om);
+		final IProfile angleProfile = t.getProfile(ProfileType.ANGLE, om);
 
-		double diff = angleProfile.absoluteSquareDifference(medianProfile,
+		final double diff = angleProfile.absoluteSquareDifference(medianProfile,
 				FIXED_PROFILE_LENGTH);
 		return Math.sqrt(diff / FIXED_PROFILE_LENGTH); // use the differences in degrees divided
 														// by the pixel
@@ -648,22 +658,22 @@ public class DefaultCellCollection implements ICellCollection {
 	public Nucleus getNucleusMostSimilarToMedian(OrientationMark pointType)
 			throws SegmentUpdateException, MissingDataException {
 
-		List<Nucleus> list = this.getNuclei();
+		final List<Nucleus> list = this.getNuclei();
 
 		// No need to check profiles if there is only one nucleus
 		if (this.size() == 1)
 			return list.stream().findFirst().orElseThrow(MissingDataException::new);
 
-		IProfile medianProfile = profileCollection
+		final IProfile medianProfile = profileCollection
 				.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN)
 				.interpolate(FIXED_PROFILE_LENGTH);
 
 		Nucleus result = null;
 
 		double difference = Double.MAX_VALUE;
-		for (Nucleus p : list) {
-			IProfile profile = p.getProfile(ProfileType.ANGLE, pointType);
-			double nDifference = profile.absoluteSquareDifference(medianProfile,
+		for (final Nucleus p : list) {
+			final IProfile profile = p.getProfile(ProfileType.ANGLE, pointType);
+			final double nDifference = profile.absoluteSquareDifference(medianProfile,
 					FIXED_PROFILE_LENGTH);
 			if (nDifference < difference) {
 				difference = nDifference;
@@ -744,7 +754,7 @@ public class DefaultCellCollection implements ICellCollection {
 			throws MissingDataException, SegmentUpdateException {
 
 		if (!statsCache.has(stat, component, scale, id)) {
-			double[] values = getRawValues(stat, component, scale, id);
+			final double[] values = getRawValues(stat, component, scale, id);
 			statsCache.set(stat, component, scale, id, values);
 
 		}
@@ -773,7 +783,7 @@ public class DefaultCellCollection implements ICellCollection {
 			throws MissingDataException, SegmentUpdateException {
 
 		if (!statsCache.has(stat, component, scale, id)) {
-			double[] values = getRawValues(stat, component, scale, id);
+			final double[] values = getRawValues(stat, component, scale, id);
 			statsCache.set(stat, component, scale, id, values);
 
 		}
@@ -802,7 +812,7 @@ public class DefaultCellCollection implements ICellCollection {
 			SegmentUpdateException {
 
 		if (!statsCache.has(stat, component, scale, id)) {
-			double[] values = getRawValues(stat, component, scale, id);
+			final double[] values = getRawValues(stat, component, scale, id);
 			statsCache.set(stat, component, scale, id, values);
 		}
 
@@ -822,9 +832,8 @@ public class DefaultCellCollection implements ICellCollection {
 	private synchronized double[] getCellStatistics(@NonNull Measurement stat,
 			@NonNull MeasurementScale scale) throws MissingMeasurementException {
 
-		if (!cells.parallelStream().allMatch(c -> c.hasMeasurement(stat))) {
+		if (!cells.parallelStream().allMatch(c -> c.hasMeasurement(stat)))
 			throw new MissingMeasurementException("Missing '%s' in at least one cell");
-		}
 
 		return cells.parallelStream()
 				.mapToDouble(c -> {
@@ -860,11 +869,7 @@ public class DefaultCellCollection implements ICellCollection {
 			result = this.getNormalisedDifferencesToMedianFromPoint(OrientationMark.REFERENCE);
 		} else {
 			result = this.getNuclei().parallelStream()
-					.mapToDouble(n -> {
-						return StreamUtils.uncheckCall(() -> {
-							return n.getMeasurement(stat, scale);
-						});
-					})
+					.mapToDouble(n -> StreamUtils.uncheckCall(() -> n.getMeasurement(stat, scale)))
 					.sorted()
 					.toArray();
 		}
@@ -890,9 +895,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		double[] result = null;
 
-		result = getNuclei().parallelStream().mapToDouble(n -> {
-			return StreamUtils.uncheckCall(callSegMeasurement(stat, scale, id, n));
-		}).sorted().toArray();
+		result = getNuclei().parallelStream().mapToDouble(n -> StreamUtils.uncheckCall(callSegMeasurement(stat, scale, id, n))).sorted().toArray();
 
 		return result;
 	}
@@ -906,8 +909,8 @@ public class DefaultCellCollection implements ICellCollection {
 			segment = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE).getSegment(id);
 			double perimeterLength = 0;
 			if (segment != null) {
-				int indexLength = segment.length();
-				double fractionOfPerimeter = (double) indexLength
+				final int indexLength = segment.length();
+				final double fractionOfPerimeter = (double) indexLength
 						/ (double) segment.getProfileLength();
 				perimeterLength = fractionOfPerimeter
 						* n.getMeasurement(Measurement.PERIMETER, scale);
@@ -923,12 +926,13 @@ public class DefaultCellCollection implements ICellCollection {
 			return;
 
 		cells.stream().flatMap(c -> c.getNuclei().stream()).forEach(n -> {
-			File oldFolder = n.getSourceFolder();
+			final File oldFolder = n.getSourceFolder();
 			n.setSourceFolder(newFolder);
 			// Update signals in the same file
 			n.getSignalCollection().getAllSignals().stream().forEach(s -> {
-				if (s.getSourceFolder().equals(oldFolder))
+				if (s.getSourceFolder().equals(oldFolder)) {
 					s.setSourceFolder(newFolder);
+				}
 			});
 
 		});
@@ -941,7 +945,7 @@ public class DefaultCellCollection implements ICellCollection {
 		if (nucleus == null)
 			return false;
 
-		for (Nucleus n : getNuclei()) {
+		for (final Nucleus n : getNuclei()) {
 			if (n.getId().equals(nucleus.getId()))
 				return true;
 		}
@@ -962,7 +966,7 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public Set<UUID> getSignalGroupIDs() {
 
-		Set<UUID> ids = signalGroups.stream().map(s -> s.getId()).collect(Collectors.toSet());
+		final Set<UUID> ids = signalGroups.stream().map(ISignalGroup::getId).collect(Collectors.toSet());
 		ids.remove(IShellResult.RANDOM_SIGNAL_ID);
 		return ids;
 	}
@@ -1039,7 +1043,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		if (vennCache.hasCount(d2))
 			return vennCache.getCount(d2);
-		int shared = countSharedNuclei(d2);
+		final int shared = countSharedNuclei(d2);
 		d2.setSharedCount(this, shared);
 		vennCache.addCount(d2, shared);
 
@@ -1068,7 +1072,7 @@ public class DefaultCellCollection implements ICellCollection {
 		if (!d2.getRuleSetCollection().equals(ruleSets))
 			return 0;
 
-		Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
+		final Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
 		toSearch.retainAll(getCellIDs());
 		return toSearch.size();
 	}
@@ -1076,9 +1080,9 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public String toString() {
 
-		String newLine = System.getProperty("line.separator");
+		final String newLine = System.getProperty("line.separator");
 
-		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
+		final StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
 				.append("Class: " + this.getClass().getSimpleName() + newLine)
 				.append("Nuclei: " + this.getNucleusCount() + newLine)
 				.append("Profile collections:" + newLine)
@@ -1087,9 +1091,9 @@ public class DefaultCellCollection implements ICellCollection {
 		b.append(this.ruleSets.toString() + newLine);
 
 		b.append("Signal groups:" + newLine);
-		for (ISignalGroup entry : signalGroups) {
-			UUID signalGroupID = entry.getId();
-			int count = this.getSignalManager().getSignalCount(signalGroupID);
+		for (final ISignalGroup entry : signalGroups) {
+			final UUID signalGroupID = entry.getId();
+			final int count = this.getSignalManager().getSignalCount(signalGroupID);
 			b.append(entry.toString() + " | " + count + " signals across all cells" + newLine);
 		}
 
@@ -1136,7 +1140,7 @@ public class DefaultCellCollection implements ICellCollection {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DefaultCellCollection other = (DefaultCellCollection) obj;
+		final DefaultCellCollection other = (DefaultCellCollection) obj;
 		if (!uuid.equals(other.uuid))
 			return false;
 
@@ -1161,7 +1165,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		if (signalGroups.size() != other.signalGroups.size())
 			return false;
-		for (ISignalGroup s : signalGroups) {
+		for (final ISignalGroup s : signalGroups) {
 			if (!other.signalGroups.contains(s))
 				return false;
 		}
@@ -1179,8 +1183,9 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public void fireComponentUpdated() {
 		isRecalcHashcode = true;
-		for(ComponentUpdateListener l : componentUpdateListeners)
+		for(final ComponentUpdateListener l : componentUpdateListeners) {
 			l.componentUpdated(new ComponentUpdateEvent(this));
+		}
 	}
 
 
@@ -1206,18 +1211,8 @@ public class DefaultCellCollection implements ICellCollection {
 	 */
 	public class DefaultProfileCollection implements IProfileCollection {
 
-//		private static final String XML_VALUE_ATTRIBUTE = "value";
-//
-//		private static final String XML_INDEX_ATTRIBUTE = "index";
-//
-//		private static final String XML_NAME_ATTRIBUTE = "name";
-//
-//		private static final String XML_LANDMARK = "Landmark";
-//
-//		private static final String XML_ORIENT = "Orient";
-
 		/** The indexes of landmarks in the profiles and border list */
-		private Map<Landmark, Integer> landmarks = new HashMap<>();
+		private final Map<Landmark, Integer> landmarks = new HashMap<>();
 
 		/** segments in the median profile with RP at zero */
 		private List<IProfileSegment> segments = new ArrayList<>();
@@ -1230,7 +1225,7 @@ public class DefaultCellCollection implements ICellCollection {
 		 * default.
 		 */
 		public DefaultProfileCollection() {
-			Landmark lm = ruleSets.getLandmark(OrientationMark.REFERENCE).get();
+			final Landmark lm = ruleSets.getLandmark(OrientationMark.REFERENCE).get();
 			landmarks.put(lm, ZERO_INDEX);
 		}
 
@@ -1242,22 +1237,12 @@ public class DefaultCellCollection implements ICellCollection {
 		 */
 		public DefaultProfileCollection(Element e) {
 
-			for (Element el : e.getChildren(XMLNames.XML_LANDMARK)) {
+			for (final Element el : e.getChildren(XMLNames.XML_LANDMARK)) {
 				landmarks.put(new DefaultLandmark(el.getAttributeValue(XMLNames.XML_NAME)),
 						Integer.parseInt(el.getAttributeValue(XMLNames.XML_INDEX)));
 			}
 
-			for (Element el : e.getChildren(XMLNames.XML_ORIENT)) {
-				OrientationMark name = OrientationMark
-						.valueOf(el.getAttributeValue(XMLNames.XML_NAME));
-				Landmark l = landmarks.keySet().stream()
-						.filter(lm -> lm.getName()
-								.equals(el.getAttributeValue(XMLNames.XML_VALUE)))
-						.findFirst()
-						.get();
-			}
-
-			for (Element el : e.getChildren(XMLNames.XML_SEGMENT)) {
+			for (final Element el : e.getChildren(XMLNames.XML_SEGMENT)) {
 				segments.add(new DefaultProfileSegment(el));
 			}
 
@@ -1270,11 +1255,13 @@ public class DefaultCellCollection implements ICellCollection {
 		 * @throws SegmentUpdateException
 		 */
 		private DefaultProfileCollection(DefaultProfileCollection p) throws SegmentUpdateException {
-			for (Landmark l : p.landmarks.keySet())
+			for (final Landmark l : p.landmarks.keySet()) {
 				landmarks.put(l, p.landmarks.get(l));
+			}
 
-			for (IProfileSegment s : p.segments)
+			for (final IProfileSegment s : p.segments) {
 				segments.add(s.duplicate());
+			}
 
 			cache = p.cache.duplicate();
 		}
@@ -1303,7 +1290,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		@Override
 		public int getLandmarkIndex(@NonNull OrientationMark om) throws MissingLandmarkException {
-			Landmark lm = getLandmark(om);
+			final Landmark lm = getLandmark(om);
 			return getLandmarkIndex(lm);
 		}
 
@@ -1316,19 +1303,15 @@ public class DefaultCellCollection implements ICellCollection {
 
 		@Override
 		public List<Landmark> getLandmarks() {
-			List<Landmark> result = new ArrayList<>();
-			for (Landmark s : landmarks.keySet()) {
-				result.add(s);
-			}
+			final List<Landmark> result = new ArrayList<>();
+			result.addAll(landmarks.keySet());
 			return result;
 		}
 
 		@Override
 		public List<OrientationMark> getOrientationMarks() {
-			List<OrientationMark> result = new ArrayList<>();
-			for (OrientationMark s : ruleSets.getOrientionMarks()) {
-				result.add(s);
-			}
+			final List<OrientationMark> result = new ArrayList<>();
+			result.addAll(ruleSets.getOrientionMarks());
 			return result;
 		}
 
@@ -1345,7 +1328,7 @@ public class DefaultCellCollection implements ICellCollection {
 				throw new MissingLandmarkException(
 						"Orientation point is not present: " + om.toString());
 
-			Landmark lm = getLandmark(om);
+			final Landmark lm = getLandmark(om);
 
 			return getProfile(type, lm, quartile);
 		}
@@ -1356,11 +1339,11 @@ public class DefaultCellCollection implements ICellCollection {
 				throws MissingDataException, SegmentUpdateException {
 
 			if (!cache.hasProfile(type, quartile, lm)) {
-				IProfileAggregate agg = createProfileAggregate(type,
+				final IProfileAggregate agg = createProfileAggregate(type,
 						DefaultCellCollection.this.getMedianArrayLength());
 
 				IProfile p = agg.getQuartile(quartile);
-				int offset = landmarks.get(lm);
+				final int offset = landmarks.get(lm);
 				p = p.startFrom(offset);
 				cache.addProfile(type, quartile, lm, p);
 			}
@@ -1378,7 +1361,7 @@ public class DefaultCellCollection implements ICellCollection {
 				throw new IllegalArgumentException("Quartile must be between 0-100");
 
 			// get the profile array
-			IProfile p = getProfile(type, tag, quartile);
+			final IProfile p = getProfile(type, tag, quartile);
 			if (segments.isEmpty())
 				throw new MissingDataException("No segments assigned to profile collection");
 
@@ -1389,8 +1372,8 @@ public class DefaultCellCollection implements ICellCollection {
 		public void calculateProfiles()
 				throws MissingDataException, SegmentUpdateException {
 			cache.clear();
-			for (ProfileType t : ProfileType.values()) {
-				for (Landmark lm : landmarks.keySet()) {
+			for (final ProfileType t : ProfileType.values()) {
+				for (final Landmark lm : landmarks.keySet()) {
 					getProfile(t, lm, Stats.MEDIAN);
 					getProfile(t, lm, Stats.LOWER_QUARTILE);
 					getProfile(t, lm, Stats.UPPER_QUARTILE);
@@ -1400,10 +1383,10 @@ public class DefaultCellCollection implements ICellCollection {
 
 		@Override
 		public synchronized List<UUID> getSegmentIDs() {
-			List<UUID> result = new ArrayList<>();
+			final List<UUID> result = new ArrayList<>();
 			if (segments == null)
 				return result;
-			for (IProfileSegment seg : this.segments) {
+			for (final IProfileSegment seg : this.segments) {
 				result.add(seg.getID());
 			}
 			return result;
@@ -1422,11 +1405,11 @@ public class DefaultCellCollection implements ICellCollection {
 			// this must be negative offset for segments
 			// since we are moving the pointIndex back to the beginning
 			// of the array
-			int offset = -getLandmarkIndex(tag);
+			final int offset = -getLandmarkIndex(tag);
 
-			List<IProfileSegment> result = new ArrayList<>();
+			final List<IProfileSegment> result = new ArrayList<>();
 
-			for (IProfileSegment s : segments) {
+			for (final IProfileSegment s : segments) {
 				result.add(s.duplicate().offset(offset));
 			}
 
@@ -1438,10 +1421,10 @@ public class DefaultCellCollection implements ICellCollection {
 		@Override
 		public IProfileSegment getSegmentContaining(@NonNull OrientationMark tag)
 				throws SegmentUpdateException, MissingLandmarkException {
-			List<IProfileSegment> segs = this.getSegments(tag);
+			final List<IProfileSegment> segs = this.getSegments(tag);
 
-			IProfileSegment result = null;
-			for (IProfileSegment seg : segs) {
+			final IProfileSegment result = null;
+			for (final IProfileSegment seg : segs) {
 				if (seg.contains(ZERO_INDEX))
 					return seg;
 			}
@@ -1452,7 +1435,7 @@ public class DefaultCellCollection implements ICellCollection {
 		@Override
 		public void setLandmark(@NonNull Landmark lm, int newIndex) {
 			// Cannot move the RP from zero
-			Landmark rp = getLandmark(OrientationMark.REFERENCE);
+			final Landmark rp = getLandmark(OrientationMark.REFERENCE);
 
 			if (rp.equals(lm))
 				return;
@@ -1467,7 +1450,7 @@ public class DefaultCellCollection implements ICellCollection {
 			if (n.isEmpty())
 				throw new IllegalArgumentException("String or segment list is empty");
 
-			int length = DefaultCellCollection.this.getMedianArrayLength();
+			final int length = DefaultCellCollection.this.getMedianArrayLength();
 			if (length != n.get(0).getProfileLength())
 				throw new IllegalArgumentException(
 						String.format(
@@ -1479,14 +1462,14 @@ public class DefaultCellCollection implements ICellCollection {
 			 * means the indexes must be moved forwards appropriately. Hence, add a positive
 			 * offset.
 			 */
-			int offset = getLandmarkIndex(OrientationMark.REFERENCE);
+			final int offset = getLandmarkIndex(OrientationMark.REFERENCE);
 
-			for (IProfileSegment s : n) {
+			for (final IProfileSegment s : n) {
 				s.offset(offset);
 			}
 
 			segments = new ArrayList<>();
-			for (IProfileSegment s : n) {
+			for (final IProfileSegment s : n) {
 				segments.add(s.duplicate());
 			}
 		}
@@ -1497,7 +1480,7 @@ public class DefaultCellCollection implements ICellCollection {
 				throw new IllegalArgumentException(
 						"Requested profile aggregate length is zero or negative");
 			cache.clear();
-			Landmark lm = getLandmark(OrientationMark.REFERENCE);
+			final Landmark lm = getLandmark(OrientationMark.REFERENCE);
 			landmarks.put(lm, ZERO_INDEX);
 
 			// If there are segments, not just the default segment, and the segment
@@ -1514,11 +1497,12 @@ public class DefaultCellCollection implements ICellCollection {
 						IProfileCollection.DEFAULT_SEGMENT_ID));
 			}
 
-			IProfileAggregate agg = new DefaultProfileAggregate(length,
+			final IProfileAggregate agg = new DefaultProfileAggregate(length,
 					DefaultCellCollection.this.size());
 
-			for (Nucleus n : DefaultCellCollection.this.getNuclei())
+			for (final Nucleus n : DefaultCellCollection.this.getNuclei()) {
 				agg.addValues(n.getProfile(type, OrientationMark.REFERENCE));
+			}
 			return agg;
 
 		}
@@ -1536,27 +1520,27 @@ public class DefaultCellCollection implements ICellCollection {
 				int length)
 				throws MissingDataException, SegmentUpdateException {
 			cache.clear();
-			Landmark lm = getLandmark(OrientationMark.REFERENCE);
+			final Landmark lm = getLandmark(OrientationMark.REFERENCE);
 			landmarks.put(lm, ZERO_INDEX);
 
 			// We have no profile to use to interpolate segments.
 			// Create an arbitrary profile with the original length.
 
-			List<IProfileSegment> originalSegList = new ArrayList<>();
-			for (IProfileSegment s : segments)
-				originalSegList.add(s);
-			IProfile template = new DefaultProfile(0, segments.get(0).getProfileLength());
-			ISegmentedProfile segTemplate = new DefaultSegmentedProfile(template, originalSegList);
+			final List<IProfileSegment> originalSegList = new ArrayList<>();
+			originalSegList.addAll(segments);
+			final IProfile template = new DefaultProfile(0, segments.get(0).getProfileLength());
+			final ISegmentedProfile segTemplate = new DefaultSegmentedProfile(template, originalSegList);
 
 			// Now use the interpolation method to adjust the segment lengths
-			List<IProfileSegment> interpolatedSegments = segTemplate.interpolate(length)
+			final List<IProfileSegment> interpolatedSegments = segTemplate.interpolate(length)
 					.getSegments();
 
-			IProfileAggregate agg = new DefaultProfileAggregate(length,
+			final IProfileAggregate agg = new DefaultProfileAggregate(length,
 					DefaultCellCollection.this.size());
 
-			for (Nucleus n : DefaultCellCollection.this.getNuclei())
+			for (final Nucleus n : DefaultCellCollection.this.getNuclei()) {
 				agg.addValues(n.getProfile(type, OrientationMark.REFERENCE));
+			}
 
 			setSegments(interpolatedSegments);
 
@@ -1565,21 +1549,21 @@ public class DefaultCellCollection implements ICellCollection {
 
 		@Override
 		public String toString() {
-			String newLine = System.getProperty("line.separator");
-			StringBuilder builder = new StringBuilder();
+			final String newLine = System.getProperty("line.separator");
+			final StringBuilder builder = new StringBuilder();
 			builder.append("Point types:" + newLine);
-			for (Entry<Landmark, Integer> e : landmarks.entrySet()) {
+			for (final Entry<Landmark, Integer> e : landmarks.entrySet()) {
 				builder.append(e.getKey() + ": " + e.getValue() + newLine);
 			}
 
 			// Show segments from RP
 			try {
 				builder.append("Segments from RP:" + newLine);
-				for (IProfileSegment s : this.getSegments(OrientationMark.REFERENCE)) {
+				for (final IProfileSegment s : this.getSegments(OrientationMark.REFERENCE)) {
 					builder.append(s.toString() + newLine);
 				}
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				builder.append("Exception fetching segments: " + e.getMessage());
 			}
 
@@ -1591,8 +1575,8 @@ public class DefaultCellCollection implements ICellCollection {
 		public IProfile getIQRProfile(@NonNull ProfileType type, @NonNull OrientationMark om)
 				throws MissingDataException, SegmentUpdateException {
 
-			IProfile q25 = getProfile(type, om, Stats.LOWER_QUARTILE);
-			IProfile q75 = getProfile(type, om, Stats.UPPER_QUARTILE);
+			final IProfile q25 = getProfile(type, om, Stats.LOWER_QUARTILE);
+			final IProfile q75 = getProfile(type, om, Stats.UPPER_QUARTILE);
 
 			if (q25 == null)
 				throw new MissingDataException("Could not create q25 profile; was null");
@@ -1616,20 +1600,20 @@ public class DefaultCellCollection implements ICellCollection {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			DefaultProfileCollection other = (DefaultProfileCollection) obj;
+			final DefaultProfileCollection other = (DefaultProfileCollection) obj;
 			return Objects.equals(landmarks, other.landmarks)
 					&& Objects.equals(segments, other.segments);
 		}
 
 		@Override
 		@NonNull public Element toXmlElement() {
-			Element e = new Element("ProfileCollection");
+			final Element e = new Element(XMLNames.XML_PROFILE_COLLECTION);
 
-			for (IProfileSegment s : segments) {
+			for (final IProfileSegment s : segments) {
 				e.addContent(s.toXmlElement());
 			}
 
-			for (Entry<Landmark, Integer> entry : landmarks.entrySet()) {
+			for (final Entry<Landmark, Integer> entry : landmarks.entrySet()) {
 				e.addContent(new Element(XMLNames.XML_LANDMARK)
 						.setAttribute(XMLNames.XML_NAME, entry.getKey().toString())
 						.setAttribute(XMLNames.XML_INDEX, String.valueOf(entry.getValue())));
@@ -1639,7 +1623,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 		@Override
 		public double getProportionOfIndex(int index) {
-			int length = DefaultCellCollection.this.getMedianArrayLength();
+			final int length = DefaultCellCollection.this.getMedianArrayLength();
 			if (index < 0 || index >= length)
 				throw new IllegalArgumentException("Index out of bounds: " + index);
 			if (index == 0)
@@ -1668,11 +1652,11 @@ public class DefaultCellCollection implements ICellCollection {
 			if (proportion == 0)
 				return 0;
 
-			int length = DefaultCellCollection.this.getMedianArrayLength();
+			final int length = DefaultCellCollection.this.getMedianArrayLength();
 			if (proportion == 1)
 				return length - 1;
 
-			double desiredDistanceFromStart = length * proportion;
+			final double desiredDistanceFromStart = length * proportion;
 			return (int) desiredDistanceFromStart;
 		}
 
@@ -1730,7 +1714,7 @@ public class DefaultCellCollection implements ICellCollection {
 						return false;
 					if (getClass() != obj.getClass())
 						return false;
-					ProfileKey other = (ProfileKey) obj;
+					final ProfileKey other = (ProfileKey) obj;
 					if (!getOuterType().equals(other.getOuterType()))
 						return false;
 					if (Double.doubleToLongBits(quartile) != Double
@@ -1752,17 +1736,18 @@ public class DefaultCellCollection implements ICellCollection {
 
 			}
 
-			private Map<ProfileKey, IProfile> map = new HashMap<>();
+			private final Map<ProfileKey, IProfile> map = new HashMap<>();
 
 			public ProfileCache() { // no default data
 			}
 
 			public ProfileCache duplicate() throws SegmentUpdateException {
-				ProfileCache result = new ProfileCache();
-				for (ProfileKey k : map.keySet()) {
-					IProfile p = map.get(k);
-					if (p != null)
+				final ProfileCache result = new ProfileCache();
+				for (final ProfileKey k : map.keySet()) {
+					final IProfile p = map.get(k);
+					if (p != null) {
 						result.map.put(k, p.duplicate());
+					}
 				}
 				return result;
 			}
@@ -1778,19 +1763,19 @@ public class DefaultCellCollection implements ICellCollection {
 			public void addProfile(final ProfileType type, final double quartile,
 					final Landmark tag,
 					IProfile profile) {
-				ProfileKey key = new ProfileKey(type, quartile, tag);
+				final ProfileKey key = new ProfileKey(type, quartile, tag);
 				map.put(key, profile);
 			}
 
 			public boolean hasProfile(final ProfileType type, final double quartile,
 					final Landmark tag) {
-				ProfileKey key = new ProfileKey(type, quartile, tag);
+				final ProfileKey key = new ProfileKey(type, quartile, tag);
 				return map.containsKey(key);
 			}
 
 			public IProfile getProfile(final ProfileType type, final double quartile,
 					final Landmark tag) {
-				ProfileKey key = new ProfileKey(type, quartile, tag);
+				final ProfileKey key = new ProfileKey(type, quartile, tag);
 				return map.get(key);
 			}
 
@@ -1803,9 +1788,9 @@ public class DefaultCellCollection implements ICellCollection {
 
 			public void remove(final Landmark t) {
 
-				Iterator<ProfileKey> it = map.keySet().iterator();
+				final Iterator<ProfileKey> it = map.keySet().iterator();
 				while (it.hasNext()) {
-					ProfileKey k = it.next();
+					final ProfileKey k = it.next();
 					if (k.has(t)) {
 						it.remove();
 					}

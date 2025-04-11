@@ -45,7 +45,6 @@ import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.Imageable;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.XMLNames;
-import com.bmskinner.nma.components.Updatable.ComponentUpdateEvent;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.measure.DefaultMeasurement;

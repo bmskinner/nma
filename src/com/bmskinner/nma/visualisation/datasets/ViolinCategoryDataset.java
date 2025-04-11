@@ -357,7 +357,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 	 * @param binWidth the precision of the KernelEstimator
 	 * @return
 	 */
-	public KernelEstimator createProbabililtyKernel(List<Number> values, double binWidth) {
+	public static KernelEstimator createProbabililtyKernel(List<Number> values, double binWidth) {
 		KernelEstimator est = new KernelEstimator(binWidth);
 		for (Number d : values) {
 			est.addValue(d.doubleValue(), 1);

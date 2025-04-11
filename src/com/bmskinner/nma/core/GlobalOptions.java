@@ -20,7 +20,6 @@ import java.io.File;
 
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.DefaultOptions;
-import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
 
 /**

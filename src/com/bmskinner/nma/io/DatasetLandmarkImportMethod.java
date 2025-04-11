@@ -24,7 +24,6 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.DefaultLandmark;
 import com.bmskinner.nma.components.profiles.Landmark;
-import com.bmskinner.nma.io.ImageImporter.ImageImportException;
 
 /**
  * Method to read a landmark file and update all landmarks in a dataset to

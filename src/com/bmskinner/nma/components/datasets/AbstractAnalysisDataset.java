@@ -32,7 +32,6 @@ import org.jdom2.Element;
 
 import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.MissingDataException;
-import com.bmskinner.nma.components.Updatable.ComponentUpdateEvent;
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.components.Version.UnsupportedVersionException;
 import com.bmskinner.nma.components.XMLNames;
