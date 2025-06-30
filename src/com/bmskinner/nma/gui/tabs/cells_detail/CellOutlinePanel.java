@@ -127,6 +127,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 		add(chartPanel, BorderLayout.CENTER);
 
 		uiController.addCellUpdatedEventListener(this);
+		uiController.addSwatchUpdatedListener(this);
 
 	}
 
@@ -236,7 +237,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 	@Override
 	public void globalPaletteUpdated() {
-		update(getDatasets());
+		refreshCache(getDatasets());
 	}
 
 	@Override
