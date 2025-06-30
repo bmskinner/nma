@@ -43,8 +43,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -71,7 +71,6 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
 import com.bmskinner.nma.io.ChartDataExtracter;
 import com.bmskinner.nma.io.Io;
-
 import com.bmskinner.nma.utility.FileUtils;
 import com.bmskinner.nma.visualisation.ChartImageConverter;
 import com.bmskinner.nma.visualisation.datasets.FloatXYDataset;
@@ -137,66 +136,66 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	public ExportableChartPanel(@NonNull JFreeChart chart) {
 		super(chart, true);
 
-		JPopupMenu popup = this.getPopupMenu();
+		final JPopupMenu popup = this.getPopupMenu();
 		popup.addSeparator();
 
-		JMenuItem copyItem = new JMenuItem(COPY_LBL);
+		final JMenuItem copyItem = new JMenuItem(COPY_LBL);
 		copyItem.addActionListener(e -> copyData());
 		copyItem.setEnabled(true);
 		popup.add(copyItem);
 
-		JMenuItem exportItem = new JMenuItem(EXPORT_LBL);
+		final JMenuItem exportItem = new JMenuItem(EXPORT_LBL);
 		exportItem.addActionListener(e -> exportData());
 		exportItem.setEnabled(true);
 		popup.add(exportItem);
 
 		// Export in the dimensions on screen
-		JMenuItem exportPNGItem = new JMenuItem(EXPORT_PNG);
+		final JMenuItem exportPNGItem = new JMenuItem(EXPORT_PNG);
 		exportPNGItem
 				.addActionListener(
 						e -> {
 
-							int w = ChartImageConverter.pixelsToMM((int) (getWidth() / DPI_SCALE),
+							final int w = ChartImageConverter.pixelsToMM((int) (getWidth() / DPI_SCALE),
 									300);
-							int h = Math.min(calcHeightFromWidth(w), MAX_A4_HEIGHT_MM);
+							final int h = Math.min(calcHeightFromWidth(w), MAX_A4_HEIGHT_MM);
 							exportPNG(w, h);
 						});
 		exportPNGItem.setEnabled(true);
 
 		// Export scaled to one panel
-		JMenuItem exportSinglePNGItem = new JMenuItem(EXPORT_SINGLE_PANEL_PNG);
+		final JMenuItem exportSinglePNGItem = new JMenuItem(EXPORT_SINGLE_PANEL_PNG);
 		exportSinglePNGItem
 				.addActionListener(e -> exportPNG(SINGLE_COL_WIDTH_MM, SINGLE_COL_WIDTH_MM));
 		exportSinglePNGItem.setEnabled(true);
 
 		// Export scaled to two panels
-		JMenuItem exportDoublePNGItem = new JMenuItem(EXPORT_DOUBLE_PANEL_PNG);
+		final JMenuItem exportDoublePNGItem = new JMenuItem(EXPORT_DOUBLE_PANEL_PNG);
 		exportDoublePNGItem
 				.addActionListener(e -> exportPNG(DOUBLE_COL_WIDTH_MM, SINGLE_COL_WIDTH_MM));
 		exportDoublePNGItem.setEnabled(true);
 
-		JMenuItem exportSvgItem = new JMenuItem(EXPORT_SVG);
+		final JMenuItem exportSvgItem = new JMenuItem(EXPORT_SVG);
 		exportSvgItem.addActionListener(e -> {
-			int w = ChartImageConverter.pixelsToMM((int) (getWidth() / DPI_SCALE),
+			final int w = ChartImageConverter.pixelsToMM((int) (getWidth() / DPI_SCALE),
 					300);
-			int h = Math.min(calcHeightFromWidth(w), MAX_A4_HEIGHT_MM);
+			final int h = Math.min(calcHeightFromWidth(w), MAX_A4_HEIGHT_MM);
 			exportSVG(w, h);
 		});
 		exportSvgItem.setEnabled(true);
 
-		JMenuItem exportSingleSvgItem = new JMenuItem(EXPORT_SINGLE_PANEL_SVG);
+		final JMenuItem exportSingleSvgItem = new JMenuItem(EXPORT_SINGLE_PANEL_SVG);
 		exportSingleSvgItem
 				.addActionListener(e -> exportSVG(SINGLE_COL_WIDTH_MM, SINGLE_COL_WIDTH_MM));
 		exportSingleSvgItem.setEnabled(true);
 
-		JMenuItem exportDoubleSvgItem = new JMenuItem(EXPORT_DOUBLE_PANEL_SVG);
+		final JMenuItem exportDoubleSvgItem = new JMenuItem(EXPORT_DOUBLE_PANEL_SVG);
 		exportDoubleSvgItem
 				.addActionListener(e -> exportSVG(DOUBLE_COL_WIDTH_MM, SINGLE_COL_WIDTH_MM));
 		exportDoubleSvgItem.setEnabled(true);
 
 		// Put the SVG export with the other save as items
-		for (Component c : popup.getComponents()) {
-			if (c instanceof JMenuItem t && t.getText().equals("Save as")) {
+		for (final Component c : popup.getComponents()) {
+			if (c instanceof final JMenuItem t && t.getText().equals("Save as")) {
 				t.removeAll(); // Remove the default PNG export item
 				t.add(exportPNGItem);
 				t.add(exportSinglePNGItem);
@@ -226,7 +225,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	}
 
 	private int calcHeightFromWidth(int w) {
-		double r = (double) getWidth() / (double) getHeight();
+		final double r = (double) getWidth() / (double) getHeight();
 		return (int) (w / r);
 	}
 
@@ -253,7 +252,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			restoreAutoBounds();
 		} else {
 
-			for (ComponentListener l : this.getComponentListeners()) {
+			for (final ComponentListener l : this.getComponentListeners()) {
 				if (l instanceof FixedAspectAdapter) {
 					this.removeComponentListener(l);
 				}
@@ -281,17 +280,18 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 		if (b) {
 
-			for (MouseListener l : this.getMouseListeners()) {
+			for (final MouseListener l : this.getMouseListeners()) {
 				this.removeMouseListener(l);
 			}
-			MousePanListener mpl = new MousePanListener();
+			final MousePanListener mpl = new MousePanListener();
 			this.addMouseListener(mpl);
 			this.addMouseMotionListener(mpl);
 
 		} else {
-			for (MouseListener l : this.getMouseListeners()) {
-				if (l instanceof MousePanListener)
+			for (final MouseListener l : this.getMouseListeners()) {
+				if (l instanceof MousePanListener) {
 					this.removeMouseListener(l);
+				}
 			}
 		}
 	}
@@ -312,14 +312,13 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	 */
 	public double getPlotAspectRatio() {
 		// Only apply to XYPlots
-		if (!(this.getChart().getPlot() instanceof XYPlot)) {
+		if (!(this.getChart().getPlot() instanceof XYPlot))
 			return 1;
-		}
 
-		XYPlot plot = (XYPlot) this.getChart().getPlot();
+		final XYPlot plot = (XYPlot) this.getChart().getPlot();
 
-		double w = plot.getDomainAxis().getRange().getLength();
-		double h = plot.getRangeAxis().getRange().getLength();
+		final double w = plot.getDomainAxis().getRange().getLength();
+		final double h = plot.getRangeAxis().getRange().getLength();
 		return w / h;
 	}
 
@@ -328,7 +327,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		super.setChart(chart);
 		try {
 			fireChartSetEvent();
-		} catch (NullPointerException e) {
+		} catch (final NullPointerException e) {
 			// This occurs during init because setChart is called internally in
 			// ChartPanel constructor
 			// Catch and ignore
@@ -339,11 +338,98 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		}
 	}
 
+
+	/**
+	 * Get the domain axis range for all datasets in a plot
+	 * 
+	 * @param plot the xyplot to extract a domain range from
+	 * @return
+	 */
+	public static Range getDataDomainRange(XYPlot plot) {
+		if (plot.getDatasetCount() == 0)
+			return new Range(-DEFAULT_AUTO_RANGE, DEFAULT_AUTO_RANGE);
+
+		// start with impossible values, before finding the real chart
+		// values
+		double xMin = Double.MAX_VALUE;
+		double xMax = -Double.MAX_VALUE;
+
+		// get the max and min values on the chart by looking for
+		// the min and max values within each dataset in the chart
+		for (int i = 0; i < plot.getDatasetCount(); i++) {
+			final XYDataset dataset = plot.getDataset(i);
+
+			if (dataset == null) { // No dataset, skip
+				continue;
+			}
+
+			// No values in the dataset, skip
+			if (DatasetUtils.findMaximumDomainValue(dataset) == null) {
+				continue;
+			}
+
+			xMax = DatasetUtils.findMaximumDomainValue(dataset).doubleValue() > xMax
+					? DatasetUtils.findMaximumDomainValue(dataset).doubleValue()
+					: xMax;
+
+			xMin = DatasetUtils.findMinimumDomainValue(dataset).doubleValue() < xMin
+					? DatasetUtils.findMinimumDomainValue(dataset).doubleValue()
+					: xMin;
+		}
+		if (xMin >= xMax)
+			return new Range(-DEFAULT_AUTO_RANGE, DEFAULT_AUTO_RANGE);
+
+		return new Range(xMin, xMax);
+	}
+
+	/**
+	 * Get the range axis range for all datasets in a plot
+	 * 
+	 * @param plot the xyplot to extract a range range from
+	 * @return
+	 */
+	public static Range getDataRangeRange(XYPlot plot) {
+		if (plot.getDatasetCount() == 0)
+			return new Range(-DEFAULT_AUTO_RANGE, DEFAULT_AUTO_RANGE);
+
+		// start with impossible values, before finding the real chart
+		// values
+		double yMin = Double.MAX_VALUE;
+		double yMax = -Double.MAX_VALUE;
+
+		// get the max and min values on the chart by looking for
+		// the min and max values within each dataset in the chart
+		for (int i = 0; i < plot.getDatasetCount(); i++) {
+			final XYDataset dataset = plot.getDataset(i);
+
+			if (dataset == null) { // No dataset, skip
+				continue;
+			}
+
+			// No values in the dataset, skip
+			if (DatasetUtils.findMaximumRangeValue(dataset) == null) {
+				continue;
+			}
+
+			yMax = DatasetUtils.findMaximumRangeValue(dataset).doubleValue() > yMax
+					? DatasetUtils.findMaximumRangeValue(dataset).doubleValue()
+					: yMax;
+
+			yMin = DatasetUtils.findMinimumRangeValue(dataset).doubleValue() < yMin
+					? DatasetUtils.findMinimumRangeValue(dataset).doubleValue()
+					: yMin;
+		}
+
+		if (yMin >= yMax)
+			return new Range(-DEFAULT_AUTO_RANGE, DEFAULT_AUTO_RANGE);
+
+		return new Range(yMin, yMax);
+	}
+
 	@Override
 	public void restoreAutoBounds() {
-		if (getChart() == null) {
+		if (getChart() == null)
 			return;
-		}
 
 		// Only carry out if the flag is set
 		if (!isFixedAspectRatio) {
@@ -359,16 +445,15 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				return;
 			}
 
-			XYPlot plot = (XYPlot) this.getChart().getPlot();
+			final XYPlot plot = (XYPlot) this.getChart().getPlot();
 
 			// Only apply to plots with datasets
-			if (plot.getDatasetCount() == 0) {
+			if (plot.getDatasetCount() == 0)
 				return;
-			}
 
 			// Find the aspect ratio of the chart
-			double chartWidth = this.getWidth();
-			double chartHeight = this.getHeight();
+			final double chartWidth = this.getWidth();
+			final double chartHeight = this.getHeight();
 
 			// If we can't get useful values for width and height, use defaults
 			if (Double.valueOf(chartWidth) == null || Double.valueOf(chartHeight) == null) {
@@ -378,64 +463,26 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			}
 
 			// Calculate the panel aspect ratio
-			double aspectRatio = chartWidth / chartHeight;
+			final double aspectRatio = chartWidth / chartHeight;
 
-			// start with impossible values, before finding the real chart
-			// values
-			double xMin = Double.MAX_VALUE;
-			double yMin = Double.MAX_VALUE;
-			//
-			double xMax = -Double.MAX_VALUE;
-			double yMax = -Double.MAX_VALUE;
-
-			// get the max and min values on the chart by looking for
-			// the min and max values within each dataset in the chart
-			for (int i = 0; i < plot.getDatasetCount(); i++) {
-				XYDataset dataset = plot.getDataset(i);
-
-				if (dataset == null) { // No dataset, skip
-					continue;
-				}
-
-				// No values in the dataset, skip
-				if (DatasetUtils.findMaximumDomainValue(dataset) == null) {
-					continue;
-				}
-
-				xMax = DatasetUtils.findMaximumDomainValue(dataset).doubleValue() > xMax
-						? DatasetUtils.findMaximumDomainValue(dataset).doubleValue()
-						: xMax;
-
-				xMin = DatasetUtils.findMinimumDomainValue(dataset).doubleValue() < xMin
-						? DatasetUtils.findMinimumDomainValue(dataset).doubleValue()
-						: xMin;
-
-				yMax = DatasetUtils.findMaximumRangeValue(dataset).doubleValue() > yMax
-						? DatasetUtils.findMaximumRangeValue(dataset).doubleValue()
-						: yMax;
-
-				yMin = DatasetUtils.findMinimumRangeValue(dataset).doubleValue() < yMin
-						? DatasetUtils.findMinimumRangeValue(dataset).doubleValue()
-						: yMin;
-			}
+			final Range xDataRange = getDataDomainRange(plot);
+			final Range yDataRange = getDataRangeRange(plot);
 
 			// If no useful datasets were found (e.g. all datasets were
-			// malformed)
-			// min and max 'impossible' values have not changed. In this case,
-			// set defaults
-			if (xMin == Double.MAX_VALUE || yMin == Double.MAX_VALUE) {
-				xMin = -DEFAULT_AUTO_RANGE;
-				yMin = -DEFAULT_AUTO_RANGE;
-				xMax = DEFAULT_AUTO_RANGE;
-				yMax = DEFAULT_AUTO_RANGE;
-			}
+			// malformed) min and max default values have been set.
+
+			// Find the real chart values
+			double xMin = xDataRange.getLowerBound();
+			double yMin = yDataRange.getLowerBound();
+			double xMax = xDataRange.getUpperBound();
+			double yMax = yDataRange.getUpperBound();
 
 			// find the ranges the min and max values cover
-			double xRange = xMax - xMin;
-			double yRange = yMax - yMin;
+			final double xRange = xDataRange.getLength();
+			final double yRange = yDataRange.getLength();
 
-			double newXRange = xRange;
-			double newYRange = yRange;
+			double newXRange = xDataRange.getLength();
+			double newYRange = yDataRange.getLength();
 
 			// test the aspect ratio
 			if ((xRange / yRange) > aspectRatio) {
@@ -449,8 +496,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			}
 
 			// with the new ranges, find the best min and max values to use
-			double xDiff = (newXRange - xRange) / 2;
-			double yDiff = (newYRange - yRange) / 2;
+			final double xDiff = (newXRange - xRange) / 2;
+			final double yDiff = (newYRange - yRange) / 2;
 
 			xMin -= xDiff;
 			xMax += xDiff;
@@ -468,8 +515,9 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			plot.getRangeAxis().setRange(yMin, yMax);
 			plot.getDomainAxis().setRange(xMin, xMax);
 
-		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Error restoring auto bounds, falling back to default", e);
+		} catch (final Exception e) {
+			LOGGER.log(Level.SEVERE,
+					"Error restoring auto bounds, falling back to default: %s".formatted(e.getMessage()), e);
 			if (getChart() != null) {
 				super.restoreAutoBounds();
 			}
@@ -483,14 +531,14 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		try {
 
 			if (this.getChart().getPlot() instanceof CategoryPlot) {
-				CategoryPlot plot = this.getChart().getCategoryPlot();
+				final CategoryPlot plot = this.getChart().getCategoryPlot();
 				if (plot.getDataset() instanceof ShellResultDataset)
 					return ChartDataExtracter.getShellData(this.getChart());
 				if (plot.getDataset() instanceof BoxAndWhiskerCategoryDataset)
 					return ChartDataExtracter.getBoxplotData(this.getChart());
 
 			} else {
-				XYPlot plot = getChart().getXYPlot();
+				final XYPlot plot = getChart().getXYPlot();
 				if (plot.getDataset() instanceof XYZDataset)
 					return ChartDataExtracter.getHeatMapData(this.getChart());
 				if (plot.getDataset() instanceof FloatXYDataset
@@ -501,12 +549,12 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 			}
 
-		} catch (ClassCastException e2) {
+		} catch (final ClassCastException e2) {
 
-			StringBuilder builder = new StringBuilder();
+			final StringBuilder builder = new StringBuilder();
 			builder.append("Class cast error: " + e2.getMessage() + Io.NEWLINE);
 
-			for (StackTraceElement el : e2.getStackTrace()) {
+			for (final StackTraceElement el : e2.getStackTrace()) {
 				builder.append(el.toString() + Io.NEWLINE);
 			}
 			return builder.toString();
@@ -517,31 +565,31 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	private void copyData() {
 
 		new Thread(() -> {
-			String string = getChartData();
-			StringSelection stringSelection = new StringSelection(string);
-			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			final String string = getChartData();
+			final StringSelection stringSelection = new StringSelection(string);
+			final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 			clipboard.setContents(stringSelection, null);
 		}).start();
 	}
 
 	private void exportData() {
 		try {
-			File saveFile = new DefaultInputSupplier().requestFileSave(
+			final File saveFile = new DefaultInputSupplier().requestFileSave(
 					FileUtils.commonPathOfDatasets(
 							DatasetListManager.getInstance().getSelectedDatasets()),
 					"Table export", Io.TAB_FILE_EXTENSION_NODOT);
 
 			new Thread(() -> {
-				String string = getChartData();
+				final String string = getChartData();
 
 				try (PrintWriter out = new PrintWriter(saveFile)) {
 					out.println(string);
-				} catch (FileNotFoundException e) {
+				} catch (final FileNotFoundException e) {
 					LOGGER.warning("Cannot export to file");
 					LOGGER.log(Level.SEVERE, "Error exporting", e);
 				}
 			}).start();
-		} catch (RequestCancelledException e) {
+		} catch (final RequestCancelledException e) {
 			// User cancelled, no action
 		}
 	}
@@ -559,7 +607,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	private void exportPNG(int w, int h) {
 
 		try {
-			File file = new DefaultInputSupplier().requestFileSave(
+			final File file = new DefaultInputSupplier().requestFileSave(
 					FileUtils.commonPathOfDatasets(
 							DatasetListManager.getInstance().getSelectedDatasets()),
 					"Chart export", Io.PNG_FILE_EXTENSION_NODOT);
@@ -570,19 +618,19 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				return;
 
 			try (OutputStream os = new FileOutputStream(file)) {
-				BufferedImage bi = ChartImageConverter.createPNG(getChart(), w, h,
+				final BufferedImage bi = ChartImageConverter.createPNG(getChart(), w, h,
 						DEFAULT_EXPORT_DPI, this.isFixedAspectRatio);
 
 				EncoderUtil.writeBufferedImage(bi, ImageFormat.PNG, os);
 				LOGGER.info("Chart saved as '" + file.getName() + "'");
 
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOGGER.log(Level.SEVERE, "Unable to save chart as png", e);
-			} catch (TranscoderException e) {
+			} catch (final TranscoderException e) {
 				LOGGER.log(Level.SEVERE, "Unable to transcode chart to png", e);
 			}
 
-		} catch (RequestCancelledException e) {
+		} catch (final RequestCancelledException e) {
 			// User cancelled, no action
 		}
 
@@ -597,7 +645,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	private void exportSVG(int w, int h) {
 
 		try {
-			File file = new DefaultInputSupplier().requestFileSave(
+			final File file = new DefaultInputSupplier().requestFileSave(
 					FileUtils.commonPathOfDatasets(
 							DatasetListManager.getInstance().getSelectedDatasets()),
 					"Chart export", Io.SVG_FILE_EXTENSION_NODOT);
@@ -607,15 +655,15 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 							"Overwrite existing file?"))
 				return;
 
-			String svg = ChartImageConverter.createSVG(getChart(), w, h, DEFAULT_EXPORT_DPI,
+			final String svg = ChartImageConverter.createSVG(getChart(), w, h, DEFAULT_EXPORT_DPI,
 					this.isFixedAspectRatio);
 
 			writeToSVG(file, svg);
 			LOGGER.info("Chart saved as '" + file.getName() + "'");
 
-		} catch (RequestCancelledException e) {
+		} catch (final RequestCancelledException e) {
 			// User cancelled, no action
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.fine("Unable to export chart");
 		}
 	}
@@ -641,7 +689,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				if (writer != null) {
 					writer.close();
 				}
-			} catch (IOException ex) {
+			} catch (final IOException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -653,11 +701,11 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	 * @param options
 	 */
 	public void fireChartSetEvent() {
-		ChartSetEvent e = new ChartSetEvent(this);
-		Iterator<Object> iterator = listeners.iterator();
+		final ChartSetEvent e = new ChartSetEvent(this);
+		final Iterator<Object> iterator = listeners.iterator();
 		while (iterator.hasNext()) {
 
-			Object o = iterator.next();
+			final Object o = iterator.next();
 
 			if (o instanceof ChartSetEventListener) {
 				((ChartSetEventListener) o).chartSetEventReceived(e);
@@ -694,15 +742,15 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	protected Point2D getChartValuePosition(Point panelPoint) {
 
 		// Translate the panel location on screen to a Java2D point
-		Point2D p = translateScreenToJava2D(panelPoint);
+		final Point2D p = translateScreenToJava2D(panelPoint);
 
 		// Get the area covered by the panel
-		Rectangle2D plotArea = getChartRenderingInfo().getPlotInfo().getDataArea();
+		final Rectangle2D plotArea = getChartRenderingInfo().getPlotInfo().getDataArea();
 
-		XYPlot plot = (XYPlot) getChart().getPlot();
+		final XYPlot plot = (XYPlot) getChart().getPlot();
 
-		double x = plot.getDomainAxis().java2DToValue(p.getX(), plotArea, plot.getDomainAxisEdge());
-		double y = plot.getRangeAxis().java2DToValue(p.getY(), plotArea, plot.getRangeAxisEdge());
+		final double x = plot.getDomainAxis().java2DToValue(p.getX(), plotArea, plot.getDomainAxisEdge());
+		final double y = plot.getRangeAxis().java2DToValue(p.getY(), plotArea, plot.getRangeAxisEdge());
 
 		return new Point2D.Double(x, y);
 
@@ -761,24 +809,23 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			if (getChart() == null)
 				return;
 
-			if (!(getChart().getPlot() instanceof XYPlot)) {
+			if (!(getChart().getPlot() instanceof XYPlot))
 				return;
-			}
 
-			XYPlot plot = getChart().getXYPlot();
+			final XYPlot plot = getChart().getXYPlot();
 
-			XYDataset d = plot.getDataset();
+			final XYDataset d = plot.getDataset();
 			if (d == null)
 				return;
 
 			if (startPoint != null) {
 
-				Point2D p = getChartValuePosition(e.getPoint());
-				double dx = startPoint.getX() - p.getX();
-				double dy = startPoint.getY() - p.getY();
+				final Point2D p = getChartValuePosition(e.getPoint());
+				final double dx = startPoint.getX() - p.getX();
+				final double dy = startPoint.getY() - p.getY();
 
-				Range xoriginal = plot.getDomainAxis().getRange();
-				Range yoriginal = plot.getRangeAxis().getRange();
+				final Range xoriginal = plot.getDomainAxis().getRange();
+				final Range yoriginal = plot.getRangeAxis().getRange();
 
 				plot.getDomainAxis().setRange(xoriginal.getLowerBound() + dx,
 						xoriginal.getUpperBound() + dx);
@@ -812,13 +859,12 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			if (getChart() == null)
 				return;
 
-			if (!(getChart().getPlot() instanceof XYPlot)) {
+			if (!(getChart().getPlot() instanceof XYPlot))
 				return;
-			}
 
-			XYPlot plot = getChart().getXYPlot();
+			final XYPlot plot = getChart().getXYPlot();
 
-			XYDataset d = plot.getDataset();
+			final XYDataset d = plot.getDataset();
 			if (d == null)
 				return;
 
@@ -841,24 +887,24 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 			}
 
 			// Find the anchor point for the zoom
-			Point2D p = getChartValuePosition(e.getPoint());
+			final Point2D p = getChartValuePosition(e.getPoint());
 
-			Range xoriginal = plot.getDomainAxis().getRange();
-			Range yoriginal = plot.getRangeAxis().getRange();
+			final Range xoriginal = plot.getDomainAxis().getRange();
+			final Range yoriginal = plot.getRangeAxis().getRange();
 
 			// We want the point under the cursor to remain under the cursor
 			// after zooming and not jump to the middle of the screen.
 			// To do this, calculate the fractional position of the cursor
 			// and preserve this in the new range.
 
-			double fx = (p.getX() - xoriginal.getLowerBound()) / xoriginal.getLength();
-			double fy = (p.getY() - yoriginal.getLowerBound()) / yoriginal.getLength();
+			final double fx = (p.getX() - xoriginal.getLowerBound()) / xoriginal.getLength();
+			final double fy = (p.getY() - yoriginal.getLowerBound()) / yoriginal.getLength();
 
 			// Zoom the range
 			if (e.getUnitsToScroll() < 0) { // Zoom in
 
 				// The new range lengths to be covered
-				double xr = xoriginal.getLength() / ZOOM_IN_FACTOR;
+				final double xr = xoriginal.getLength() / ZOOM_IN_FACTOR;
 				double yr = yoriginal.getLength() / ZOOM_IN_FACTOR;
 
 				// Correct for aspect ratio
@@ -867,10 +913,10 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				}
 
 				// Set min and max of range from fraction position of anchor
-				double xMin = p.getX() - (fx * xr);
-				double xMax = p.getX() + (1 - fx) * xr;
-				double yMin = p.getY() - (fy * yr);
-				double yMax = p.getY() + (1 - fy) * yr;
+				final double xMin = p.getX() - (fx * xr);
+				final double xMax = p.getX() + (1 - fx) * xr;
+				final double yMin = p.getY() - (fy * yr);
+				final double yMax = p.getY() + (1 - fy) * yr;
 
 				// Update the range
 				plot.getDomainAxis().setRange(xMin, xMax);
@@ -878,7 +924,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 			} else { // Zoom out
 
-				double xr = xoriginal.getLength() * ZOOM_OUT_FACTOR;
+				final double xr = xoriginal.getLength() * ZOOM_OUT_FACTOR;
 				double yr = yoriginal.getLength() * ZOOM_OUT_FACTOR;
 
 				// Correct for aspect ratio
@@ -887,13 +933,13 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				}
 
 				// Find the values range plus 10% to constrain zoom out
-				ChartRanges minZoomRanges = findMinimumZoomAxisRanges();
+				final ChartRanges minZoomRanges = findMinimumZoomAxisRanges();
 
 				// Ensure we only zoom out but only to the extent of the data
-				double xMin = minZoomRanges.xRange.constrain(p.getX() - (fx * xr));
-				double xMax = minZoomRanges.xRange.constrain(p.getX() + (1 - fx) * xr);
-				double yMin = minZoomRanges.yRange.constrain(p.getY() - (fy * yr));
-				double yMax = minZoomRanges.yRange.constrain(p.getY() + (1 - fy) * yr);
+				final double xMin = minZoomRanges.xRange.constrain(p.getX() - (fx * xr));
+				final double xMax = minZoomRanges.xRange.constrain(p.getX() + (1 - fx) * xr);
+				final double yMin = minZoomRanges.yRange.constrain(p.getY() - (fy * yr));
+				final double yMax = minZoomRanges.yRange.constrain(p.getY() + (1 - fy) * yr);
 
 				// Update the range
 				plot.getDomainAxis().setRange(xMin, xMax);
@@ -909,7 +955,7 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 		 */
 		private ChartRanges findMinimumZoomAxisRanges() {
 
-			XYPlot plot = getChart().getXYPlot();
+			final XYPlot plot = getChart().getXYPlot();
 			// Find the full data range of all values in the chart
 			Range domainRange = DatasetUtils.findDomainBounds(plot.getDataset());
 			Range rangeRange = DatasetUtils.findRangeBounds(plot.getDataset());
@@ -931,23 +977,22 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 			// The maximum range depends on whether the chart is aspect ratio constrained.
 
-			if (!isFixedAspectRatio) {
+			if (!isFixedAspectRatio)
 				return new ChartRanges(Range.expand(domainRange, 0.10, 0.10),
 						Range.expand(rangeRange, 0.10, 0.10));
-			}
 
-			double expandedRangeLength = Range.expand(rangeRange, 0.10, 0.10).getLength();
+			final double expandedRangeLength = Range.expand(rangeRange, 0.10, 0.10).getLength();
 
 			if (domainRange.getLength() > expandedRangeLength) {
 
 				domainRange = Range.expand(domainRange, 0.10, 0.10);
-				double rangeLength = domainRange.getLength() / getPanelAspectRatio();
+				final double rangeLength = domainRange.getLength() / getPanelAspectRatio();
 				rangeRange = new Range(rangeRange.getCentralValue() - rangeLength / 2,
 						rangeRange.getCentralValue() + rangeLength / 2);
 
 			} else {
 				rangeRange = Range.expand(rangeRange, 0.10, 0.10);
-				double domainLength = rangeRange.getLength() * getPanelAspectRatio();
+				final double domainLength = rangeRange.getLength() * getPanelAspectRatio();
 				domainRange = new Range(domainRange.getCentralValue() - domainLength / 2,
 						domainRange.getCentralValue() + domainLength / 2);
 

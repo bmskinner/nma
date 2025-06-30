@@ -22,6 +22,8 @@ import org.jfree.data.Range;
 import org.jfree.svg.SVGGraphics2D;
 import org.jfree.svg.SVGUnits;
 
+import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
+
 /**
  * Given a chart, produce an image suitable for a report or export
  * 
@@ -42,6 +44,12 @@ public class ChartImageConverter {
 	private static final float PIXEL_SCALE_1_DPI = 0.084672f * 300f;
 
 	/**
+	 * When rescaling chart axes to fit the data, the amount of buffer to include on
+	 * each end of axis. Expressed as a fraction of the axis length.
+	 */
+	private static final double RANGE_EXPANSION_FRACTION = 0.05;
+
+	/**
 	 * Create a PNG representation of the given chart at 300 DPI
 	 * 
 	 * @param chart the chart to draw
@@ -55,7 +63,7 @@ public class ChartImageConverter {
 			boolean isFixedAspect)
 			throws TranscoderException, IOException {
 
-		String svg = ChartImageConverter.createSVG(chart, wmm, hmm, dpi, isFixedAspect);
+		final String svg = ChartImageConverter.createSVG(chart, wmm, hmm, dpi, isFixedAspect);
 
 		return ChartImageConverter.convertSVGToPNG(svg, wmm, dpi);
 	}
@@ -70,7 +78,7 @@ public class ChartImageConverter {
 	 */
 	public static int mmToPixels(int mm, int dpi) {
 		// The number of mm in a single pixel at this resolution
-		double mmPerPixel = PIXEL_SCALE_1_DPI / dpi;
+		final double mmPerPixel = PIXEL_SCALE_1_DPI / dpi;
 		return (int) Math.round(mm / mmPerPixel);
 	}
 
@@ -83,7 +91,7 @@ public class ChartImageConverter {
 	 */
 	public static int pixelsToMM(int pixels, int dpi) {
 		// The number of mm in a single pixel at this resolution
-		double mmPerPixel = PIXEL_SCALE_1_DPI / dpi;
+		final double mmPerPixel = PIXEL_SCALE_1_DPI / dpi;
 		return (int) Math.round(mmPerPixel * pixels);
 
 	}
@@ -105,29 +113,30 @@ public class ChartImageConverter {
 	public static String createSVG(JFreeChart chart, int wmm, int hmm, int dpi,
 			boolean isFixedAspect) {
 
-		if (isFixedAspect)
+		if (isFixedAspect) {
 			chart = fixAspect(chart, wmm, hmm);
+		}
 
 		// Get the DPI of the display
 		int screenDpi = DEFAULT_SCREEN_DPI;
 		try {
 			screenDpi = Toolkit.getDefaultToolkit().getScreenResolution();
-		} catch (HeadlessException e) {
+		} catch (final HeadlessException e) {
 			// no monitors present to report, just use the default
 			screenDpi = DEFAULT_SCREEN_DPI;
 		}
 
-		double dpiScale = (double) screenDpi / dpi;
+		final double dpiScale = (double) screenDpi / dpi;
 
-		int wpx = mmToPixels(wmm, dpi);
-		int hpx = mmToPixels(hmm, dpi);
+		final int wpx = mmToPixels(wmm, dpi);
+		final int hpx = mmToPixels(hmm, dpi);
 
 		// Adjust for scaling of chart elements
-		int w = (int) (wpx * dpiScale);
-		int h = (int) (hpx * dpiScale);
+		final int w = (int) (wpx * dpiScale);
+		final int h = (int) (hpx * dpiScale);
 
-		SVGGraphics2D g2 = new SVGGraphics2D(w, h, SVGUnits.PX);
-		Rectangle r = new Rectangle(0, 0, w, h);
+		final SVGGraphics2D g2 = new SVGGraphics2D(w, h, SVGUnits.PX);
+		final Rectangle r = new Rectangle(0, 0, w, h);
 		chart.draw(g2, r);
 		return g2.getSVGDocument();
 	}
@@ -144,39 +153,67 @@ public class ChartImageConverter {
 	 */
 	private static JFreeChart fixAspect(JFreeChart c, int wmm, int hmm) {
 		try {
-			JFreeChart chart = (JFreeChart) c.clone();
 
-			double desiredAspect = (double) wmm / hmm;
+			// Clone the original chart. Note that the chart may have axes wider than the
+			// data range in order that aspect is preserved. For an output figure with new
+			// dimensions, the chart ranges may need to be changed. For example, single cell
+			// outline images.
+			final JFreeChart chart = (JFreeChart) c.clone();
 
-			Range xRange = chart.getXYPlot().getDomainAxis().getRange();
-			Range yRange = chart.getXYPlot().getRangeAxis().getRange();
-			double actualAspect = xRange.getLength() / yRange.getLength();
+			final double desiredAspect = (double) wmm / hmm;
 
-			if (actualAspect < desiredAspect) { // y longer than x, increase x range
+			final Range xPlotRange = chart.getXYPlot().getDomainAxis().getRange();
+			final Range yPlotRange = chart.getXYPlot().getRangeAxis().getRange();
 
-				double newX = yRange.getLength() * desiredAspect;
-				double diff = newX - xRange.getLength();
+			// Check if the actual ranges can be trimmed down to fit the data better.
+			Range xDataRange = ExportableChartPanel.getDataDomainRange(chart.getXYPlot());
+			Range yDataRange = ExportableChartPanel.getDataRangeRange(chart.getXYPlot());
 
-				// Fraction of range to expand by
-				double margin = (diff / xRange.getLength()) / 2;
+			xDataRange = Range.expand(xDataRange, RANGE_EXPANSION_FRACTION, RANGE_EXPANSION_FRACTION);
+			yDataRange = Range.expand(yDataRange, RANGE_EXPANSION_FRACTION, RANGE_EXPANSION_FRACTION);
 
-				xRange = Range.expand(xRange, margin, margin);
-				chart.getXYPlot().getDomainAxis().setRange(xRange);
+			LOGGER.finest("X plot range %s".formatted(xPlotRange.toString()));
+			LOGGER.finest("Y plot range %s".formatted(yPlotRange.toString()));
+			LOGGER.finest("X data range %s".formatted(xDataRange.toString()));
+			LOGGER.finest("Y data range %s".formatted(yDataRange.toString()));
 
-			} else { // increase y range
-				double newY = xRange.getLength() / desiredAspect;
-				double diff = newY - yRange.getLength();
+			final double plotAspect = xPlotRange.getLength() / yPlotRange.getLength();
+			final double dataAspect = xDataRange.getLength() / yDataRange.getLength();
 
-				// Fraction of range to expand by
-				double margin = (diff / yRange.getLength()) / 2;
+			LOGGER.finest("Plot aspect %s".formatted(plotAspect));
+			LOGGER.finest("Data aspect %s".formatted(dataAspect));
+			LOGGER.finest("Desired aspect %s".formatted(desiredAspect));
 
-				yRange = Range.expand(yRange, margin, margin);
-				chart.getXYPlot().getRangeAxis().setRange(yRange);
+			if (dataAspect < desiredAspect) { // y is longer than x, increase x axis range
+
+				final double newXLength = yDataRange.getLength() * desiredAspect;
+				final double toAdd = newXLength - xDataRange.getLength();
+
+				// Fraction of range to expand each end of the axis by
+				final double margin = (toAdd / xDataRange.getLength()) / 2;
+
+				xDataRange = Range.expand(xDataRange, margin, margin);
+				chart.getXYPlot().getDomainAxis().setRange(xDataRange);
+				chart.getXYPlot().getRangeAxis().setRange(yDataRange);
+
+			} else { // x is longer than y, increase y axis range
+				final double newYLength = xDataRange.getLength() / desiredAspect;
+				final double toAdd = newYLength - yDataRange.getLength();
+
+				// Fraction of range to expand each end of the axis by
+				final double margin = (toAdd / yDataRange.getLength()) / 2;
+
+				yDataRange = Range.expand(yDataRange, margin, margin);
+				chart.getXYPlot().getRangeAxis().setRange(yDataRange);
+				chart.getXYPlot().getDomainAxis().setRange(xDataRange);
 			}
+
+			LOGGER.finest("Final plot x range %s".formatted(chart.getXYPlot().getDomainAxis().getRange()));
+			LOGGER.finest("Final plot y range %s".formatted(chart.getXYPlot().getRangeAxis().getRange()));
 
 			return chart;
 
-		} catch (CloneNotSupportedException e) {
+		} catch (final CloneNotSupportedException e) {
 			return c;
 		}
 	}
@@ -193,16 +230,16 @@ public class ChartImageConverter {
 	 */
 	private static BufferedImage convertSVGToPNG(String svg, int wmm, int dpi)
 			throws TranscoderException, IOException {
-		float mmPerPixel = PIXEL_SCALE_1_DPI / dpi;
-		int w_px = mmToPixels(wmm, dpi);
+		final float mmPerPixel = PIXEL_SCALE_1_DPI / dpi;
+		final int w_px = mmToPixels(wmm, dpi);
 
-		TranscoderInput transcoderInput = new TranscoderInput(new StringReader(svg));
+		final TranscoderInput transcoderInput = new TranscoderInput(new StringReader(svg));
 
-		ByteArrayOutputStream resultByteStream = new ByteArrayOutputStream();
+		final ByteArrayOutputStream resultByteStream = new ByteArrayOutputStream();
 
-		TranscoderOutput transcoderOutput = new TranscoderOutput(resultByteStream);
+		final TranscoderOutput transcoderOutput = new TranscoderOutput(resultByteStream);
 
-		PNGTranscoder pngTranscoder = new PNGTranscoder();
+		final PNGTranscoder pngTranscoder = new PNGTranscoder();
 		pngTranscoder.addTranscodingHint(SVGAbstractTranscoder.KEY_WIDTH, (float) w_px);
 		pngTranscoder.addTranscodingHint(SVGAbstractTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER,
 				mmPerPixel);
