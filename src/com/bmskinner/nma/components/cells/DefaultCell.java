@@ -17,6 +17,7 @@
 package com.bmskinner.nma.components.cells;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,12 +36,15 @@ import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
 import com.bmskinner.nma.components.XMLNames;
+import com.bmskinner.nma.components.measure.ArrayMeasurement;
 import com.bmskinner.nma.components.measure.DefaultMeasurement;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.measure.MissingMeasurementException;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
+import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.io.XmlSerializable;
+import com.bmskinner.nma.utility.ArrayUtils;
 
 /**
  * The cell is the highest level of analysis here. Cells we can analyse have a
@@ -56,13 +60,19 @@ public class DefaultCell implements ICell {
 	protected UUID uuid;
 	protected ICytoplasm cytoplasm = null;
 	protected List<Nucleus> nuclei = new ArrayList<>();
-	
+
 	transient protected boolean isRecalcHashcode = true;
 	transient protected int hashcodeCache = 0;
 
 	/** The statistical values stored for this object */
-	private Map<Measurement, Double> measurements = new HashMap<>();
-	
+	private final Map<Measurement, Double> measurements = new HashMap<>();
+
+	/**
+	 * Measurements stored for this object that are associated with an array instead
+	 * of single values e.g. histograms
+	 */
+	private final Map<Measurement, List<Double>> arrayMeasurements = new HashMap<>();
+
 	transient protected List<ComponentUpdateListener> componentUpdateListeners = new ArrayList<>();
 
 	/**
@@ -71,8 +81,7 @@ public class DefaultCell implements ICell {
 	protected DefaultCell() {
 		this(UUID.randomUUID());
 	}
-	
-	
+
 
 	/**
 	 * Construct from an XML element. Use for unmarshalling. The element should
@@ -93,6 +102,12 @@ public class DefaultCell implements ICell {
 		for (final Element el : e.getChildren(XMLNames.XML_MEASUREMENT)) {
 			final Measurement m = new DefaultMeasurement(el);
 			measurements.put(m, Double.parseDouble(el.getAttributeValue(XMLNames.XML_VALUE)));
+		}
+
+		for (final Element el : e.getChildren(XMLNames.XML_ARRAY_MEASUREMENT)) {
+			final Measurement m = new ArrayMeasurement(el);
+			final double[] values = XMLReader.parseDoubleArray(el.getAttributeValue(XMLNames.XML_VALUE));
+			arrayMeasurements.put(m, ArrayUtils.toMutableList(values));
 		}
 
 	}
@@ -138,10 +153,15 @@ public class DefaultCell implements ICell {
 			cytoplasm.addComponentUpdateListener(this);
 		}
 
-		measurements = new HashMap<>();
 		for (final Measurement stat : c.getMeasurements()) {
 			try {
-				measurements.put(stat, c.getMeasurement(stat));
+				if (stat.isArrayMeasurement()) {
+					// ensure we have a separate copy of the data
+					final double[] tmp = ArrayUtils.toArray(c.getArrayMeasurement(stat, MeasurementScale.PIXELS));
+					setMeasurement(stat, tmp);
+				} else {
+					setMeasurement(stat, c.getMeasurement(stat, MeasurementScale.PIXELS));
+				}
 			} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
 				LOGGER.log(Level.SEVERE, "Error copying measurement to new cell", e);
 			}
@@ -323,9 +343,16 @@ public class DefaultCell implements ICell {
 	@Override
 	@NonNull public Element toXmlElement() {
 		final Element e = new Element(XMLNames.XML_CELL).setAttribute(XMLNames.XML_ID, uuid.toString());
+
 		for (final Entry<Measurement, Double> entry : measurements.entrySet()) {
 			e.addContent(entry.getKey().toXmlElement().setAttribute(XMLNames.XML_VALUE,
 					entry.getValue().toString()));
+		}
+
+		for (final Entry<Measurement, List<Double>> entry : arrayMeasurements.entrySet()) {
+			final double[] values = ArrayUtils.toArray(entry.getValue());
+			e.addContent(entry.getKey().toXmlElement().setAttribute(XMLNames.XML_VALUE,
+					Arrays.toString(values)));
 		}
 
 		if (cytoplasm != null) {
@@ -352,7 +379,7 @@ public class DefaultCell implements ICell {
 				&& Objects.equals(measurements, other.measurements)
 				&& Objects.equals(uuid, other.uuid);
 	}
-	
+
 	protected int recalculateHashcodeCache() {
 		return Objects.hash(cytoplasm, nuclei, measurements, uuid);
 	}
@@ -400,7 +427,28 @@ public class DefaultCell implements ICell {
 	public void removeComponentUpdateListener(ComponentUpdateListener l) {
 		componentUpdateListeners.remove(l);
 	}
-	
-	
+
+	@Override
+	public List<Double> getArrayMeasurement(@NonNull Measurement measurement, @NonNull MeasurementScale scale)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
+		final double sc = chooseScale();
+		if (!this.arrayMeasurements.containsKey(measurement)) {
+			setMeasurement(measurement, ComponentMeasurer.calculate(measurement, this));
+		}
+		return measurement.convert(arrayMeasurements.get(measurement), sc, scale);
+	}
+
+	@Override
+	public List<Double> getArrayMeasurement(@NonNull Measurement measurement)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
+		return getArrayMeasurement(measurement, MeasurementScale.PIXELS);
+	}
+
+	@Override
+	public void setMeasurement(@NonNull Measurement measurement, double[] d) {
+		arrayMeasurements.put(measurement, ArrayUtils.toMutableList(d));
+		fireComponentUpdated();
+	}
+
 
 }

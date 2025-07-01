@@ -17,6 +17,7 @@
 package com.bmskinner.nma.components.measure;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -253,12 +254,23 @@ public interface Measurement extends XmlSerializable {
 	}
 
 	/**
+	 * Create a measurement for a level of the pixel histogram.
+	 * 
+	 * @param dim the grey level measured
+	 * @return
+	 */
+	static Measurement makeImageHistogram(int channel) {
+		return new ArrayMeasurement(Names.PIXEL_HISTOGRAM + "_channel_" + channel,
+				MeasurementDimension.NONE);
+	}
+
+	/**
 	 * All available stats
 	 * 
 	 * @return
 	 */
 	static List<Measurement> getAllStatsTypes() {
-		List<Measurement> list = new ArrayList<>();
+		final List<Measurement> list = new ArrayList<>();
 		list.add(AREA);
 		list.add(PERIMETER);
 		list.add(MIN_DIAMETER);
@@ -294,9 +306,9 @@ public interface Measurement extends XmlSerializable {
 	 */
 	static Measurement of(String name) {
 
-		List<Measurement> all = getAllStatsTypes();
+		final List<Measurement> all = getAllStatsTypes();
 
-		for (Measurement stat : all) {
+		for (final Measurement stat : all) {
 			if (stat.name().equals(name))
 				return stat;
 		}
@@ -309,7 +321,7 @@ public interface Measurement extends XmlSerializable {
 	 * @return
 	 */
 	static List<Measurement> getComponentStats() {
-		List<Measurement> list = new ArrayList<>();
+		final List<Measurement> list = new ArrayList<>();
 		list.add(AREA);
 		list.add(PERIMETER);
 		list.add(CIRCULARITY);
@@ -322,7 +334,7 @@ public interface Measurement extends XmlSerializable {
 	 * @return
 	 */
 	static List<Measurement> getCellStats() {
-		List<Measurement> list = new ArrayList<>();
+		final List<Measurement> list = new ArrayList<>();
 //		list.add(CELL_NUCLEUS_COUNT);
 //		list.add(CELL_NUCLEAR_AREA);
 //		list.add(CELL_NUCLEAR_RATIO);
@@ -340,7 +352,7 @@ public interface Measurement extends XmlSerializable {
 
 	static List<Measurement> getRoundNucleusStats() {
 
-		List<Measurement> list = getComponentStats();
+		final List<Measurement> list = getComponentStats();
 		list.add(MIN_DIAMETER);
 		list.add(ELLIPTICITY);
 		list.add(ASPECT);
@@ -353,9 +365,8 @@ public interface Measurement extends XmlSerializable {
 	}
 
 	static List<Measurement> getGlcmStats() {
-		List<Measurement> list = new ArrayList<>();
-		for (Measurement s : GLCMParameter.toStats())
-			list.add(s);
+		final List<Measurement> list = new ArrayList<>();
+		Collections.addAll(list, GLCMParameter.toStats());
 		return list;
 	}
 
@@ -365,9 +376,10 @@ public interface Measurement extends XmlSerializable {
 	 * @return the 256 grey level measurements
 	 */
 	static List<Measurement> getPixelHistogramMeasurements(int channel) {
-		List<Measurement> list = new ArrayList<>();
-		for (int i = 0; i < 256; i++)
+		final List<Measurement> list = new ArrayList<>();
+		for (int i = 0; i < 256; i++) {
 			list.add(Measurement.makePixelHistogram(channel, i));
+		}
 		return list;
 	}
 
@@ -377,7 +389,7 @@ public interface Measurement extends XmlSerializable {
 	 * @return
 	 */
 	static List<Measurement> getRodentSpermNucleusStats() {
-		List<Measurement> list = getRoundNucleusStats();
+		final List<Measurement> list = getRoundNucleusStats();
 		list.add(HOOK_LENGTH);
 		list.add(BODY_WIDTH);
 		return list;
@@ -389,7 +401,7 @@ public interface Measurement extends XmlSerializable {
 	 * @return
 	 */
 	static List<Measurement> getSignalStats() {
-		List<Measurement> list = getComponentStats();
+		final List<Measurement> list = getComponentStats();
 		list.add(ANGLE);
 		list.add(DISTANCE_FROM_COM);
 		list.add(FRACT_DISTANCE_FROM_COM);
@@ -403,7 +415,7 @@ public interface Measurement extends XmlSerializable {
 	 * @return
 	 */
 	static List<Measurement> getSegmentStats() {
-		List<Measurement> list = new ArrayList<>(2);
+		final List<Measurement> list = new ArrayList<>(2);
 		list.add(LENGTH);
 		return list;
 	}
@@ -415,17 +427,18 @@ public interface Measurement extends XmlSerializable {
 	 * @return
 	 */
 	static List<Measurement> commonMeasurements(List<IAnalysisDataset> datasets) {
-		List<Measurement> result = new ArrayList<>();
+		final List<Measurement> result = new ArrayList<>();
 
 		// Get measurements in first dataset
-		Set<Measurement> d1 = datasets.get(0).getCollection().getRuleSetCollection()
+		final Set<Measurement> d1 = datasets.get(0).getCollection().getRuleSetCollection()
 				.getMeasurableValues();
-		for (Measurement m : d1) {
+		for (final Measurement m : d1) {
 			// Keep if they are in all other datasets
 			if (datasets.stream()
 					.allMatch(d -> d.getCollection().getRuleSetCollection().getMeasurableValues()
-							.contains(m)))
+							.contains(m))) {
 				result.add(m);
+			}
 		}
 		return result;
 	}
@@ -452,6 +465,13 @@ public interface Measurement extends XmlSerializable {
 	boolean isAngle();
 
 	/**
+	 * Test if this measurement is associated with an array of values
+	 * 
+	 * @return
+	 */
+	boolean isArrayMeasurement();
+
+	/**
 	 * Get the dimension of the statistic (area, length, angle, none)
 	 * 
 	 * @return
@@ -475,6 +495,17 @@ public interface Measurement extends XmlSerializable {
 	 * @return
 	 */
 	double convert(double value, double factor, MeasurementScale scale);
+
+	/**
+	 * Convert the input value (assumed to be pixels) using the given factor (
+	 * Nucleus.getScale() ) into the appropriate scale
+	 * 
+	 * @param value  the pixel measure
+	 * @param factor the conversion factor to microns
+	 * @param scale  the desired scale
+	 * @return
+	 */
+	List<Double> convert(List<Double> value, double factor, MeasurementScale scale);
 
 	/**
 	 * Get the appropriate units label for the statistic, based on its dimension.
@@ -541,6 +572,40 @@ public interface Measurement extends XmlSerializable {
 			return value;
 		}
 
+	}
+
+	/**
+	 * Convert the input value (assumed to be pixels) using the given factor (
+	 * CellularComponent.getScale() ) into the appropriate scale
+	 * 
+	 * @param value  the pixel measure
+	 * @param factor the conversion factor to microns
+	 * @param scale  the desired scale
+	 * @param dim    the dimension of the statistic
+	 * @return the converted value
+	 */
+	static List<Double> convertArray(List<Double> value, double factor, MeasurementScale scale,
+			MeasurementDimension dim) {
+
+		final List<Double> result = new ArrayList<>();
+		for (final Double d : value) {
+			final double r = switch (scale) {
+			case MICRONS -> {
+				yield switch (dim) {
+				case AREA -> Measurement.areaToMicrons(d, factor);
+				case LENGTH -> Measurement.lengthToMicrons(d, factor);
+				case NONE, ANGLE -> d;
+				default -> d;
+				};
+			}
+
+			case PIXELS -> d;
+			default -> d;
+			};
+			
+			result.add(r);
+		};
+		return result;
 	}
 
 	/**

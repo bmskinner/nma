@@ -69,6 +69,10 @@ public class XMLNames {
 	/** XML identifier for a valid measurement */
 	public static final String XML_MEASUREMENT = "Measurement";
 
+	/** XML identifier for a valid array measurement */
+	public static final String XML_ARRAY_MEASUREMENT = "ArrayMeasurement";
+
+
 	public static final String XML_DIMENSION = "dim";
 
 	// From cluster groups

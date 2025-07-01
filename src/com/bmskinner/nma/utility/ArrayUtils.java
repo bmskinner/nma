@@ -1,6 +1,8 @@
 package com.bmskinner.nma.utility;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Utility methods for arrays
@@ -14,6 +16,28 @@ public class ArrayUtils {
 		// only uses static methods
 	}
 	
+	/**
+	 * Box the given doubles and add to a mutable list
+	 * 
+	 * @param arr
+	 * @return
+	 */
+	public static List<Double> toMutableList(double[] arr) {
+		final List<Double> result = new ArrayList<>();
+		for (final double d : arr) {
+			result.add(d);
+		}
+		return result;
+	}
+
+	public static double[] toArray(List<Double> l) {
+		final double[] result = new double[l.size()];
+		for (int i = 0; i < l.size(); i++) {
+			result[i] = l.get(i);
+		}
+		return result;
+	}
+
 	/**
 	 * Unbox the given array
 	 * @param arr
@@ -39,7 +63,7 @@ public class ArrayUtils {
 	 * @return
 	 */
 	public static float[] toFloat(Float[] arr) {
-		float[] f = new float[arr.length];
+		final float[] f = new float[arr.length];
 		for (int i = 0; i < arr.length; i++) {
 			f[i] = arr[i];
 
@@ -54,7 +78,7 @@ public class ArrayUtils {
 	 * @return
 	 */
 	public static float[] toFloat(long[] arr) {
-		float[] f = new float[arr.length];
+		final float[] f = new float[arr.length];
 
 		for (int i = 0; i < arr.length; i++) {
 			f[i] = arr[i];
@@ -70,7 +94,7 @@ public class ArrayUtils {
 	 * @return
 	 */
 	public static float[] toFloat(double[] arr) {
-		float[] f = new float[arr.length];
+		final float[] f = new float[arr.length];
 
 		for (int i = 0; i < arr.length; i++) {
 			f[i] = (float) arr[i];
@@ -87,7 +111,7 @@ public class ArrayUtils {
 	 */
 	public static int[] reverse(int[] arr) {
 		for (int i = 0; i < arr.length / 2; i++) {
-			int t = arr[i];
+			final int t = arr[i];
 			arr[i] = arr[arr.length - i - 1];
 			arr[arr.length - i - 1] = t;
 		}
@@ -102,9 +126,10 @@ public class ArrayUtils {
 	 * @return
 	 */
 	public static float[] floatArray(int length, float value) {
-		float[] f = new float[length];
-		for (int i = 0; i < f.length; i++)
+		final float[] f = new float[length];
+		for (int i = 0; i < f.length; i++) {
 			f[i] = value;
+		}
 		return f;
 	}
 
@@ -116,9 +141,10 @@ public class ArrayUtils {
 	 * @return
 	 */
 	public static byte[] byteArray(int length, byte value) {
-		byte[] f = new byte[length];
-		for (int i = 0; i < f.length; i++)
+		final byte[] f = new byte[length];
+		for (int i = 0; i < f.length; i++) {
 			f[i] = value;
+		}
 		return f;
 	}
 

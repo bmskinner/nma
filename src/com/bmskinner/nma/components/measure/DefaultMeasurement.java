@@ -16,6 +16,8 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.measure;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
@@ -66,6 +68,11 @@ public class DefaultMeasurement implements Measurement {
 	}
 
 	@Override
+	public boolean isArrayMeasurement() {
+		return false;
+	}
+
+	@Override
 	public MeasurementDimension getDimension() {
 		return dim;
 	}
@@ -73,12 +80,13 @@ public class DefaultMeasurement implements Measurement {
 	@Override
 	public String label(MeasurementScale scale) {
 
-		StringBuilder b = new StringBuilder(name);
+		final StringBuilder b = new StringBuilder(name);
 
-		if (!dim.equals(MeasurementDimension.NONE))
+		if (!dim.equals(MeasurementDimension.NONE)) {
 			b.append(" (")
 					.append(units(scale))
 					.append(")");
+		}
 
 		return b.toString();
 	}
@@ -86,6 +94,11 @@ public class DefaultMeasurement implements Measurement {
 	@Override
 	public double convert(double value, double factor, MeasurementScale scale) {
 		return Measurement.convert(value, factor, scale, dim);
+	}
+
+	@Override
+	public List<Double> convert(List<Double> value, double factor, MeasurementScale scale) {
+		return Measurement.convertArray(value, factor, scale, this.getDimension());
 	}
 
 	@Override
@@ -115,7 +128,7 @@ public class DefaultMeasurement implements Measurement {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DefaultMeasurement other = (DefaultMeasurement) obj;
+		final DefaultMeasurement other = (DefaultMeasurement) obj;
 		if (dim != other.dim)
 			return false;
 		if (name == null) {

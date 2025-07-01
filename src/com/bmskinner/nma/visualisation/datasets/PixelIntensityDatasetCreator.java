@@ -37,8 +37,8 @@ public class PixelIntensityDatasetCreator extends AbstractDatasetCreator<ChartOp
 
 	/**
 	 * Create a dataset that contains CGH log2ratios for all channel combinations in
-	 * a single dataset. i.e. blue-red, blue-green, red-green (for whichever
-	 * combinations are present).
+	 * a dataset. i.e. blue-red, blue-green, red-green (for whichever combinations
+	 * are present).
 	 * 
 	 * @return a violin dataset
 	 */
@@ -48,9 +48,9 @@ public class PixelIntensityDatasetCreator extends AbstractDatasetCreator<ChartOp
 
 		final List<IAnalysisDataset> datasets = options.getDatasets();
 
-		final List<Measurement> pixelMeasurementKeysR = Measurement.getPixelHistogramMeasurements(0);
-		final List<Measurement> pixelMeasurementKeysG = Measurement.getPixelHistogramMeasurements(1);
-		final List<Measurement> pixelMeasurementKeysB = Measurement.getPixelHistogramMeasurements(2);
+		final Measurement keyR = Measurement.makeImageHistogram(0);
+		final Measurement keyG = Measurement.makeImageHistogram(1);
+		final Measurement keyB = Measurement.makeImageHistogram(2);
 
 		// Calculate the data
 		for (final IAnalysisDataset d : datasets) {
@@ -68,18 +68,24 @@ public class PixelIntensityDatasetCreator extends AbstractDatasetCreator<ChartOp
 					double totalG = 0;
 					double totalB = 0;
 
-					for (int px = 0; px < 256; px++) {
-
-						if (n.hasMeasurement(pixelMeasurementKeysR.get(px))) {
-							totalR += n.getMeasurement(pixelMeasurementKeysR.get(px)) * px;
+					if (n.hasMeasurement(keyR)) {
+						final List<Double> valsR = n.getArrayMeasurement(keyR);
+						for (int px = 0; px < 256; px++) {
+							totalR += valsR.get(px) * px;
 						}
+					}
 
-						if (n.hasMeasurement(pixelMeasurementKeysG.get(px))) {
-							totalG += n.getMeasurement(pixelMeasurementKeysG.get(px)) * px;
+					if (n.hasMeasurement(keyG)) {
+						final List<Double> valsG = n.getArrayMeasurement(keyG);
+						for (int px = 0; px < 256; px++) {
+							totalG += valsG.get(px) * px;
 						}
+					}
 
-						if (n.hasMeasurement(pixelMeasurementKeysB.get(px))) {
-							totalB += n.getMeasurement(pixelMeasurementKeysB.get(px)) * px;
+					if (n.hasMeasurement(keyB)) {
+						final List<Double> valsB = n.getArrayMeasurement(keyB);
+						for (int px = 0; px < 256; px++) {
+							totalB += valsB.get(px) * px;
 						}
 					}
 

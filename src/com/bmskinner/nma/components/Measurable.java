@@ -66,12 +66,51 @@ public interface Measurable {
 			SegmentUpdateException;
 
 	/**
+	 * Get the value of the given measurement for this component. Note that
+	 * {@link Measurement.VARIABILILTY} returns zero, as this must be calculated at
+	 * the collection level
+	 * 
+	 * @param measurement the measurement to fetch
+	 * @param scale       the units to return values in
+	 * @return the value or zero if stat.equals(Measurement.VARIABILILTY)
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
+	 */
+	List<Double> getArrayMeasurement(@NonNull Measurement measurement, @NonNull MeasurementScale scale)
+			throws MissingDataException, ComponentCreationException,
+			SegmentUpdateException;
+
+	/**
+	 * Get the measurement at the default scale ({@link MeasurementScale.PIXELS}),
+	 * calculating if not already present.
+	 * 
+	 * @param measurement
+	 * @return
+	 * @throws SegmentUpdateException
+	 * @throws ComponentCreationException
+	 * @throws MissingDataException
+	 */
+	List<Double> getArrayMeasurement(@NonNull Measurement measurement)
+			throws MissingDataException, ComponentCreationException,
+			SegmentUpdateException;
+
+	/**
 	 * Set the measurement at the default scale ({@link MeasurementScale.PIXELS})
 	 * 
 	 * @param measurement
 	 * @param d
 	 */
 	void setMeasurement(@NonNull Measurement measurement, double d);
+
+	/**
+	 * Set an array measurement at the default scale
+	 * ({@link MeasurementScale.PIXELS})
+	 * 
+	 * @param measurement
+	 * @param d
+	 */
+	void setMeasurement(@NonNull Measurement measurement, double[] d);
 
 	/*
 	 * Remove the given measurement from the cache

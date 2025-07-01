@@ -56,7 +56,7 @@ public class CellHistogramCalculationMethod extends SingleDatasetAnalysisMethod 
 			for (final ICell c : dataset.getCollection().getCells(f)) {
 				for (final Nucleus n : c.getNuclei()) {
 
-					final int[] histogram = new int[256];
+					final double[] histogram = new double[256];
 					final Roi roi = n.toOriginalRoi();
 					final int x = (int) n.getMinX();
 					final int w = (int) n.getMaxX();
@@ -72,11 +72,14 @@ public class CellHistogramCalculationMethod extends SingleDatasetAnalysisMethod 
 						}
 					}
 
+					final Measurement m = Measurement.makeImageHistogram(channel);
+					n.setMeasurement(m, histogram);
+
 					// Add the measurments to the nucleus
-					for (int i = 0; i < histogram.length; i++) {
-						final Measurement m = Measurement.makePixelHistogram(channel, i);
-						n.setMeasurement(m, histogram[i]);
-					}
+//					for (int i = 0; i < histogram.length; i++) {
+//						final Measurement m = Measurement.makePixelHistogram(channel, i);
+//						n.setMeasurement(m, histogram[i]);
+//					}
 
 				}
 				fireProgressEvent();

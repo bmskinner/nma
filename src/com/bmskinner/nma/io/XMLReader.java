@@ -39,7 +39,7 @@ public abstract class XMLReader {
 	 * @throws XMLReadingException if the document could not be read or was not XML
 	 */
 	public static Document readDocument(@NonNull File file) throws XMLReadingException {
-		SAXBuilder saxBuilder = new SAXBuilder();
+		final SAXBuilder saxBuilder = new SAXBuilder();
 		try {
 			return saxBuilder.build(file);
 		} catch (JDOMException | IOException e) {
@@ -50,29 +50,29 @@ public abstract class XMLReader {
 
 	public static IAnalysisDataset readDataset(@NonNull File f)
 			throws XMLReadingException, ComponentCreationException, UnsupportedVersionException {
-		Document d = readDocument(f);
+		final Document d = readDocument(f);
 		return DatasetCreator.createRoot(d.getRootElement(), null);
 	}
 
 	public static RuleSetCollection readRulesetCollection(@NonNull File f)
 			throws XMLReadingException, ComponentCreationException {
-		Document d = readDocument(f);
+		final Document d = readDocument(f);
 		return new RuleSetCollection(d.getRootElement());
 	}
 
 	public static HashOptions readOptions(@NonNull File f) throws XMLReadingException {
-		Document d = readDocument(f);
+		final Document d = readDocument(f);
 		return new DefaultOptions(d.getRootElement());
 	}
 
 	public static IAnalysisOptions readAnalysisOptions(@NonNull File f)
 			throws XMLReadingException, ComponentCreationException {
-		Document d = readDocument(f);
+		final Document d = readDocument(f);
 		return new DefaultAnalysisOptions(d.getRootElement());
 	}
 
 	public static IWorkspace readWorkspace(@NonNull File f) throws XMLReadingException {
-		Document d = readDocument(f);
+		final Document d = readDocument(f);
 		return new DefaultWorkspace(f, d.getRootElement());
 	}
 
@@ -83,12 +83,12 @@ public abstract class XMLReader {
 	 * @return
 	 */
 	public static long[] parseLongArray(String arrayText) {
-		String[] s = arrayText.replace("[", "")
+		final String[] s = arrayText.replace("[", "")
 				.replace("]", "")
 				.replace(" ", "")
 				.split(",");
 
-		long[] l = new long[s.length];
+		final long[] l = new long[s.length];
 		for (int i = 0; i < s.length; i++) {
 			l[i] = Long.parseLong(s[i]);
 		}
@@ -102,14 +102,34 @@ public abstract class XMLReader {
 	 * @return
 	 */
 	public static int[] parseIntArray(String arrayText) {
-		String[] s = arrayText.replace("[", "")
+		final String[] s = arrayText.replace("[", "")
 				.replace("]", "")
 				.replace(" ", "")
 				.split(",");
 
-		int[] l = new int[s.length];
+		final int[] l = new int[s.length];
 		for (int i = 0; i < s.length; i++) {
 			l[i] = Integer.parseInt(s[i]);
+		}
+		return l;
+	}
+
+	/**
+	 * Parse a string to an array, assuming it has the format: [1.0, 2.0, 3.0, 4.0,
+	 * 5.0]
+	 * 
+	 * @param arrayText
+	 * @return
+	 */
+	public static double[] parseDoubleArray(String arrayText) {
+		final String[] s = arrayText.replace("[", "")
+				.replace("]", "")
+				.replace(" ", "")
+				.split(",");
+
+		final double[] l = new double[s.length];
+		for (int i = 0; i < s.length; i++) {
+			l[i] = Double.parseDouble(s[i]);
 		}
 		return l;
 	}
