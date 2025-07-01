@@ -83,6 +83,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		super(e);
 		savePath = new File(e.getChildText(XMLNames.XML_SAVE_FILE)).getAbsoluteFile();
 		cellCollection = new DefaultCellCollection(e.getChild(XMLNames.XML_CELL_COLLECTION), l);
+		cellCollection.addComponentUpdateListener(this);
 	}
 
 	/**
@@ -95,9 +96,11 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	private DefaultAnalysisDataset(DefaultAnalysisDataset d) throws ComponentCreationException {
 		super(d);
 		cellCollection = d.cellCollection.duplicate();
+		cellCollection.addComponentUpdateListener(this);
 
-		for (IAnalysisDataset g : d.otherDatasets)
+		for (final IAnalysisDataset g : d.otherDatasets) {
 			otherDatasets.add(g.copy());
+		}
 
 		mergeSources.addAll(d.mergeSources);
 
@@ -107,7 +110,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
 	@Override
 	@NonNull public Element toXmlElement() {
-		Element e = super.toXmlElement();
+		final Element e = super.toXmlElement();
 		e.addContent(new Element(XMLNames.XML_SAVE_FILE).setText(savePath.getPath()));
 
 		e.addContent(cellCollection.toXmlElement());
@@ -139,7 +142,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	@Override
 	public IAnalysisDataset addChildCollection(@NonNull final ICellCollection collection) {
 		try {
-			VirtualDataset v = new VirtualDataset(this, collection.getName(), collection.getId(),
+			final VirtualDataset v = new VirtualDataset(this, collection.getName(), collection.getId(),
 					collection);
 			return addChildDataset(v);
 		} catch (MissingDataException | SegmentUpdateException e) {
@@ -158,7 +161,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 			if (getName().equals(dataset.getName())
 					|| childDatasets.stream().map(IAnalysisDataset::getName)
 							.anyMatch(s -> s.equals(dataset.getName()))) {
-				String newName = chooseSuffix(dataset.getName());
+				final String newName = chooseSuffix(dataset.getName());
 				dataset.setName(newName);
 			}
 		}
@@ -176,7 +179,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
 		childDatasets.removeIf(c -> c.getId().equals(id));
 
-		for (IClusterGroup g : clusterGroups) {
+		for (final IClusterGroup g : clusterGroups) {
 			if (g.hasDataset(id)) {
 				g.removeDataset(id);
 			}
@@ -202,21 +205,23 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		LOGGER.fine(() -> "Setting scale for " + getName() + " to " + scale);
 
 		getCollection().forEach(c -> c.setScale(scale));
-		if (getCollection().hasConsensus())
+		if (getCollection().hasConsensus()) {
 			getCollection().getRawConsensus().setScale(scale);
+		}
 		getCollection().clear(MeasurementScale.MICRONS);
 
-		Optional<IAnalysisOptions> op = getAnalysisOptions();
+		final Optional<IAnalysisOptions> op = getAnalysisOptions();
 		if (op.isPresent()) {
-			Set<String> detectionOptions = op.get().getDetectionOptionTypes();
-			for (String detectedComponent : detectionOptions) {
-				Optional<HashOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
-				if (subOptions.isPresent())
+			final Set<String> detectionOptions = op.get().getDetectionOptionTypes();
+			for (final String detectedComponent : detectionOptions) {
+				final Optional<HashOptions> subOptions = op.get().getDetectionOptions(detectedComponent);
+				if (subOptions.isPresent()) {
 					subOptions.get().setDouble(HashOptions.SCALE, scale);
+				}
 			}
 		}
 
-		for (IAnalysisDataset child : getChildDatasets()) {
+		for (final IAnalysisDataset child : getChildDatasets()) {
 			child.setScale(scale);
 		}
 		isRecalcHashcode = true;
@@ -230,13 +235,13 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	@Override
 	public Set<UUID> getAllChildUUIDs() {
 
-		Set<UUID> result = new HashSet<>();
+		final Set<UUID> result = new HashSet<>();
 
-		Set<UUID> idlist = getChildUUIDs();
+		final Set<UUID> idlist = getChildUUIDs();
 		result.addAll(idlist);
 
-		for (UUID id : idlist) {
-			IAnalysisDataset d = getChildDataset(id);
+		for (final UUID id : idlist) {
+			final IAnalysisDataset d = getChildDataset(id);
 			result.addAll(d.getAllChildUUIDs());
 		}
 		return result;
@@ -245,13 +250,13 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	@Override
 	public IAnalysisDataset getChildDataset(@NonNull final UUID id) {
 		if (this.hasDirectChild(id)) {
-			for (IAnalysisDataset c : childDatasets) {
+			for (final IAnalysisDataset c : childDatasets) {
 				if (c.getId().equals(id))
 					return c;
 			}
 
 		} else {
-			for (IAnalysisDataset child : this.getAllChildDatasets()) {
+			for (final IAnalysisDataset child : this.getAllChildDatasets()) {
 				if (child.getId().equals(id))
 					return child;
 			}
@@ -277,10 +282,10 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	@Override
 	public List<IAnalysisDataset> getAllChildDatasets() {
 
-		List<IAnalysisDataset> result = new ArrayList<>();
+		final List<IAnalysisDataset> result = new ArrayList<>();
 
 		if (!childDatasets.isEmpty()) {
-			for (IAnalysisDataset d : childDatasets) {
+			for (final IAnalysisDataset d : childDatasets) {
 				result.add(d);
 				result.addAll(d.getAllChildDatasets());
 			}
@@ -298,21 +303,24 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
 		if (this.hasClusters()) {
 			// Find the groups that need removing
-			List<IClusterGroup> groupsToDelete = new ArrayList<>();
-			for (IClusterGroup g : this.getClusterGroups()) {
+			final List<IClusterGroup> groupsToDelete = new ArrayList<>();
+			for (final IClusterGroup g : this.getClusterGroups()) {
 				boolean clusterRemains = false;
 
-				for (UUID childID : g.getUUIDs()) {
-					if (this.hasDirectChild(childID))
+				for (final UUID childID : g.getUUIDs()) {
+					if (this.hasDirectChild(childID)) {
 						clusterRemains = true;
+					}
 				}
-				if (!clusterRemains)
+				if (!clusterRemains) {
 					groupsToDelete.add(g);
+				}
 			}
 
 			// Remove the groups
-			for (IClusterGroup g : groupsToDelete)
+			for (final IClusterGroup g : groupsToDelete) {
 				this.deleteClusterGroup(g);
+			}
 			
 			isRecalcHashcode = true;
 		}
@@ -322,17 +330,19 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	public void deleteClusterGroup(@NonNull final IClusterGroup group) {
 
 		if (hasClusterGroup(group)) {
-			UUID[] groupIds = group.getUUIDs().toArray(new UUID[0]);
+			final UUID[] groupIds = group.getUUIDs().toArray(new UUID[0]);
 
-			for (UUID id : groupIds)
+			for (final UUID id : groupIds) {
 				deleteChild(id);
+			}
 
 			// Remove saved values associated with the cluster group
 			// e.g. tSNE, PCA
-			for (Nucleus n : getCollection().getNuclei()) {
-				for (Measurement s : n.getMeasurements()) {
-					if (s.toString().endsWith(group.getId().toString()))
+			for (final Nucleus n : getCollection().getNuclei()) {
+				for (final Measurement s : n.getMeasurements()) {
+					if (s.toString().endsWith(group.getId().toString())) {
 						n.clearMeasurement(s);
+					}
 				}
 			}
 			this.clusterGroups.remove(group);
@@ -344,9 +354,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	public void deleteClusterGroups() {
 		LOGGER.fine("Deleting all cluster groups in " + getName());
 		// Use arrays to avoid concurrent modifications to cluster groups
-		Object[] ids = clusterGroups.parallelStream().map(IClusterGroup::getId).toArray();
-		for (Object id : ids) {
-			IClusterGroup g = clusterGroups.stream().filter(group -> group.getId().equals(id))
+		final Object[] ids = clusterGroups.parallelStream().map(IClusterGroup::getId).toArray();
+		for (final Object id : ids) {
+			final IClusterGroup g = clusterGroups.stream().filter(group -> group.getId().equals(id))
 					.findFirst().get();
 			deleteClusterGroup(g);
 		}
@@ -383,7 +393,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 			return;
 		}
 
-		Optional<HashOptions> nucleusOptions = analysisOptions
+		final Optional<HashOptions> nucleusOptions = analysisOptions
 				.getDetectionOptions(CellularComponent.NUCLEUS);
 
 		if (!nucleusOptions.isPresent()) {
@@ -393,8 +403,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
 		// Check that the folders have the same name - if the files have
 		// just been copied between computers, this should be true
-		String filePath = analysisOptions.getNucleusDetectionFolder().get().getAbsolutePath();
-		String expectedName = new File(filePath).getName();
+		final String filePath = analysisOptions.getNucleusDetectionFolder().get().getAbsolutePath();
+		final String expectedName = new File(filePath).getName();
 
 		if (!expectedImageDirectory.getName().equals(expectedName)) {
 			LOGGER.warning(String.format(
@@ -417,7 +427,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
 		// TODO add unit tests that this completes correctly
 
-		for (IAnalysisDataset child : this.getAllChildDatasets()) {
+		for (final IAnalysisDataset child : this.getAllChildDatasets()) {
 			child.getCollection().setSourceFolder(expectedImageDirectory);
 		}
 		isRecalcHashcode = true;
@@ -433,15 +443,16 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	 */
 	private boolean hasImages(@NonNull final File expectedImageDirectory) {
 
-		File[] listOfFiles = expectedImageDirectory.listFiles();
+		final File[] listOfFiles = expectedImageDirectory.listFiles();
 
 		if (listOfFiles == null)
 			return false;
 
 		int result = 0;
-		for (File file : listOfFiles) {
-			if (ImageImporter.isFileImportable(file))
+		for (final File file : listOfFiles) {
+			if (ImageImporter.isFileImportable(file)) {
 				result++;
+			}
 		}
 		return result > 0;
 	}
@@ -476,7 +487,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DefaultAnalysisDataset other = (DefaultAnalysisDataset) obj;
+		final DefaultAnalysisDataset other = (DefaultAnalysisDataset) obj;
 		if (analysisOptions == null) {
 			if (other.analysisOptions != null)
 				return false;

@@ -234,6 +234,11 @@ public class DefaultCellCollection implements ICellCollection {
 			}
 		}
 
+		// Ensure cells are tracked for data updates
+		for (final ICell c : cells) {
+			c.addComponentUpdateListener(this);
+		}
+
 		for (final Element el : signalElements) {
 			signalGroups.add(new DefaultSignalGroup(el));
 

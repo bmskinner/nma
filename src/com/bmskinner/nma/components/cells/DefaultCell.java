@@ -34,7 +34,6 @@ import com.bmskinner.nma.components.ComponentMeasurer;
 import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.Taggable;
-import com.bmskinner.nma.components.Updatable;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.measure.DefaultMeasurement;
 import com.bmskinner.nma.components.measure.Measurement;
@@ -50,7 +49,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * @author Ben Skinner
  * @since 1.13.3
  */
-public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
+public class DefaultCell implements ICell {
 
 	private static final Logger LOGGER = Logger.getLogger(DefaultCell.class.getName());
 
@@ -84,15 +83,15 @@ public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 	public DefaultCell(@NonNull Element e) throws ComponentCreationException {
 		uuid = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
 
-		for (Element el : e.getChildren(XMLNames.XML_NUCLEUS)) {
-			Nucleus n = new DefaultNucleus(el);
+		for (final Element el : e.getChildren(XMLNames.XML_NUCLEUS)) {
+			final Nucleus n = new DefaultNucleus(el);
 			n.addComponentUpdateListener(this);
 			nuclei.add(n);
 		}
 
 		// Add measurements
-		for (Element el : e.getChildren(XMLNames.XML_MEASUREMENT)) {
-			Measurement m = new DefaultMeasurement(el);
+		for (final Element el : e.getChildren(XMLNames.XML_MEASUREMENT)) {
+			final Measurement m = new DefaultMeasurement(el);
 			measurements.put(m, Double.parseDouble(el.getAttributeValue(XMLNames.XML_VALUE)));
 		}
 
@@ -128,8 +127,8 @@ public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 		this.uuid = c.getId();
 
 		nuclei = new ArrayList<>(0);
-		for (Nucleus m : c.getNuclei()) {
-			Nucleus n = m.duplicate();
+		for (final Nucleus m : c.getNuclei()) {
+			final Nucleus n = m.duplicate();
 			n.addComponentUpdateListener(this);
 			nuclei.add(n);
 		}
@@ -140,12 +139,13 @@ public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 		}
 
 		measurements = new HashMap<>();
-		for (Measurement stat : c.getMeasurements())
+		for (final Measurement stat : c.getMeasurements()) {
 			try {
 				measurements.put(stat, c.getMeasurement(stat));
 			} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
 				LOGGER.log(Level.SEVERE, "Error copying measurement to new cell", e);
 			}
+		}
 	}
 
 	@Override
@@ -184,23 +184,21 @@ public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 			@NonNull MeasurementScale scale) throws MissingMeasurementException {
 
 		// Get the scale of one of the components of the cell
-		double sc = chooseScale();
+		final double sc = chooseScale();
 
 		if (!measurements.containsKey(stat))
 			throw new MissingMeasurementException("Measurement '%s' not present".formatted(stat));
 
-		double result = measurements.get(stat);
+		final double result = measurements.get(stat);
 		return stat.convert(result, sc, scale);
 	}
 
 	private double chooseScale() {
 
-		if (hasNucleus()) {
+		if (hasNucleus())
 			return getPrimaryNucleus().getScale();
-		}
-		if (hasCytoplasm()) {
+		if (hasCytoplasm())
 			return getCytoplasm().getScale();
-		}
 
 		return 1d;
 	}
@@ -230,13 +228,14 @@ public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 		nuclei.add(nucleus);
 		nucleus.addComponentUpdateListener(this);
 		measurements.clear();
-		for (Measurement m : Measurement.getCellStats())
+		for (final Measurement m : Measurement.getCellStats()) {
 			try {
 				measurements.put(m, ComponentMeasurer.calculate(m, this));
 			} catch (MissingDataException | ComponentCreationException | SegmentUpdateException e) {
 				LOGGER.log(Level.SEVERE,
 						"Unable to calculate cell measurements when adding new nucleus", e);
 			}
+		}
 		fireComponentUpdated();
 	}
 
@@ -264,7 +263,7 @@ public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 
 	@Override
 	public List<Taggable> getTaggables() {
-		List<Taggable> result = new ArrayList<>(0);
+		final List<Taggable> result = new ArrayList<>(0);
 		result.addAll(getTaggables(nuclei));
 
 		if (hasCytoplasm()) {
@@ -278,15 +277,16 @@ public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 	}
 
 	private List<Taggable> getTaggables(List<? extends CellularComponent> l) {
-		return l.stream().filter(e -> e instanceof Taggable).map(e -> (Taggable) e)
+		return l.stream().filter(Taggable.class::isInstance).map(e -> (Taggable) e)
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public void setScale(double scale) {
 		nuclei.stream().forEach(n -> n.setScale(scale));
-		if (cytoplasm != null)
+		if (cytoplasm != null) {
 			cytoplasm.setScale(scale);
+		}
 		fireComponentUpdated();
 	}
 
@@ -311,7 +311,7 @@ public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 			return this.getNuclei().size() - o.getNuclei().size();
 
 		int val = 0;
-		List<Nucleus> other = o.getNuclei();
+		final List<Nucleus> other = o.getNuclei();
 
 		for (int i = 0; i < other.size(); i++) {
 			val += this.getNuclei().get(i).compareTo(other.get(i));
@@ -322,16 +322,17 @@ public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 
 	@Override
 	@NonNull public Element toXmlElement() {
-		Element e = new Element(XMLNames.XML_CELL).setAttribute(XMLNames.XML_ID, uuid.toString());
-		for (Entry<Measurement, Double> entry : measurements.entrySet()) {
+		final Element e = new Element(XMLNames.XML_CELL).setAttribute(XMLNames.XML_ID, uuid.toString());
+		for (final Entry<Measurement, Double> entry : measurements.entrySet()) {
 			e.addContent(entry.getKey().toXmlElement().setAttribute(XMLNames.XML_VALUE,
 					entry.getValue().toString()));
 		}
 
-		if (cytoplasm != null)
+		if (cytoplasm != null) {
 			e.addContent(cytoplasm.toXmlElement());
+		}
 
-		for (Nucleus n : nuclei) {
+		for (final Nucleus n : nuclei) {
 			e.addContent(n.toXmlElement());
 		}
 
@@ -346,7 +347,7 @@ public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DefaultCell other = (DefaultCell) obj;
+		final DefaultCell other = (DefaultCell) obj;
 		return Objects.equals(cytoplasm, other.cytoplasm) && Objects.equals(nuclei, other.nuclei)
 				&& Objects.equals(measurements, other.measurements)
 				&& Objects.equals(uuid, other.uuid);
@@ -381,8 +382,9 @@ public class DefaultCell implements ICell, ComponentUpdateListener, Updatable {
 	@Override
 	public void fireComponentUpdated() {
 		isRecalcHashcode = true;
-		for(ComponentUpdateListener l : componentUpdateListeners)
+		for(final ComponentUpdateListener l : componentUpdateListeners) {
 			l.componentUpdated(new ComponentUpdateEvent(this));
+		}
 	}
 
 
