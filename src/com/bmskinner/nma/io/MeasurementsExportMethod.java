@@ -95,14 +95,15 @@ public abstract class MeasurementsExportMethod extends MultipleDatasetAnalysisMe
 	 * @param file the file or folder to create from
 	 */
 	private void createExportFilePath(@NonNull File file) {
-		if (file.isDirectory())
+		if (file.isDirectory()) {
 			file = new File(file, DEFAULT_MULTI_FILE_NAME);
+		}
 
 		exportFile = file;
 
 		try {
 			Files.deleteIfExists(exportFile.toPath());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Unable to delete file: %s".formatted(exportFile), e);
 		}
 	}
@@ -118,9 +119,9 @@ public abstract class MeasurementsExportMethod extends MultipleDatasetAnalysisMe
 				OutputStream os = new FileOutputStream(exportFile);
 				CountedOutputStream cos = new CountedOutputStream(os);
 				PrintWriter p = new PrintWriter(cos);) {
-			cos.addCountListener((l) -> fireProgressEvent(l));
+			cos.addCountListener(this::fireProgressEvent);
 
-			StringBuilder outLine = new StringBuilder();
+			final StringBuilder outLine = new StringBuilder();
 			appendHeader(outLine);
 
 			// Update the progress bar length with ~correct value.
@@ -132,11 +133,12 @@ public abstract class MeasurementsExportMethod extends MultipleDatasetAnalysisMe
 			p.write(outLine.toString());
 
 			for (@NonNull
-			IAnalysisDataset d : list) {
+			final IAnalysisDataset d : datasets) {
 				append(d, p);
+				LOGGER.fine("Appended dataset '%s' output to %s".formatted(d.getName(), exportFile.getName()));
 			}
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Unable to write to file: %s".formatted(e.getMessage()), e);
 		}
 

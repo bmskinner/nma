@@ -90,14 +90,14 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 		@Override
 		public void run() {
 
-			SubAnalysisSetupDialog optionsPanel = new ExportOptionsDialog(datasets);
+			final SubAnalysisSetupDialog optionsPanel = new ExportOptionsDialog(datasets);
 			if (optionsPanel.isReadyToRun()) {
 
 				try {
-					File file = FileSelector.chooseStatsExportFile(datasets, "stats");
+					final File file = FileSelector.chooseStatsExportFile(datasets, "stats");
 					if (is.fileIsOKForSave(file)) {
 
-						IAnalysisMethod m = new DatasetMeasurementsExportMethod(file, datasets,
+						final IAnalysisMethod m = new DatasetMeasurementsExportMethod(file, datasets,
 								optionsPanel.getOptions());
 						worker = new DefaultAnalysisWorker(m, datasets.size());
 						worker.addPropertyChangeListener(this);
@@ -106,9 +106,9 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 					} else {
 						cancel();
 					}
-				} catch (RequestCancelledException e) {
+				} catch (final RequestCancelledException e) {
 					cancel();
-				} catch (MissingOptionException e) {
+				} catch (final MissingOptionException e) {
 					LOGGER.log(Level.SEVERE, "Unable to export, option is missing" + e.getMessage(),
 							e);
 					cancel();
@@ -127,9 +127,10 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 		 */
 		private class ExportOptionsDialog extends SubAnalysisSetupDialog {
 
-			private HashOptions options = new OptionsBuilder().build();
+			private final HashOptions options = new OptionsBuilder().build();
 
 			private static final String INCLUDE_MEASUREMENTS_LBL = "Include measurements";
+			private static final String INCLUDE_HISTOGRAMS_LBL = "Include image histograms";
 			private static final String INCLUDE_OUTLINES_LBL = "Include outlines";
 			private static final String INCLUDE_PROFILES_LBL = "Include profiles";
 			private static final String PROFILE_SAMPLE_LBL = "Profile length";
@@ -156,30 +157,37 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 
 			@Override
 			protected void createUI() {
-				JPanel panel = new JPanel();
-				GridBagLayout layout = new GridBagLayout();
+				final JPanel panel = new JPanel();
+				final GridBagLayout layout = new GridBagLayout();
 				panel.setLayout(layout);
-				List<JLabel> labels = new ArrayList<>();
-				List<Component> fields = new ArrayList<>();
+				final List<JLabel> labels = new ArrayList<>();
+				final List<Component> fields = new ArrayList<>();
 
-				JCheckBox isExportMeasurementsBox = new JCheckBox("", true);
+				final JCheckBox isExportMeasurementsBox = new JCheckBox("", true);
 				isExportMeasurementsBox.addChangeListener(e -> {
 					options.set(DefaultOptions.EXPORT_MEASUREMENTS_KEY,
 							isExportMeasurementsBox.isSelected());
 				});
 
-				SpinnerModel profileInterpolationModel = new SpinnerNumberModel(100, // initial
+
+				final JCheckBox isExportHistogramsBox = new JCheckBox("", false);
+				isExportHistogramsBox.addChangeListener(e -> {
+					options.set(DefaultOptions.EXPORT_PIXEL_HISTOGRAMS_KEY,
+							isExportHistogramsBox.isSelected());
+				});
+
+				final SpinnerModel profileInterpolationModel = new SpinnerNumberModel(100, // initial
 						100, // min
 						1000, // max
 						1); // step
-				JSpinner profileInterpolationSpinner = new JSpinner(profileInterpolationModel);
+				final JSpinner profileInterpolationSpinner = new JSpinner(profileInterpolationModel);
 
 				profileInterpolationSpinner.addChangeListener(
 						e -> addIntToOptions(profileInterpolationSpinner, options,
 								HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH));
 
-				JCheckBox isExportProfilesBox = new JCheckBox("", true);
-				JCheckBox isExportOutlinesBox = new JCheckBox("", false);
+				final JCheckBox isExportProfilesBox = new JCheckBox("", true);
+				final JCheckBox isExportOutlinesBox = new JCheckBox("", false);
 
 				isExportProfilesBox.addChangeListener(e -> {
 					options.setBoolean(DefaultOptions.EXPORT_PROFILES_KEY,
@@ -190,18 +198,18 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 
 				// If downsamping, number of points to export
 
-				SpinnerModel outlineInterpolationModel = new SpinnerNumberModel(100, // initial
+				final SpinnerModel outlineInterpolationModel = new SpinnerNumberModel(100, // initial
 						10, // min
 						1000, // max
 						1); // step
-				JSpinner outlineInterpolationSpinner = new JSpinner(outlineInterpolationModel);
+				final JSpinner outlineInterpolationSpinner = new JSpinner(outlineInterpolationModel);
 
 				outlineInterpolationSpinner.addChangeListener(
 						e -> addIntToOptions(outlineInterpolationSpinner, options,
 								DefaultOptions.EXPORT_OUTLINE_N_SAMPLES_KEY));
 
 				// Dropdown for which orientation point to index on
-				JComboBox<OrientationMark> omBox = new JComboBox<>(OrientationMark.values());
+				final JComboBox<OrientationMark> omBox = new JComboBox<>(OrientationMark.values());
 				omBox.setSelectedItem(OrientationMark.REFERENCE);
 
 				omBox.addActionListener(e -> {
@@ -221,6 +229,9 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 
 				labels.add(new JLabel(INCLUDE_MEASUREMENTS_LBL));
 				fields.add(isExportMeasurementsBox);
+
+				labels.add(new JLabel(INCLUDE_HISTOGRAMS_LBL));
+				fields.add(isExportHistogramsBox);
 
 				labels.add(new JLabel(INCLUDE_PROFILES_LBL));
 				fields.add(isExportProfilesBox);
@@ -245,6 +256,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 			@Override
 			protected void setDefaults() {
 				options.set(HashOptions.EXPORT_MEASUREMENTS_KEY, true);
+				options.set(HashOptions.EXPORT_PIXEL_HISTOGRAMS_KEY, false);
 				options.set(HashOptions.EXPORT_PROFILES_KEY, true);
 				options.set(HashOptions.EXPORT_OUTLINES_KEY, false);
 
@@ -278,10 +290,10 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 		@Override
 		public void run() {
 			try {
-				File file = FileSelector.chooseStatsExportFile(datasets, "profiles");
+				final File file = FileSelector.chooseStatsExportFile(datasets, "profiles");
 				if (is.fileIsOKForSave(file)) {
 
-					IAnalysisMethod m = new DatasetProfileExporter(file, datasets,
+					final IAnalysisMethod m = new DatasetProfileExporter(file, datasets,
 							new DefaultOptions());
 					worker = new DefaultAnalysisWorker(m, datasets.size());
 					worker.addPropertyChangeListener(this);
@@ -290,7 +302,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 				} else {
 					cancel();
 				}
-			} catch (RequestCancelledException e) {
+			} catch (final RequestCancelledException e) {
 				cancel();
 			}
 		}
@@ -315,12 +327,12 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 		@Override
 		public void run() {
 
-			SubAnalysisSetupDialog optionsPanel = new ExportOutlinesOptionsDialog(datasets);
+			final SubAnalysisSetupDialog optionsPanel = new ExportOutlinesOptionsDialog(datasets);
 			if (optionsPanel.isReadyToRun()) {
 				try {
-					File file = FileSelector.chooseStatsExportFile(datasets, "outlines");
+					final File file = FileSelector.chooseStatsExportFile(datasets, "outlines");
 					if (is.fileIsOKForSave(file)) {
-						IAnalysisMethod m = new DatasetOutlinesExportMethod(file, datasets,
+						final IAnalysisMethod m = new DatasetOutlinesExportMethod(file, datasets,
 								optionsPanel.getOptions());
 						worker = new DefaultAnalysisWorker(m, datasets.size());
 						worker.addPropertyChangeListener(this);
@@ -330,7 +342,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 						cancel();
 					}
 
-				} catch (RequestCancelledException e) {
+				} catch (final RequestCancelledException e) {
 					cancel();
 				}
 
@@ -350,7 +362,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 		@SuppressWarnings("serial")
 		private class ExportOutlinesOptionsDialog extends SubAnalysisSetupDialog {
 
-			private HashOptions options = new OptionsBuilder().build();
+			private final HashOptions options = new OptionsBuilder().build();
 			private static final String IS_SAMPLE_LBL = "Sample fixed number of points";
 			private static final String PROFILE_SAMPLE_LBL = "Number of points";
 			private static final String OM_LBL = "Orientation mark to start from";
@@ -375,19 +387,19 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 
 			@Override
 			protected void createUI() {
-				JPanel panel = new JPanel();
-				GridBagLayout layout = new GridBagLayout();
+				final JPanel panel = new JPanel();
+				final GridBagLayout layout = new GridBagLayout();
 				panel.setLayout(layout);
-				List<JLabel> labels = new ArrayList<>();
-				List<Component> fields = new ArrayList<>();
+				final List<JLabel> labels = new ArrayList<>();
+				final List<Component> fields = new ArrayList<>();
 
 				// If downsamping, number of points to export
 
-				SpinnerModel model = new SpinnerNumberModel(100, // initial
+				final SpinnerModel model = new SpinnerNumberModel(100, // initial
 						10, // min
 						1000, // max
 						1); // step
-				JSpinner spinner = new JSpinner(model);
+				final JSpinner spinner = new JSpinner(model);
 
 				spinner.addChangeListener(
 						e -> addIntToOptions(spinner, options,
@@ -396,7 +408,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 
 				// Checkbox for whether to downsample
 
-				JCheckBox useSampling = new JCheckBox("", false);
+				final JCheckBox useSampling = new JCheckBox("", false);
 				useSampling.addChangeListener(e -> {
 					options.setBoolean(DefaultOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY,
 							useSampling.isSelected());
@@ -405,7 +417,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 				});
 
 				// Dropdown for which orientation point to index on
-				JComboBox<OrientationMark> omBox = new JComboBox<>(OrientationMark.values());
+				final JComboBox<OrientationMark> omBox = new JComboBox<>(OrientationMark.values());
 				omBox.setSelectedItem(OrientationMark.REFERENCE);
 
 				omBox.addActionListener(e -> {
@@ -461,10 +473,10 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 		public void run() {
 
 			try {
-				File file = FileSelector.chooseStatsExportFile(datasets, "shells");
+				final File file = FileSelector.chooseStatsExportFile(datasets, "shells");
 				if (is.fileIsOKForSave(file)) {
 
-					IAnalysisMethod m = new DatasetShellsExporter(file, datasets,
+					final IAnalysisMethod m = new DatasetShellsExporter(file, datasets,
 							new DefaultOptions());
 					worker = new DefaultAnalysisWorker(m, datasets.size());
 					worker.addPropertyChangeListener(this);
@@ -473,7 +485,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 				} else {
 					cancel();
 				}
-			} catch (RequestCancelledException e) {
+			} catch (final RequestCancelledException e) {
 				cancel();
 			}
 
@@ -501,10 +513,10 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 		public void run() {
 
 			try {
-				File file = FileSelector.chooseStatsExportFile(datasets, "signals");
+				final File file = FileSelector.chooseStatsExportFile(datasets, "signals");
 				if (is.fileIsOKForSave(file)) {
 
-					IAnalysisMethod m = new DatasetSignalsExporter(file, datasets,
+					final IAnalysisMethod m = new DatasetSignalsExporter(file, datasets,
 							new DefaultOptions());
 					worker = new DefaultAnalysisWorker(m, datasets.size());
 					worker.addPropertyChangeListener(this);
@@ -513,7 +525,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 				} else {
 					cancel();
 				}
-			} catch (RequestCancelledException e) {
+			} catch (final RequestCancelledException e) {
 				cancel();
 			}
 		}

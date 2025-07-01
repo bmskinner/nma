@@ -248,10 +248,10 @@ public interface Measurement extends XmlSerializable {
 	 * @param dim the grey level measured
 	 * @return
 	 */
-	static Measurement makePixelHistogram(int channel, int dim) {
-		return new DefaultMeasurement(Names.PIXEL_HISTOGRAM + "_" + dim + "_channel_" + channel,
-				MeasurementDimension.NONE);
-	}
+//	static Measurement makePixelHistogram(int channel, int dim) {
+//		return new DefaultMeasurement(Names.PIXEL_HISTOGRAM + "_" + dim + "_channel_" + channel,
+//				MeasurementDimension.NONE);
+//	}
 
 	/**
 	 * Create a measurement for a level of the pixel histogram.
@@ -375,13 +375,13 @@ public interface Measurement extends XmlSerializable {
 	 * 
 	 * @return the 256 grey level measurements
 	 */
-	static List<Measurement> getPixelHistogramMeasurements(int channel) {
-		final List<Measurement> list = new ArrayList<>();
-		for (int i = 0; i < 256; i++) {
-			list.add(Measurement.makePixelHistogram(channel, i));
-		}
-		return list;
-	}
+//	static List<Measurement> getPixelHistogramMeasurements(int channel) {
+//		final List<Measurement> list = new ArrayList<>();
+//		for (int i = 0; i < 256; i++) {
+//			list.add(Measurement.makePixelHistogram(channel, i));
+//		}
+//		return list;
+//	}
 
 	/**
 	 * Get stats for rodent sperm nuclei

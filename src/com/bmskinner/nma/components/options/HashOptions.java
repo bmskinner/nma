@@ -255,6 +255,11 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	String EXPORT_OUTLINE_IS_OFFSET_COM_KEY = "EXPORT_OUTLINE_IS_OFFSET_COM";
 
 	/**
+	 * Number of points to export if normalising outlines
+	 */
+	String EXPORT_PIXEL_HISTOGRAMS_KEY = "EXPORT_PIXEL_HISTOGRAMS";
+
+	/**
 	 * Create a copy of this options object
 	 * 
 	 * @return
