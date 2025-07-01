@@ -123,10 +123,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 */
 	private boolean hasMergeSource(@NonNull List<IAnalysisDataset> datasets) {
 
-		Set<IAnalysisDataset> all = DatasetListManager.getInstance().getAllDatasets();
+		final Set<IAnalysisDataset> all = DatasetListManager.getInstance().getAllDatasets();
 
-		for (IAnalysisDataset d : datasets) {
-			for (IAnalysisDataset p : all)
+		for (final IAnalysisDataset d : datasets) {
+			for (final IAnalysisDataset p : all)
 				if (p.hasMergeSource(d))
 					return true;
 		}
@@ -142,21 +142,18 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 */
 	public TableModel createNucleusStatsTable() {
 
-		if (!options.hasDatasets()) {
+		if (!options.hasDatasets())
 			return createBlankTable();
-		}
 		return new NucleusMeasurementsTableModel(options.getDatasets());
 	}
 
 	public TableModel createVennTable() {
 
-		if (!options.hasDatasets()) {
+		if (!options.hasDatasets())
 			return createBlankTable();
-		}
 
-		if (options.isSingleDataset()) {
+		if (options.isSingleDataset())
 			return createBlankTable();
-		}
 
 		return new VennTableModel(options.getDatasets());
 	}
@@ -169,13 +166,11 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 */
 	public TableModel createPairwiseVennTable() {
 
-		if (!options.hasDatasets()) {
+		if (!options.hasDatasets())
 			return createBlankTable();
-		}
 
-		if (options.isSingleDataset()) {
+		if (options.isSingleDataset())
 			return createBlankTable();
-		}
 
 		return new VennDetailedTableModel(options.getDatasets());
 	}
@@ -189,22 +184,21 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 */
 	public TableModel createWilcoxonStatisticTable(@Nullable String component) {
 
-		if (!options.hasDatasets()) {
+		if (!options.hasDatasets())
 			return new WilcoxonTableModel(null, null);
-		}
 
 		try {
 
 			if (CellularComponent.NUCLEUS.equals(component)) {
-				List<WilcoxDatasetResult> results = calculateNuclearWilcoxonResults();
+				final List<WilcoxDatasetResult> results = calculateNuclearWilcoxonResults();
 				return new WilcoxonTableModel(options.getDatasets(), results);
 			}
 
 			if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-				List<WilcoxDatasetResult> results = calculateSegmentWilcoxonResults();
+				final List<WilcoxDatasetResult> results = calculateSegmentWilcoxonResults();
 				return new WilcoxonTableModel(options.getDatasets(), results);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error creating Wilcoxon table", e);
 			return createBlankTable();
 		}
@@ -223,31 +217,40 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 */
 	private List<WilcoxDatasetResult> calculateNuclearWilcoxonResults()
 			throws MissingDataException, SegmentUpdateException {
-		List<WilcoxDatasetResult> results = new ArrayList<>();
+		final List<WilcoxDatasetResult> results = new ArrayList<>();
 
 		// Bonferroni correction on number of datasets and number of measurement types
 		int nComparisons = (options.datasetCount() * (options.datasetCount() - 1)) / 2;
 		nComparisons *= Measurement.commonMeasurements(options.getDatasets()).size();
 
-		Measurement stat = options.getMeasurement();
+		final Measurement stat = options.getMeasurement();
 
-		for (IAnalysisDataset dataset : options.getDatasets()) {
-			double[] d1Values = dataset.getCollection().getRawValues(stat,
+		for (final IAnalysisDataset dataset : options.getDatasets()) {
+			if (!dataset.getAnalysisOptions().get().getRuleSetCollection().getMeasurableValues().contains(stat)) {
+				continue; // ignore any comparisons where one dataset does not have the value
+			}
+
+			final double[] d1Values = dataset.getCollection().getRawValues(stat,
 					CellularComponent.NUCLEUS,
 					MeasurementScale.PIXELS);
-			for (IAnalysisDataset d2 : options.getDatasets()) {
+			for (final IAnalysisDataset d2 : options.getDatasets()) {
 
-				if (dataset.getId().equals(d2.getId()))
+				if (dataset.getId().equals(d2.getId())) {
 					continue;
-				long idVal = WilcoxDatasetResult.toId(dataset, d2);
+				}
+				final long idVal = WilcoxDatasetResult.toId(dataset, d2);
 				if (results.stream().anyMatch(w -> w.id() == idVal)) {
 					continue; // don't do reciprocal comparison
 				}
 
-				double[] d2Values = d2.getCollection().getRawValues(stat, CellularComponent.NUCLEUS,
+				if (!d2.getAnalysisOptions().get().getRuleSetCollection().getMeasurableValues().contains(stat)) {
+					continue; // ignore any comparisons where one dataset does not have the value
+				}
+
+				final double[] d2Values = d2.getCollection().getRawValues(stat, CellularComponent.NUCLEUS,
 						MeasurementScale.PIXELS);
 
-				WilcoxonRankSumResult wilcox = Stats.runWilcoxonTest(d1Values, d2Values,
+				final WilcoxonRankSumResult wilcox = Stats.runWilcoxonTest(d1Values, d2Values,
 						nComparisons);
 				results.add(new WilcoxDatasetResult(idVal, wilcox));
 			}
@@ -265,41 +268,42 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	private List<WilcoxDatasetResult> calculateSegmentWilcoxonResults()
 			throws MissingDataException,
 			SegmentUpdateException {
-		List<WilcoxDatasetResult> results = new ArrayList<>();
-		int nComparisons = (options.datasetCount() * (options.datasetCount() - 1)) / 2;
+		final List<WilcoxDatasetResult> results = new ArrayList<>();
+		final int nComparisons = (options.datasetCount() * (options.datasetCount() - 1)) / 2;
 
-		for (IAnalysisDataset dataset : options.getDatasets()) {
+		for (final IAnalysisDataset dataset : options.getDatasets()) {
 
-			IProfileSegment medianSeg1 = dataset.getCollection().getProfileCollection()
+			final IProfileSegment medianSeg1 = dataset.getCollection().getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
 					.getSegments()
 					.get(options.getSegPosition());
 
-			double[] d1Values = dataset.getCollection().getRawValues(Measurement.LENGTH,
+			final double[] d1Values = dataset.getCollection().getRawValues(Measurement.LENGTH,
 					CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS,
 					medianSeg1.getID());
 
-			for (IAnalysisDataset d2 : options.getDatasets()) {
+			for (final IAnalysisDataset d2 : options.getDatasets()) {
 
-				if (dataset.getId().equals(d2.getId()))
+				if (dataset.getId().equals(d2.getId())) {
 					continue;
+				}
 
-				long idVal = WilcoxDatasetResult.toId(dataset, d2);
+				final long idVal = WilcoxDatasetResult.toId(dataset, d2);
 				if (results.stream().anyMatch(w -> w.id() == idVal)) {
 					continue; // don't do reciprocal comparison
 				}
 
-				IProfileSegment medianSeg2 = d2.getCollection().getProfileCollection()
+				final IProfileSegment medianSeg2 = d2.getCollection().getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
 								Stats.MEDIAN)
 						.getSegments()
 						.get(options.getSegPosition());
 
-				double[] d2Values = d2.getCollection().getRawValues(Measurement.LENGTH,
+				final double[] d2Values = d2.getCollection().getRawValues(Measurement.LENGTH,
 						CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS,
 						medianSeg2.getID());
 
-				WilcoxonRankSumResult wilcox = Stats.runWilcoxonTest(d1Values, d2Values,
+				final WilcoxonRankSumResult wilcox = Stats.runWilcoxonTest(d1Values, d2Values,
 						nComparisons);
 				results.add(new WilcoxDatasetResult(idVal, wilcox));
 			}
@@ -315,22 +319,21 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 */
 	public TableModel createMagnitudeStatisticTable(@Nullable String component) {
 
-		if (!options.hasDatasets()) {
+		if (!options.hasDatasets())
 			return new MagnitudeTableModel(null, null);
-		}
 
 		try {
 
 			if (CellularComponent.NUCLEUS.equals(component)) {
-				List<MagnitudeDatasetResult> results = calculateNuclearMagnitudes();
+				final List<MagnitudeDatasetResult> results = calculateNuclearMagnitudes();
 				return new MagnitudeTableModel(options.getDatasets(), results);
 			}
 
 			if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-				List<MagnitudeDatasetResult> results = calculateSegmentMagnitudes();
+				final List<MagnitudeDatasetResult> results = calculateSegmentMagnitudes();
 				return new MagnitudeTableModel(options.getDatasets(), results);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error creating magnitude table", e);
 			return createBlankTable();
 		}
@@ -351,22 +354,33 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	private List<MagnitudeDatasetResult> calculateNuclearMagnitudes()
 			throws MissingDataException,
 			SegmentUpdateException {
-		List<MagnitudeDatasetResult> results = new ArrayList<>();
+		final List<MagnitudeDatasetResult> results = new ArrayList<>();
 
-		for (IAnalysisDataset d1 : options.getDatasets()) {
-			double v1 = d1.getCollection().getMedian(options.getMeasurement(),
-					CellularComponent.NUCLEUS,
-					options.getScale());
+		for (final IAnalysisDataset d1 : options.getDatasets()) {
 
-			for (IAnalysisDataset d2 : options.getDatasets()) {
-				if (d1 == d2)
+			for (final IAnalysisDataset d2 : options.getDatasets()) {
+				if (d1 == d2) {
 					continue;
+				}
 
-				double v2 = d2.getCollection().getMedian(options.getMeasurement(),
-						CellularComponent.NUCLEUS,
-						options.getScale());
+				// Ignore comparisons between datasets that don't have the same measurement
+				if (!d1.getAnalysisOptions().get().getRuleSetCollection().getMeasurableValues()
+						.contains(options.getMeasurement())
+						| !d2.getAnalysisOptions().get().getRuleSetCollection().getMeasurableValues()
+						.contains(options.getMeasurement())) {
+					results.add(new MagnitudeDatasetResult(d1, d2, Double.NaN));
+				} else {
 
-				results.add(new MagnitudeDatasetResult(d1, d2, v1 / v2));
+					final double v1 = d1.getCollection().getMedian(options.getMeasurement(),
+							CellularComponent.NUCLEUS,
+							options.getScale());
+
+					final double v2 = d2.getCollection().getMedian(options.getMeasurement(),
+							CellularComponent.NUCLEUS,
+							options.getScale());
+
+					results.add(new MagnitudeDatasetResult(d1, d2, v1 / v2));
+				}
 			}
 		}
 		return results;
@@ -384,31 +398,32 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	private List<MagnitudeDatasetResult> calculateSegmentMagnitudes()
 			throws MissingDataException,
 			SegmentUpdateException {
-		List<MagnitudeDatasetResult> results = new ArrayList<>();
+		final List<MagnitudeDatasetResult> results = new ArrayList<>();
 
-		for (IAnalysisDataset d1 : options.getDatasets()) {
+		for (final IAnalysisDataset d1 : options.getDatasets()) {
 
-			IProfileSegment medianSeg1 = d1.getCollection().getProfileCollection()
+			final IProfileSegment medianSeg1 = d1.getCollection().getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
 					.getSegments()
 					.get(options.getSegPosition());
 
-			double v1 = d1.getCollection().getMedian(Measurement.LENGTH,
+			final double v1 = d1.getCollection().getMedian(Measurement.LENGTH,
 					CellularComponent.NUCLEAR_BORDER_SEGMENT,
 					MeasurementScale.PIXELS, medianSeg1.getID());
 
-			for (IAnalysisDataset d2 : options.getDatasets()) {
+			for (final IAnalysisDataset d2 : options.getDatasets()) {
 
-				if (d1.getId().equals(d2.getId()))
+				if (d1.getId().equals(d2.getId())) {
 					continue;
+				}
 
-				IProfileSegment medianSeg2 = d2.getCollection().getProfileCollection()
+				final IProfileSegment medianSeg2 = d2.getCollection().getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
 								Stats.MEDIAN)
 						.getSegments()
 						.get(options.getSegPosition());
 
-				double v2 = d2.getCollection().getMedian(Measurement.LENGTH,
+				final double v2 = d2.getCollection().getMedian(Measurement.LENGTH,
 						CellularComponent.NUCLEAR_BORDER_SEGMENT,
 						MeasurementScale.PIXELS, medianSeg2.getID());
 

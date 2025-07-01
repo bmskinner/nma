@@ -15,6 +15,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.core.GlobalOptions;
+import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.stats.ConfidenceInterval;
 import com.bmskinner.nma.stats.Stats;
 
@@ -77,6 +78,16 @@ public class NucleusMeasurementsTableModel extends DatasetTableModel {
 				}
 
 				// Add the calculated values in each dataset as a batch
+
+				if (!datasets.get(c - 1).getAnalysisOptions().get().getRuleSetCollection().getMeasurableValues()
+						.contains(m)) {
+					rowData[r][c] = Labels.NA;
+					rowData[r + 1][c] = Labels.NA;
+					rowData[r + 2][c] = Labels.NA;
+					rowData[r + 3][c] = Labels.NA;
+					rowData[r + 4][c] = Labels.NA;
+					continue; // ignore any comparisons where one dataset does not have the value
+				}
 
 				final double[] vals = datasets.get(c - 1).getCollection().getRawValues(m,
 						CellularComponent.NUCLEUS,
