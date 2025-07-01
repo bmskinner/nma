@@ -22,6 +22,7 @@ import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
+import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.io.ImageImporter;
 
 /**
@@ -49,9 +50,9 @@ public class CalculateCellHistogramAction extends SingleDatasetResultAction {
 	@Override
 	public void run() {
 
-		SubAnalysisSetupDialog optionsPanel = new HistogramOptionsDialog(dataset);
+		final SubAnalysisSetupDialog optionsPanel = new HistogramOptionsDialog(dataset);
 		if (optionsPanel.isReadyToRun()) {
-			IAnalysisMethod m = optionsPanel.getMethod();
+			final IAnalysisMethod m = optionsPanel.getMethod();
 			worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
@@ -63,6 +64,7 @@ public class CalculateCellHistogramAction extends SingleDatasetResultAction {
 		if (!hasRemainingDatasetsToProcess()) {
 			super.finished();
 			countdownLatch();
+			UIController.getInstance().fireNuclearSignalUpdated(dataset);
 		} else {
 			// otherwise analyse the next item in the list
 			cancel(); // remove progress bar
@@ -82,7 +84,7 @@ public class CalculateCellHistogramAction extends SingleDatasetResultAction {
 	 */
 	private class HistogramOptionsDialog extends SubAnalysisSetupDialog {
 
-		private HashOptions options = new OptionsBuilder().build();
+		private final HashOptions options = new OptionsBuilder().build();
 
 		public HistogramOptionsDialog(@NonNull final IAnalysisDataset dataset) {
 			super(dataset, "Histogram calculation options");
@@ -103,13 +105,13 @@ public class CalculateCellHistogramAction extends SingleDatasetResultAction {
 
 		@Override
 		protected void createUI() {
-			JPanel panel = new JPanel();
-			GridBagLayout layout = new GridBagLayout();
+			final JPanel panel = new JPanel();
+			final GridBagLayout layout = new GridBagLayout();
 			panel.setLayout(layout);
-			List<JLabel> labels = new ArrayList<>();
-			List<Component> fields = new ArrayList<>();
+			final List<JLabel> labels = new ArrayList<>();
+			final List<Component> fields = new ArrayList<>();
 
-			JComboBox<String> channelBox = new JComboBox<>(
+			final JComboBox<String> channelBox = new JComboBox<>(
 					channelOptionStrings);
 
 			channelBox.addActionListener(e -> {

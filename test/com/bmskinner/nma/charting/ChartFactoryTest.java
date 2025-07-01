@@ -52,7 +52,7 @@ public abstract class ChartFactoryTest {
 	public static void showProfile(IProfile profile, String title)
 			throws InterruptedException, SegmentUpdateException {
 
-		ChartOptions options = new ChartOptionsBuilder()
+		final ChartOptions options = new ChartOptionsBuilder()
 				.setShowAnnotations(true)
 				.setShowProfiles(true)
 				.build();
@@ -71,12 +71,12 @@ public abstract class ChartFactoryTest {
 	public static void showProfiles(List<IProfile> profiles, List<String> names, String title)
 			throws InterruptedException, SegmentUpdateException {
 
-		ChartOptions options = new ChartOptionsBuilder()
+		final ChartOptions options = new ChartOptionsBuilder()
 				.setShowAnnotations(true)
 				.setShowProfiles(true)
 				.build();
 
-		List<JPanel> panels = new ArrayList<>();
+		final List<JPanel> panels = new ArrayList<>();
 		for (int i = 0; i < profiles.size(); i++) {
 			panels.add(makeChartPanel(
 					new ProfileTestChartFactory(options).createProfileChart(profiles.get(i)),
@@ -94,7 +94,7 @@ public abstract class ChartFactoryTest {
 	 */
 	public static void showMedianProfile(IAnalysisDataset d, String title)
 			throws InterruptedException {
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(d)
+		final ChartOptions options = new ChartOptionsBuilder().setDatasets(d)
 				.setShowAnnotations(true)
 				.build();
 		showSingleChart(new ProfileChartFactory(options).createProfileChart(), options, title,
@@ -111,9 +111,9 @@ public abstract class ChartFactoryTest {
 	public static void showProfiles(Collection<ICell> cells, IAnalysisDataset d)
 			throws InterruptedException {
 
-		List<JPanel> panels = new ArrayList<>();
+		final List<JPanel> panels = new ArrayList<>();
 
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(d)
+		final ChartOptions options = new ChartOptionsBuilder().setDatasets(d)
 				.setShowAnnotations(true)
 				.setShowProfiles(true)
 				.setNormalised(true)
@@ -123,9 +123,9 @@ public abstract class ChartFactoryTest {
 		panels.add(makeChartPanel(new ProfileChartFactory(options).createProfileChart(), options,
 				"Dataset profile", false));
 
-		for (ICell cell : cells) {
+		for (final ICell cell : cells) {
 			// show the profile corresponding to the chart
-			ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(d)
+			final ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(d)
 					.setCell(cell)
 					.setLandmark(OrientationMark.REFERENCE)
 					.setShowMarkers(true)
@@ -141,23 +141,23 @@ public abstract class ChartFactoryTest {
 
 	public static JPanel makeConsensusChartPanel(IAnalysisDataset d) throws InterruptedException {
 //		List<JPanel> panels = new ArrayList<>();
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(d).build();
-		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeConsensusChart();
+		final ChartOptions options = new ChartOptionsBuilder().setDatasets(d).build();
+		final JFreeChart chart = new ConsensusNucleusChartFactory(options).makeConsensusChart();
 		return makeChartPanel(chart, options, "Consensus", true);
 //		showCharts(panels, "Consensus");
 	}
 
 	public static void showConsensus(IAnalysisDataset d) throws InterruptedException {
-		List<JPanel> panels = new ArrayList<>();
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(d).build();
-		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeConsensusChart();
+		final List<JPanel> panels = new ArrayList<>();
+		final ChartOptions options = new ChartOptionsBuilder().setDatasets(d).build();
+		final JFreeChart chart = new ConsensusNucleusChartFactory(options).makeConsensusChart();
 		panels.add(makeChartPanel(chart, options, "Consensus", true));
 		showCharts(panels, "Consensus");
 	}
 
 	protected static void showSingleChart(JFreeChart chart, ChartOptions options, String variable,
 			boolean fixedAspect) throws InterruptedException {
-		List<JPanel> panels = new ArrayList<>();
+		final List<JPanel> panels = new ArrayList<>();
 		panels.add(makeChartPanel(chart, options, variable, fixedAspect));
 		showCharts(panels, variable);
 	}
@@ -173,9 +173,9 @@ public abstract class ChartFactoryTest {
 	 */
 	protected static JPanel makeChartPanel(JFreeChart chart, ChartOptions options, String variable,
 			boolean fixedAspect) throws InterruptedException {
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 		panel.add(new JLabel(variable), BorderLayout.NORTH);
-		ExportableChartPanel exp = new ExportableChartPanel(chart);
+		final ExportableChartPanel exp = new ExportableChartPanel(chart);
 		exp.setFixedAspectRatio(fixedAspect);
 		panel.add(exp, BorderLayout.CENTER);
 		panel.add(new JTextArea(options.toString()), BorderLayout.WEST);
@@ -191,16 +191,16 @@ public abstract class ChartFactoryTest {
 	 * @throws InterruptedException
 	 */
 	public static void showCharts(List<JPanel> panels, String title) throws InterruptedException {
-		JFrame f = new JFrame();
+		final JFrame f = new JFrame();
 
-		JPanel content = new JPanel();
+		final JPanel content = new JPanel();
 		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
-		for (JPanel panel : panels) {
+		for (final JPanel panel : panels) {
 			content.add(panel);
 		}
 
-		ScrollPane sp = new ScrollPane();
+		final ScrollPane sp = new ScrollPane();
 		sp.add(content);
 		sp.setPreferredSize(new Dimension(1000, 600));
 		f.setTitle(title);
@@ -208,7 +208,7 @@ public abstract class ChartFactoryTest {
 		f.pack();
 		f.setVisible(true);
 		while (f.isVisible()) {
-			Thread.sleep(1000);
+//			Thread.sleep(1000);
 		}
 	}
 

@@ -111,7 +111,8 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * 
      */
 
-    private static synchronized JFreeChart createViolinChart(String title, String categoryAxisLabel, String valueAxisLabel,
+	public static synchronized JFreeChart createViolinChart(String title, String categoryAxisLabel,
+			String valueAxisLabel,
             ViolinCategoryDataset dataset, boolean legend) {
 
         final CategoryAxis categoryAxis = new CategoryAxis(categoryAxisLabel);

@@ -158,17 +158,17 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	}
 
 	private JPanel createMonitorPanel() {
-		JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		final JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		panel.add(new JLabel(TASK_QUEUE_LBL));
 		panel.add(Box.createHorizontalStrut(5));
-		TaskListMonitor t = new TaskListMonitor();
+		final TaskListMonitor t = new TaskListMonitor();
 		t.setPreferredSize(new Dimension(100, t.getPreferredSize().height));
 		t.setBorder(BorderFactory.createBevelBorder(1));
 		panel.add(t);
 		panel.add(Box.createHorizontalStrut(10));
 		panel.add(new JLabel(MEMORY_LBL));
 		panel.add(Box.createHorizontalStrut(5));
-		MemoryIndicator m = new MemoryIndicator();
+		final MemoryIndicator m = new MemoryIndicator();
 		m.setPreferredSize(new Dimension(100, m.getPreferredSize().height));
 		m.setBorder(BorderFactory.createBevelBorder(1));
 		panel.add(m);
@@ -178,12 +178,12 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	}
 
 	private ContextualMenu createFileMenu() {
-		ContextualMenu menu = fact.makeMenu(FILE_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
+		final ContextualMenu menu = fact.makeMenu(FILE_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 		menu.setMnemonic(KeyEvent.VK_F);
 
-		ContextualMenu newMenu = fact.makeMenu(NEW_ANALYSIS_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
+		final ContextualMenu newMenu = fact.makeMenu(NEW_ANALYSIS_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 
-		JMenuItem i1 = new JMenuItem(NEW_ANALYSIS_CUSTOM_LBL);
+		final JMenuItem i1 = new JMenuItem(NEW_ANALYSIS_CUSTOM_LBL);
 		i1.setToolTipText(NEW_ANALYSIS_CUSTOM_TOOLTIP);
 		i1.addActionListener(
 				e -> new NewAnalysisAction(
@@ -207,9 +207,9 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 		// Start of File>Open
 
-		ContextualMenu openMenu = fact.makeMenu(OPEN_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
+		final ContextualMenu openMenu = fact.makeMenu(OPEN_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 
-		JMenuItem o1 = fact.new ContextualMenuItem(OPEN_DATASET_LBL, "",
+		final JMenuItem o1 = fact.new ContextualMenuItem(OPEN_DATASET_LBL, "",
 				ContextEnabled.ALWAYS_ACTIVE, OPEN_DATASET_TOOLTIP);
 		o1.addActionListener(e -> UserActionController.getInstance()
 				.fileImportRequested(new FileImportEvent(this, null,
@@ -217,7 +217,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		o1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
 		openMenu.add(o1);
 
-		JMenuItem o2 = fact.new ContextualMenuItem(OPEN_WORKSPACE_LBL, "",
+		final JMenuItem o2 = fact.new ContextualMenuItem(OPEN_WORKSPACE_LBL, "",
 				ContextEnabled.ALWAYS_ACTIVE, OPEN_WORKSPACE_TOOLTIP);
 		o2.addActionListener(e -> UserActionController.getInstance()
 				.fileImportRequested(new FileImportEvent(this, null,
@@ -227,23 +227,24 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		menu.add(openMenu);
 
 		// End of File>Open
-		ContextualMenuItem saveData = fact.makeItem(SAVE_DATASETS_LBL,
+		final ContextualMenuItem saveData = fact.makeItem(SAVE_DATASETS_LBL,
 				UserActionEvent.SAVE_SELECTED_DATASETS,
 				ContextEnabled.ONLY_DATASETS, SAVE_DATASETS_TOOLTIP);
 		saveData.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
 		menu.add(saveData);
 
-		ContextualMenuItem saveAllData = fact.makeItem(SAVE_ALL_DATASETS_LBL,
+		final ContextualMenuItem saveAllData = fact.makeItem(SAVE_ALL_DATASETS_LBL,
 				UserActionEvent.SAVE_ALL_DATASETS,
 				ContextEnabled.ONLY_DATASETS, SAVE_ALL_DATASETS_TOOLTIP);
 		menu.add(saveAllData);
 
 		// Exit event routed through the main window close listener
-		JMenuItem exit = new JMenuItem(EXIT_LBL);
+		final JMenuItem exit = new JMenuItem(EXIT_LBL);
 		exit.addActionListener(e -> {
-			for (WindowListener l : mw.getWindowListeners()) {
-				if (l instanceof MainWindowCloseAdapter)
+			for (final WindowListener l : mw.getWindowListeners()) {
+				if (l instanceof MainWindowCloseAdapter) {
 					l.windowClosing(new WindowEvent((Window) mw, WindowEvent.WINDOW_CLOSING));
+				}
 			}
 		});
 		menu.add(exit);
@@ -252,7 +253,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	}
 
 	private ContextualMenu createWorkspaceMenu() {
-		ContextualMenu menu = fact.makeMenu(WORKSPACE_MENU_LBL,
+		final ContextualMenu menu = fact.makeMenu(WORKSPACE_MENU_LBL,
 				ContextEnabled.ACTIVE_ON_WORKSPACE | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
 
 		menu.add(fact.makeItem(Labels.Populations.ADD_TO_WORKSPACE_LBL,
@@ -262,19 +263,20 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	}
 
 	private ContextualMenu createViewMenu() {
-		ContextualMenu menu = fact.makeMenu(VIEW_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
+		final ContextualMenu menu = fact.makeMenu(VIEW_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 		menu.setMnemonic(KeyEvent.VK_V);
 
-		JMenu scaleMenu = new JMenu(SCALE_ITEM_LBL);
+		final JMenu scaleMenu = new JMenu(SCALE_ITEM_LBL);
 
-		ButtonGroup g = new ButtonGroup();
-		for (MeasurementScale m : MeasurementScale.values()) {
-			JMenuItem j = new JRadioButtonMenuItem(m.toString());
+		final ButtonGroup g = new ButtonGroup();
+		for (final MeasurementScale m : MeasurementScale.values()) {
+			final JMenuItem j = new JRadioButtonMenuItem(m.toString());
 			g.add(j);
-			if (m.equals(GlobalOptions.getInstance().getDisplayScale())) // default config file scale
+			if (m.equals(GlobalOptions.getInstance().getDisplayScale())) { // default config file scale
 				j.setSelected(true);
+			}
 			j.addActionListener(e -> {
-				Runnable r = () -> {
+				final Runnable r = () -> {
 					GlobalOptions.getInstance().setDisplayScale(m);
 					UIController.getInstance().fireScaleUpdated();
 				};
@@ -285,15 +287,16 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		}
 		menu.add(scaleMenu);
 
-		JMenu swatchMenu = new JMenu(SWATCH_ITEM_LBL);
-		ButtonGroup swatchGroup = new ButtonGroup();
-		for (ColourSwatch c : ColourSwatch.values()) {
-			JMenuItem j = new JRadioButtonMenuItem(c.toString());
+		final JMenu swatchMenu = new JMenu(SWATCH_ITEM_LBL);
+		final ButtonGroup swatchGroup = new ButtonGroup();
+		for (final ColourSwatch c : ColourSwatch.values()) {
+			final JMenuItem j = new JRadioButtonMenuItem(c.toString());
 			swatchGroup.add(j);
-			if (c.equals(GlobalOptions.getInstance().getSwatch())) // default config file scale
+			if (c.equals(GlobalOptions.getInstance().getSwatch())) { // default config file scale
 				j.setSelected(true);
+			}
 			j.addActionListener(e -> {
-				Runnable r = () -> {
+				final Runnable r = () -> {
 					GlobalOptions.getInstance().setSwatch(c);
 					UIController.getInstance().fireSwatchUpdated();
 				};
@@ -304,7 +307,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		}
 		menu.add(swatchMenu);
 
-		JCheckBoxMenuItem fillConsensusItem = new JCheckBoxMenuItem(FILL_CONSENSUS_ITEM_LBL,
+		final JCheckBoxMenuItem fillConsensusItem = new JCheckBoxMenuItem(FILL_CONSENSUS_ITEM_LBL,
 				GlobalOptions.getInstance().isFillConsensus());
 		fillConsensusItem.addActionListener(e -> {
 			GlobalOptions.getInstance().setFillConsensus(fillConsensusItem.isSelected());
@@ -312,12 +315,12 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		});
 		menu.add(fillConsensusItem);
 
-		JCheckBoxMenuItem monitorItem = new JCheckBoxMenuItem(TASK_MONITOR_ITEM_LBL, false);
+		final JCheckBoxMenuItem monitorItem = new JCheckBoxMenuItem(TASK_MONITOR_ITEM_LBL, false);
 		monitorItem.addActionListener(e -> monitorPanel.setVisible(!monitorPanel.isVisible()));
 		menu.add(monitorItem);
 		
 		
-		JMenuItem prefs = new JMenuItem(PREFERENCES_ITEM_LBL);
+		final JMenuItem prefs = new JMenuItem(PREFERENCES_ITEM_LBL);
 		prefs.addActionListener(e -> new MainPreferencesDialog());
 		menu.add(prefs);
 
@@ -326,7 +329,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 	private void loadUserGuide() {
 
-		Runnable r = () -> {
+		final Runnable r = () -> {
 
 			try {
 
@@ -334,7 +337,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 				final String helpPath = "user_guide_v" + Version.currentVersion().toString();
 
 				// Directory for the help files
-				File userGuideDir = new File(Io.getConfigDir(), helpPath);
+				final File userGuideDir = new File(Io.getConfigDir(), helpPath);
 
 				// The file we will open
 				final File mainHelpFile = new File(userGuideDir, "index.html");
@@ -346,21 +349,21 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 									+ userGuideDir.getAbsolutePath());
 					Files.createDirectories(userGuideDir.toPath());
 
-					CodeSource src = getClass().getProtectionDomain().getCodeSource();
+					final CodeSource src = getClass().getProtectionDomain().getCodeSource();
 
 					// If this is run from the jar file, copy the help file out
 					if (src != null) {
-						File jarFile = new File(src.getLocation().toURI().getPath());
+						final File jarFile = new File(src.getLocation().toURI().getPath());
 
 						LOGGER.fine(() -> "Copying help files from jar at: %s"
 								.formatted(jarFile.toString()));
-						URL fileSysUrl = new URL(
+						final URL fileSysUrl = new URL(
 								"jar:file:" + jarFile.getAbsolutePath() + "!/user-guide");
 
 						// Create a jar URL connection object
 						LOGGER.fine(() -> "Copying help files from url at: %s"
 								.formatted(fileSysUrl.toString()));
-						JarURLConnection jarURLConn = (JarURLConnection) fileSysUrl
+						final JarURLConnection jarURLConn = (JarURLConnection) fileSysUrl
 								.openConnection();
 						FileUtils.copyJarResourcesRecursively(userGuideDir, jarURLConn);
 					} else {
@@ -379,7 +382,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 				} else {
 					LOGGER.fine(() -> "Opening %s".formatted(mainHelpFile.toURI().toString()));
-					Desktop desktop = Desktop.getDesktop();
+					final Desktop desktop = Desktop.getDesktop();
 
 					// Especially on Linux, Desktop::browse may not be available. If so, fall back
 					// to ImageJ's implementation of BrowserLauncher
@@ -391,7 +394,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 				}
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.warning("Unable to open user guide; see log for details");
 				LOGGER.log(Level.SEVERE,
 						"Error extracting user guide: %s".formatted(e.getMessage()), e);
@@ -401,17 +404,17 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	}
 
 	private ContextualMenu createHelpMenu() {
-		ContextualMenu menu = fact.makeMenu(HELP_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
+		final ContextualMenu menu = fact.makeMenu(HELP_MENU_LBL, ContextEnabled.ALWAYS_ACTIVE);
 		menu.setMnemonic(KeyEvent.VK_H);
 
-		JMenuItem userGuideItem = new JMenuItem("Open user guide");
+		final JMenuItem userGuideItem = new JMenuItem("Open user guide");
 		userGuideItem.addActionListener(e -> loadUserGuide());
 		menu.add(userGuideItem);
 
-		JMenuItem checkItem = new JMenuItem(CHECK_FOR_UPDATES_ITEM_LBL);
+		final JMenuItem checkItem = new JMenuItem(CHECK_FOR_UPDATES_ITEM_LBL);
 		checkItem.addActionListener(e -> {
-			Runnable r = () -> {
-				Version v = UpdateChecker.fetchLatestVersion();
+			final Runnable r = () -> {
+				final Version v = UpdateChecker.fetchLatestVersion();
 				if (v.isNewerThan(Version.currentVersion())) {
 					JOptionPane.showMessageDialog(this, "A new version - " + v + " - is available!",
 							"Update found!",
@@ -427,32 +430,32 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 		menu.add(checkItem);
 
-		JMenuItem configFileItem = new JMenuItem(OPEN_CONFIG_FILE_LBL);
+		final JMenuItem configFileItem = new JMenuItem(OPEN_CONFIG_FILE_LBL);
 		configFileItem.addActionListener(e -> {
 			try {
 				Desktop.getDesktop().open(Io.getConfigFile());
-			} catch (IOException e1) {
+			} catch (final IOException e1) {
 				LOGGER.log(Level.SEVERE, "Unable to open config file", e1);
 			}
 		});
 		menu.add(configFileItem);
 
-		JMenuItem logFileItem = new JMenuItem(OPEN_LOG_FILE_LBL);
+		final JMenuItem logFileItem = new JMenuItem(OPEN_LOG_FILE_LBL);
 		logFileItem.addActionListener(e -> {
 			try {
 				Desktop.getDesktop().open(Io.getLogFile());
-			} catch (IOException e1) {
+			} catch (final IOException e1) {
 				LOGGER.log(Level.SEVERE, "Unable to open log file", e1);
 			}
 		});
 		menu.add(logFileItem);
 
-		JMenuItem logItem = new JMenuItem(OPEN_CONFIG_DIR_LBL);
+		final JMenuItem logItem = new JMenuItem(OPEN_CONFIG_DIR_LBL);
 		logItem.addActionListener(e -> {
-			Runnable r = () -> {
+			final Runnable r = () -> {
 				try {
 					Desktop.getDesktop().open(Io.getConfigDir());
-				} catch (IOException ex) {
+				} catch (final IOException ex) {
 					LOGGER.log(Level.SEVERE, "Unable to open folder", ex);
 					JOptionPane.showMessageDialog(this,
 							"Unable to open log folder: " + Io.getConfigDir().getAbsolutePath(),
@@ -463,7 +466,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		});
 		menu.add(logItem);
 
-		JMenuItem aboutItem = new JMenuItem(ABOUT_ITEM_LBL);
+		final JMenuItem aboutItem = new JMenuItem(ABOUT_ITEM_LBL);
 		aboutItem.addActionListener(e -> new VersionHelpDialog(mw));
 		menu.add(aboutItem);
 
@@ -471,10 +474,10 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	}
 
 	private ContextualMenu createDatasetMenu() {
-		ContextualMenu menu = fact.makeMenu(DATASETS_MENU_LBL, ContextEnabled.ONLY_DATASETS);
+		final ContextualMenu menu = fact.makeMenu(DATASETS_MENU_LBL, ContextEnabled.ONLY_DATASETS);
 		menu.setMnemonic(KeyEvent.VK_D);
 
-		ContextualMenu addSubMenu = fact.makeMenu(Labels.Populations.ADD,
+		final ContextualMenu addSubMenu = fact.makeMenu(Labels.Populations.ADD,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET
 						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
@@ -513,9 +516,13 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
 				Labels.Populations.ADD_CHILD_CELLS_TOOLTIP));
 
+		addSubMenu.add(fact.makeItem(Labels.Populations.ADD_HISTOGRAM_LBL, UserActionEvent.RUN_HISTOGRAM_CALC,
+				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
+				Labels.Populations.ADD_HISTOGRAM_TOOLTIP));
+
 		menu.add(addSubMenu);
 
-		ContextualMenu clusterSubMenu = fact.makeMenu(Labels.Populations.CLUSTER,
+		final ContextualMenu clusterSubMenu = fact.makeMenu(Labels.Populations.CLUSTER,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET
 						| ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
@@ -602,7 +609,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	}
 
 	private ContextualMenu createExportMenu() {
-		ContextualMenu exportMenu = fact.makeMenu(Labels.Populations.EXPORT,
+		final ContextualMenu exportMenu = fact.makeMenu(Labels.Populations.EXPORT,
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT);
@@ -637,7 +644,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 		exportMenu.addSeparator();
 
-		JMenuItem consensus = fact.new ContextualMenuItem(Labels.Populations.EXPORT_CONSENSUS, "",
+		final JMenuItem consensus = fact.new ContextualMenuItem(Labels.Populations.EXPORT_CONSENSUS, "",
 				ContextEnabled.ACTIVE_ON_ROOT_DATASET | ContextEnabled.ACTIVE_ON_CHILD_DATASET
 						| ContextEnabled.ACTIVE_ON_MULTI_OBJECTS
 						| ContextEnabled.ACTIVE_ON_SINGLE_OBJECT,
@@ -687,8 +694,8 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 	}
 
 	private void updateSelectionContext(Collection<?> obj) {
-		for (Component c : this.getComponents()) {
-			if (c instanceof ContextEnabled con) {
+		for (final Component c : this.getComponents()) {
+			if (c instanceof final ContextEnabled con) {
 				con.updateSelectionContext(obj);
 			}
 		}

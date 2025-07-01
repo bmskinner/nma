@@ -46,22 +46,22 @@ public class CellHistogramCalculationMethod extends SingleDatasetAnalysisMethod 
 	 */
 	private void run() throws Exception {
 
-		int channel = options.get(HashOptions.CHANNEL);
+		final int channel = options.get(HashOptions.CHANNEL);
 
-		for (File f : dataset.getCollection().getImageFiles()) {
+		for (final File f : dataset.getCollection().getImageFiles()) {
 
-			// Read the image for the nucleus channel
-			ImageProcessor image = ImageImporter.importImage(f, channel);
+			// Read the image for the desired channel
+			final ImageProcessor image = ImageImporter.importImage(f, channel);
 
-			for (ICell c : dataset.getCollection().getCells(f)) {
-				for (Nucleus n : c.getNuclei()) {
+			for (final ICell c : dataset.getCollection().getCells(f)) {
+				for (final Nucleus n : c.getNuclei()) {
 
-					int[] histogram = new int[256];
-					Roi roi = n.toOriginalRoi();
-					int x = (int) n.getMinX();
-					int w = (int) n.getMaxX();
-					int y = (int) n.getMinY();
-					int h = (int) n.getMaxY();
+					final int[] histogram = new int[256];
+					final Roi roi = n.toOriginalRoi();
+					final int x = (int) n.getMinX();
+					final int w = (int) n.getMaxX();
+					final int y = (int) n.getMinY();
+					final int h = (int) n.getMaxY();
 
 					// Limit to bounding box
 					for (int xx = x; xx <= w; xx++) {
@@ -74,7 +74,7 @@ public class CellHistogramCalculationMethod extends SingleDatasetAnalysisMethod 
 
 					// Add the measurments to the nucleus
 					for (int i = 0; i < histogram.length; i++) {
-						Measurement m = Measurement.makePixelHistogram(channel, i);
+						final Measurement m = Measurement.makePixelHistogram(channel, i);
 						n.setMeasurement(m, histogram[i]);
 					}
 

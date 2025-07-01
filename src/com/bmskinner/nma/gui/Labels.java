@@ -117,6 +117,9 @@ public class Labels {
 		public static final String ADD_CHILD_CELLS_LBL = "Child dataset from cell location file";
 		public static final String ADD_CHILD_CELLS_TOOLTIP = "Select cells based on image name and location of centre-of-mass";
 
+		public static final String ADD_HISTOGRAM_LBL = "Cell pixel intensity histogram";
+		public static final String ADD_HISTOGRAM_TOOLTIP = "Measure the pixel intensities in each nucleus";
+
 		public static final String CLUSTER = "Cluster...";
 		public static final String ADD_CLUSTER_MANUAL_LBL = "Manually";
 		public static final String ADD_CLUSTER_MANUAL_TOOLTIP = "Choose which cells to put in each cluster";

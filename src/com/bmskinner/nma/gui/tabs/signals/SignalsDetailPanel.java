@@ -17,8 +17,8 @@
 package com.bmskinner.nma.gui.tabs.signals;
 
 import java.awt.BorderLayout;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
@@ -53,14 +53,15 @@ public class SignalsDetailPanel extends DetailPanel {
 
 			signalsTabPane = new JTabbedPane(SwingConstants.TOP);
 
-			DetailPanel overviewPanel = new SignalsOverviewPanel();
-			DetailPanel countsPanel = new SignalCountsPanel();
-			DetailPanel boxplotPanel = new SignalsBoxplotPanel();
-			DetailPanel shellsPanel = new SignalShellsPanel();
-			DetailPanel detectionSettingsPanel = new SignalsAnalysisPanel();
-			DetailPanel signalScatterChartPanel = new SignalScatterChartPanel();
-			DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
-			DetailPanel warpingPanel = new SignalWarpingMainPanel();
+			final DetailPanel overviewPanel = new SignalsOverviewPanel();
+			final DetailPanel countsPanel = new SignalCountsPanel();
+			final DetailPanel boxplotPanel = new SignalsBoxplotPanel();
+			final DetailPanel shellsPanel = new SignalShellsPanel();
+			final DetailPanel detectionSettingsPanel = new SignalsAnalysisPanel();
+			final DetailPanel signalScatterChartPanel = new SignalScatterChartPanel();
+			final DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
+			final DetailPanel warpingPanel = new SignalWarpingMainPanel();
+			final DetailPanel histogramPanel = new CellHistogramPanel();
 
 			addPanel(signalsTabPane, overviewPanel);
 			addPanel(signalsTabPane, detectionSettingsPanel);
@@ -71,10 +72,11 @@ public class SignalsDetailPanel extends DetailPanel {
 			addPanel(signalsTabPane, shellsPanel);
 			addPanel(signalsTabPane, colocalistionPanel);
 			addPanel(signalsTabPane, warpingPanel);
+			addPanel(signalsTabPane, histogramPanel);
 
 			this.add(signalsTabPane, BorderLayout.CENTER);
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error making signal panel", e);
 		}
 	}

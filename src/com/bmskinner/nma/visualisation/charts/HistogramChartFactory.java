@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -49,7 +50,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	private static final boolean HISTOGRAM_CREATE_LEGEND = true;
 	private static final boolean HISTOGRAM_CREATE_TOOLTIP = true;
 
-	public HistogramChartFactory(ChartOptions o) {
+	public HistogramChartFactory(@NonNull ChartOptions o) {
 		super(o);
 	}
 
@@ -60,12 +61,12 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 */
 	private static JFreeChart createEmptyHistogram() {
 
-		JFreeChart chart = ChartFactory.createHistogram(null, null, null, null, PlotOrientation.VERTICAL,
+		final JFreeChart chart = ChartFactory.createHistogram(null, null, null, null, PlotOrientation.VERTICAL,
 				HISTOGRAM_CREATE_LEGEND, HISTOGRAM_CREATE_TOOLTIP, DEFAULT_CREATE_URLS);
 
-		XYPlot plot = chart.getXYPlot();
+		final XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.white);
-		XYBarRenderer rend = new XYBarRenderer();
+		final XYBarRenderer rend = new XYBarRenderer();
 		rend.setBarPainter(new StandardXYBarPainter());
 		rend.setShadowVisible(false);
 		plot.setRenderer(rend);
@@ -82,12 +83,12 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 */
 	private static JFreeChart createHistogram(HistogramDataset ds, String xLabel, String yLabel) {
 
-		JFreeChart chart = ChartFactory.createHistogram(null, xLabel, yLabel, ds, PlotOrientation.VERTICAL,
+		final JFreeChart chart = ChartFactory.createHistogram(null, xLabel, yLabel, ds, PlotOrientation.VERTICAL,
 				HISTOGRAM_CREATE_LEGEND, HISTOGRAM_CREATE_TOOLTIP, DEFAULT_CREATE_URLS);
 
-		XYPlot plot = chart.getXYPlot();
+		final XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.white);
-		XYBarRenderer rend = new XYBarRenderer();
+		final XYBarRenderer rend = new XYBarRenderer();
 		rend.setBarPainter(new StandardXYBarPainter());
 		rend.setShadowVisible(false);
 		plot.setRenderer(rend);
@@ -107,8 +108,8 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @throws Exception
 	 */
 	public static JFreeChart createRandomSampleHistogram(List<Double> list) throws ChartDatasetCreationException {
-		HistogramDataset ds = HistogramDatasetCreator.createHistogramDatasetFromList(list);
-		JFreeChart chart = createHistogram(ds, "Magnitude difference between populations", "Observed instances");
+		final HistogramDataset ds = HistogramDatasetCreator.createHistogramDatasetFromList(list);
+		final JFreeChart chart = createHistogram(ds, "Magnitude difference between populations", "Observed instances");
 		chart.getXYPlot().addDomainMarker(new ValueMarker(1, Color.BLACK, ChartComponents.MARKER_STROKE));
 		return chart;
 	}
@@ -122,11 +123,11 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @throws Exception
 	 */
 	public JFreeChart createRandomSampleDensity(List<Double> list) throws ChartDatasetCreationException {
-		XYDataset ds = new NuclearHistogramDatasetCreator(options).createDensityDatasetFromList(list, 0.0001);
-		String xLabel = "Magnitude difference between populations";
-		JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel, "Probability", ds, PlotOrientation.VERTICAL,
+		final XYDataset ds = new NuclearHistogramDatasetCreator(options).createDensityDatasetFromList(list, 0.0001);
+		final String xLabel = "Magnitude difference between populations";
+		final JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel, "Probability", ds, PlotOrientation.VERTICAL,
 				true, true, false);
-		XYPlot plot = chart.getXYPlot();
+		final XYPlot plot = chart.getXYPlot();
 		for (int j = 0; j < ds.getSeriesCount(); j++) {
 			plot.getRenderer().setSeriesVisibleInLegend(j, false);
 		}
