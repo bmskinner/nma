@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -16,14 +16,15 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.image.CellHistogramCalculationMethod;
+import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
+import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.ProgressBarAcceptor;
 import com.bmskinner.nma.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nma.gui.events.UIController;
-import com.bmskinner.nma.io.ImageImporter;
 
 /**
  * Create an action to run histogram calculation and signal the UI
@@ -111,27 +112,20 @@ public class CalculateCellHistogramAction extends SingleDatasetResultAction {
 			final List<JLabel> labels = new ArrayList<>();
 			final List<Component> fields = new ArrayList<>();
 
-			final JComboBox<String> channelBox = new JComboBox<>(
-					channelOptionStrings);
+			final JCheckBox nucleusBox = new JCheckBox("Pixels in the nucleus channel", true);
 
-			channelBox.addActionListener(e -> {
-
-				int channel = 0;
-				switch (channelBox.getSelectedItem().toString()) {
-				case "Red":
-					channel = ImageImporter.RGB_RED;
-					break;
-				case "Green":
-					channel = ImageImporter.RGB_GREEN;
-					break;
-				default:
-					channel = ImageImporter.RGB_BLUE;
-				}
-				options.set(HashOptions.CHANNEL, channel);
-			});
-
-			labels.add(new JLabel("Channel"));
-			fields.add(channelBox);
+			nucleusBox.addActionListener(e -> options.setBoolean(CellularComponent.NUCLEUS, nucleusBox.isSelected()));
+			labels.add(new JLabel(CellularComponent.NUCLEUS));
+			fields.add(nucleusBox);
+			
+			
+			for(final ISignalGroup sg : dataset.getCollection().getSignalGroups()) {
+				final JCheckBox sgBox = new JCheckBox("All pixels in this signal channel within the nucleus", true);
+				sgBox.addActionListener(e -> options
+						.setBoolean(CellularComponent.NUCLEAR_SIGNAL + sg.getId(), sgBox.isSelected()));
+				labels.add(new JLabel(sg.getGroupName()));
+				fields.add(sgBox);
+			}
 
 			addLabelTextRows(labels, fields, layout, panel);
 			add(panel, BorderLayout.CENTER);
@@ -140,9 +134,16 @@ public class CalculateCellHistogramAction extends SingleDatasetResultAction {
 
 		@Override
 		protected void setDefaults() {
-			options.set(HashOptions.CHANNEL,
-					dataset.getAnalysisOptions().get().getNucleusDetectionOptions().get()
-							.getInt(HashOptions.CHANNEL));
+			// Nucleus channel by default
+			options.setBoolean(CellularComponent.NUCLEUS, true);
+
+			// Any signal channels by default
+			for (final ISignalGroup sg : dataset.getCollection().getSignalGroups()) {
+
+				options
+						.setBoolean(CellularComponent.NUCLEAR_SIGNAL + sg.getId(), true);
+
+			}
 		}
 
 	}

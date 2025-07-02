@@ -377,11 +377,12 @@ public class DefaultCell implements ICell {
 		final DefaultCell other = (DefaultCell) obj;
 		return Objects.equals(cytoplasm, other.cytoplasm) && Objects.equals(nuclei, other.nuclei)
 				&& Objects.equals(measurements, other.measurements)
+				&& Objects.equals(arrayMeasurements, other.arrayMeasurements)
 				&& Objects.equals(uuid, other.uuid);
 	}
 
 	protected int recalculateHashcodeCache() {
-		return Objects.hash(cytoplasm, nuclei, measurements, uuid);
+		return Objects.hash(cytoplasm, nuclei, measurements, arrayMeasurements, uuid);
 	}
 
 	@Override

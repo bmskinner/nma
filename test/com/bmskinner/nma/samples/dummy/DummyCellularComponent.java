@@ -62,10 +62,6 @@ public class DummyCellularComponent implements CellularComponent {
 		return component.getOriginalBase();
 	}
 
-//	@Override
-//	public Mask getSourceBooleanMask() {
-//		return component.getSourceBooleanMask();
-//	}
 
 	@Override
 	public Shape toShape(MeasurementScale scale) {
@@ -401,6 +397,23 @@ public class DummyCellularComponent implements CellularComponent {
 	@Override
 	public void componentUpdated(ComponentUpdateEvent e) {
 		component.componentUpdated(e);
+	}
+
+	@Override
+	public List<Double> getArrayMeasurement(@NonNull Measurement measurement, @NonNull MeasurementScale scale)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
+		return component.getArrayMeasurement(measurement, scale);
+	}
+
+	@Override
+	public List<Double> getArrayMeasurement(@NonNull Measurement measurement)
+			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
+		return component.getArrayMeasurement(measurement);
+	}
+
+	@Override
+	public void setMeasurement(@NonNull Measurement measurement, double[] d) {
+		component.setMeasurement(measurement, d);
 	}
 
 }

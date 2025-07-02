@@ -208,7 +208,7 @@ public abstract class ChartFactoryTest {
 		f.pack();
 		f.setVisible(true);
 		while (f.isVisible()) {
-//			Thread.sleep(1000);
+			Thread.sleep(1000);
 		}
 	}
 

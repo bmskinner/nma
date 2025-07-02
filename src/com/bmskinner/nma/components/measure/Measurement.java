@@ -79,7 +79,7 @@ public interface Measurement extends XmlSerializable {
 		static final String PCA_N = "Number of PCs";
 		static final String PCA_1 = "PC1";
 		static final String PCA_2 = "PC2";
-		public static final String PIXEL_HISTOGRAM = "Pixel histogram";
+		public static final String PIXEL_HISTOGRAM = "Pixel_histogram";
 
 	}
 
@@ -256,11 +256,11 @@ public interface Measurement extends XmlSerializable {
 	/**
 	 * Create a measurement for a level of the pixel histogram.
 	 * 
-	 * @param dim the grey level measured
+	 * @param object  the name of the object being measured
 	 * @return
 	 */
-	static Measurement makeImageHistogram(int channel) {
-		return new ArrayMeasurement(Names.PIXEL_HISTOGRAM + "_channel_" + channel,
+	static Measurement makeImageHistogram(String objectName) {
+		return new ArrayMeasurement(Names.PIXEL_HISTOGRAM + "_" + objectName,
 				MeasurementDimension.NONE);
 	}
 

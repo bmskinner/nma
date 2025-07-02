@@ -73,8 +73,8 @@ public class DatasetMeasurementsExportMethod extends MeasurementsExportMethod {
 	private boolean isIncludeGlcm = false;
 	private boolean isIncludePixelHistogram = false;
 
-	/** Which image channels have pixel histogram values? */
-	private final int[] pixelHistogramChannels = { 0, 1, 2 };
+	/** The distinct objects that must be exported with pixel measurements */
+	private Set<Measurement> pixelHistogramObjects = new HashSet<>();
 
 	/** How many samples should be taken from each profile? */
 	private int profileSamples = 100;
@@ -133,7 +133,9 @@ public class DatasetMeasurementsExportMethod extends MeasurementsExportMethod {
 		normProfileLength = chooseNormalisedProfileLength();
 
 		measurements = chooseMeasurementsToExport();
-		
+
+		pixelHistogramObjects = choosePixelHistogramsToExport();
+
 		LOGGER.fine("Created export method for %s datasets".formatted(list.size()));
 	}
 
@@ -161,6 +163,17 @@ public class DatasetMeasurementsExportMethod extends MeasurementsExportMethod {
 					.getMeasurableValues());
 		}
 		return result.stream().toList();
+	}
+
+	private Set<Measurement> choosePixelHistogramsToExport() {
+
+		return datasets.stream().map(IAnalysisDataset::getCollection)
+				.flatMap(c -> c.getCells().stream())
+				.flatMap(c -> c.getNuclei().stream())
+				.flatMap(n -> n.getMeasurements().stream())
+				.filter(Measurement::isArrayMeasurement)
+				.collect(Collectors.toSet());
+
 	}
 
 	/**
@@ -212,9 +225,9 @@ public class DatasetMeasurementsExportMethod extends MeasurementsExportMethod {
 		}
 
 		if (isIncludePixelHistogram) {
-			for (final int channel : pixelHistogramChannels) {
+			for (final Measurement objectName : pixelHistogramObjects) {
 				for (int i = 0; i < 256; i++) {
-					final String label = Measurement.Names.PIXEL_HISTOGRAM + "_channel_" + channel + "_int_" + i;
+					final String label = objectName.name() + "_int_" + i;
 					outLine.append(label + TAB);
 				}
 			}
@@ -382,12 +395,11 @@ public class DatasetMeasurementsExportMethod extends MeasurementsExportMethod {
 	 */
 	private void appendPixelHistograms(StringBuilder outLine, CellularComponent c) {
 
-		for (final int channel : pixelHistogramChannels) {
-			final Measurement m = Measurement.makeImageHistogram(channel);
+		for (final Measurement objectName : pixelHistogramObjects) {
 
-			if (c.hasMeasurement(m)) {
+			if (c.hasMeasurement(objectName)) {
 				try {
-					final List<Double> pixelValues = c.getArrayMeasurement(m);
+					final List<Double> pixelValues = c.getArrayMeasurement(objectName);
 					for (final Double px : pixelValues) {
 						outLine.append(px + TAB);
 					}

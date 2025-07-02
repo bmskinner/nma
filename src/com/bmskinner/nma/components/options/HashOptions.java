@@ -260,6 +260,13 @@ public interface HashOptions extends Serializable, XmlSerializable {
 	String EXPORT_PIXEL_HISTOGRAMS_KEY = "EXPORT_PIXEL_HISTOGRAMS";
 
 	/**
+	 * Keys for options involving channel selections
+	 */
+	String RED_CHANNEL_KEY = "RED_CHANNEL";
+	String GREEN_CHANNEL_KEY = "GREEN_CHANNEL";
+	String BLUE_CHANNEL_KEY = "BLUE_CHANNEL";
+
+	/**
 	 * Create a copy of this options object
 	 * 
 	 * @return

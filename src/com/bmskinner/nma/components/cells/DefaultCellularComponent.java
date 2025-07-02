@@ -490,9 +490,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public synchronized List<Double> getArrayMeasurement(@NonNull final Measurement stat,
 			@NonNull final MeasurementScale measurementScale)
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
-		if (!this.arrayMeasurements.containsKey(stat)) {
-			setMeasurement(stat, ComponentMeasurer.calculate(stat, this));
-		}
+		if (!this.arrayMeasurements.containsKey(stat))
+			throw new MissingDataException("Measurement '%s' not present in object".formatted(stat.name()));
 		return stat.convert(arrayMeasurements.get(stat), this.scale, measurementScale);
 	}
 
@@ -1075,7 +1074,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		return prime * result
 				+ Objects.hash(centreOfMass, sourceFile, channel, uuid, originalCentreOfMass, scale,
-						measurements);
+						measurements, arrayMeasurements);
 	}
 
 	@Override
@@ -1110,6 +1109,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			return false;
 		for (final Entry<Measurement, Double> e : measurements.entrySet()) {
 			if (!e.getValue().equals(other.measurements.get(e.getKey())))
+				return false;
+		}
+
+		if (arrayMeasurements.size() != other.arrayMeasurements.size())
+			return false;
+		for (final Entry<Measurement, List<Double>> e : arrayMeasurements.entrySet()) {
+			if (!e.getValue().equals(other.arrayMeasurements.get(e.getKey())))
 				return false;
 		}
 
