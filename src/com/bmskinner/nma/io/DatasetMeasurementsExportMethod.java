@@ -111,7 +111,8 @@ public class DatasetMeasurementsExportMethod extends MeasurementsExportMethod {
 		}
 
 		isIncludeMeasurements = options.get(HashOptions.EXPORT_MEASUREMENTS_KEY);
-		isIncludePixelHistogram = options.get(HashOptions.EXPORT_PIXEL_HISTOGRAMS_KEY);
+		isIncludePixelHistogram = options.hasBoolean(HashOptions.EXPORT_PIXEL_HISTOGRAMS_KEY)
+				&& (boolean) options.get(HashOptions.EXPORT_PIXEL_HISTOGRAMS_KEY);
 		isIncludeOutlines = options.get(HashOptions.EXPORT_OUTLINES_KEY);
 		isIncludeProfiles = options.get(HashOptions.EXPORT_PROFILES_KEY);
 

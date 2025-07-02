@@ -130,7 +130,7 @@ public abstract class ExportMeasurementsAction extends MultiDatasetResultAction 
 			private final HashOptions options = new OptionsBuilder().build();
 
 			private static final String INCLUDE_MEASUREMENTS_LBL = "Include measurements";
-			private static final String INCLUDE_HISTOGRAMS_LBL = "Include image histograms";
+			private static final String INCLUDE_HISTOGRAMS_LBL = "Include pixel histograms";
 			private static final String INCLUDE_OUTLINES_LBL = "Include outlines";
 			private static final String INCLUDE_PROFILES_LBL = "Include profiles";
 			private static final String PROFILE_SAMPLE_LBL = "Profile length";

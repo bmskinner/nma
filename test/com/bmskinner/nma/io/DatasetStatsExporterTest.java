@@ -20,7 +20,7 @@ public class DatasetStatsExporterTest {
 	@Test
 	public void testSegmentsInterpolated() throws Exception {
 
-		IAnalysisDataset d = new TestDatasetBuilder()
+		final IAnalysisDataset d = new TestDatasetBuilder()
 				.cellCount(1)
 				.baseHeight(500)
 				.baseWidth(1000)
@@ -29,14 +29,14 @@ public class DatasetStatsExporterTest {
 				.build();
 
 		// Ensure profiles are longer than 1000
-		int length = d.getCollection().getMedianArrayLength();
+		final int length = d.getCollection().getMedianArrayLength();
 		assertTrue(length > 1000);
 
 		// Decrease the length of the segments to below minimum regular length
 		while (d.getCollection().getProfileCollection().getSegments(OrientationMark.REFERENCE)
 				.get(0).length() > IProfileSegment.MINIMUM_SEGMENT_LENGTH * 0.7) {
 
-			IProfileSegment seg = d.getCollection().getProfileCollection()
+			final IProfileSegment seg = d.getCollection().getProfileCollection()
 					.getSegments(OrientationMark.REFERENCE).get(0);
 
 			new SegmentSplitMethod(d, seg.getID()).call();
@@ -49,14 +49,15 @@ public class DatasetStatsExporterTest {
 
 		// Interpolation length should be chosen to be at least the current length
 		// If this operation fails, the interpolation logic did not succeed
-		HashOptions op = new OptionsBuilder()
+		final HashOptions op = new OptionsBuilder()
 				.withValue(HashOptions.EXPORT_MEASUREMENTS_KEY, false)
 				.withValue(HashOptions.EXPORT_OUTLINES_KEY, false)
+				.withValue(HashOptions.EXPORT_PIXEL_HISTOGRAMS_KEY, false)
 				.withValue(HashOptions.EXPORT_PROFILES_KEY, false)
 				.withValue(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 10)
 				.build();
 
-		File outFile = new File("test");
+		final File outFile = new File("test");
 
 		// No exceptions should occur here
 		new DatasetMeasurementsExportMethod(outFile, d, op);

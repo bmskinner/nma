@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,22 +40,22 @@ public class UpdateChecker {
 		Version latestVersion = new Version(1, 13, 0);
 		try {
 
-			Pattern p = Pattern.compile(NAME_PATTERN);
+			final Pattern p = Pattern.compile(NAME_PATTERN);
 
-			String jsonString = downloadJson();
+			final String jsonString = downloadJson();
 
-			JsonObject jsonObject = new JsonParser().parse(jsonString).getAsJsonObject();
+			final JsonObject jsonObject = new JsonParser().parse(jsonString).getAsJsonObject();
 
-			JsonElement values = jsonObject.get("values");
+			final JsonElement values = jsonObject.get("values");
 
-			JsonArray array = values.getAsJsonArray();
+			final JsonArray array = values.getAsJsonArray();
 
-			for (JsonElement e : array) {
-				String name = e.getAsJsonObject().get("name").toString();
-				Matcher m = p.matcher(name);
+			for (final JsonElement e : array) {
+				final String name = e.getAsJsonObject().get("name").toString();
+				final Matcher m = p.matcher(name);
 				if (m.find()) {
-					String vString = m.group(1);
-					Version v = Version.fromString(vString);
+					final String vString = m.group(1);
+					final Version v = Version.fromString(vString);
 					if (v.isNewerThan(latestVersion)) {
 						latestVersion = v;
 					}
@@ -77,13 +78,14 @@ public class UpdateChecker {
 
 		boolean isLaterVersion = false;
 
-		Version latestVersion = fetchLatestVersion();
+		final Version latestVersion = fetchLatestVersion();
 		isLaterVersion = latestVersion.isNewerThan(testVersion);
 
-		if (isLaterVersion)
+		if (isLaterVersion) {
 			LOGGER.fine("Found later version: " + latestVersion);
-		else
+		} else {
 			LOGGER.fine("Up to date: " + latestVersion);
+		}
 		return isLaterVersion;
 	}
 
@@ -91,19 +93,20 @@ public class UpdateChecker {
 
 		String result = "";
 
-		URL url = new URL(DOWNLOAD_URL);
+		final URL url = new URL(DOWNLOAD_URL);
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));) {
 
-			StringBuffer buffer = new StringBuffer();
+			final StringBuffer buffer = new StringBuffer();
 			int read;
-			char[] chars = new char[1024];
-			while ((read = reader.read(chars)) != -1)
+			final char[] chars = new char[1024];
+			while ((read = reader.read(chars)) != -1) {
 				buffer.append(chars, 0, read);
+			}
 
 			result = buffer.toString();
-		} catch (IOException e) {
-			LOGGER.fine("Unable to connect to remote server");
+		} catch (final IOException e) {
+			LOGGER.log(Level.FINE, "Unable to connect to remote server: %s".formatted(e.getMessage()), e);
 			result = "Unable to connect";
 		}
 		return result;
