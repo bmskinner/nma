@@ -54,6 +54,7 @@ Shell analysis ofsignals | Begin a shell analysis of signals in the selected dat
 Warped signals | Begin [signal warping](#warp-signals-method) for a root dataset with nuclear signals
 Child collection from file | Create a child dataset based on the nuclei saved in a `.cell` file (these can be created via the Export submenu)
 Cluster group from file | Create a child dataset based on [clusters defined in a text file](#import-cluster-method) in tab separated format
+Cell pixel intensity histogram | Calculate the pixel intensities within each cell for selected image channels
 
 #### The Export submenu {#export-menu}
 
@@ -389,6 +390,20 @@ The 'Full MS-SSIM*' button opens a comparator showing the full structural simila
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
 knitr::include_graphics("img/Nuclear signals_Warping.png")
+```
+
+### Cell pixel intensities
+
+Displays a summary of image pixel histogram measurements when created via 'Dataset > Add... > Cell pixel intensity histogram'. The display is a log2 ratio of total pixel intensities for each combination of image channels in the dataset. 
+
+Total pixel intensity is calculated as (1 * the number of pixels with 1 intensity) + (2 * the number of pixels with 2 intensity) + (3 * the number of pixels with 3 intensity) etc. to intensity 255).
+
+The ratio between two signals is given as a log2 ratio, which centres on zero and makes deviations above and below zero equally sized.
+
+The raw pixel data can be exported via 'Dataset > Export > Export nuclear measurements' by including the 'Include pixel histograms' option
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Nuclear signals_Cell pixel intensities.png")
 ```
 
 ## Nuclear segments tab {#nuclear-segments-tab}

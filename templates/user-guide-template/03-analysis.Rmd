@@ -457,7 +457,7 @@ Columns are usually separated by tabs.
 
 Option | Action
 -------|----------
-Nuclear measurements | The measured values for each nucleus, plus normalised profiles
+Nuclear measurements | The measured values for each nucleus and normalised profiles
 Full nuclear profiles | The non-normalised angle profile values for each nucleus. Since there are a different number of values in each nucleus, they are combined into a single column, separated by commas for later parsing
 Full nuclear outlines | The X and Y coordinates of each border point in the outline of each nucleus. Since there are a different number of values in each nucleus, they are combined into a single column. XY pairs are separated by commas for later parsing. Within each pair, X and Y values are separated by a pipe  (`|`) e.g. `12.4|3.6,12.9|4.0`.
 Nuclear signal measurements | The measured values for each nuclear signal
