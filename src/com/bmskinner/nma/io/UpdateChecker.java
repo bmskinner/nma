@@ -10,9 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.bmskinner.nma.components.Version;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.bmskinner.nma.core.GlobalOptions;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
@@ -25,8 +23,9 @@ import com.google.gson.JsonSyntaxException;
 public class UpdateChecker {
 
 	private static final Logger LOGGER = Logger.getLogger(UpdateChecker.class.getName());
-	private static final String DOWNLOAD_URL = "https://api.bitbucket.org/2.0/repositories/bmskinner/nuclear_morphology/downloads/";
-	private static final String NAME_PATTERN = "Nuclear_Morphology_Analysis_(\\d+\\.\\d+\\.\\d+)";
+
+	/** The standard naming patterns for a release */
+	private static final String VERSION_PATTERN = "(\\d+\\.\\d+\\.\\d+)";
 
 	private UpdateChecker() {
 	}
@@ -37,30 +36,24 @@ public class UpdateChecker {
 	 * @return the latest version found. Will be the current version on error.
 	 */
 	public static Version fetchLatestVersion() {
-		Version latestVersion = new Version(1, 13, 0);
+		Version latestVersion = new Version(1, 13, 0); // an arbitrarily old version to start age checking from
 		try {
 
-			final Pattern p = Pattern.compile(NAME_PATTERN);
+			final Pattern p = Pattern.compile(VERSION_PATTERN);
 
 			final String jsonString = downloadJson();
 
-			final JsonObject jsonObject = new JsonParser().parse(jsonString).getAsJsonObject();
+			final String tag = new JsonParser().parse(jsonString).getAsJsonObject().toString();
 
-			final JsonElement values = jsonObject.get("values");
-
-			final JsonArray array = values.getAsJsonArray();
-
-			for (final JsonElement e : array) {
-				final String name = e.getAsJsonObject().get("name").toString();
-				final Matcher m = p.matcher(name);
-				if (m.find()) {
-					final String vString = m.group(1);
-					final Version v = Version.fromString(vString);
-					if (v.isNewerThan(latestVersion)) {
-						latestVersion = v;
-					}
+			final Matcher m = p.matcher(tag);
+			if (m.find()) {
+				final String vString = m.group(1);
+				final Version v = Version.fromString(vString);
+				if (v.isNewerThan(latestVersion)) {
+					latestVersion = v;
 				}
 			}
+
 		} catch (IOException | JsonSyntaxException e) {
 			LOGGER.fine("Unable to fetch latest version from website; using current version");
 		}
@@ -93,7 +86,7 @@ public class UpdateChecker {
 
 		String result = "";
 
-		final URL url = new URL(DOWNLOAD_URL);
+		final URL url = new URL(GlobalOptions.getInstance().getString(GlobalOptions.DEFAULT_UPDATE_URL_KEY));
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));) {
 

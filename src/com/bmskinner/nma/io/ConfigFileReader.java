@@ -134,6 +134,8 @@ public class ConfigFileReader {
 				String.valueOf(op.getBoolean(GlobalOptions.IS_SINGLE_THREADED_DETECTION)));
 		properties.setProperty(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION,
 				String.valueOf(op.getBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION)));
+		properties.setProperty(GlobalOptions.DEFAULT_UPDATE_URL_KEY,
+				String.valueOf(op.getBoolean(GlobalOptions.DEFAULT_UPDATE_URL)));
 		return properties;
 
 	}
@@ -189,6 +191,9 @@ public class ConfigFileReader {
 			
 			if (GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION.equals(key))
 				op.setBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION, Boolean.valueOf(value));
+
+			if (GlobalOptions.DEFAULT_UPDATE_URL_KEY.equals(key))
+				op.setBoolean(GlobalOptions.DEFAULT_UPDATE_URL_KEY, Boolean.valueOf(value));
 
 		}
 	}

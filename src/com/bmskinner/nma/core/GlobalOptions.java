@@ -75,6 +75,10 @@ public class GlobalOptions extends DefaultOptions {
 	
 	public static final String WARN_LOW_JVM_MEMORY_FRACTION = "WARN_LOW_JVM_MEMORY_FRACTION";
 
+	/** The default location to check for software updates */
+	public static final String DEFAULT_UPDATE_URL_KEY = "UPDATE_URL";
+	public static final String DEFAULT_UPDATE_URL = "https://api.github.com/repos/bmskinner/nma/releases/latest";
+
 	private File defaultDir; // where to fall back to for finding images or
 								// saving files
 
@@ -123,6 +127,7 @@ public class GlobalOptions extends DefaultOptions {
 		setBoolean(ALLOW_UPDATE_CHECK_KEY, true);
 		setBoolean(IS_SINGLE_THREADED_DETECTION, false);
 		setBoolean(WARN_LOW_JVM_MEMORY_FRACTION, true);
+		setString(DEFAULT_UPDATE_URL_KEY, DEFAULT_UPDATE_URL);
 	}
 
 	public synchronized MeasurementScale getDisplayScale() {
