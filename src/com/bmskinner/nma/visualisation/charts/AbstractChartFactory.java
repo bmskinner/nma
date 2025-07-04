@@ -109,8 +109,8 @@ public abstract class AbstractChartFactory {
 	 */
 	@NonNull
 	public static JFreeChart createEmptyChart() {
-		JFreeChart c = createBaseXYChart();
-		XYPlot plot = c.getXYPlot();
+		final JFreeChart c = createBaseXYChart();
+		final XYPlot plot = c.getXYPlot();
 
 		plot.getDomainAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
 		plot.getRangeAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
@@ -127,8 +127,8 @@ public abstract class AbstractChartFactory {
 	 * @return a chart with the given message
 	 */
 	protected static JFreeChart createTextAnnotatedEmptyChart(String labelText) {
-		JFreeChart chart = createEmptyChart();
-		XYTextAnnotation annotation = new XYTextAnnotation(labelText, 0, 0);
+		final JFreeChart chart = createEmptyChart();
+		final XYTextAnnotation annotation = new XYTextAnnotation(labelText, 0, 0);
 		annotation.setPaint(Color.BLACK);
 		chart.getXYPlot().addAnnotation(annotation);
 		return chart;
@@ -171,7 +171,7 @@ public abstract class AbstractChartFactory {
 	 * @return the index found
 	 */
 	public static int getIndexFromLabel(String label) {
-		String[] names = label.split("_");
+		final String[] names = label.split("_");
 		return Integer.parseInt(names[1]);
 	}
 
@@ -185,7 +185,7 @@ public abstract class AbstractChartFactory {
 	public static UUID getSignalGroupFromLabel(String label) {
 
 		if (label.startsWith(CellularComponent.NUCLEAR_SIGNAL)) {
-			String[] names = label.split("_");
+			final String[] names = label.split("_");
 			return UUID.fromString(names[1]);
 		}
 		throw new IllegalArgumentException(
@@ -203,8 +203,8 @@ public abstract class AbstractChartFactory {
 	 */
 	protected void addDomainMarkerToXYPlot(final XYPlot plot, final Landmark tag,
 			final double value, double yval) {
-		double range = plot.getRangeAxis().getRange().getLength();
-		double minY = plot.getRangeAxis().getRange().getLowerBound();
+		final double range = plot.getRangeAxis().getRange().getLength();
+		final double minY = plot.getRangeAxis().getRange().getLowerBound();
 		plot.addAnnotation(new XYTextAnnotation(tag.getName(), value, minY + (range * 0.1)), false);
 		plot.addAnnotation(new XYLineAnnotation(value, minY + (range * 0.15), value, yval,
 				ChartComponents.MARKER_STROKE, Color.GRAY));
@@ -221,11 +221,11 @@ public abstract class AbstractChartFactory {
 	 */
 	protected static JFreeChart createBaseXYChart(final String xLabel, final String yLabel,
 			final XYDataset ds) {
-		JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel, yLabel, ds,
+		final JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel, yLabel, ds,
 				PlotOrientation.VERTICAL, false,
 				false, false);
 
-		XYPlot plot = chart.getXYPlot();
+		final XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 
 		plot.getRenderer().setDefaultToolTipGenerator(null);
@@ -266,11 +266,11 @@ public abstract class AbstractChartFactory {
 	 * @param plot the plot to apply colours to
 	 */
 	protected void applySingleXYDatasetColours(final XYPlot plot) {
-		int seriesCount = plot.getDataset().getSeriesCount();
+		final int seriesCount = plot.getDataset().getSeriesCount();
 
-		XYItemRenderer renderer = plot.getRenderer();
+		final XYItemRenderer renderer = plot.getRenderer();
 		for (int i = 0; i < seriesCount; i++) {
-			Paint colour = options.getDatasets().get(i).getDatasetColour()
+			final Paint colour = options.getDatasets().get(i).getDatasetColour()
 					.orElse(ColourSelecter.getColor(i));
 			renderer.setSeriesPaint(i, colour);
 
@@ -285,11 +285,11 @@ public abstract class AbstractChartFactory {
 	 */
 	protected void applyDefaultAxisOptions(final JFreeChart chart) {
 
-		Plot plot = chart.getPlot();
+		final Plot plot = chart.getPlot();
 
 		if (plot instanceof XYPlot) {
 
-			XYPlot xy = chart.getXYPlot();
+			final XYPlot xy = chart.getXYPlot();
 			xy.getDomainAxis().setVisible(options.isShowXAxis());
 			xy.getRangeAxis().setVisible(options.isShowYAxis());
 			xy.getDomainAxis().setInverted(options.isInvertXAxis());
@@ -298,7 +298,7 @@ public abstract class AbstractChartFactory {
 		}
 
 		if (plot instanceof CategoryPlot) {
-			CategoryPlot cat = chart.getCategoryPlot();
+			final CategoryPlot cat = chart.getCategoryPlot();
 			cat.getDomainAxis().setVisible(options.isShowXAxis());
 			cat.getRangeAxis().setVisible(options.isShowYAxis());
 			cat.getRangeAxis().setInverted(options.isInvertYAxis());
@@ -311,7 +311,7 @@ public abstract class AbstractChartFactory {
 	 * annotation types.
 	 */
 	protected static void clearShapeAnnotations(XYPlot plot) {
-		for (Object a : plot.getAnnotations()) {
+		for (final Object a : plot.getAnnotations()) {
 			if (a.getClass() == XYShapeAnnotation.class) {
 				plot.removeAnnotation((XYAnnotation) a);
 			}
@@ -337,11 +337,11 @@ public abstract class AbstractChartFactory {
 		// Make a dataset to allow the autoscale to work even if no other datasets are
 		// present
 		// Hide the dataset from visibility
-		XYDataset bounds = new NucleusDatasetCreator(options).createAnnotationRectangleDataset(
+		final XYDataset bounds = new NucleusDatasetCreator(options).createAnnotationRectangleDataset(
 				ip.getWidth(),
 				ip.getHeight());
 		plot.setDataset(0, bounds);
-		XYItemRenderer rend = plot.getRenderer(0);
+		final XYItemRenderer rend = plot.getRenderer(0);
 		rend.setDefaultSeriesVisible(false);
 
 		plot.getDomainAxis().setRange(0, ip.getWidth());
@@ -350,7 +350,7 @@ public abstract class AbstractChartFactory {
 		for (int x = 0; x < ip.getWidth(); x++) {
 			for (int y = 0; y < ip.getHeight(); y++) {
 
-				int pixel = ip.get(x, y);
+				final int pixel = ip.get(x, y);
 				Color col = null;
 
 				if (ip instanceof ColorProcessor) {
@@ -359,21 +359,21 @@ public abstract class AbstractChartFactory {
 						col = ColourSelecter.getTransparentColour(col, true, alpha);
 					}
 
-				} else {
-					if (pixel < 255) // Ignore anything that is not signal - the background is
-										// already white
-						col = new Color(pixel, pixel, pixel, alpha);
+				} else if (pixel < 255) { // Ignore anything that is not signal - the background is
+					// already white
+											col = new Color(pixel, pixel, pixel, alpha);
 				}
 
-				if (col == null && showBounds) // Draw red pixels at bounds
+				if (col == null && showBounds) { // Draw red pixels at bounds
 					col = new Color(255, 0, 0, alpha);
+				}
 
 				if (col != null) {
 					// Ensure the 'pixels' overlap to avoid lines of background
 					// colour seeping through
-					Rectangle2D r = new Rectangle2D.Double(x + xOffset - 0.1, y + yOffset - 0.1,
+					final Rectangle2D r = new Rectangle2D.Double(x + xOffset - 0.1, y + yOffset - 0.1,
 							1.2, 1.2);
-					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+					final XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
 
 					rend.addAnnotation(a, Layer.BACKGROUND);
 				}
@@ -414,11 +414,11 @@ public abstract class AbstractChartFactory {
 	 */
 	protected JFreeChart drawImageAsAnnotation(ImageProcessor ip, int alpha) {
 
-		JFreeChart chart = ChartFactory.createXYLineChart(null, null, null, null,
+		final JFreeChart chart = ChartFactory.createXYLineChart(null, null, null, null,
 				PlotOrientation.VERTICAL, true, true,
 				false);
 
-		XYPlot plot = chart.getXYPlot();
+		final XYPlot plot = chart.getXYPlot();
 		drawImageAsAnnotation(ip, plot, alpha);
 		return chart;
 	}
@@ -426,18 +426,18 @@ public abstract class AbstractChartFactory {
 	private static ImageProcessor importAndCropImage(@NonNull ICell cell,
 			@NonNull CellularComponent component)
 			throws UnloadableImageException {
-		ImageConverter ic = new ImageConverter(ImageImporter.importFullImageTo8bit(component))
+		final ImageConverter ic = new ImageConverter(ImageImporter.importFullImageTo8bit(component))
 				.invert();
-		ImageProcessor openProcessor = ic.convertToRGBGreyscale().toProcessor();
+		final ImageProcessor openProcessor = ic.convertToRGBGreyscale().toProcessor();
 
-		Nucleus n = cell.getPrimaryNucleus();
+		final Nucleus n = cell.getPrimaryNucleus();
 
-		int xBase = n.getXBase();
-		int yBase = n.getYBase();
+		final int xBase = n.getXBase();
+		final int yBase = n.getYBase();
 
-		int padding = Imageable.COMPONENT_BUFFER;
-		int wideW = (int) n.getWidth() + (padding * 2);
-		int wideH = (int) n.getHeight() + (padding * 2);
+		final int padding = Imageable.COMPONENT_BUFFER;
+		final int wideW = (int) n.getWidth() + (padding * 2);
+		final int wideH = (int) n.getHeight() + (padding * 2);
 		int wideX = xBase - padding;
 		int wideY = yBase - padding;
 
@@ -458,11 +458,11 @@ public abstract class AbstractChartFactory {
 	 */
 	private static AffineTransform createRotationTransform(Nucleus n)
 			throws MissingLandmarkException, ComponentCreationException {
-		AffineTransform at = new AffineTransform();
+		final AffineTransform at = new AffineTransform();
 
 		// The point to rotate about
-		IPoint com = n.getCentreOfMass();
-		double rads = Math.toRadians(360 - ComponentOrienter.calcAngleToAlignVertically(n));
+		final IPoint com = n.getCentreOfMass();
+		final double rads = Math.toRadians(360 - ComponentOrienter.calcAngleToAlignVertically(n));
 
 		at.concatenate(AffineTransform.getTranslateInstance(com.getX(), com.getY()));
 		if (ComponentOrienter.isFlipNeeded(n)) {
@@ -479,20 +479,20 @@ public abstract class AbstractChartFactory {
 			throws UnloadableImageException, MissingLandmarkException, ComponentCreationException {
 
 		// Image with black background, white signal
-		ImageConverter ic = new ImageConverter(ImageImporter.importFullImageTo8bit(component));
+		final ImageConverter ic = new ImageConverter(ImageImporter.importFullImageTo8bit(component));
 
 		ImageProcessor openProcessor = ic.convertToRGBGreyscale().toProcessor();
 
 		// All rotation is relative to the nucleus
-		Nucleus n = cell.getPrimaryNucleus();
-		Nucleus rn = cell.getPrimaryNucleus().getOrientedNucleus();
+		final Nucleus n = cell.getPrimaryNucleus();
+		final Nucleus rn = cell.getPrimaryNucleus().getOrientedNucleus();
 
 		// Rotate the image about the nucleus CoM and flip if needed
-		AffineTransform at = createRotationTransform(n);
-		AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC);
+		final AffineTransform at = createRotationTransform(n);
+		final AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC);
 
 		// Add to new image, with black background filling in spaces
-		BufferedImage mid = op.filter(openProcessor.getBufferedImage(), null);
+		final BufferedImage mid = op.filter(openProcessor.getBufferedImage(), null);
 
 		openProcessor = new ColorProcessor(mid);
 
@@ -504,11 +504,11 @@ public abstract class AbstractChartFactory {
 		// so the cropping can clip the real bounds.
 		// Caused by vertical nucleus CoM not being in the centre of the
 		// new image
-		int xBase = rn.getXBase();
-		int yBase = rn.getYBase();
-		int padding = Imageable.COMPONENT_BUFFER;
-		int wideW = (int) rn.getWidth() + (padding * 2);
-		int wideH = (int) rn.getHeight() + (padding * 2);
+		final int xBase = rn.getXBase();
+		final int yBase = rn.getYBase();
+		final int padding = Imageable.COMPONENT_BUFFER;
+		final int wideW = (int) rn.getWidth() + (padding * 2);
+		final int wideH = (int) rn.getHeight() + (padding * 2);
 		int wideX = xBase - padding;
 		int wideY = yBase - padding;
 
@@ -530,9 +530,12 @@ public abstract class AbstractChartFactory {
 	 */
 	protected static void drawImageAsAnnotation(@NonNull XYPlot plot, @NonNull ICell cell,
 			@NonNull CellularComponent component, RotationMode mode) {
+		
+		LOGGER.finer("Drawing background image for cell with primary nucleus %s"
+				.formatted(cell.getPrimaryNucleus().getNameAndNumber()));
 		try {
 
-			XYItemRenderer rend = plot.getRenderer(0); // index zero should be the
+			final XYItemRenderer rend = plot.getRenderer(0); // index zero should be the
 
 			// Start with a buffer
 			int xBase = -Imageable.COMPONENT_BUFFER;
@@ -554,22 +557,23 @@ public abstract class AbstractChartFactory {
 			for (int x = 0; x < openProcessor.getWidth(); x++) {
 				for (int y = 0; y < openProcessor.getHeight(); y++) {
 
-					int pixel = openProcessor.get(x, y);
-					Color col = new Color(pixel);
+					final int pixel = openProcessor.get(x, y);
+					final Color col = new Color(pixel);
 					// Ensure the 'pixels' overlap to avoid lines of background
 					// colour seeping through
-					Rectangle2D r = new Rectangle2D.Double(
+					final Rectangle2D r = new Rectangle2D.Double(
 							xBase + x - 0.6,
 							yBase + y - 0.6,
 							1.2, 1.2);
-					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+					final XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
 
 					rend.addAnnotation(a, Layer.BACKGROUND);
 				}
 			}
 		} catch (UnloadableImageException | MissingLandmarkException
 				| ComponentCreationException e) {
-			// No action needed, no image drawn
+			// No action needed, no image drawn, error logged quietly
+			LOGGER.fine("Unable to draw background image for cell: %s".formatted(e.getMessage()));
 		}
 	}
 

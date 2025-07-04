@@ -77,7 +77,7 @@ public interface Io {
 	String TEXT_FILE_EXTENSION = DOT + TEXT_FILE_EXTENSION_NODOT;
 
 	String INVALID_FILE_ERROR = "File is not valid for importing";
-	String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0";
+	String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0; check analysis options have channel set";
 
 	/** The folder to write and store logs and configuration */
 	String CONFIG_FOLDER_NAME = ".nma";
@@ -101,10 +101,11 @@ public interface Io {
 			File dir = new File(Importer.class.getProtectionDomain().getCodeSource().getLocation()
 					.toURI().getPath());
 			// Difference in path between standalone and jar
-			if (dir.getAbsolutePath().endsWith(".jar") || dir.getAbsolutePath().endsWith(".exe"))
+			if (dir.getAbsolutePath().endsWith(".jar") || dir.getAbsolutePath().endsWith(".exe")) {
 				dir = dir.getParentFile();
+			}
 			return dir;
-		} catch (URISyntaxException e) {
+		} catch (final URISyntaxException e) {
 			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.WARNING,
 					"Error getting program dir");
 			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.SEVERE, e.getMessage(), e);
@@ -128,7 +129,7 @@ public interface Io {
 	 * @return
 	 */
 	static File getRulesetDir() {
-		File dir = getConfigDir();
+		final File dir = getConfigDir();
 		return new File(dir, RULESET_FOLDER_NAME);
 	}
 
@@ -138,7 +139,7 @@ public interface Io {
 	 * @return
 	 */
 	static File getLogDir() {
-		File dir = getConfigDir();
+		final File dir = getConfigDir();
 		return new File(dir, LOG_FOLDER_NAME);
 	}
 
@@ -148,7 +149,7 @@ public interface Io {
 	 * @return
 	 */
 	static File getConfigFile() {
-		File dir = getConfigDir();
+		final File dir = getConfigDir();
 		return new File(dir, CONFIG_FILE_NAME);
 	}
 
@@ -158,9 +159,9 @@ public interface Io {
 	 * @return
 	 */
 	static File getLogFile() {
-		File dir = getLogDir();
+		final File dir = getLogDir();
 
-		File[] files = dir.listFiles((d, name) -> name.endsWith("0.log"));
+		final File[] files = dir.listFiles((d, name) -> name.endsWith("0.log"));
 
 		if (files == null || files.length == 0)
 			return null;
@@ -184,15 +185,14 @@ public interface Io {
 		 */
 		public static boolean writeString(final String s, final File f) {
 
-			if (f == null) {
+			if (f == null)
 				throw new IllegalArgumentException("File cannot be null");
-			}
 
 			try (PrintWriter out = new PrintWriter(f)) {
 
 				out.println(s);
 
-			} catch (FileNotFoundException e) {
+			} catch (final FileNotFoundException e) {
 				// No action
 				return false;
 			}
@@ -212,10 +212,9 @@ public interface Io {
 		 */
 		static File replaceFileExtension(final File f, final String oldExt, final String newExt) {
 
-			if (!f.getName().endsWith(oldExt)) {
+			if (!f.getName().endsWith(oldExt))
 				throw new IllegalArgumentException("Old extension not found");
-			}
-			String newFileName = f.getAbsolutePath().replace(oldExt, newExt);
+			final String newFileName = f.getAbsolutePath().replace(oldExt, newExt);
 			return new File(newFileName);
 
 		}
@@ -234,8 +233,8 @@ public interface Io {
 				return false;
 			if (!folder.isDirectory())
 				return false;
-			for (String fileType : ImageImporter.IMPORTABLE_FILE_TYPES) {
-				for (File f : folder.listFiles()) {
+			for (final String fileType : ImageImporter.IMPORTABLE_FILE_TYPES) {
+				for (final File f : folder.listFiles()) {
 					if (f.getName().endsWith(fileType))
 						return true;
 				}

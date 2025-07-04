@@ -132,22 +132,23 @@ public class TextFileNucleusFinder extends CellFinder {
 	public Collection<ICell> findInFolder(@NonNull final File folder) throws ImageImportException {
 
 		final List<ICell> list = new ArrayList<>();
-		File[] arr = folder.listFiles();
+		final File[] arr = folder.listFiles();
 		if (arr == null)
 			return list;
 
-		for (File f : arr) {
+		for (final File f : arr) {
 
 			// Check we are good to use this file
-			if (Thread.interrupted() || f.isDirectory() || !f.getName().endsWith(Io.TEXT_FILE_EXTENSION)) // Only look
-																											// at text
-																											// files
-				continue;
+			if (Thread.interrupted() || f.isDirectory() || !f.getName().endsWith(Io.TEXT_FILE_EXTENSION)) { // Only look
+				// at text
+																															// files
+								continue;
+			}
 
 			try {
 				list.addAll(findInFile(f));
 				LOGGER.finer(() -> "Found text files in %s".formatted(f.getName()));
-			} catch (ImageImportException e) {
+			} catch (final ImageImportException e) {
 				LOGGER.log(Level.SEVERE, "Error searching file: %s".formatted(e.getMessage()), e);
 			}
 		}
@@ -162,7 +163,7 @@ public class TextFileNucleusFinder extends CellFinder {
 //		Group by object
 //		Convert object coords to Roi
 //		Invoke NucleusBuilder
-		List<CoordinateLine> coordinates = new ArrayList<>();
+		final List<CoordinateLine> coordinates = new ArrayList<>();
 		try (FileInputStream fstream = new FileInputStream(textFile);
 				BufferedReader br = new BufferedReader(new InputStreamReader(fstream, StandardCharsets.UTF_8));) {
 			String strLine;
@@ -172,27 +173,27 @@ public class TextFileNucleusFinder extends CellFinder {
 					row++;
 					continue;
 				}
-				String[] arr = strLine.split(Io.TAB);
+				final String[] arr = strLine.split(Io.TAB);
 				coordinates.add(new CoordinateLine(arr[nucleusCol], arr[imageFileCol], Float.parseFloat(arr[xCol]),
 						Float.parseFloat(arr[yCol])));
 			}
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			LOGGER.severe("Cannot find input file: %s".formatted(textFile.getAbsolutePath()));
 			throw new ImageImportException(e);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.severe("Cannot read input file: %s".formatted(textFile.getAbsolutePath()));
 			throw new ImageImportException(e);
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			LOGGER.severe(
 					"When reading x and y coordinates, unable to parse a string as a number. %s. Check input file columns are in the correct order."
 							.formatted(e.getMessage()));
 			throw new ImageImportException("Unable to read object coordinates from file", e);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.severe("Error parsing coordinate file: %s".formatted(e.getMessage()));
 			throw new ImageImportException("Unable to read object coordinates from file", e);
 		}
 
-		List<Nucleus> nuclei = coordinates.stream()
+		final List<Nucleus> nuclei = coordinates.stream()
 				.collect(Collectors.groupingBy(CoordinateLine::object, Collectors.toList())).values().stream()
 				.map(l -> {
 					try {
@@ -203,11 +204,13 @@ public class TextFileNucleusFinder extends CellFinder {
 					return null;
 				}).toList();
 
-		List<ICell> result = new ArrayList<>();
-		for (Nucleus n : nuclei) {
+		final List<ICell> result = new ArrayList<>();
+		for (final Nucleus n : nuclei) {
 			if (null == n)
+			 {
 				continue; // nulls may come from failed makeNucleus above
-			ICell c = new DefaultCell(n);
+			}
+			final ICell c = new DefaultCell(n);
 			result.add(c);
 		}
 		fireProgressEvent();
@@ -216,27 +219,31 @@ public class TextFileNucleusFinder extends CellFinder {
 
 	private Nucleus makeNucleus(List<CoordinateLine> coordinates) throws ComponentCreationException {
 
-		String image = coordinates.stream().map(c -> c.imageName).findFirst().get();
-		File imageFile = new File(image);
-		Float[] xPoints = coordinates.stream().map(CoordinateLine::x).toArray(Float[]::new);
-		Float[] yPoints = coordinates.stream().map(CoordinateLine::y).toArray(Float[]::new);
-		float[] x = ArrayUtils.toFloat(xPoints);
-		float[] y = ArrayUtils.toFloat(yPoints);
+		final String image = coordinates.stream().map(c -> c.imageName).findFirst().get();
+		final File imageFile = new File(image);
+		final Float[] xPoints = coordinates.stream().map(CoordinateLine::x).toArray(Float[]::new);
+		final Float[] yPoints = coordinates.stream().map(CoordinateLine::y).toArray(Float[]::new);
+		final float[] x = ArrayUtils.toFloat(xPoints);
+		final float[] y = ArrayUtils.toFloat(yPoints);
 
 		// Calculate centroid
-		double xMin = Stats.min(x);
-		double yMin = Stats.min(y);
-		double xMax = Stats.max(x);
-		double yMax = Stats.max(y);
-		double xc = xMin + (xMax - xMin) / 2;
-		double yc = yMin + (yMax - yMin) / 2;
+		final double xMin = Stats.min(x);
+		final double yMin = Stats.min(y);
+		final double xMax = Stats.max(x);
+		final double yMax = Stats.max(y);
+		final double xc = xMin + (xMax - xMin) / 2;
+		final double yc = yMin + (yMax - yMin) / 2;
 
-		IPoint com = new FloatPoint(xc, yc);
+		final IPoint com = new FloatPoint(xc, yc);
 
-		Roi r = new PolygonRoi(x, y, Roi.POLYGON);
+		final Roi r = new PolygonRoi(x, y, Roi.POLYGON);
 
-		return factory.newBuilder().fromRoi(r).withFile(imageFile).withCoM(com)
-				.withChannel(nucleusOptions.getInt(HashOptions.CHANNEL)).build();
+		return factory.newBuilder()
+				.fromRoi(r)
+				.withFile(imageFile)
+				.withCoM(com)
+				.withChannel(nucleusOptions.getInt(HashOptions.CHANNEL))
+				.build();
 	}
 
 	@Override
