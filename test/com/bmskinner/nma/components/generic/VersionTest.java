@@ -87,12 +87,22 @@ public class VersionTest {
 		final Version v7 = new Version(2, 3, 2, "beta-1");
 		final Version v8 = new Version(2, 3, 2, "beta-2");
 
+		// Suffix within version
 		assertTrue(v5.isOlderThan(v4));
 		assertTrue(v5.isOlderThan(v6));
 		assertTrue(v6.isOlderThan(v7));
 		assertTrue(v7.isOlderThan(v8));
 		assertTrue(v8.isOlderThan(v4));
 		assertTrue(v1.isOlderThan(v8));
+
+		// Suffix between versions
+		final Version v9 = new Version(2, 2, 0);
+
+		assertTrue(v9.isOlderThan(v6));
+		assertFalse(v6.isOlderThan(v9));
+
+		// Same version
+		assertFalse(v5.isOlderThan(v5));
 
 	}
 
@@ -111,6 +121,29 @@ public class VersionTest {
 		final Version v4 = new Version(2, 3, 2);
 		assertTrue(v4.isNewerThan(v2));
 		assertFalse(v2.isNewerThan(v4));
+
+		// Check suffix handling
+		final Version v5 = new Version(2, 3, 0, "alpha-1");
+		final Version v6 = new Version(2, 3, 0, "alpha-2");
+		final Version v7 = new Version(2, 3, 0, "beta-1");
+		final Version v8 = new Version(2, 3, 0, "beta-2");
+
+		// Suffix within version
+		assertFalse(v5.isNewerThan(v4));
+		assertFalse(v5.isNewerThan(v6));
+		assertFalse(v6.isNewerThan(v7));
+		assertFalse(v7.isNewerThan(v8));
+		assertFalse(v8.isNewerThan(v4));
+		assertFalse(v1.isNewerThan(v8));
+
+		// Suffix between versions
+		final Version v9 = new Version(2, 2, 0);
+
+		assertFalse(v9.isNewerThan(v6));
+		assertTrue(v6.isNewerThan(v9));
+
+		// Same version
+		assertFalse(v5.isNewerThan(v5));
 	}
 
 	@Test
@@ -147,6 +180,9 @@ public class VersionTest {
 	public void testToString() {
 		final String s = "1.13.4";
 		assertEquals(s, Version.parseString("1.13.4").toString());
+
+		final String s1 = "1.13.4.alpha-1";
+		assertEquals(s1, Version.parseString(s1).toString());
 	}
 
 	@Test

@@ -414,7 +414,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 		final JMenuItem checkItem = new JMenuItem(CHECK_FOR_UPDATES_ITEM_LBL);
 		checkItem.addActionListener(e -> {
 			final Runnable r = () -> {
-				final Version v = UpdateChecker.fetchLatestVersion();
+				final Version v = UpdateChecker.fetchLatestVersionOnRemote();
 				if (v.isNewerThan(Version.currentVersion())) {
 					JOptionPane.showMessageDialog(this, "A new version - " + v + " - is available!",
 							"Update found!",

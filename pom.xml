@@ -11,7 +11,7 @@
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
 		<version>${project.version}</version>
 		<!-- Suffix should always start with a . e.g. .alpha-1 -->
-		<version.suffix>.alpha-3</version.suffix>
+		<version.suffix>.alpha-4</version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>

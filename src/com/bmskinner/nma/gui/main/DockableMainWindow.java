@@ -90,7 +90,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 
 		// Run update check if allowed in config
 		if (GlobalOptions.getInstance().getBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY)) {
-			Version latestVersion = UpdateChecker.fetchLatestVersion();
+			final Version latestVersion = UpdateChecker.fetchLatestVersionOnRemote();
 			if (latestVersion.isNewerThan(Version.currentVersion())) {
 				LOGGER.info(() -> "New version %s available".formatted(latestVersion));
 			}
@@ -108,45 +108,45 @@ public class DockableMainWindow extends AbstractMainWindow {
 	protected void createUI() {
 		try {
 
-			Dimension preferredSize = new Dimension(1080, 804);
+			final Dimension preferredSize = new Dimension(1080, 804);
 			this.setPreferredSize(preferredSize);
 			setBounds(100, 100, 1012, 804);
-			JPanel contentPane = new JPanel();
+			final JPanel contentPane = new JPanel();
 			contentPane.setBorder(new EmptyBorder(2, 2, 2, 2));
 			contentPane.setLayout(new BorderLayout(2, 2));
 			setContentPane(contentPane);
 
 			// Create the log panel
-			FloatDockModel dockModel = new FloatDockModel();
+			final FloatDockModel dockModel = new FloatDockModel();
 			dockModel.addOwner("frame0", this);
 			DockingManager.setDockModel(dockModel);
-			SingleDockFactory floatFactory = new SingleDockFactory();
+			final SingleDockFactory floatFactory = new SingleDockFactory();
 			dockModel.getFloatDock(this).setChildDockFactory(floatFactory); // ensure floating docks
 																			// are not converted
 																			// to tab docks
 
-			DatasetSelectionPanel populationsPanel = new DatasetSelectionPanel();
+			final DatasetSelectionPanel populationsPanel = new DatasetSelectionPanel();
 			populationsPanel.setBorder(BorderFactory.createEmptyBorder());
-			ConsensusNucleusPanel consensusNucleusPanel = new ConsensusNucleusPanel();
+			final ConsensusNucleusPanel consensusNucleusPanel = new ConsensusNucleusPanel();
 			consensusNucleusPanel.setBorder(BorderFactory.createEmptyBorder());
 
 			detailPanels.add(consensusNucleusPanel);
 
-			LogPanel logPanel = createLogPanel();
-			JPanel topPanel = createTopPanel(logPanel, populationsPanel, consensusNucleusPanel);
+			final LogPanel logPanel = createLogPanel();
+			final JPanel topPanel = createTopPanel(logPanel, populationsPanel, consensusNucleusPanel);
 
 			tabDock = createTabs();
 			dockModel.addRootDock("tabdock", tabDock, this);
 
 			// Add the top and bottom rows to the main panel
-			JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, tabDock);
+			final JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, tabDock);
 			panelMain.setBorder(BorderFactory.createEmptyBorder());
 			contentPane.add(panelMain, BorderLayout.CENTER);
 
 			this.pack();
 			consensusNucleusPanel.restoreAutoBounds();
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error initialising main view: %s".formatted(e.getMessage()),
 					e);
 		}
@@ -160,8 +160,8 @@ public class DockableMainWindow extends AbstractMainWindow {
 		final int width = getWidth();
 		final int height = getHeight();
 		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		int x = (screenSize.width / 2) - (width / 2);
-		int y = (screenSize.height / 2) - (height / 2);
+		final int x = (screenSize.width / 2) - (width / 2);
+		final int y = (screenSize.height / 2) - (height / 2);
 
 		setLocation(x, y);
 	}
@@ -172,12 +172,12 @@ public class DockableMainWindow extends AbstractMainWindow {
 	 * @return
 	 */
 	private LogPanel createLogPanel() {
-		LogPanel logPanel = new LogPanel();
+		final LogPanel logPanel = new LogPanel();
 		logPanel.setBorder(BorderFactory.createEmptyBorder());
 
 		// Set up the log panel
 		UserActionController.getInstance().setProgressBarAcceptor(logPanel);
-		LogPanelHandler textHandler = new LogPanelHandler(logPanel);
+		final LogPanelHandler textHandler = new LogPanelHandler(logPanel);
 		textHandler.setLevel(Level.INFO);
 		textHandler.setFormatter(new LogPanelFormatter());
 		Logger.getLogger("com.bmskinner.nma").addHandler(textHandler);
@@ -188,16 +188,16 @@ public class DockableMainWindow extends AbstractMainWindow {
 			ConsensusNucleusPanel consensusNucleusPanel) {
 
 		// Provide minimum sizes for the components
-		Dimension minimumSize = new Dimension(300, 200);
+		final Dimension minimumSize = new Dimension(300, 200);
 		logPanel.setMinimumSize(minimumSize);
 		populationsPanel.setMinimumSize(minimumSize);
 		consensusNucleusPanel.setMaximumSize(minimumSize);
 
 		// Create a container for the datasets and consensus panels
-		JPanel dataPanel = new JPanel();
+		final JPanel dataPanel = new JPanel();
 		dataPanel.setBorder(BorderFactory.createEmptyBorder());
 		dataPanel.setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
+		final GridBagConstraints c = new GridBagConstraints();
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.BOTH; // fill both axes of container
 		c.weightx = 1.0; // maximum weighting
@@ -213,10 +213,10 @@ public class DockableMainWindow extends AbstractMainWindow {
 		dataPanel.add(consensusNucleusPanel, c);
 
 		// Create split pane to separate log panel from others
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, logPanel, dataPanel);
+		final JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, logPanel, dataPanel);
 		splitPane.setBorder(BorderFactory.createEmptyBorder());
 
-		JPanel topRow = new JPanel(new BorderLayout());
+		final JPanel topRow = new JPanel(new BorderLayout());
 		topRow.setBorder(BorderFactory.createEmptyBorder());
 		topRow.add(splitPane);
 		return topRow;
@@ -230,17 +230,17 @@ public class DockableMainWindow extends AbstractMainWindow {
 		tabDock = new TabDock();
 
 		// Create the top level tabs in the UI
-		DetailPanel analysisDetailPanel = new AnalysisInfoDetailPanel();
-		DetailPanel nucleusProfilesPanel = new NucleusProfilesPanel(); // the angle profiles
-		DetailPanel cellsDetailPanel = new IndividualCellDetailPanel();
-		DetailPanel nuclearChartsPanel = new NuclearStatisticsPanel();
-		DetailPanel signalsDetailPanel = new SignalsDetailPanel();
-		DetailPanel clusterDetailPanel = new ClusterDetailPanel();
-		DetailPanel mergesDetailPanel = new MergesDetailPanel();
-		DetailPanel segmentsDetailPanel = new SegmentsDetailPanel();
-		DetailPanel comparisonsPanel = new ComparisonDetailPanel();
-		DetailPanel editingDetailPanel = new DatasetEditingPanel();
-		DetailPanel imagesTabPanel = new ImagesTabPanel();
+		final DetailPanel analysisDetailPanel = new AnalysisInfoDetailPanel();
+		final DetailPanel nucleusProfilesPanel = new NucleusProfilesPanel(); // the angle profiles
+		final DetailPanel cellsDetailPanel = new IndividualCellDetailPanel();
+		final DetailPanel nuclearChartsPanel = new NuclearStatisticsPanel();
+		final DetailPanel signalsDetailPanel = new SignalsDetailPanel();
+		final DetailPanel clusterDetailPanel = new ClusterDetailPanel();
+		final DetailPanel mergesDetailPanel = new MergesDetailPanel();
+		final DetailPanel segmentsDetailPanel = new SegmentsDetailPanel();
+		final DetailPanel comparisonsPanel = new ComparisonDetailPanel();
+		final DetailPanel editingDetailPanel = new DatasetEditingPanel();
+		final DetailPanel imagesTabPanel = new ImagesTabPanel();
 
 		detailPanels.add(analysisDetailPanel);
 		detailPanels.add(imagesTabPanel);
@@ -260,14 +260,14 @@ public class DockableMainWindow extends AbstractMainWindow {
 		detailPanels.add(editingDetailPanel);
 
 		int i = 0;
-		for (TabPanel t : detailPanels) {
+		for (final TabPanel t : detailPanels) {
 			if (t instanceof ConsensusNucleusPanel) {
 				continue;
 			}
 
-			DetailPanel p = (DetailPanel) t;
+			final DetailPanel p = (DetailPanel) t;
 			p.setMaximumSize(Toolkit.getDefaultToolkit().getScreenSize());
-			DefaultDockable d = new DefaultDockable(p.getPanelTitle(), p, p.getPanelTitle(), null,
+			final DefaultDockable d = new DefaultDockable(p.getPanelTitle(), p, p.getPanelTitle(), null,
 					DockingMode.ALL);
 			d.setDescription(p.getPanelDescription());
 			tabDock.addDockable(d, new Position(i++));

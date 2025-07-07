@@ -43,6 +43,8 @@ public class Version {
 	private static final String VERSION_STRING = readVersionTemplateFile();
 	private static final Version CURRENT_VERSION = parseString(VERSION_STRING);
 
+	private static final String EMPTY_STRING = "";
+
 	private final int major;
 	private final int minor;
 	private final int revision;
@@ -125,27 +127,39 @@ public class Version {
 	 * @return
 	 */
 	public boolean isOlderThan(@NonNull final Version v) {
+
+		if (this.equals(v))
+			return false;
+
 		if (this.major < v.getMajor())
 			return true;
 
-		if (this.major == v.getMajor() && this.minor < v.getMinor())
+		if (this.major > v.getMajor())
+			return false;
+
+		// Major version must be equal
+		if (this.minor < v.getMinor())
 			return true;
 
-		if (this.major == v.getMajor() && this.minor == v.getMinor()
-				&& this.revision < v.getRevision())
+		if (this.minor > v.getMinor())
+			return false;
+
+		// Minor version must be equal
+		if (this.revision < v.getRevision())
 			return true;
 
-		if (!this.suffix.equals("") | !v.suffix.equals("")) {
-			if (this.suffix.equals("") && !v.suffix.equals("")) // same version but no suffix
-				return false;
+		if (this.revision > v.getRevision())
+			return false;
 
-			if (!this.suffix.equals("") && v.suffix.equals("")) // same version but has suffix
-				return true;
+		// Revision must be equal
+		if (this.hasSuffix() && !v.hasSuffix())
+			return true; // only pre-release has a suffix
 
-			// Both have a suffix; standard alphabetical comparison
-			return this.suffix.compareTo(v.suffix) < 1;
-		}
-		return false;
+		if (v.hasSuffix() && !this.hasSuffix())
+			return false; // only pre-release has a suffix
+
+		// Both have a suffix; alphabetical comparison
+		return this.suffix.compareTo(v.suffix) < 1;
 	}
 
 	/**
@@ -218,6 +232,19 @@ public class Version {
 		return revision;
 	}
 
+	/**
+	 * Get the version suffix
+	 * 
+	 * @return the suffix or the empty string if not present
+	 */
+	public String getSuffix() {
+		return suffix;
+	}
+
+	public boolean hasSuffix() {
+		return !suffix.equals(EMPTY_STRING);
+	}
+
 	@Override
 	public String toString() {
 		if (suffix.equals(""))
@@ -246,7 +273,7 @@ public class Version {
 	 * @return
 	 */
 	private static String readVersionTemplateFile() {
-		String version = "";
+		String version = EMPTY_STRING;
 		try (InputStream fstream = NuclearMorphologyAnalysis.class.getClassLoader()
 				.getResourceAsStream("version.template");
 				BufferedReader br = new BufferedReader(new InputStreamReader(fstream, StandardCharsets.UTF_8));) {
