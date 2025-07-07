@@ -16,11 +16,18 @@
  ******************************************************************************/
 package com.bmskinner.nma.components;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+
+import com.bmskinner.nma.core.NuclearMorphologyAnalysis;
 
 /**
  * Hold version information, and parsing methods
@@ -33,18 +40,13 @@ public class Version {
 
 	private static final Logger LOGGER = Logger.getLogger(Version.class.getName());
 
-	/**
-	 * The fields for setting the version. Backwards compatability should be
-	 * maintained between revision increments and minor verions, but is not
-	 * guaranteed between major version increments.
-	 */
-	public static final int VERSION_MAJOR = 2;
-	public static final int VERSION_MINOR = 3;
-	public static final int VERSION_REVISION = 0;
+	private static final String VERSION_STRING = readVersionTemplateFile();
+	private static final Version CURRENT_VERSION = parseString(VERSION_STRING);
 
 	private final int major;
 	private final int minor;
 	private final int revision;
+	private final String suffix; // alpha suffix etc
 
 	private static final String SEPARATOR = ".";
 
@@ -59,10 +61,22 @@ public class Version {
 	 * @param minor
 	 * @param revision
 	 */
-	public Version(final int major, final int minor, final int revision) {
+	public Version(final int major, final int minor, final int revision, final String suffix) {
 		this.major = major;
 		this.minor = minor;
 		this.revision = revision;
+		this.suffix = suffix;
+	}
+
+	/**
+	 * Create a version
+	 * 
+	 * @param major
+	 * @param minor
+	 * @param revision
+	 */
+	public Version(final int major, final int minor, final int revision) {
+		this(major, minor, revision, "");
 	}
 
 	/**
@@ -71,7 +85,8 @@ public class Version {
 	 * @return
 	 */
 	public static @NonNull Version currentVersion() {
-		return new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+//		return new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+		return CURRENT_VERSION;
 	}
 
 	/**
@@ -93,11 +108,13 @@ public class Version {
 	 * @return
 	 */
 	public static Version parseString(@NonNull final String s) {
-		String[] parts = s.split("\\" + SEPARATOR);
-		if (parts.length == 3) {
+		final String[] parts = s.split("\\" + SEPARATOR);
+		if (parts.length == 3)
 			return new Version(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]),
 					Integer.valueOf(parts[2]));
-		}
+		if (parts.length == 4)
+			return new Version(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]),
+					Integer.valueOf(parts[2]), parts[3]);
 		throw new IllegalArgumentException("Input string %s is not a version format".formatted(s));
 	}
 
@@ -108,17 +125,25 @@ public class Version {
 	 * @return
 	 */
 	public boolean isOlderThan(@NonNull final Version v) {
-		if (this.major < v.getMajor()) {
+		if (this.major < v.getMajor())
 			return true;
-		}
 
-		if (this.major == v.getMajor() && this.minor < v.getMinor()) {
+		if (this.major == v.getMajor() && this.minor < v.getMinor())
 			return true;
-		}
 
 		if (this.major == v.getMajor() && this.minor == v.getMinor()
-				&& this.revision < v.getRevision()) {
+				&& this.revision < v.getRevision())
 			return true;
+
+		if (!this.suffix.equals("") | !v.suffix.equals("")) {
+			if (this.suffix.equals("") && !v.suffix.equals("")) // same version but no suffix
+				return false;
+
+			if (!this.suffix.equals("") && v.suffix.equals("")) // same version but has suffix
+				return true;
+
+			// Both have a suffix; standard alphabetical comparison
+			return this.suffix.compareTo(v.suffix) < 1;
 		}
 		return false;
 	}
@@ -139,6 +164,7 @@ public class Version {
 		result = prime * result + major;
 		result = prime * result + minor;
 		result = prime * result + revision;
+		result = prime * result + suffix.hashCode();
 		return result;
 	}
 
@@ -150,12 +176,14 @@ public class Version {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Version other = (Version) obj;
+		final Version other = (Version) obj;
 		if (major != other.major)
 			return false;
 		if (minor != other.minor)
 			return false;
 		if (revision != other.revision)
+			return false;
+		if (suffix != other.suffix)
 			return false;
 		return true;
 	}
@@ -192,7 +220,9 @@ public class Version {
 
 	@Override
 	public String toString() {
-		return major + SEPARATOR + minor + SEPARATOR + revision;
+		if (suffix.equals(""))
+			return major + SEPARATOR + minor + SEPARATOR + revision;
+		return major + SEPARATOR + minor + SEPARATOR + revision + SEPARATOR + suffix;
 	}
 
 	/**
@@ -206,8 +236,31 @@ public class Version {
 	public static boolean versionIsSupported(@NonNull Version version) {
 
 		// major version MUST be the same
-		return version.getMajor() == VERSION_MAJOR;
+		return version.getMajor() == CURRENT_VERSION.major;
 	}
+
+	/**
+	 * Read the res/version.template to get the current version string as written
+	 * from the pom
+	 * 
+	 * @return
+	 */
+	private static String readVersionTemplateFile() {
+		String version = "";
+		try (InputStream fstream = NuclearMorphologyAnalysis.class.getClassLoader()
+				.getResourceAsStream("version.template");
+				BufferedReader br = new BufferedReader(new InputStreamReader(fstream, StandardCharsets.UTF_8));) {
+
+			String strLine;
+			while ((strLine = br.readLine()) != null) {
+				version += strLine;
+			}
+		} catch (final IOException e) {
+			LOGGER.log(Level.SEVERE, "Cannot read version information", e);
+		}
+		return version;
+	}
+
 
 	/**
 	 * Throw if the version being deserialised is not supported

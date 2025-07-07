@@ -21,28 +21,24 @@ public class VersionTest {
 	}
 
 	@Test
-	public void testCurrentVersion() {
-		Version v = new Version(Version.VERSION_MAJOR, Version.VERSION_MINOR,
-				Version.VERSION_REVISION);
-		assertEquals(v, Version.currentVersion());
-	}
-
-	@Test
 	public void testParseString() {
-		String s = "1.13.8";
-		Version v = Version.parseString(s);
+		final String s = "1.13.8";
+		final Version v = Version.parseString(s);
 		assertEquals(new Version(1, 13, 8), v);
 
+		final Version v1 = Version.parseString("1.2.3.4");
+		assertFalse(new Version(1, 2, 3).equals(v1));
+
 		exception.expect(IllegalArgumentException.class);
-		Version.parseString("1.2.3.4");
 		Version.parseString("1.2");
+
 
 	}
 
 	@Test
 	public void testParseStringWithTooManyParametersExcepts() {
 		exception.expect(IllegalArgumentException.class);
-		Version.parseString("1.2.3.4");
+		Version.parseString("1.2.3.4.5");
 	}
 
 	@Test
@@ -71,34 +67,48 @@ public class VersionTest {
 
 	@Test
 	public void testIsOlderThan() {
-		Version v1 = Version.parseString("1.13.4");
-		Version v2 = Version.parseString("1.13.5");
+		final Version v1 = Version.parseString("1.13.4");
+		final Version v2 = Version.parseString("1.13.5");
 
 		assertTrue(v1.isOlderThan(v2));
 		assertFalse(v2.isOlderThan(v1));
 
-		Version v3 = new Version(1, 5, 1);
+		final Version v3 = new Version(1, 5, 1);
 		assertTrue(v3.isOlderThan(v2));
 		assertFalse(v2.isOlderThan(v3));
 
-		Version v4 = new Version(2, 3, 2);
+		final Version v4 = new Version(2, 3, 2);
 		assertTrue(v2.isOlderThan(v4));
 		assertFalse(v4.isOlderThan(v2));
+
+		// Check suffix handling
+		final Version v5 = new Version(2, 3, 2, "alpha-1");
+		final Version v6 = new Version(2, 3, 2, "alpha-2");
+		final Version v7 = new Version(2, 3, 2, "beta-1");
+		final Version v8 = new Version(2, 3, 2, "beta-2");
+
+		assertTrue(v5.isOlderThan(v4));
+		assertTrue(v5.isOlderThan(v6));
+		assertTrue(v6.isOlderThan(v7));
+		assertTrue(v7.isOlderThan(v8));
+		assertTrue(v8.isOlderThan(v4));
+		assertTrue(v1.isOlderThan(v8));
+
 	}
 
 	@Test
 	public void testIsNewerThan() {
-		Version v1 = Version.parseString("1.13.4");
-		Version v2 = Version.parseString("1.13.5");
+		final Version v1 = Version.parseString("1.13.4");
+		final Version v2 = Version.parseString("1.13.5");
 
 		assertTrue(v2.isNewerThan(v1));
 		assertFalse(v1.isNewerThan(v2));
 
-		Version v3 = new Version(1, 5, 1);
+		final Version v3 = new Version(1, 5, 1);
 		assertTrue(v2.isNewerThan(v3));
 		assertFalse(v3.isNewerThan(v2));
 
-		Version v4 = new Version(2, 3, 2);
+		final Version v4 = new Version(2, 3, 2);
 		assertTrue(v4.isNewerThan(v2));
 		assertFalse(v2.isNewerThan(v4));
 	}
@@ -109,10 +119,10 @@ public class VersionTest {
 		assertFalse(Version.parseString("1.13.4").equals(Version.parseString("1.13.3")));
 		assertTrue(Version.parseString("1.13.4").equals(new Version(1, 13, 4)));
 
-		Version v1 = new Version(2, 13, 4);
+		final Version v1 = new Version(2, 13, 4);
 		assertFalse(Version.parseString("1.13.4").equals(v1));
 
-		Version v2 = new Version(1, 14, 4);
+		final Version v2 = new Version(1, 14, 4);
 		assertFalse(Version.parseString("1.13.4").equals(v2));
 
 		assertFalse(Version.parseString("1.13.4").equals(new Object()));
@@ -135,7 +145,7 @@ public class VersionTest {
 
 	@Test
 	public void testToString() {
-		String s = "1.13.4";
+		final String s = "1.13.4";
 		assertEquals(s, Version.parseString("1.13.4").toString());
 	}
 

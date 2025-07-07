@@ -9,6 +9,7 @@ bin/*
 doc/*
 res/user-guide/*
 res/screens/*
+res/version.template
 scripts/package*
 scripts/render*
 scripts/upload*

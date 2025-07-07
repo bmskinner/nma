@@ -10,6 +10,7 @@
 	<properties>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
 		<version>${project.version}</version>
+		<!-- Suffix should always start with a . e.g. .alpha-1 -->
 		<version.suffix>.alpha-3</version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
@@ -113,6 +114,7 @@
 					<include>icons/*</include>
 					<include>licenses/*</include>
 					<include>logging.properties</include>
+					<include>version.template</include>
 				</includes>
 			</resource>
 		</resources>
@@ -221,6 +223,28 @@
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>3.0.1</version>
 				<executions>
+				
+					<!-- Copy the version template to res -->
+					<execution>
+						<id>create-version-file</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.basedir}/res</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.template.directory}</directory>
+									<includes>
+										<include>version.template</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
 
 					<!-- Copy the readme with version info to the base directory so the 
 						repo is up to date -->
