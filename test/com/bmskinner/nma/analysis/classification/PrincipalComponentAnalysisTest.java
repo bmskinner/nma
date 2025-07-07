@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,10 +16,11 @@ import com.bmskinner.nma.TestDatasetBuilder;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
-import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
+import com.bmskinner.nma.utility.StreamUtils;
 
 /**
  * Tests for principal component analysis
@@ -52,38 +52,32 @@ public class PrincipalComponentAnalysisTest extends ComponentTester {
 	@Test
 	public void testAllNucleiGetPrincipalComponents() throws Exception {
 
-		UUID clusterId = UUID.randomUUID();
-		// Check first 10 PC stats are empty
-		for (int i = 0; i < 10; i++) {
-			final int j = i;
-			boolean anyPresent = dataset.getCollection().getNuclei().stream()
-					.anyMatch(m -> m.hasMeasurement(Measurement
-							.makePrincipalComponent(j + 1,
-									clusterId)));
-			assertFalse(anyPresent);
-		}
+		final UUID clusterId = UUID.randomUUID();
+		final Measurement mm = Measurement.makePrincipalComponent(clusterId);
+
+		// Check PC measurements are not present
+		final boolean anyPresent = dataset.getCollection().getNuclei().stream()
+				.anyMatch(m -> m.hasMeasurement(mm));
+		assertFalse(anyPresent);
 
 		// Run the PCA on angle profiles
-		HashOptions options = new DefaultOptions();
-		options.setUUID(HashOptions.CLUSTER_GROUP_ID_KEY, clusterId);
-		options.setBoolean(ProfileType.ANGLE.toString(), true);
-		options.setDouble(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY, 0.95);
+		final HashOptions options =  new  OptionsBuilder()
+				.withValue(HashOptions.CLUSTER_GROUP_ID_KEY, clusterId)
+				.withValue(ProfileType.ANGLE.toString(), true)
+				.withValue(PrincipalComponentAnalysis.PROPORTION_VARIANCE_KEY, 0.95)
+				.build();
 
-		PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis(dataset, options);
-		pca.call();
+		new PrincipalComponentAnalysis(dataset, options).call();
 
-		Nucleus n = dataset.getCollection().getNuclei().stream().findFirst().get();
-		int nPcs = (int) n.getMeasurement(Measurement.makePrincipalComponentNumber(clusterId));
+		// check number of PCSs
+		final Nucleus n = dataset.getCollection().getNuclei().stream().findFirst().get();
+		final int nPcs = n.getArrayMeasurement(Measurement.makePrincipalComponent(clusterId)).size();
 
-		// Test that PCs have been set
-		for (int i = 0; i < nPcs; i++) {
-			final int j = i;
-			boolean allPresent = dataset.getCollection().getNuclei().stream()
-					.allMatch(m -> m.hasMeasurement(Measurement
-							.makePrincipalComponent(j + 1,
-									clusterId)));
-			assertTrue(allPresent);
-		}
+		// Test that PCs have been set in all nuclei
+		final boolean allPresent = dataset.getCollection().getNuclei().stream()
+				.allMatch(m -> StreamUtils
+						.uncheckCall(() -> m.hasMeasurement(mm) && m.getArrayMeasurement(mm).size() == nPcs));
+		assertTrue(allPresent);
 	}
 
 }

@@ -76,21 +76,21 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 
 	@Override
 	public IAnalysisResult call() throws Exception {
-		Instances inst = createInstances();
-		PrincipalComponents pca = new PrincipalComponents();
+		final Instances inst = createInstances();
+		final PrincipalComponents pca = new PrincipalComponents();
 		pca.setVarianceCovered(options.getDouble(PROPORTION_VARIANCE_KEY));
 		pca.buildEvaluator(inst);
 
 		// Calculate variance for each eigenvector
-		double variance = pca.getVarianceCovered();
+		final double variance = pca.getVarianceCovered();
 		LOGGER.fine(() -> "Variance covered: %s".formatted(variance));
 
 		int expectedPcs = 0;
 
-		double[] eigenValues = pca.getEigenValues();
+		final double[] eigenValues = pca.getEigenValues();
 
-		double totalEigenValues = Arrays.stream(eigenValues).sum();
-		double[] varianceExplained = Arrays.stream(eigenValues)
+		final double totalEigenValues = Arrays.stream(eigenValues).sum();
+		final double[] varianceExplained = Arrays.stream(eigenValues)
 				.map(d -> d / totalEigenValues)
 				.sorted()
 				.toArray();
@@ -98,38 +98,30 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 				.formatted(Arrays.toString(varianceExplained)));
 
 		for (int i = 0; i < inst.numInstances(); i++) {
-			Instance instance = inst.instance(i);
-			Instance converted = pca.convertInstance(instance);
-			double[] values = converted.toDoubleArray();
-			UUID nucleusId = nucleusToInstanceMap.get(i);
-			Optional<Nucleus> nucl = dataset.getCollection().getNucleus(nucleusId);
+			final Instance instance = inst.instance(i);
+			final Instance converted = pca.convertInstance(instance);
+			final double[] values = converted.toDoubleArray();
+			final UUID nucleusId = nucleusToInstanceMap.get(i);
+			final Optional<Nucleus> nucl = dataset.getCollection().getNucleus(nucleusId);
 
 			if (nucl.isPresent()) {
 
-				Measurement pcn = Measurement.makePrincipalComponentNumber(
+				final Measurement pcn = Measurement.makePrincipalComponent(
 						options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
 
-				nucl.get().setMeasurement(pcn, values.length); // Store the number of
-																// expected PCs
+				nucl.get().setMeasurement(pcn, values);
 
-				for (int pc = 0; pc < values.length; pc++) {
-					int readableIndex = pc + 1; // start from PC1, not PC0
-
-					Measurement stat = Measurement.makePrincipalComponent(readableIndex,
-							options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
-					nucl.get().setMeasurement(stat, values[pc]);
-				}
 				if (i == 0) {
 					expectedPcs = values.length;
 					LOGGER.fine("Detected %d PCs".formatted(expectedPcs));
-				} else {
-					if (values.length != expectedPcs)
-						LOGGER.fine("Different number of PCs (%d) to expected (%d)"
-								.formatted(values.length, expectedPcs));
+				} else if (values.length != expectedPcs) {
+					LOGGER.fine("Different number of PCs (%d) to expected (%d)"
+							.formatted(values.length, expectedPcs));
 				}
-			} else
+			} else {
 				LOGGER.fine("No nucleus in collection for instance %d with id %s".formatted(i,
 						nucleusId));
+			}
 		}
 
 		options.setInt(HashOptions.CLUSTER_NUM_PCS_KEY, expectedPcs);
@@ -140,23 +132,24 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 	private ArrayList<Attribute> createAttributes() {
 
 		double profileWindow = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
-		if (dataset.hasAnalysisOptions())
+		if (dataset.hasAnalysisOptions()) {
 			profileWindow = dataset.getAnalysisOptions().get().getProfileWindowProportion();
+		}
 
-		ArrayList<Attribute> attributes = new ArrayList<>();
+		final ArrayList<Attribute> attributes = new ArrayList<>();
 
-		for (ProfileType t : ProfileType.displayValues()) {
+		for (final ProfileType t : ProfileType.displayValues()) {
 			if (options.getBoolean(t.toString())) {
-				int nProfileAtttributes = (int) Math.floor(1d / profileWindow);
+				final int nProfileAtttributes = (int) Math.floor(1d / profileWindow);
 				for (int i = 0; i < nProfileAtttributes; i++) {
 					attributes.add(new Attribute(t.toString() + i));
 				}
 			}
 		}
 
-		for (Measurement stat : Measurement.getNucleusStats()) {
+		for (final Measurement stat : Measurement.getNucleusStats()) {
 			if (options.getBoolean(stat.toString())) {
-				Attribute a = new Attribute(stat.toString());
+				final Attribute a = new Attribute(stat.toString());
 				attributes.add(a);
 			}
 		}
@@ -166,17 +159,18 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 	private Instances createInstances() throws ClusteringMethodException {
 
 		double windowProportion = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
-		if (dataset.hasAnalysisOptions())// Merged datasets may not have options
+		if (dataset.hasAnalysisOptions()) { // Merged datasets may not have options
 			windowProportion = dataset.getAnalysisOptions().get().getProfileWindowProportion();
+		}
 
-		ArrayList<Attribute> attributes = createAttributes();
+		final ArrayList<Attribute> attributes = createAttributes();
 
-		Instances instances = new Instances(dataset.getName(),
+		final Instances instances = new Instances(dataset.getName(),
 				attributes,
 				dataset.getCollection().size());
 
-		for (ICell c : dataset.getCollection()) {
-			for (Nucleus n : c.getNuclei()) {
+		for (final ICell c : dataset.getCollection()) {
+			for (final Nucleus n : c.getNuclei()) {
 				try {
 					addNucleus(n, attributes, instances, windowProportion);
 				} catch (MissingDataException | SegmentUpdateException
@@ -193,33 +187,33 @@ public class PrincipalComponentAnalysis extends SingleDatasetAnalysisMethod {
 			double windowProportion)
 			throws SegmentUpdateException, MissingDataException, ComponentCreationException {
 
-		Instance inst = new SparseInstance(attributes.size());
+		final Instance inst = new SparseInstance(attributes.size());
 
 		int attNumber = 0;
 
-		int pointsToSample = (int) Math.floor(1d / windowProportion);
+		final int pointsToSample = (int) Math.floor(1d / windowProportion);
 
-		for (ProfileType t : ProfileType.displayValues()) {
+		for (final ProfileType t : ProfileType.displayValues()) {
 			if (options.getBoolean(t.toString())) {
-				IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
+				final IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
 				for (int i = 0; i < pointsToSample; i++) {
-					Attribute att = attributes.get(i);
+					final Attribute att = attributes.get(i);
 					inst.setValue(att, p.get(i * windowProportion));
 					attNumber++;
 				}
 			}
 		}
 
-		for (Measurement stat : Measurement.getNucleusStats()) {
+		for (final Measurement stat : Measurement.getNucleusStats()) {
 
 			if (options.getBoolean(stat.toString())) {
-				Attribute att = attributes.get(attNumber++);
+				final Attribute att = attributes.get(attNumber++);
 				inst.setValue(att, n.getMeasurement(stat, MeasurementScale.MICRONS));
 			}
 		}
 
 		instances.add(inst);
-		int index = instances.numInstances();
+		final int index = instances.numInstances();
 		nucleusToInstanceMap.put(index - 1, n.getId());
 		fireProgressEvent();
 	}

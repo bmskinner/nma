@@ -139,4 +139,9 @@ public class DefaultMeasurement implements Measurement {
 		return true;
 	}
 
+	@Override
+	public int compareTo(Measurement o) {
+		return this.name.compareTo(o.name());
+	}
+
 }

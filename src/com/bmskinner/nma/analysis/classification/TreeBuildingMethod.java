@@ -75,8 +75,8 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 	public IAnalysisResult call() throws Exception {
 
 		makeTree();
-		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-		IClusterGroup group = new DefaultClusterGroup(
+		final int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
+		final IClusterGroup group = new DefaultClusterGroup(
 				IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, options,
 				newickTree, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
 		return new ClusterAnalysisResult(dataset, group);
@@ -93,20 +93,20 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 	}
 
 	protected String[] createClustererOptions() {
-		ClusteringMethod cm = ClusteringMethod.from(options);
+		final ClusteringMethod cm = ClusteringMethod.from(options);
 		if (cm.equals(ClusteringMethod.HIERARCHICAL)) {
-			String[] o = new String[4];
+			final String[] o = new String[4];
 			o[0] = "-N"; // number of clusters
 			o[1] = String.valueOf(options.getInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY));
 			o[2] = "-L"; // algorithm
-			HierarchicalClusterMethod hm = HierarchicalClusterMethod
+			final HierarchicalClusterMethod hm = HierarchicalClusterMethod
 					.valueOf(options.getString(HashOptions.CLUSTER_HIERARCHICAL_METHOD_KEY));
 			o[3] = hm.code();
 			return o;
 		}
 
 		if (cm.equals(ClusteringMethod.EM)) {
-			String[] o = new String[2];
+			final String[] o = new String[2];
 			o[0] = "-I"; // max. iterations
 			o[1] = String.valueOf(options.getInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY));
 			return o;
@@ -123,12 +123,12 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 	 */
 	protected boolean makeTree() throws Exception {
 		// create Instances to hold Instance
-		Instances instances = makeInstances();
+		final Instances instances = makeInstances();
 
 		// create the clusterer to run on the Instances
-		String[] optionArray = createClustererOptions();
+		final String[] optionArray = createClustererOptions();
 
-		HierarchicalClusterer clusterer = new HierarchicalClusterer();
+		final HierarchicalClusterer clusterer = new HierarchicalClusterer();
 
 		clusterer.setOptions(optionArray); // set the options
 		clusterer.setDistanceFunction(new EuclideanDistance());
@@ -147,22 +147,22 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 	}
 
 	private ArrayList<Attribute> makeUmapAttributes() {
-		ArrayList<Attribute> attributes = new ArrayList<>();
+		final ArrayList<Attribute> attributes = new ArrayList<>();
 		attributes.add(new Attribute("UMAP_X"));
 		attributes.add(new Attribute("UMAP_Y"));
 		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
-			Attribute name = new Attribute("name", (List<String>) null);
+			final Attribute name = new Attribute("name", (List<String>) null);
 			attributes.add(name);
 		}
 		return attributes;
 	}
 
 	private ArrayList<Attribute> makeTsneAttributes() {
-		ArrayList<Attribute> attributes = new ArrayList<>();
+		final ArrayList<Attribute> attributes = new ArrayList<>();
 		attributes.add(new Attribute("tSNE_X"));
 		attributes.add(new Attribute("tSNE_Y"));
 		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
-			Attribute name = new Attribute("name", (List<String>) null);
+			final Attribute name = new Attribute("name", (List<String>) null);
 			attributes.add(name);
 		}
 		return attributes;
@@ -172,16 +172,17 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 
 		// From the first nucleus, find the number of PCs to cluster on
-		Nucleus n = dataset.getCollection().getCells().stream().findFirst()
+		final Nucleus n = dataset.getCollection().getCells().stream().findFirst()
 				.orElseThrow(NullPointerException::new).getPrimaryNucleus();
-		int nPcs = (int) n.getMeasurement(Measurement.PCA_N);
+		final int nPcs = (int) n.getMeasurement(Measurement.PCA_N);
 
-		ArrayList<Attribute> attributes = new ArrayList<>();
-		for (int i = 1; i <= nPcs; i++)
+		final ArrayList<Attribute> attributes = new ArrayList<>();
+		for (int i = 1; i <= nPcs; i++) {
 			attributes.add(new Attribute("PC_" + i));
+		}
 
 		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
-			Attribute name = new Attribute("name", (List<String>) null);
+			final Attribute name = new Attribute("name", (List<String>) null);
 			attributes.add(name);
 		}
 		return attributes;
@@ -198,13 +199,14 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 				return makeTsneAttributes();
 
 			LOGGER.finer("Checking if PCA clustering is set");
-			if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY))
+			if (options.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
 				try {
 					return makePCAttributes();
 				} catch (MissingDataException | ComponentCreationException
 						| SegmentUpdateException e) {
 					throw new AnalysisMethodException("Missing measurements in nuclei", e);
 				}
+			}
 
 			LOGGER.finer("Checking if UMAP clustering is set");
 			if (options.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY))
@@ -221,27 +223,28 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
 		// How many attributes per profile?
 		double profileWindow = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
-		if (dataset.hasAnalysisOptions())
+		if (dataset.hasAnalysisOptions()) {
 			profileWindow = dataset.getAnalysisOptions().orElseThrow(NullPointerException::new)
 					.getProfileWindowProportion();
+		}
 
 		profileAttributeCount = (int) Math.floor(1d / profileWindow);
 
 		// An attribute for each index in each selected profile, spaced <windowSize>
 		// apart
-		for (ProfileType t : ProfileType.displayValues()) {
+		for (final ProfileType t : ProfileType.displayValues()) {
 			if (options.getBoolean(t.toString())) {
 				attributeCount += profileAttributeCount;
 			}
 		}
 
-		for (Measurement stat : Measurement.getNucleusStats()) {
+		for (final Measurement stat : Measurement.getNucleusStats()) {
 			if (options.getBoolean(stat.toString())) {
 				attributeCount++;
 			}
 		}
 
-		for (Measurement stat : Measurement.getGlcmStats()) {
+		for (final Measurement stat : Measurement.getGlcmStats()) {
 			if (options.getBoolean(stat.toString())) {
 				attributeCount++;
 			}
@@ -268,30 +271,30 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
 		// Create the attributes
 		LOGGER.finer("Creating attributes");
-		ArrayList<Attribute> attributes = new ArrayList<>(attributeCount);
+		final ArrayList<Attribute> attributes = new ArrayList<>(attributeCount);
 		int profileAttCounter = 0;
-		for (ProfileType t : ProfileType.displayValues()) {
+		for (final ProfileType t : ProfileType.displayValues()) {
 			if (options.getBoolean(t.toString())) {
 				for (int i = 0; i < profileAttributeCount; i++) {
-					Attribute a = new Attribute("att_" + profileAttCounter);
+					final Attribute a = new Attribute("att_" + profileAttCounter);
 					attributes.add(a);
 					profileAttCounter++;
 				}
 			}
 		}
 
-		for (Measurement stat : Measurement.getNucleusStats()) {
+		for (final Measurement stat : Measurement.getNucleusStats()) {
 			if (options.getBoolean(stat.toString())) {
 				LOGGER.finer("Creating attribute for " + stat);
-				Attribute a = new Attribute(stat.toString());
+				final Attribute a = new Attribute(stat.toString());
 				attributes.add(a);
 			}
 		}
 
-		for (Measurement stat : Measurement.getGlcmStats()) {
+		for (final Measurement stat : Measurement.getGlcmStats()) {
 			if (options.getBoolean(stat.toString())) {
 				LOGGER.finer("Creating attribute for " + stat);
-				Attribute a = new Attribute(stat.toString());
+				final Attribute a = new Attribute(stat.toString());
 				attributes.add(a);
 			}
 		}
@@ -299,16 +302,16 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		if (options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus()
 				&& mesh != null) {
 
-			for (MeshFace face : mesh.getFaces()) {
+			for (final MeshFace face : mesh.getFaces()) {
 				LOGGER.finer("Creating attribute for face " + face.toString());
-				Attribute a = new Attribute("mesh_" + face.toString());
+				final Attribute a = new Attribute("mesh_" + face.toString());
 				attributes.add(a);
 			}
 		}
 
 		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
 			LOGGER.finer("Creating attribute for name - hierarchical only");
-			Attribute name = new Attribute("name", (List<String>) null);
+			final Attribute name = new Attribute("name", (List<String>) null);
 			attributes.add(name);
 		}
 		return attributes;
@@ -332,23 +335,24 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			SegmentUpdateException {
 		LOGGER.finer("Creating clusterable instances");
 		double windowProportion = Taggable.DEFAULT_PROFILE_WINDOW_PROPORTION;
-		if (dataset.hasAnalysisOptions())// Merged datasets may not have options
+		if (dataset.hasAnalysisOptions()) { // Merged datasets may not have options
 			windowProportion = dataset.getAnalysisOptions().orElseThrow(NullPointerException::new)
-					.getProfileWindowProportion();
+								.getProfileWindowProportion();
+		}
 
 		// Weka clustering uses a table in which columns are attributes and rows are
 		// instances
-		ArrayList<Attribute> attributes = makeAttributes();
+		final ArrayList<Attribute> attributes = makeAttributes();
 
-		Instances instances = new Instances(collection.getName(), attributes, collection.size());
+		final Instances instances = new Instances(collection.getName(), attributes, collection.size());
 
 		Mesh template = null;
 		if (options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus()) {
 			template = new DefaultMesh(collection.getConsensus());
 		}
 
-		for (ICell c : collection) {
-			for (Nucleus n : c.getNuclei()) {
+		for (final ICell c : collection) {
+			for (final Nucleus n : c.getNuclei()) {
 				addNucleus(c, n, attributes, instances, template, windowProportion);
 			}
 		}
@@ -371,18 +375,18 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			Instances instances)
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		int attNumber = 0;
-		Instance inst = new SparseInstance(attributes.size());
-		Attribute attX = attributes.get(attNumber++);
+		final Instance inst = new SparseInstance(attributes.size());
+		final Attribute attX = attributes.get(attNumber++);
 		inst.setValue(attX, n.getMeasurement(
 				Measurement.makeUMAP(1, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
 
-		Attribute attY = attributes.get(attNumber++);
+		final Attribute attY = attributes.get(attNumber++);
 		inst.setValue(attY, n.getMeasurement(
 				Measurement.makeUMAP(2, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
 
 		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
-			String uniqueName = c.getId().toString();
-			Attribute att = attributes.get(attNumber++);
+			final String uniqueName = c.getId().toString();
+			final Attribute att = attributes.get(attNumber++);
 			inst.setValue(att, uniqueName);
 		}
 		instances.add(inst);
@@ -406,18 +410,18 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			Instances instances)
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		int attNumber = 0;
-		Instance inst = new SparseInstance(attributes.size());
-		Attribute attX = attributes.get(attNumber++);
+		final Instance inst = new SparseInstance(attributes.size());
+		final Attribute attX = attributes.get(attNumber++);
 		inst.setValue(attX, n.getMeasurement(
 				Measurement.makeTSNE(1, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
 
-		Attribute attY = attributes.get(attNumber++);
+		final Attribute attY = attributes.get(attNumber++);
 		inst.setValue(attY, n.getMeasurement(
 				Measurement.makeTSNE(2, options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY))));
 
 		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
-			String uniqueName = c.getId().toString();
-			Attribute att = attributes.get(attNumber++);
+			final String uniqueName = c.getId().toString();
+			final Attribute att = attributes.get(attNumber++);
 			inst.setValue(att, uniqueName);
 		}
 		instances.add(inst);
@@ -430,20 +434,20 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			Instances instances)
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		int attNumber = 0;
-		Instance inst = new SparseInstance(attributes.size());
+		final Instance inst = new SparseInstance(attributes.size());
 
-		int nPcs = (int) n.getMeasurement(Measurement.PCA_N);
-		for (int i = 1; i <= nPcs; i++) {
-			Attribute att = attributes.get(attNumber++);
-			Measurement pcm = Measurement.makePrincipalComponent(i,
-					options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
-			double pc = n.getMeasurement(pcm);
+		final List<Double> pcs = n
+				.getArrayMeasurement(
+						Measurement.makePrincipalComponent(options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY)));
+
+		for (final double pc : pcs) {
+			final Attribute att = attributes.get(attNumber++);
 			inst.setValue(att, pc);
 		}
 
 		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
-			String uniqueName = c.getId().toString();
-			Attribute att = attributes.get(attNumber++);
+			final String uniqueName = c.getId().toString();
+			final Attribute att = attributes.get(attNumber++);
 			inst.setValue(att, uniqueName);
 		}
 		instances.add(inst);
@@ -478,28 +482,28 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 		}
 
 		int attNumber = 0;
-		Instance inst = new SparseInstance(attributes.size());
+		final Instance inst = new SparseInstance(attributes.size());
 
-		int pointsToSample = (int) Math.floor(1d / windowProportion);
+		final int pointsToSample = (int) Math.floor(1d / windowProportion);
 
-		for (ProfileType t : ProfileType.displayValues()) {
+		for (final ProfileType t : ProfileType.displayValues()) {
 
 			if (options.getBoolean(t.toString())) {
 				LOGGER.finer("Adding attribute for " + t.toString());
 				// Interpolate the profile to the median length
-				IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
+				final IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
 
 				for (int i = 0; i < pointsToSample; i++) {
-					Attribute att = attributes.get(attNumber);
+					final Attribute att = attributes.get(attNumber);
 					inst.setValue(att, p.get(i * windowProportion));
 					attNumber++;
 				}
 			}
 		}
 
-		for (Measurement stat : Measurement.getNucleusStats()) {
+		for (final Measurement stat : Measurement.getNucleusStats()) {
 			if (options.getBoolean(stat.toString())) {
-				Attribute att = attributes.get(attNumber++);
+				final Attribute att = attributes.get(attNumber++);
 
 				if (Measurement.VARIABILITY.equals(stat)) {
 					inst.setValue(att, collection
@@ -511,25 +515,25 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 			}
 		}
 
-		for (Measurement stat : Measurement.getGlcmStats()) {
+		for (final Measurement stat : Measurement.getGlcmStats()) {
 			if (options.getBoolean(stat.toString())) {
-				Attribute att = attributes.get(attNumber++);
+				final Attribute att = attributes.get(attNumber++);
 				inst.setValue(att, n.getMeasurement(stat, MeasurementScale.MICRONS));
 			}
 		}
 
 		if (options.getBoolean(HashOptions.CLUSTER_INCLUDE_MESH_KEY) && collection.hasConsensus()) {
 
-			Mesh mesh = new DefaultMesh(n, template);
-			for (MeshFace face : mesh.getFaces()) {
-				Attribute att = attributes.get(attNumber++);
+			final Mesh mesh = new DefaultMesh(n, template);
+			for (final MeshFace face : mesh.getFaces()) {
+				final Attribute att = attributes.get(attNumber++);
 				inst.setValue(att, face.getArea());
 			}
 		}
 
 		if (ClusteringMethod.from(options).equals(ClusteringMethod.HIERARCHICAL)) {
-			String uniqueName = c.getId().toString();
-			Attribute att = attributes.get(attNumber++);
+			final String uniqueName = c.getId().toString();
+			final Attribute att = attributes.get(attNumber++);
 			inst.setValue(att, uniqueName);
 		}
 

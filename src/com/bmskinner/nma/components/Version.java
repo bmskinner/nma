@@ -52,6 +52,7 @@ public class Version {
 	public static final Version V_2_0_0 = new Version(2, 0, 0);
 	public static final Version V_2_1_0 = new Version(2, 1, 0);
 	public static final Version V_2_2_0 = new Version(2, 2, 0);
+	public static final Version V_2_3_0 = new Version(2, 3, 0);
 
 	/**
 	 * Create a version
@@ -93,11 +94,10 @@ public class Version {
 	 * @return
 	 */
 	public static Version parseString(@NonNull final String s) {
-		String[] parts = s.split("\\" + SEPARATOR);
-		if (parts.length == 3) {
+		final String[] parts = s.split("\\" + SEPARATOR);
+		if (parts.length == 3)
 			return new Version(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]),
 					Integer.valueOf(parts[2]));
-		}
 		throw new IllegalArgumentException("Input string %s is not a version format".formatted(s));
 	}
 
@@ -108,18 +108,15 @@ public class Version {
 	 * @return
 	 */
 	public boolean isOlderThan(@NonNull final Version v) {
-		if (this.major < v.getMajor()) {
+		if (this.major < v.getMajor())
 			return true;
-		}
 
-		if (this.major == v.getMajor() && this.minor < v.getMinor()) {
+		if (this.major == v.getMajor() && this.minor < v.getMinor())
 			return true;
-		}
 
 		if (this.major == v.getMajor() && this.minor == v.getMinor()
-				&& this.revision < v.getRevision()) {
+				&& this.revision < v.getRevision())
 			return true;
-		}
 		return false;
 	}
 
@@ -150,7 +147,7 @@ public class Version {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Version other = (Version) obj;
+		final Version other = (Version) obj;
 		if (major != other.major)
 			return false;
 		if (minor != other.minor)

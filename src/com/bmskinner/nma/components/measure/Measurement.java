@@ -35,7 +35,7 @@ import com.bmskinner.nma.io.XmlSerializable;
  * @author Ben Skinner
  *
  */
-public interface Measurement extends XmlSerializable {
+public interface Measurement extends XmlSerializable, Comparable<Measurement> {
 
 	/**
 	 * The names of the measured statistics
@@ -43,42 +43,43 @@ public interface Measurement extends XmlSerializable {
 	 * @author Ben Skinner
 	 *
 	 */
-	static class Names {
+	public static class Names {
 
-		static final String AREA = "Area";
-		static final String PERIMETER = "Perimeter";
-		static final String MIN_DIAMETER = "Min diameter";
-		static final String ELLIPTICITY = "Ellipticity";
-		static final String ASPECT = "Aspect ratio";
-		static final String CIRCULARITY = "Circularity";
-		static final String ELONGATION = "Elongation";
-		static final String REGULARITY = "Regularity";
-		static final String VARIABILITY = "Difference from median";
-		static final String BOUNDING_HEIGHT = "Bounding height";
-		static final String BOUNDING_WIDTH = "Bounding width";
-		static final String OP_RP_ANGLE = "Angle between reference points";
-		static final String HOOK_LENGTH = "Length of hook";
-		static final String BODY_WIDTH = "Width of body";
-		static final String PATH_LENGTH = "Path length";
-		static final String CELL_NUCLEUS_COUNT = "Nuclei per cell";
-		static final String CELL_NUCLEAR_AREA = "Nuclear area";
-		static final String CELL_NUCLEAR_RATIO = "Nucleus : Cytoplasm area ratio";
-		static final String NUCLEUS_SIGNAL_COUNT = "Signals per nucleus";
-		static final String ANGLE = "Angle";
-		static final String DISTANCE_FROM_COM = "Distance from CoM";
-		static final String FRACT_DISTANCE_FROM_COM = "Fractional distance from CoM";
-		static final String RADIUS = "Radius";
-		static final String LENGTH = "Length";
-		static final String DISPLACEMENT = "Displacement";
-		static final String TSNE = "TSNE";
-		static final String TSNE_1 = "TSNE_1";
-		static final String TSNE_2 = "TSNE_2";
-		static final String UMAP = "UMAP";
-		static final String UMAP_1 = "UMAP_1";
-		static final String UMAP_2 = "UMAP_2";
-		static final String PCA_N = "Number of PCs";
-		static final String PCA_1 = "PC1";
-		static final String PCA_2 = "PC2";
+		public static final String AREA = "Area";
+		public static final String PERIMETER = "Perimeter";
+		public static final String MIN_DIAMETER = "Min diameter";
+		public static final String ELLIPTICITY = "Ellipticity";
+		public static final String ASPECT = "Aspect ratio";
+		public static final String CIRCULARITY = "Circularity";
+		public static final String ELONGATION = "Elongation";
+		public static final String REGULARITY = "Regularity";
+		public static final String VARIABILITY = "Difference from median";
+		public static final String BOUNDING_HEIGHT = "Bounding height";
+		public static final String BOUNDING_WIDTH = "Bounding width";
+		public static final String OP_RP_ANGLE = "Angle between reference points";
+		public static final String HOOK_LENGTH = "Length of hook";
+		public static final String BODY_WIDTH = "Width of body";
+		public static final String PATH_LENGTH = "Path length";
+		public static final String CELL_NUCLEUS_COUNT = "Nuclei per cell";
+		public static final String CELL_NUCLEAR_AREA = "Nuclear area";
+		public static final String CELL_NUCLEAR_RATIO = "Nucleus : Cytoplasm area ratio";
+		public static final String NUCLEUS_SIGNAL_COUNT = "Signals per nucleus";
+		public static final String ANGLE = "Angle";
+		public static final String DISTANCE_FROM_COM = "Distance from CoM";
+		public static final String FRACT_DISTANCE_FROM_COM = "Fractional distance from CoM";
+		public static final String RADIUS = "Radius";
+		public static final String LENGTH = "Length";
+		public static final String DISPLACEMENT = "Displacement";
+		public static final String TSNE = "TSNE";
+		public static final String TSNE_1 = "TSNE_1";
+		public static final String TSNE_2 = "TSNE_2";
+		public static final String UMAP = "UMAP";
+		public static final String UMAP_1 = "UMAP_1";
+		public static final String UMAP_2 = "UMAP_2";
+		public static final String PCA = "Principal_components";
+		public static final String PCA_N = "Number of PCs";
+		public static final String PCA_1 = "PC1";
+		public static final String PCA_2 = "PC2";
 		public static final String PIXEL_HISTOGRAM = "Pixel_histogram";
 
 	}
@@ -189,35 +190,41 @@ public interface Measurement extends XmlSerializable {
 	}
 
 	/**
-	 * Create a statistic for a principal component
+	 * Create a statistic for the number of principal components with a cluster
+	 * group
 	 * 
-	 * @param pc the number of the component, from 1 to n
+	 * @param id a cluster group id
 	 * @return the stat for the component
+	 * @deprecated since 2.3.0 to use array measurements instead. Retained to allow
+	 *             conversion of datasets
 	 */
-//	static Measurement makePrincipalComponent(int pc) {
-//		return new DefaultMeasurement("PC" + pc, MeasurementDimension.NONE);
-//	}
+	@Deprecated
+	static Measurement makePrincipalComponentNumber(UUID id) {
+		return new DefaultMeasurement(Names.PCA_N + "_" + id, MeasurementDimension.NONE);
+	}
 
 	/**
-	 * Create a statistic for a principal component with a cluster group
+	 * Create a measurement for a principal component with a cluster group
 	 * 
-	 * @param pc the number of the component, from 1 to n
+	 * @param pc the principal component
 	 * @param id a group id
-	 * @return the stat for the component
+	 * @return the measurement for the component
+	 * @deprecated since 2.3.0 to use array measurements instead. Retained to allow
+	 *             conversion of datasets
 	 */
+	@Deprecated
 	static Measurement makePrincipalComponent(int pc, UUID id) {
 		return new DefaultMeasurement("PC" + pc + "_" + id, MeasurementDimension.NONE);
 	}
 
 	/**
-	 * Create a statistic for the number of principal components with a cluster
-	 * group
+	 * Create a measurement for principal components within a cluster group
 	 * 
-	 * @param id a group id
-	 * @return the stat for the component
+	 * @param clusterGroupId a cluster group id
+	 * @return the measurement for the component
 	 */
-	static Measurement makePrincipalComponentNumber(UUID id) {
-		return new DefaultMeasurement(Names.PCA_N + "_" + id, MeasurementDimension.NONE);
+	static Measurement makePrincipalComponent(UUID clusterGroupId) {
+		return new ArrayMeasurement(Names.PCA + "_" + clusterGroupId, MeasurementDimension.NONE);
 	}
 
 	/**
@@ -242,16 +249,6 @@ public interface Measurement extends XmlSerializable {
 		return new DefaultMeasurement(Names.UMAP + "_" + dim + "_" + id, MeasurementDimension.NONE);
 	}
 
-	/**
-	 * Create a measurement for a level of the pixel histogram.
-	 * 
-	 * @param dim the grey level measured
-	 * @return
-	 */
-//	static Measurement makePixelHistogram(int channel, int dim) {
-//		return new DefaultMeasurement(Names.PIXEL_HISTOGRAM + "_" + dim + "_channel_" + channel,
-//				MeasurementDimension.NONE);
-//	}
 
 	/**
 	 * Create a measurement for a level of the pixel histogram.
@@ -374,14 +371,32 @@ public interface Measurement extends XmlSerializable {
 	 * Get the measurement keys for each grey level of an image histogram
 	 * 
 	 * @return the 256 grey level measurements
+	 * @deprecated since 2.3.0 to use array measurements instead. Retained to allow
+	 *             conversion of datasets
 	 */
-//	static List<Measurement> getPixelHistogramMeasurements(int channel) {
-//		final List<Measurement> list = new ArrayList<>();
-//		for (int i = 0; i < 256; i++) {
-//			list.add(Measurement.makePixelHistogram(channel, i));
-//		}
-//		return list;
-//	}
+	@Deprecated
+	static List<Measurement> getPixelHistogramMeasurements(int channel) {
+		final List<Measurement> list = new ArrayList<>();
+		for (int i = 0; i < 256; i++) {
+			list.add(Measurement.makePixelHistogram(channel, i));
+		}
+		return list;
+	}
+
+	/**
+	 * Create a measurement for a pixel count at a given level
+	 * 
+	 * @param channel the image RGB channel
+	 * @param dim     the pixel value (0-255)
+	 * @return
+	 * @deprecated since 2.3.0 to use array measurements instead. Retained to allow
+	 *             conversion of datasets
+	 */
+	@Deprecated
+	static Measurement makePixelHistogram(int channel, int dim) {
+		return new DefaultMeasurement(Names.PIXEL_HISTOGRAM + "_" + dim + "_channel_" + channel,
+				MeasurementDimension.NONE);
+	}
 
 	/**
 	 * Get stats for rodent sperm nuclei
