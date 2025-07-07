@@ -85,9 +85,19 @@ public class XMLNames {
 
 	public static final String XML_REVERSE = "reverse";
 
+	/** The integer y coordinates for interpolation */
+	@Deprecated
 	public static final String XML_YPOINTS = "ypoints";
 
+	/** The integer x coordinates for interpolation */
+	@Deprecated
 	public static final String XML_XPOINTS = "xpoints";
+
+	/** The interpolated x coordinates */
+	public static final String XML_XBORDER = "xborder";
+
+	/** The interpolated y coordinates */
+	public static final String XML_YBORDER = "yborder";
 
 	public static final String XML_SCALE = "Scale";
 

@@ -108,9 +108,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 */
 	private double scale = CellularComponent.DEFAULT_SCALE;
 
-	/** The points within the roi from which the object was detected */
-	private final int[] xpoints;
-	private final int[] ypoints;
+//	/** The points within the roi from which the object was detected */
+//	@Deprecated
+//	private final int[] xpoints;
+//	@Deprecated
+//	private final int[] ypoints;
 
 	/** Whether the x and y points should be reversed when making the border */
 	private boolean isReversed = false;
@@ -197,10 +199,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		// The polygon may have empty indices in its arrays
 		// so resize these by copying the values to new
 		// arrays
-		this.xpoints = Arrays.copyOfRange(polygon.xpoints, 0, polygon.npoints);
-		this.ypoints = Arrays.copyOfRange(polygon.ypoints, 0, polygon.npoints);
+		int[] xpoints = Arrays.copyOfRange(polygon.xpoints, 0, polygon.npoints);
+		int[] ypoints = Arrays.copyOfRange(polygon.ypoints, 0, polygon.npoints);
 
-		makeBorderList();
+		makeBorderList(xpoints, ypoints);
 	}
 
 	/**
@@ -238,8 +240,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			}
 		}
 
-		this.xpoints = Arrays.copyOf(other.xpoints, other.xpoints.length);
-		this.ypoints = Arrays.copyOf(other.ypoints, other.ypoints.length);
+//		int[] xpoints = Arrays.copyOf(other.xpoints, other.xpoints.length);
+//		int[] ypoints = Arrays.copyOf(other.ypoints, other.ypoints.length);
 		this.isReversed = a.isReversed();
 
 		borderList = new IPoint[other.borderList.length];
@@ -285,12 +287,25 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		channel = Integer.parseInt(e.getChildText(XMLNames.XML_CHANNEL));
 		scale = Double.parseDouble(e.getChildText(XMLNames.XML_SCALE));
 
-		xpoints = XMLReader.parseIntArray(e.getChildText(XMLNames.XML_XPOINTS));
-		ypoints = XMLReader.parseIntArray(e.getChildText(XMLNames.XML_YPOINTS));
-		isReversed = e.getChild(XMLNames.XML_XPOINTS)
-				.getAttributeValue(XMLNames.XML_REVERSE) != null;
+		// If border is stored already interpolated
+		if (XMLReader.hasElement(e, XMLNames.XML_XBORDER)) {
 
-		makeBorderList();
+			float[] xp = XMLReader.parseFloatArray(e.getChildText(XMLNames.XML_XBORDER));
+			float[] yp = XMLReader.parseFloatArray(e.getChildText(XMLNames.XML_YBORDER));
+			borderList = new IPoint[xp.length];
+			for (int i = 0; i < xp.length; i++) {
+				borderList[i] = new FloatPoint(xp[i], yp[i]);
+			}
+			isReversed = e.getChild(XMLNames.XML_XBORDER)
+					.getAttributeValue(XMLNames.XML_REVERSE) != null;
+		} else {
+			int[] xpoints = XMLReader.parseIntArray(e.getChildText(XMLNames.XML_XPOINTS));
+			int[] ypoints = XMLReader.parseIntArray(e.getChildText(XMLNames.XML_YPOINTS));
+			isReversed = e.getChild(XMLNames.XML_XPOINTS)
+					.getAttributeValue(XMLNames.XML_REVERSE) != null;
+
+			makeBorderList(xpoints, ypoints);
+		}
 	}
 
 	/**
@@ -299,7 +314,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * 
 	 * @param roi
 	 */
-	private void makeBorderList() {
+	private void makeBorderList(int[] xpoints, int[] ypoints) {
 
 		// Make a copy of the int[] points otherwise creating a polygon roi
 		// will reset them to 0,0 coordinates
@@ -387,8 +402,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public IPoint getOriginalBase() {
-		final int x = Arrays.stream(xpoints).min().getAsInt();
-		final int y = Arrays.stream(ypoints).min().getAsInt();
+		final double x = Arrays.stream(borderList).mapToDouble(IPoint::getX).min().getAsDouble();
+		final double y = Arrays.stream(borderList).mapToDouble(IPoint::getY).min().getAsDouble();
 		return new FloatPoint(x, y);
 	}
 
@@ -763,7 +778,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public void reverse()
 			throws MissingDataException, SegmentUpdateException, ComponentCreationException {
 		isReversed = !isReversed;
-		makeBorderList(); // Recreate the border list from the new key points
+		for (int i = 0; i < borderList.length / 2; i++) {
+			final IPoint p0 = borderList[i];
+			borderList[i] = borderList[borderList.length - i - 1];
+			borderList[borderList.length - i - 1] = p0;
+		}
+		updateBounds();
 		fireComponentUpdated();
 	}
 
@@ -841,6 +861,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public Roi toRoi() {
+
+		int[] xpoints = Arrays.stream(borderList).mapToDouble(IPoint::getX).mapToInt(d -> (int) d).toArray();
+		int[] ypoints = Arrays.stream(borderList).mapToDouble(IPoint::getY).mapToInt(d -> (int) d).toArray();
 		final Roi r = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 		r.setLocation(0, 0);
 		return r;
@@ -848,6 +871,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public Roi toOriginalRoi() {
+		int[] xpoints = Arrays.stream(borderList).mapToDouble(IPoint::getX).mapToInt(d -> (int) d).toArray();
+		int[] ypoints = Arrays.stream(borderList).mapToDouble(IPoint::getY).mapToInt(d -> (int) d).toArray();
 		return new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 	}
 
@@ -1008,10 +1033,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		builder.append("Scale: " + scale);
 		builder.append(newLine);
 		builder.append("isReversed: " + isReversed);
-		builder.append(newLine);
-		builder.append("xpoints: " + Arrays.toString(xpoints));
-		builder.append(newLine);
-		builder.append("ypoints: " + Arrays.toString(ypoints));
+//		builder.append(newLine);
+//		builder.append("xpoints: " + Arrays.toString(xpoints));
+//		builder.append(newLine);
+//		builder.append("ypoints: " + Arrays.toString(ypoints));
 		builder.append(newLine);
 
 		// Sort by measurement name
@@ -1055,22 +1080,27 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		e.addContent(new Element(XMLNames.XML_CHANNEL).setText(String.valueOf(channel)));
 		e.addContent(new Element(XMLNames.XML_SCALE).setText(String.valueOf(scale)));
 
-		final Element xEl = new Element(XMLNames.XML_XPOINTS).setText(Arrays.toString(xpoints));
-		if (isReversed)
-		 {
+
+		final Element xEl = new Element(XMLNames.XML_XBORDER)
+				.setText(Arrays.toString(ArrayUtils.toArray(borderList, XMLNames.XML_XBORDER)));
+
+		if (isReversed) {
 			xEl.setAttribute(XMLNames.XML_REVERSE, "true"); // don't waste space if false
 		}
 		e.addContent(xEl);
 
-		e.addContent(new Element(XMLNames.XML_YPOINTS).setText(Arrays.toString(ypoints)));
+		final Element yEl = new Element(XMLNames.XML_YBORDER)
+				.setText(Arrays.toString(ArrayUtils.toArray(borderList, XMLNames.XML_YBORDER)));
+
+		e.addContent(yEl);
 		return e;
 	}
 	
 	protected int recalculateHashcodeCache() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(xpoints);
-		result = prime * result + Arrays.hashCode(ypoints);
+		result = prime * result + Arrays.hashCode(borderList);
+//		result = prime * result + Arrays.hashCode(ypoints);
 
 		return prime * result
 				+ Objects.hash(centreOfMass, sourceFile, channel, uuid, originalCentreOfMass, scale,
@@ -1124,7 +1154,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				&& Objects.equals(uuid, other.uuid)
 				&& Objects.equals(originalCentreOfMass, other.originalCentreOfMass)
 				&& Double.doubleToLongBits(scale) == Double.doubleToLongBits(other.scale)
-				&& Arrays.equals(xpoints, other.xpoints) && Arrays.equals(ypoints, other.ypoints);
+				&& Arrays.equals(borderList, other.borderList);
+//				&& Arrays.equals(xpoints, other.xpoints) && Arrays.equals(ypoints, other.ypoints);
 	}
 
 	/*

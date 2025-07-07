@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.bmskinner.nma.components.XMLNames;
+import com.bmskinner.nma.components.generic.IPoint;
+
 /**
  * Utility methods for arrays
  * 
@@ -16,6 +19,21 @@ public class ArrayUtils {
 		// only uses static methods
 	}
 	
+	/**
+	 * Convert a border list array to array of floats for x or y coordinate
+	 * 
+	 * @param arr        the array to convert
+	 * @param coordinate a value of XMLNames.XML_XBORDER or XMLNames.XML_YBORDER
+	 * @return
+	 */
+	public static float[] toArray(IPoint[] arr, String coordinate) {
+		float[] result = new float[arr.length];
+		for (int i = 0; i < arr.length; i++) {
+			result[i] = coordinate.equals(XMLNames.XML_XBORDER) ? (float) arr[i].getX() : (float) arr[i].getY();
+		}
+		return result;
+	}
+
 	/**
 	 * Box the given doubles and add to a mutable list
 	 * 

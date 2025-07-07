@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Document;
+import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
@@ -77,6 +78,17 @@ public abstract class XMLReader {
 	}
 
 	/**
+	 * Test if the given element has child information under the given name
+	 * 
+	 * @param element the element to test
+	 * @param name    the name of the information
+	 * @return
+	 */
+	public static boolean hasElement(Element element, String name) {
+		return element.getChild(name) != null;
+	}
+
+	/**
 	 * Parse a string to an array, assuming it has the format: [1, 2, 3, 4, 5]
 	 * 
 	 * @param arrayText
@@ -130,6 +142,26 @@ public abstract class XMLReader {
 		final double[] l = new double[s.length];
 		for (int i = 0; i < s.length; i++) {
 			l[i] = Double.parseDouble(s[i]);
+		}
+		return l;
+	}
+
+	/**
+	 * Parse a string to an array, assuming it has the format: [1.0, 2.0, 3.0, 4.0,
+	 * 5.0]
+	 * 
+	 * @param arrayText
+	 * @return
+	 */
+	public static float[] parseFloatArray(String arrayText) {
+		final String[] s = arrayText.replace("[", "")
+				.replace("]", "")
+				.replace(" ", "")
+				.split(",");
+
+		final float[] l = new float[s.length];
+		for (int i = 0; i < s.length; i++) {
+			l[i] = Float.parseFloat(s[i]);
 		}
 		return l;
 	}
