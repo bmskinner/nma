@@ -71,14 +71,22 @@ public interface Measurement extends XmlSerializable, Comparable<Measurement> {
 		public static final String LENGTH = "Length";
 		public static final String DISPLACEMENT = "Displacement";
 		public static final String TSNE = "TSNE";
+		@Deprecated
 		public static final String TSNE_1 = "TSNE_1";
+		@Deprecated
 		public static final String TSNE_2 = "TSNE_2";
 		public static final String UMAP = "UMAP";
+		@Deprecated
 		public static final String UMAP_1 = "UMAP_1";
+		@Deprecated
 		public static final String UMAP_2 = "UMAP_2";
+		@Deprecated
+		public static final String PC = "PC";
 		public static final String PCA = "Principal_components";
 		public static final String PCA_N = "Number of PCs";
+		@Deprecated
 		public static final String PCA_1 = "PC1";
+		@Deprecated
 		public static final String PCA_2 = "PC2";
 		public static final String PIXEL_HISTOGRAM = "Pixel_histogram";
 
@@ -155,18 +163,24 @@ public interface Measurement extends XmlSerializable, Comparable<Measurement> {
 	// Special stats. These should not be included in default charts - they are used
 	// as hidden data stores
 	@NonNull
+	@Deprecated
 	Measurement TSNE_1 = new DefaultMeasurement(Names.TSNE_1, MeasurementDimension.NONE);
 	@NonNull
+	@Deprecated
 	Measurement TSNE_2 = new DefaultMeasurement(Names.TSNE_2, MeasurementDimension.NONE);
 
 	@NonNull
+	@Deprecated
 	Measurement UMAP_1 = new DefaultMeasurement(Names.UMAP_1, MeasurementDimension.NONE);
 	@NonNull
+	@Deprecated
 	Measurement UMAP_2 = new DefaultMeasurement(Names.UMAP_2, MeasurementDimension.NONE);
 
 	@NonNull
+	@Deprecated
 	Measurement PCA_1 = new DefaultMeasurement(Names.PCA_1, MeasurementDimension.NONE);
 	@NonNull
+	@Deprecated
 	Measurement PCA_2 = new DefaultMeasurement(Names.PCA_2, MeasurementDimension.NONE);
 	@NonNull
 	Measurement PCA_N = new DefaultMeasurement(Names.PCA_N, MeasurementDimension.NONE); // Number of
@@ -214,7 +228,7 @@ public interface Measurement extends XmlSerializable, Comparable<Measurement> {
 	 */
 	@Deprecated
 	static Measurement makePrincipalComponent(int pc, UUID id) {
-		return new DefaultMeasurement("PC" + pc + "_" + id, MeasurementDimension.NONE);
+		return new DefaultMeasurement(Names.PC + pc + "_" + id, MeasurementDimension.NONE);
 	}
 
 	/**
@@ -234,8 +248,19 @@ public interface Measurement extends XmlSerializable, Comparable<Measurement> {
 	 * @param id
 	 * @return
 	 */
+	@Deprecated
 	static Measurement makeTSNE(int dim, UUID id) {
 		return new DefaultMeasurement(Names.TSNE + "_" + dim + "_" + id, MeasurementDimension.NONE);
+	}
+
+	/**
+	 * Create a measurement for the given tSNE cluster id
+	 * 
+	 * @param id
+	 * @return
+	 */
+	static Measurement makeTSNE(UUID id) {
+		return new ArrayMeasurement(Names.TSNE + "_" + id, MeasurementDimension.NONE);
 	}
 
 	/**
@@ -245,8 +270,19 @@ public interface Measurement extends XmlSerializable, Comparable<Measurement> {
 	 * @param id
 	 * @return
 	 */
+	@Deprecated
 	static Measurement makeUMAP(int dim, UUID id) {
 		return new DefaultMeasurement(Names.UMAP + "_" + dim + "_" + id, MeasurementDimension.NONE);
+	}
+
+	/**
+	 * Create a measurement for the given UMAP cluster id
+	 * 
+	 * @param id
+	 * @return
+	 */
+	static Measurement makeUMAP(UUID id) {
+		return new DefaultMeasurement(Names.UMAP + "_" + id, MeasurementDimension.NONE);
 	}
 
 

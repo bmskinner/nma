@@ -74,33 +74,29 @@ public class DatasetConverter {
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 
 		// Get all the measurements in the dataset that should be array measurements
-		final List<Measurement> updatedMeasurements = dataset.getCollection().stream()
+		final List<Measurement> allMeasurements = dataset.getCollection().stream()
 				.flatMap(c -> c.getNuclei().stream())
 				.flatMap(n -> n.getMeasurements().stream())
+				.filter(m -> !m.isArrayMeasurement())
 				.distinct()
 				.toList();
 		
-		final List<Measurement> histogramMeasurements = updatedMeasurements.stream()
-				.filter(m -> m.name().startsWith(Measurement.Names.PIXEL_HISTOGRAM))
-				.sorted()
-				.toList();
+		final boolean hasHistogramMeasurements = allMeasurements.stream()
+				.anyMatch(m -> m.name().startsWith(Measurement.Names.PIXEL_HISTOGRAM));
 
-		final List<Measurement> pcaMeasurements = updatedMeasurements.stream()
-				.filter(m -> m.name().startsWith("PC_"))
-				.toList();
+		final boolean hasPCAMeasurements = allMeasurements.stream()
+				.anyMatch(m -> m.name().startsWith(Measurement.Names.PC));
 		
-		final List<Measurement> tsneMeasurements = updatedMeasurements.stream()
-				.filter(m -> m.name().startsWith(Measurement.Names.TSNE))
-				.toList();
-				
-		final List<Measurement> umapMeasurements = updatedMeasurements.stream()
-				.filter(m -> m.name().startsWith(Measurement.Names.UMAP))
-				.toList();
+		final boolean hasTsneMeasurements = allMeasurements.stream()
+				.filter(m -> !m.isArrayMeasurement())
+				.anyMatch(m -> m.name().startsWith(Measurement.Names.TSNE));
 
-		final List<IClusterGroup> clusterGroups = dataset.getClusterGroups();
+		final boolean hasUmapMeasurements = allMeasurements.stream()
+				.filter(m -> !m.isArrayMeasurement())
+				.anyMatch(m -> m.name().startsWith(Measurement.Names.UMAP));
 				
 		// Replace image histograms
-		if (!histogramMeasurements.isEmpty()) {
+		if (hasHistogramMeasurements) {
 
 			final List<Measurement> histogram = Measurement.getPixelHistogramMeasurements(
 					dataset.getAnalysisOptions().get().getNucleusDetectionOptions().get().getInt(HashOptions.CHANNEL));
@@ -116,7 +112,9 @@ public class DatasetConverter {
 		}
 
 		// Replace PCAs
-		if (!pcaMeasurements.isEmpty()) {
+		final List<IClusterGroup> clusterGroups = dataset.getClusterGroups();
+
+		if (hasPCAMeasurements) {
 			for (final IClusterGroup cg : clusterGroups) {
 				final UUID id = cg.getId();
 
@@ -134,12 +132,42 @@ public class DatasetConverter {
 						values.add(n.getMeasurement(m));
 						n.clearMeasurement(m);
 					}
+
 					n.setMeasurement(Measurement.makePrincipalComponent(id), ArrayUtils.toArray(values));
 				}
 			}
-
-
 		}
+
+		if (hasTsneMeasurements) {
+			for (final IClusterGroup cg : clusterGroups) {
+				final UUID id = cg.getId();
+
+				for (final Nucleus n : dataset.getCollection().getNuclei()) {
+					final double[] values = new double[2];
+					values[0] = n.getMeasurement(Measurement.makeTSNE(1, id));
+					values[1] = n.getMeasurement(Measurement.makeTSNE(2, id));
+					n.clearMeasurement(Measurement.makeTSNE(1, id));
+					n.clearMeasurement(Measurement.makeTSNE(2, id));
+					n.setMeasurement(Measurement.makeTSNE(id), values);
+				}
+			}
+		}
+
+		if (hasUmapMeasurements) {
+			for (final IClusterGroup cg : clusterGroups) {
+				final UUID id = cg.getId();
+
+				for (final Nucleus n : dataset.getCollection().getNuclei()) {
+					final double[] values = new double[2];
+					values[0] = n.getMeasurement(Measurement.makeUMAP(1, id));
+					values[1] = n.getMeasurement(Measurement.makeUMAP(2, id));
+					n.clearMeasurement(Measurement.makeUMAP(1, id));
+					n.clearMeasurement(Measurement.makeUMAP(2, id));
+					n.setMeasurement(Measurement.makeUMAP(id), values);
+				}
+			}
+		}
+
 	}
 
 	/**
