@@ -282,7 +282,7 @@ public interface Measurement extends XmlSerializable, Comparable<Measurement> {
 	 * @return
 	 */
 	static Measurement makeUMAP(UUID id) {
-		return new DefaultMeasurement(Names.UMAP + "_" + id, MeasurementDimension.NONE);
+		return new ArrayMeasurement(Names.UMAP + "_" + id, MeasurementDimension.NONE);
 	}
 
 

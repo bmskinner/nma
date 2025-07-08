@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -83,6 +84,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 			if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
 				return createSignalScatterDataset();
 		} catch (SegmentUpdateException | MissingDataException | ComponentCreationException e) {
+			LOGGER.log(Level.FINE, "Error making scatter dataset: %s".formatted(e.getMessage()), e);
 			throw new ChartDatasetCreationException(
 					"Error creating chart dataset for %s".formatted(component), e);
 		}
@@ -243,11 +245,15 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 		final boolean isPca = plotGroup.getOptions().get()
 				.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY);
 
-		// TODO: add an input parameter for which method we want to display
-		final String prefix1 = isUMAP ? Measurement.Names.UMAP + "1_"
-				: isTsne ? Measurement.Names.TSNE + "1_" : "PC1_";
-		final String prefix2 = isUMAP ? Measurement.Names.UMAP + "2_"
-				: isTsne ? Measurement.Names.TSNE + "2_" : "PC2_";
+//		// TODO: add an input parameter for which method we want to display
+//		final String prefix1 = isUMAP ? Measurement.Names.UMAP + "1_"
+//				: isTsne ? Measurement.Names.TSNE + "1_" : "PC1_";
+//		final String prefix2 = isUMAP ? Measurement.Names.UMAP + "2_"
+//				: isTsne ? Measurement.Names.TSNE + "2_" : "PC2_";
+
+		final Measurement measurement = isUMAP ? Measurement.makeUMAP(plotGroup.getId())
+				: isTsne ? Measurement.makeTSNE(plotGroup.getId())
+						: Measurement.makePrincipalComponent(plotGroup.getId());
 
 		if (type.equals(ColourByType.CLUSTER) && colourGroup == null) {
 			type = ColourByType.NONE;
@@ -261,7 +267,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 			for (final IAnalysisDataset mergeSource : d.getMergeSources()) {
 				final List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
 				final double[][] data = createDimensionalityReductionValues(nuclei,
-						Measurement.makeTSNE(plotGroup.getId()), 0, 1);
+						measurement, 0, 1);
 				ds.addSeries(mergeSource.getName(), data, nuclei);
 			}
 			return ds;
@@ -271,7 +277,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 		if (type.equals(ColourByType.NONE)) {
 			final List<Nucleus> nuclei = new ArrayList<>(d.getCollection().getNuclei());
 			final double[][] data = createDimensionalityReductionValues(nuclei,
-					Measurement.makeTSNE(plotGroup.getId()), 0, 1);
+					measurement, 0, 1);
 			ds.addSeries("All nuclei", data, nuclei);
 			return ds;
 		}
@@ -282,7 +288,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 				final IAnalysisDataset childDataset = d.getChildDataset(childId);
 				final List<Nucleus> nuclei = new ArrayList<>(childDataset.getCollection().getNuclei());
 				final double[][] data = createDimensionalityReductionValues(nuclei,
-						Measurement.makeTSNE(plotGroup.getId()), 0, 1);
+						measurement, 0, 1);
 				ds.addSeries(childDataset.getName(), data, nuclei);
 			}
 			return ds;

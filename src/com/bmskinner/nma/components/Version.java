@@ -56,6 +56,7 @@ public class Version {
 	public static final Version V_2_0_0 = new Version(2, 0, 0);
 	public static final Version V_2_1_0 = new Version(2, 1, 0);
 	public static final Version V_2_2_0 = new Version(2, 2, 0);
+	public static final Version V_2_3_0 = new Version(2, 3, 0);
 
 	/**
 	 * Create a version
