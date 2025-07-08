@@ -99,6 +99,12 @@ public class XMLNames {
 	/** The interpolated y coordinates */
 	public static final String XML_YBORDER = "yborder";
 
+	/** The integer minimum x coordinate */
+	public static final String XML_XBASE = "xbase";
+
+	/** The integer minimum y coordinate */
+	public static final String XML_YBASE = "ybase";
+
 	public static final String XML_SCALE = "Scale";
 
 	public static final String XML_CHANNEL = "Channel";

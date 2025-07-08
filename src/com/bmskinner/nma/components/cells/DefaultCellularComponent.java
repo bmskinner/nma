@@ -118,6 +118,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 */
 	private IPoint[] borderList = new IPoint[0];
 
+	/**
+	 * Store the integer base coordinates for the object. Added in 2.3.0 since we do
+	 * not have the full x and y int arrays
+	 */
+	private int xBase;
+	private int yBase;
+
 	/** The object bounding box */
 	private Rectangle2D bounds;
 	
@@ -285,6 +292,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		// If border is stored already interpolated; added in 2.3.0
 		if (XMLReader.hasElement(e, XMLNames.XML_XBORDER)) {
 
+			xBase = Integer.parseInt(e.getChildText(XMLNames.XML_XBASE));
+			yBase = Integer.parseInt(e.getChildText(XMLNames.XML_YBASE));
+
 			final float[] xp = XMLReader.parseFloatArray(e.getChildText(XMLNames.XML_XBORDER));
 			final float[] yp = XMLReader.parseFloatArray(e.getChildText(XMLNames.XML_YBORDER));
 			borderList = new IPoint[xp.length];
@@ -300,6 +310,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			final int[] ypoints = XMLReader.parseIntArray(e.getChildText(XMLNames.XML_YPOINTS));
 			isReversed = e.getChild(XMLNames.XML_XPOINTS)
 					.getAttributeValue(XMLNames.XML_REVERSE) != null;
+
+			xBase = Arrays.stream(xpoints).min().getAsInt();
+			yBase = Arrays.stream(ypoints).min().getAsInt();
 
 			makeBorderList(xpoints, ypoints);
 		}
@@ -335,6 +348,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		for (int i = 0; i < smoothed.npoints; i++) {
 			borderList[i] = new FloatPoint(smoothed.xpoints[i], smoothed.ypoints[i]);
 		}
+
+		xBase = Arrays.stream(xpoints).min().getAsInt();
+		yBase = Arrays.stream(ypoints).min().getAsInt();
 
 		updateBounds();
 	}
@@ -399,9 +415,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public IPoint getOriginalBase() {
-		final double x = Arrays.stream(borderList).mapToDouble(IPoint::getX).min().getAsDouble();
-		final double y = Arrays.stream(borderList).mapToDouble(IPoint::getY).min().getAsDouble();
-		return new FloatPoint(x, y);
+		return new FloatPoint(xBase, yBase);
 	}
 
 	@Override
@@ -859,8 +873,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public Roi toRoi() {
 
-		final int[] xpoints = Arrays.stream(borderList).mapToDouble(IPoint::getX).mapToInt(d -> (int) d).toArray();
-		final int[] ypoints = Arrays.stream(borderList).mapToDouble(IPoint::getY).mapToInt(d -> (int) d).toArray();
+		final float[] xpoints = new float[borderList.length];
+		final float[] ypoints = new float[borderList.length];
+		for (int i = 0; i < borderList.length; i++) {
+			xpoints[i] = (float) borderList[i].getX();
+			ypoints[i] = (float) borderList[i].getY();
+		}
 		final Roi r = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 		r.setLocation(0, 0);
 		return r;
@@ -868,8 +886,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public Roi toOriginalRoi() {
-		final int[] xpoints = Arrays.stream(borderList).mapToDouble(IPoint::getX).mapToInt(d -> (int) d).toArray();
-		final int[] ypoints = Arrays.stream(borderList).mapToDouble(IPoint::getY).mapToInt(d -> (int) d).toArray();
+		final float[] xpoints = new float[borderList.length];
+		final float[] ypoints = new float[borderList.length];
+		for (int i = 0; i < borderList.length; i++) {
+			xpoints[i] = (float) borderList[i].getX();
+			ypoints[i] = (float) borderList[i].getY();
+		}
 		return new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 	}
 
@@ -1073,6 +1095,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		e.addContent(new Element(XMLNames.XML_CHANNEL).setText(String.valueOf(channel)));
 		e.addContent(new Element(XMLNames.XML_SCALE).setText(String.valueOf(scale)));
 
+		e.addContent(new Element(XMLNames.XML_XBASE).setText(String.valueOf(xBase)));
+		e.addContent(new Element(XMLNames.XML_YBASE).setText(String.valueOf(yBase)));
 
 		final Element xEl = new Element(XMLNames.XML_XBORDER)
 				.setText(Arrays.toString(ArrayUtils.toArray(borderList, XMLNames.XML_XBORDER)));
