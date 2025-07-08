@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -49,33 +48,30 @@ public class TsneMethodTest extends ComponentTester {
 	@Test
 	public void testAllNucleiGetTsneValues() throws Exception {
 
-		// Check tSNE stats are empty
-		boolean nonePresent = dataset.getCollection().getNuclei()
+		// Check tSNE stats are empty before we start
+		final boolean nonePresent = dataset.getCollection().getNuclei()
 				.stream()
-				.noneMatch(m -> m.hasMeasurement(Measurement.TSNE_1)
-						|| m.hasMeasurement(Measurement.TSNE_2));
-		assertTrue(nonePresent);
+				.noneMatch(
+						n -> n.getMeasurements().stream().anyMatch(m -> m.name().startsWith(Measurement.Names.TSNE)));
+		assertTrue("No TSNE values should be present before test runs", nonePresent);
 
 		// Run the tSNE on angle profiles
-		HashOptions options = new DefaultOptions();
+		final HashOptions options = new DefaultOptions();
 		options.setBoolean(ProfileType.ANGLE.toString(), true);
 
 		options.setInt(TsneMethod.MAX_ITERATIONS_KEY, 1000);
 		options.setDouble(TsneMethod.PERPLEXITY_KEY, 10);
 
-		UUID clusterID = UUID.randomUUID();
+		final UUID clusterID = UUID.randomUUID();
 		options.setUUID(HashOptions.CLUSTER_GROUP_ID_KEY, clusterID);
 
-		TsneMethod tSNE = new TsneMethod(dataset, options);
+		final TsneMethod tSNE = new TsneMethod(dataset, options);
 		tSNE.call();
 
 		// Test that tSNE stats have been set
-		boolean allPresent = dataset.getCollection().getNuclei()
+		final boolean allPresent = dataset.getCollection().getNuclei()
 				.stream()
-				.allMatch((m -> m.hasMeasurement(Measurement.makeTSNE(1,
-						clusterID))
-						&& m.hasMeasurement(Measurement.makeTSNE(2,
-								clusterID))));
+				.allMatch((m -> m.hasMeasurement(Measurement.makeTSNE(clusterID))));
 		assertTrue(allPresent);
 
 	}

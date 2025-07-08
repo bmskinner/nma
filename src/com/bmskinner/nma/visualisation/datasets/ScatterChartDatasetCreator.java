@@ -77,15 +77,11 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 	 */
 	public XYDataset createScatterDataset(String component) throws ChartDatasetCreationException {
 		try {
-			if (CellularComponent.NUCLEUS.equals(component)) {
-
+			if (CellularComponent.NUCLEUS.equals(component))
 				return createNucleusScatterDataset();
 
-			}
-
-			if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+			if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
 				return createSignalScatterDataset();
-			}
 		} catch (SegmentUpdateException | MissingDataException | ComponentCreationException e) {
 			throw new ChartDatasetCreationException(
 					"Error creating chart dataset for %s".formatted(component), e);
@@ -107,53 +103,55 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 	private XYDataset createNucleusScatterDataset()
 			throws SegmentUpdateException, MissingDataException, ComponentCreationException {
 
-		DefaultXYDataset ds = new DefaultXYDataset();
+		final DefaultXYDataset ds = new DefaultXYDataset();
 
 		if (!options.hasDatasets())
 			return ds;
 
-		List<IAnalysisDataset> datasets = options.getDatasets();
+		final List<IAnalysisDataset> datasets = options.getDatasets();
 
-		MeasurementScale scale = options.getScale();
+		final MeasurementScale scale = options.getScale();
 
-		Measurement statA = options.getStat(0);
-		Measurement statB = options.getStat(1);
+		final Measurement statA = options.getStat(0);
+		final Measurement statB = options.getStat(1);
 
 		for (int i = 0; i < datasets.size(); i++) {
 
-			ICellCollection c = datasets.get(i).getCollection();
+			final ICellCollection c = datasets.get(i).getCollection();
 
 			// to make charts more responsive, only take n nuclei
-			int count = Math.min(c.getNucleusCount(), MAX_SCATTER_CHART_ITEMS);
-			double[] xpoints = new double[count];
-			double[] ypoints = new double[count];
+			final int count = Math.min(c.getNucleusCount(), MAX_SCATTER_CHART_ITEMS);
+			final double[] xpoints = new double[count];
+			final double[] ypoints = new double[count];
 
-			List<Nucleus> nuclei = new ArrayList<>();
+			final List<Nucleus> nuclei = new ArrayList<>();
 			nuclei.addAll(c.getNuclei());
 			Collections.shuffle(nuclei);
 
 			for (int j = 0; j < count; j++) {
-				Nucleus n = nuclei.get(j);
+				final Nucleus n = nuclei.get(j);
 				double statAValue;
 				double statBValue;
 
-				if (statA.equals(Measurement.VARIABILITY))
+				if (statA.equals(Measurement.VARIABILITY)) {
 					statAValue = c.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE,
 							n);
-				else
+				} else {
 					statAValue = n.getMeasurement(statA, scale);
+				}
 
-				if (statB.equals(Measurement.VARIABILITY))
+				if (statB.equals(Measurement.VARIABILITY)) {
 					statBValue = c.getNormalisedDifferenceToMedian(OrientationMark.REFERENCE,
 							n);
-				else
+				} else {
 					statBValue = n.getMeasurement(statB, scale);
+				}
 
 				xpoints[j] = statAValue;
 				ypoints[j] = statBValue;
 			}
 
-			double[][] data = { xpoints, ypoints };
+			final double[][] data = { xpoints, ypoints };
 			ds.addSeries(c.getName(), data);
 
 		}
@@ -174,42 +172,42 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 	 */
 	private SignalXYDataset createSignalScatterDataset()
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
-		List<IAnalysisDataset> datasets = options.getDatasets();
+		final List<IAnalysisDataset> datasets = options.getDatasets();
 
-		List<Measurement> stats = options.getStats();
+		final List<Measurement> stats = options.getStats();
 
-		MeasurementScale scale = options.getScale();
+		final MeasurementScale scale = options.getScale();
 
-		Measurement statA = stats.get(0);
-		Measurement statB = stats.get(1);
+		final Measurement statA = stats.get(0);
+		final Measurement statB = stats.get(1);
 
-		SignalXYDataset ds = new SignalXYDataset();
+		final SignalXYDataset ds = new SignalXYDataset();
 
 		for (int i = 0; i < datasets.size(); i++) {
 
-			ICellCollection c = datasets.get(i).getCollection();
-			SignalManager m = c.getSignalManager();
+			final ICellCollection c = datasets.get(i).getCollection();
+			final SignalManager m = c.getSignalManager();
 
-			for (@NonNull
+			for (@NonNull final
 			UUID id : m.getSignalGroupIDs()) {
 
-				ISignalGroup gp = c.getSignalGroup(id).get();
+				final ISignalGroup gp = c.getSignalGroup(id).get();
 
-				int signalCount = m.getSignalCount(id);
+				final int signalCount = m.getSignalCount(id);
 
-				double[] xpoints = new double[signalCount];
-				double[] ypoints = new double[signalCount];
+				final double[] xpoints = new double[signalCount];
+				final double[] ypoints = new double[signalCount];
 
-				List<INuclearSignal> list = m.getSignals(id);
+				final List<INuclearSignal> list = m.getSignals(id);
 
 				for (int j = 0; j < signalCount; j++) {
 					xpoints[j] = list.get(j).getMeasurement(statA, scale);
 					ypoints[j] = list.get(j).getMeasurement(statB, scale);
 				}
 
-				double[][] data = { xpoints, ypoints };
+				final double[][] data = { xpoints, ypoints };
 
-				String seriesKey = c.getName() + "_" + gp.getGroupName();
+				final String seriesKey = c.getName() + "_" + gp.getGroupName();
 				ds.addSeries(seriesKey, data);
 				ds.addDataset(datasets.get(i), seriesKey);
 				ds.addSignalGroup(gp, seriesKey);
@@ -236,55 +234,55 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 			ColourByType type,
 			IClusterGroup plotGroup, IClusterGroup colourGroup)
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
-		ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
+		final ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
 
-		boolean isUMAP = plotGroup.getOptions().get()
+		final boolean isUMAP = plotGroup.getOptions().get()
 				.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY);
-		boolean isTsne = plotGroup.getOptions().get()
+		final boolean isTsne = plotGroup.getOptions().get()
 				.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY);
-		boolean isPca = plotGroup.getOptions().get()
+		final boolean isPca = plotGroup.getOptions().get()
 				.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY);
 
 		// TODO: add an input parameter for which method we want to display
-		String prefix1 = isUMAP ? Measurement.UMAP_1.name() + "_"
-				: isTsne ? Measurement.TSNE_1.name() + "_" : "PC1_";
-		String prefix2 = isUMAP ? Measurement.UMAP_2.name() + "_"
-				: isTsne ? Measurement.TSNE_2.name() + "_" : "PC2_";
+		final String prefix1 = isUMAP ? Measurement.Names.UMAP + "1_"
+				: isTsne ? Measurement.Names.TSNE + "1_" : "PC1_";
+		final String prefix2 = isUMAP ? Measurement.Names.UMAP + "2_"
+				: isTsne ? Measurement.Names.TSNE + "2_" : "PC2_";
 
-		if (type.equals(ColourByType.CLUSTER) && colourGroup == null)
+		if (type.equals(ColourByType.CLUSTER) && colourGroup == null) {
 			type = ColourByType.NONE;
+		}
 
-		if (type.equals(ColourByType.MERGE_SOURCE) && !d.hasMergeSources())
+		if (type.equals(ColourByType.MERGE_SOURCE) && !d.hasMergeSources()) {
 			type = ColourByType.NONE;
+		}
 
 		if (type.equals(ColourByType.MERGE_SOURCE)) {
-			for (IAnalysisDataset mergeSource : d.getMergeSources()) {
-				List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
-				double[][] data = createDimensionalityReductionValues(nuclei,
-						prefix1 + plotGroup.getId(),
-						prefix2 + plotGroup.getId());
+			for (final IAnalysisDataset mergeSource : d.getMergeSources()) {
+				final List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
+				final double[][] data = createDimensionalityReductionValues(nuclei,
+						Measurement.makeTSNE(plotGroup.getId()), 0, 1);
 				ds.addSeries(mergeSource.getName(), data, nuclei);
 			}
 			return ds;
 		}
 
+
 		if (type.equals(ColourByType.NONE)) {
-			List<Nucleus> nuclei = new ArrayList<>(d.getCollection().getNuclei());
-			double[][] data = createDimensionalityReductionValues(nuclei,
-					prefix1 + plotGroup.getId(),
-					prefix2 + plotGroup.getId());
+			final List<Nucleus> nuclei = new ArrayList<>(d.getCollection().getNuclei());
+			final double[][] data = createDimensionalityReductionValues(nuclei,
+					Measurement.makeTSNE(plotGroup.getId()), 0, 1);
 			ds.addSeries("All nuclei", data, nuclei);
 			return ds;
 		}
 
 		if (type.equals(ColourByType.CLUSTER)) {
 			// colourGroup cannot be null here, we changed type earlier if it was
-			for (UUID childId : colourGroup.getUUIDs()) {
-				IAnalysisDataset childDataset = d.getChildDataset(childId);
-				List<Nucleus> nuclei = new ArrayList<>(childDataset.getCollection().getNuclei());
-				double[][] data = createDimensionalityReductionValues(nuclei,
-						prefix1 + plotGroup.getId(),
-						prefix2 + plotGroup.getId());
+			for (final UUID childId : colourGroup.getUUIDs()) {
+				final IAnalysisDataset childDataset = d.getChildDataset(childId);
+				final List<Nucleus> nuclei = new ArrayList<>(childDataset.getCollection().getNuclei());
+				final double[][] data = createDimensionalityReductionValues(nuclei,
+						Measurement.makeTSNE(plotGroup.getId()), 0, 1);
 				ds.addSeries(childDataset.getName(), data, nuclei);
 			}
 			return ds;
@@ -292,25 +290,32 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 		return ds;
 	}
 
+	/**
+	 * Create a matrix of plottable values for the given array measurment
+	 * 
+	 * @param nuclei      the nuclei to plot
+	 * @param measurement the array measurement to plot
+	 * @param index0      the index of the array for the x axis (0-indexed)
+	 * @param index1      the index of the array for the y axis (0-indexed)
+	 * @return
+	 * @throws MissingDataException
+	 * @throws ComponentCreationException
+	 * @throws SegmentUpdateException
+	 */
 	private static double[][] createDimensionalityReductionValues(List<Nucleus> nuclei,
-			String xStatName,
-			String yStatName)
+			Measurement measurement, int index0, int index1)
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
-		double[] xpoints = new double[nuclei.size()];
-		double[] ypoints = new double[nuclei.size()];
+		final double[] xpoints = new double[nuclei.size()];
+		final double[] ypoints = new double[nuclei.size()];
 
 		// need to transpose the matrix
 		for (int i = 0; i < nuclei.size(); i++) {
-			Nucleus n = nuclei.get(i);
-			Measurement dim1 = n.getMeasurements().stream().filter(s -> s.name().equals(xStatName))
-					.findFirst()
-					.orElseThrow(() -> new IllegalArgumentException(
-							"No measurement called " + xStatName));
-			Measurement dim2 = n.getMeasurements().stream().filter(s -> s.name().equals(yStatName))
-					.findFirst().orElseThrow(() -> new IllegalArgumentException(
-							"No measurement called " + yStatName));
-			xpoints[i] = n.getMeasurement(dim1);
-			ypoints[i] = n.getMeasurement(dim2);
+			final Nucleus n = nuclei.get(i);
+
+			final List<Double> values = n.getArrayMeasurement(measurement);
+
+			xpoints[i] = values.get(index0);
+			ypoints[i] = values.get(index1);
 		}
 		return new double[][] { xpoints, ypoints };
 	}

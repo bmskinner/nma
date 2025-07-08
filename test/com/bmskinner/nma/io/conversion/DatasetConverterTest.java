@@ -97,7 +97,7 @@ public class DatasetConverterTest {
 	public void test220to230DatasetPCAArrayMeasurementsConverted() throws Exception {
 
 		// Make a dataset with measurements in the 2.2.0 format
-		final IAnalysisDataset d0 = SampleDatasetReader.openTestMouseDataset();
+		final IAnalysisDataset d0 = SampleDatasetReader.openTestMouseClusterDataset();
 		final File tmpFile = new File(TestResources.DATASET_FOLDER, "220to230conversion.nmd");
 
 		assertTrue("The sample dataset should already be clustered", d0.hasClusters());
@@ -108,9 +108,10 @@ public class DatasetConverterTest {
 		final List<UUID> clusterIDs = new ArrayList<>();
 		for (final IClusterGroup cg : d0.getClusterGroups()) {
 			clusterIDs.add(cg.getId());
-			final int nPCs = cg.getOptions().get().getInt(Measurement.Names.PCA_N);
-			assertTrue("The sample dataset should already have PCA values", nPCs > 0);
-			for (int i = 0; i < nPCs; i++) {
+
+			cg.getOptions().get().setInt(HashOptions.CLUSTER_NUM_PCS_KEY, 15);
+
+			for (int i = 0; i < 15; i++) {
 				pcaMeasurements.add(Measurement.makePrincipalComponent(i, cg.getId()));
 			}
 			// Remove the existing PCs in 2.3.0 format
@@ -198,7 +199,7 @@ public class DatasetConverterTest {
 	public void test220to230DatasetTSNEArrayMeasurementsConverted() throws Exception {
 
 		// Make a dataset with measurements in the 2.2.0 format
-		final IAnalysisDataset d0 = SampleDatasetReader.openTestMouseDataset();
+		final IAnalysisDataset d0 = SampleDatasetReader.openTestMouseClusterDataset();
 		final File tmpFile = new File(TestResources.DATASET_FOLDER, "220to230conversion.nmd");
 
 		assertTrue("The sample dataset should already be clustered", d0.hasClusters());
@@ -264,7 +265,7 @@ public class DatasetConverterTest {
 	public void test220to230DatasetUMAPArrayMeasurementsConverted() throws Exception {
 
 		// Make a dataset with measurements in the 2.2.0 format
-		final IAnalysisDataset d0 = SampleDatasetReader.openTestMouseDataset();
+		final IAnalysisDataset d0 = SampleDatasetReader.openTestMouseClusterDataset();
 		final File tmpFile = new File(TestResources.DATASET_FOLDER, "220to230conversion.nmd");
 
 		assertTrue("The sample dataset should already be clustered", d0.hasClusters());

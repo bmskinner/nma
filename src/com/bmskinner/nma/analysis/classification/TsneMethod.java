@@ -69,49 +69,42 @@ public class TsneMethod extends SingleDatasetAnalysisMethod {
 	@Override
 	public IAnalysisResult call() throws Exception {
 
-		int maxIterations = options.getInt(MAX_ITERATIONS_KEY);
-		double perplexity = options.getDouble(PERPLEXITY_KEY);
+		final int maxIterations = options.getInt(MAX_ITERATIONS_KEY);
+		final double perplexity = options.getDouble(PERPLEXITY_KEY);
 
 		LOGGER.fine(() -> "Running tSNE with p %s and i %d".formatted(perplexity, maxIterations));
 
 		// Calculate from options
-		int initialDims = calculateNumberOfDimensions();
+		final int initialDims = calculateNumberOfDimensions();
 
 		// Create the matrix for profile values with consistent cell order
-		List<Nucleus> nuclei = new ArrayList<>(dataset.getCollection().getNuclei());
+		final List<Nucleus> nuclei = new ArrayList<>(dataset.getCollection().getNuclei());
 
-		double[][] profileMatrix = makeProfileMatrix(nuclei, initialDims);
+		final double[][] profileMatrix = makeProfileMatrix(nuclei, initialDims);
 
-		TSneConfiguration config = TSneUtils.buildConfig(profileMatrix, OUTPUT_DIMENSIONS,
+		final TSneConfiguration config = TSneUtils.buildConfig(profileMatrix, OUTPUT_DIMENSIONS,
 				initialDims, perplexity, maxIterations);
-		BarnesHutTSne tsne = new BHTSne(); // ParallelBHTSne may not play well with the threading.
+		final BarnesHutTSne tsne = new BHTSne(); // ParallelBHTSne may not play well with the threading.
 		// Note that using ParallelBHTSne does not play nice with the OpenJDK 12:
 		// Potentially dangerous stack overflow in ReservedStackAccess annotated method
 		// java.util.concurrent.locks.ReentrantLock$Sync.nonfairTryAcquire(I)Z
-		double[][] tSneResult = tsne.tsne(config);
+		final double[][] tSneResult = tsne.tsne(config);
 
 		// store this in the cell collection, attached to each cell. This is a temporary
 		// store -
 		// if used for clustering, it should be attached to the cluster id
 		for (int i = 0; i < nuclei.size(); i++) {
-			Nucleus n = nuclei.get(i);
-
-			Measurement m1 = Measurement.makeTSNE(1,
-					options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
-
-			Measurement m2 = Measurement.makeTSNE(2,
-					options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
-
-			n.setMeasurement(m1, tSneResult[i][0]);
-			n.setMeasurement(m2, tSneResult[i][1]);
+			final Nucleus n = nuclei.get(i);
+			final Measurement m = Measurement.makeTSNE(options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
+			n.setMeasurement(m, new double[] { tSneResult[i][0], tSneResult[i][1] });
 		}
 
-		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
+		final Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
 		if (analysisOptions.isPresent()) {
 
 			// We may run several clustering runs; ensure they are all stored appropriately
 			// with the cluster id
-			String optionsKey = IAnalysisOptions.TSNE + "_"
+			final String optionsKey = IAnalysisOptions.TSNE + "_"
 					+ options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY);
 			analysisOptions.get().setSecondaryOptions(optionsKey, options);
 		}
@@ -132,25 +125,27 @@ public class TsneMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private double[][] makeProfileMatrix(List<Nucleus> nuclei, int initialDims)
 			throws MissingDataException, SegmentUpdateException, ComponentCreationException {
-		double[][] matrix = new double[nuclei.size()][initialDims];
+		final double[][] matrix = new double[nuclei.size()][initialDims];
 
 		for (int i = 0; i < nuclei.size(); i++) {
 			int j = 0;
-			Nucleus n = nuclei.get(i);
-			for (ProfileType t : ProfileType.displayValues()) {
-				if (!options.getBoolean(t.toString()))
+			final Nucleus n = nuclei.get(i);
+			for (final ProfileType t : ProfileType.displayValues()) {
+				if (!options.getBoolean(t.toString())) {
 					continue;
+				}
 
-				IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
+				final IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
 				for (int k = 0; k < 100; k++) {
-					double idx = (k) / 100d;
+					final double idx = (k) / 100d;
 					matrix[i][j++] = p.get(idx);
 				}
 			}
 
-			for (Measurement stat : Measurement.getNucleusStats()) {
-				if (!options.getBoolean(stat.toString()))
+			for (final Measurement stat : Measurement.getNucleusStats()) {
+				if (!options.getBoolean(stat.toString())) {
 					continue;
+				}
 				matrix[i][j++] = n.getMeasurement(stat);
 			}
 		}
@@ -164,13 +159,15 @@ public class TsneMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private int calculateNumberOfDimensions() {
 		int dimensions = 0;
-		for (Measurement stat : Measurement.getNucleusStats())
-			if (options.getBoolean(stat.toString()))
+		for (final Measurement stat : Measurement.getNucleusStats())
+			if (options.getBoolean(stat.toString())) {
 				dimensions++;
+			}
 
-		for (ProfileType t : ProfileType.displayValues())
-			if (options.getBoolean(t.toString()))
+		for (final ProfileType t : ProfileType.displayValues())
+			if (options.getBoolean(t.toString())) {
 				dimensions += 100;
+			}
 
 		return dimensions;
 

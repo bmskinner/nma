@@ -53,20 +53,20 @@ public class UMAPMethod extends SingleDatasetAnalysisMethod {
 	@Override
 	public IAnalysisResult call() throws Exception {
 
-		int neighbours = options.getInt(N_NEIGHBOUR_KEY);
-		float minDist = options.getFloat(MIN_DISTANCE_KEY);
+		final int neighbours = options.getInt(N_NEIGHBOUR_KEY);
+		final float minDist = options.getFloat(MIN_DISTANCE_KEY);
 
 		LOGGER.fine(
 				() -> "Running UMAP using Euclidian metric with %s nearest neighbours and %s min distance"
 						.formatted(neighbours, minDist));
 
 		// Calculate from options
-		int initialDims = calculateNumberOfDimensions();
+		final int initialDims = calculateNumberOfDimensions();
 
 		// Create the matrix for profile values with consistent cell order
-		List<Nucleus> nuclei = new ArrayList<>(dataset.getCollection().getNuclei());
+		final List<Nucleus> nuclei = new ArrayList<>(dataset.getCollection().getNuclei());
 
-		double[][] profileMatrix = makeProfileMatrix(nuclei, initialDims);
+		final double[][] profileMatrix = makeProfileMatrix(nuclei, initialDims);
 
 		final Umap umap = new Umap();
 		umap.setNumberComponents(OUTPUT_DIMENSIONS); // number of dimensions in result
@@ -80,23 +80,16 @@ public class UMAPMethod extends SingleDatasetAnalysisMethod {
 		// store this in the cell collection, attached to each cell. It is attached to
 		// the cluster id
 		for (int i = 0; i < nuclei.size(); i++) {
-			Nucleus n = nuclei.get(i);
-
-			Measurement m1 = Measurement.makeUMAP(1,
-					options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
-
-			Measurement m2 = Measurement.makeUMAP(2,
-					options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
-
-			n.setMeasurement(m1, umapResult[i][0]);
-			n.setMeasurement(m2, umapResult[i][1]);
+			final Nucleus n = nuclei.get(i);
+			final Measurement m = Measurement.makeUMAP(options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY));
+			n.setMeasurement(m, new double[] { umapResult[i][0], umapResult[i][1] });
 		}
 
-		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
+		final Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
 		if (analysisOptions.isPresent()) {
 			// We may run several clustering runs; ensure they are all stored appropriately
 			// with the cluster id
-			String optionsKey = IAnalysisOptions.UMAP + "_"
+			final String optionsKey = IAnalysisOptions.UMAP + "_"
 					+ options.getUUID(HashOptions.CLUSTER_GROUP_ID_KEY);
 			analysisOptions.get().setSecondaryOptions(optionsKey, options);
 		}
@@ -117,25 +110,27 @@ public class UMAPMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private double[][] makeProfileMatrix(List<Nucleus> nuclei, int initialDims)
 			throws MissingDataException, SegmentUpdateException, ComponentCreationException {
-		double[][] matrix = new double[nuclei.size()][initialDims];
+		final double[][] matrix = new double[nuclei.size()][initialDims];
 
 		for (int i = 0; i < nuclei.size(); i++) {
 			int j = 0;
-			Nucleus n = nuclei.get(i);
-			for (ProfileType t : ProfileType.displayValues()) {
-				if (!options.getBoolean(t.toString()))
+			final Nucleus n = nuclei.get(i);
+			for (final ProfileType t : ProfileType.displayValues()) {
+				if (!options.getBoolean(t.toString())) {
 					continue;
+				}
 
-				IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
+				final IProfile p = n.getProfile(t, OrientationMark.REFERENCE);
 				for (int k = 0; k < 100; k++) {
-					double idx = (k) / 100d;
+					final double idx = (k) / 100d;
 					matrix[i][j++] = p.get(idx);
 				}
 			}
 
-			for (Measurement stat : Measurement.getNucleusStats()) {
-				if (!options.getBoolean(stat.toString()))
+			for (final Measurement stat : Measurement.getNucleusStats()) {
+				if (!options.getBoolean(stat.toString())) {
 					continue;
+				}
 				matrix[i][j++] = n.getMeasurement(stat);
 			}
 		}
@@ -149,13 +144,15 @@ public class UMAPMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private int calculateNumberOfDimensions() {
 		int dimensions = 0;
-		for (Measurement stat : Measurement.getNucleusStats())
-			if (options.getBoolean(stat.toString()))
+		for (final Measurement stat : Measurement.getNucleusStats())
+			if (options.getBoolean(stat.toString())) {
 				dimensions++;
+			}
 
-		for (ProfileType t : ProfileType.displayValues())
-			if (options.getBoolean(t.toString()))
+		for (final ProfileType t : ProfileType.displayValues())
+			if (options.getBoolean(t.toString())) {
 				dimensions += 100;
+			}
 		return dimensions;
 
 	}
