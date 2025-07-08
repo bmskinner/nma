@@ -55,50 +55,50 @@ public class DatasetMergeTest {
 	@Test
 	public void testDatasetMergeIncludesAllCells() throws Exception {
 
-		int cells = 0;
+		int totalCells = 0;
 
-		IAnalysisDataset d1 = SampleDatasetReader
+		final IAnalysisDataset d1 = SampleDatasetReader
 				.openDataset(TestResources.MULTIPLE_SOURCE_1_DATASET);
-		IAnalysisDataset d2 = SampleDatasetReader
+		final IAnalysisDataset d2 = SampleDatasetReader
 				.openDataset(TestResources.MULTIPLE_SOURCE_2_DATASET);
 
-		List<IAnalysisDataset> toMerge = new ArrayList<>();
+		final List<IAnalysisDataset> toMerge = new ArrayList<>();
 		toMerge.add(d1);
 		toMerge.add(d2);
 
-		cells += d1.getCollection().getNucleusCount();
-		cells += d2.getCollection().getNucleusCount();
+		totalCells += d1.getCollection().getNucleusCount();
+		totalCells += d2.getCollection().getNucleusCount();
 
-		File saveFile = new File(TestResources.MULTIPLE_BASE_FOLDER, "Merge_test.nmd");
-		IAnalysisMethod m = new DatasetMergeMethod(toMerge, BooleanOperation.OR, saveFile);
+		final File saveFile = new File(TestResources.MULTIPLE_BASE_FOLDER, "Merge_test.nmd");
+		final IAnalysisMethod m = new DatasetMergeMethod(toMerge, BooleanOperation.OR, saveFile);
 
-		IAnalysisResult r = m.call();
-		IAnalysisDataset mergedDataset = r.getFirstDataset();
+		final IAnalysisResult r = m.call();
+		final IAnalysisDataset mergedDataset = r.getFirstDataset();
 		assertNotNull("Dataset should be returned from merge method", mergedDataset);
 
-		assertEquals("Dataset merge should have the same cell count as input datasets",
-				mergedDataset.getCollection().getNucleusCount(), cells);
+		assertEquals("Merged dataset should have the sum of input dataset cell count",
+				totalCells, mergedDataset.getCollection().getNucleusCount());
 
 		// Check all the cells in input dataset one were copied
 		// Do not check all fields; that is a test for the CellCollectionFilterer
 		// Since segments must be accounted for, we don't worry about equality testing
 		// here, just if the same cell ids are present
-		for (ICell originalCell : d1.getCollection().getCells()) {
+		for (final ICell originalCell : d1.getCollection().getCells()) {
 
 			// Is there a cell with the same ID?
 			if (!mergedDataset.getCollection().getCellIDs().contains(originalCell.getId())) {
-				fail("Cell from input dataset 1 is not present in merged dataset: "
-						+ originalCell.toString());
+				fail("Cell %s from input dataset 1 is not present in merged dataset"
+						.formatted(originalCell.toString()));
 			}
 
 		}
 
 		// Now do the same for the cells in input dataset 2
-		for (ICell originalCell : d2.getCollection().getCells()) {
+		for (final ICell originalCell : d2.getCollection().getCells()) {
 			// Is there a cell with the same ID?
 			if (!mergedDataset.getCollection().getCellIDs().contains(originalCell.getId())) {
-				fail("Cell from input dataset 2 is not present in merged dataset: "
-						+ originalCell.toString());
+				fail("Cell %s from input dataset 2 is not present in merged dataset"
+						.formatted(originalCell.toString()));
 			}
 		}
 

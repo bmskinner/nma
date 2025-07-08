@@ -246,6 +246,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		}
 		this.isReversed = a.isReversed();
 
+		xBase = a.getOriginalBase().getXAsInt();
+		yBase = a.getOriginalBase().getYAsInt();
+
 		borderList = new IPoint[other.borderList.length];
 
 		for (int i = 0; i < borderList.length; i++) {

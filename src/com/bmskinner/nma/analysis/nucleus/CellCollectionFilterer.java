@@ -28,6 +28,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.ICell;
+import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DefaultCellCollection;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
@@ -53,14 +54,19 @@ public class CellCollectionFilterer {
 	 */
 	public static ICellCollection and(@NonNull List<ICellCollection> collections)
 			throws ComponentCreationException {
-		ICellCollection c0 = collections.get(0);
+		final ICellCollection c0 = collections.get(0);
 
-		ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
+		final ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
 				"AND operation", UUID.randomUUID());
-		for (ICell c : c0) {
-			if (collections.stream().allMatch(col -> col.contains(c)))
+		for (final ICell c : c0) {
+			if (collections.stream().allMatch(
+					col -> col.getNuclei().stream()
+							.anyMatch(n -> n.getId().equals(c.getPrimaryNucleus().getId())))) {
 				result.add(c.duplicate());
+			}
 		}
+		// Add signal groups
+//		c0.getSignalManager().copySignalGroupsTo(result);
 		return result;
 	}
 
@@ -75,17 +81,22 @@ public class CellCollectionFilterer {
 	 */
 	public static ICellCollection or(@NonNull List<ICellCollection> collections)
 			throws ComponentCreationException {
-		ICellCollection c0 = collections.get(0);
-		ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
+		final ICellCollection c0 = collections.get(0);
+		final ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
 				"OR operation", UUID.randomUUID());
 
-		// Add cells from each source dataset
-		for (ICellCollection d : collections) {
-			for (ICell c : d) {
-				if (!result.contains(c))
+		// Add cells from each source dataset that are not already present
+		// We can use Nucleus id checks here because strict equality is not so important
+		for (final ICellCollection d : collections) {
+			for (final ICell c : d) {
+				if (result.getNuclei().stream().map(Nucleus::getId)
+						.noneMatch(u -> u.equals(c.getPrimaryNucleus().getId()))) {
 					result.add(c.duplicate());
+				}
 			}
 		}
+		// Add signal groups
+//		c0.getSignalManager().copySignalGroupsTo(result);
 		return result;
 	}
 
@@ -100,17 +111,23 @@ public class CellCollectionFilterer {
 	 */
 	public static ICellCollection not(@NonNull List<ICellCollection> collections)
 			throws ComponentCreationException {
-		ICellCollection c0 = collections.get(0);
-		ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
+		final ICellCollection c0 = collections.get(0);
+		final ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
 				"NOT operation", UUID.randomUUID());
 
-		List<ICellCollection> otherCollections = collections.subList(1, collections.size());
+		final List<ICellCollection> otherCollections = collections.subList(1, collections.size());
 
 		// Add cells only if not in any of the other datasets
-		for (ICell c : c0) {
-			if (otherCollections.stream().noneMatch(col -> col.contains(c)))
+		// We can use Nucleus id checks here because strict equality is not so important
+		for (final ICell c : c0) {
+			if (otherCollections.stream().noneMatch(
+					col -> col.getNuclei().stream()
+							.anyMatch(n -> n.getId().equals(c.getPrimaryNucleus().getId())))) {
 				result.add(c.duplicate());
+			}
 		}
+		// Add signal groups
+//		c0.getSignalManager().copySignalGroupsTo(result);
 
 		return result;
 	}
@@ -126,22 +143,29 @@ public class CellCollectionFilterer {
 	 */
 	public static ICellCollection xor(@NonNull List<ICellCollection> collections)
 			throws ComponentCreationException {
-		ICellCollection c0 = collections.get(0);
-		ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
+		final ICellCollection c0 = collections.get(0);
+		final ICellCollection result = new DefaultCellCollection(c0.getRuleSetCollection(),
 				"XOR operation", UUID.randomUUID());
 
-		for (ICellCollection d : collections) {
+		for (final ICellCollection d : collections) {
 
 			// Get the collections other than the current collection
-			List<ICellCollection> otherCollections = collections.stream().filter(c -> !c.equals(d))
+			final List<ICellCollection> otherCollections = collections.stream().filter(c -> !c.equals(d))
 					.toList();
 
 			// Add cells that are not in any of the other datasets
-			for (ICell c : d) {
-				if (otherCollections.stream().noneMatch(col -> col.contains(c)))
+			// We can use Nucleus id checks here because strict equality is not so important
+			for (final ICell c : d) {
+				
+				if (otherCollections.stream().noneMatch(col -> col.getNuclei().stream()
+						.anyMatch(n -> n.getId().equals(c.getPrimaryNucleus().getId())))) {
 					result.add(c.duplicate());
+				}
 			}
+			// Add signal groups
+//			d.getSignalManager().copySignalGroupsTo(result);
 		}
+
 		return result;
 	}
 
@@ -155,11 +179,11 @@ public class CellCollectionFilterer {
 	 */
 	public static ICellCollection filter(ICellCollection collection, Predicate<ICell> pred)
 			throws CollectionFilteringException {
-		String newName = "Filtered_" + pred.toString();
+		final String newName = "Filtered_" + pred.toString();
 
-		ICellCollection subCollection = new DefaultCellCollection(collection, newName);
+		final ICellCollection subCollection = new DefaultCellCollection(collection, newName);
 
-		List<ICell> list = collection.parallelStream()
+		final List<ICell> list = collection.parallelStream()
 				.filter(pred)
 				.collect(Collectors.toList());
 

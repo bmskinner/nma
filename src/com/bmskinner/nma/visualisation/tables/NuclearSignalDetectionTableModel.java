@@ -13,6 +13,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nma.analysis.signals.SignalDetectionMode;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
+import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.gui.Labels;
@@ -23,7 +24,7 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 
 	private static final String VALUE_MISSING_LBL = "Value missing";
 
-	private static final long serialVersionUID = 1l;
+	private static final long serialVersionUID = 1L;
 
 	private static final Logger LOGGER = Logger
 			.getLogger(NuclearSignalDetectionTableModel.class.getName());
@@ -38,7 +39,7 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 	private String[] colNames;
 	private Object[][] rowData;
 
-	private List<IAnalysisDataset> datasets = new ArrayList<>();
+	private final List<IAnalysisDataset> datasets = new ArrayList<>();
 
 	public NuclearSignalDetectionTableModel(@Nullable List<IAnalysisDataset> datasets) {
 
@@ -51,7 +52,7 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 
 		// find the collection with the most channels
 		// this defines the number of rows
-		int maxChannels = datasets.stream()
+		final int maxChannels = datasets.stream()
 				.mapToInt(d -> d.getCollection().getSignalManager().getSignalGroupCount())
 				.max().orElse(0);
 
@@ -61,42 +62,43 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 		}
 
 		colNames = makeColNames(datasets);
-		int colCount = colNames.length;
-		int rowCount = (ROW_NAMES.size() * maxChannels) + 1;
+		final int colCount = colNames.length;
+		final int rowCount = (ROW_NAMES.size() * maxChannels) + 1;
 
 		rowData = new Object[rowCount][colCount];
 		rowData[0][0] = Labels.Signals.NUMBER_OF_SIGNAL_GROUPS;
 
 		for (int c = 0; c < colCount; c++) {
 			if (c == 0) {
-				for (int r = 1; r < rowCount; r++)
+				for (int r = 1; r < rowCount; r++) {
 					rowData[r][0] = ROW_NAMES.get((r - 1) % ROW_NAMES.size());
+				}
 				continue;
 			}
 
-			IAnalysisDataset d = datasets.get(c - 1);
+			final IAnalysisDataset d = datasets.get(c - 1);
 
-			ICellCollection collection = d.getCollection();
-			int signalGroupsInDataset = collection.getSignalManager().getSignalGroupCount();
+			final ICellCollection collection = d.getCollection();
+			final int signalGroupsInDataset = collection.getSignalManager().getSignalGroupCount();
 
 			rowData[0][c] = String.valueOf(signalGroupsInDataset);
 
 			int signalGroupNumber = 0; // number of signal groups from this dataset
 
-			for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
+			for (final UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
 				LOGGER.finer("Making for signal group " + signalGroup);
 
-				int baseIndex = signalGroupNumber * ROW_NAMES.size() + 1;
+				final int baseIndex = signalGroupNumber * ROW_NAMES.size() + 1;
 
-				Color colour = collection.getSignalGroup(signalGroup).get().hasColour()
+				final Color colour = collection.getSignalGroup(signalGroup).get().hasColour()
 						? collection.getSignalGroup(signalGroup).get().getGroupColour().get()
 						: ColourSelecter.getColor(signalGroupNumber);
 
-				SignalTableCell cell = new SignalTableCell(signalGroup,
+				final SignalTableCell cell = new SignalTableCell(signalGroup,
 						collection.getSignalManager().getSignalGroupName(signalGroup), colour);
 
-				Optional<IAnalysisOptions> op = d.getAnalysisOptions();
+				final Optional<IAnalysisOptions> op = d.getAnalysisOptions();
 				if (!op.isPresent()) {
 					for (int i = 0; i < ROW_NAMES.size(); i++) {
 						rowData[i + baseIndex][c] = EMPTY_STRING;
@@ -104,12 +106,11 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 					continue;
 				}
 
-				for (String s : op.get().getDetectionOptionTypes()) {
+				for (final String s : op.get().getDetectionOptionTypes()) {
 					LOGGER.finer("Dataset has " + s);
 				}
 
-				HashOptions ns = op.get().getNuclearSignalOptions(signalGroup)
-						.orElseThrow(IllegalArgumentException::new);
+				final HashOptions ns = op.get().getNuclearSignalOptions(signalGroup).orElse(new DefaultOptions());
 
 				rowData[baseIndex + 0][c] = Labels.Signals.SIGNAL_COLOUR_LABEL;
 				rowData[baseIndex + 1][c] = cell;
@@ -190,19 +191,22 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 	private Object makeDetctionModeLabel(IAnalysisDataset d, HashOptions ns) {
 		if (d.hasMergeSources())
 			return Labels.NA_MERGE;
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 
-		if (ns.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY))
+		if (ns.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY)) {
 			builder.append(ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY));
-		else
+		} else {
 			builder.append(VALUE_MISSING_LBL);
+		}
 
-		if (ns.getBoolean(HashOptions.IS_USE_GAP_CLOSING))
+		if (ns.getBoolean(HashOptions.IS_USE_GAP_CLOSING)) {
 			builder.append(
 					" + Gap closing (" + ns.getInt(HashOptions.GAP_CLOSING_RADIUS_INT) + ")");
+		}
 
-		if (ns.getBoolean(HashOptions.IS_USE_WATERSHED))
+		if (ns.getBoolean(HashOptions.IS_USE_WATERSHED)) {
 			builder.append(" + Watershed");
+		}
 
 		return builder.toString();
 	}
@@ -210,7 +214,7 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 	private Object makeSignalFolderLabel(IAnalysisDataset d, UUID signalGroup,
 			Optional<IAnalysisOptions> op,
 			HashOptions ns) {
-		Optional<File> folder = op.get().getNuclearSignalDetectionFolder(signalGroup);
+		final Optional<File> folder = op.get().getNuclearSignalDetectionFolder(signalGroup);
 		return folder.isPresent() ? folder.get().getAbsoluteFile()
 				: d.hasMergeSources() ? Labels.NA_MERGE : VALUE_MISSING_LBL;
 	}
@@ -219,14 +223,13 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 		if (ns.hasString(HashOptions.SIGNAL_DETECTION_MODE_KEY)
 				&& ns.hasInt(HashOptions.THRESHOLD)) {
 
-			String mode = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY);
+			final String mode = ns.getString(HashOptions.SIGNAL_DETECTION_MODE_KEY);
 			return SignalDetectionMode.FORWARD.name().equals(mode)
 					? ns.getInt(HashOptions.THRESHOLD)
 					: d.hasMergeSources() ? Labels.NA_MERGE : "Variable";
 		}
-		if (d.hasMergeSources()) {
+		if (d.hasMergeSources())
 			return Labels.NA_MERGE + " and sources have multiple values";
-		}
 
 		return VALUE_MISSING_LBL;
 	}
@@ -264,10 +267,10 @@ public class NuclearSignalDetectionTableModel extends DatasetTableModel {
 		if (rowIndex == 0)
 			return null;
 
-		int block = (rowIndex / ROW_NAMES.size()) + 1; // which block of rows for signal
-		int resultRow = block * ROW_NAMES.size() - 8; // find the row with the cell
+		final int block = (rowIndex / ROW_NAMES.size()) + 1; // which block of rows for signal
+		final int resultRow = block * ROW_NAMES.size() - 8; // find the row with the cell
 
-		SignalTableCell cell = (SignalTableCell) getValueAt(resultRow, columnIndex);
+		final SignalTableCell cell = (SignalTableCell) getValueAt(resultRow, columnIndex);
 		return cell.id();
 	}
 
