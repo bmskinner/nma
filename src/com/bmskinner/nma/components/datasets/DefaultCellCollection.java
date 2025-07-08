@@ -1077,8 +1077,9 @@ public class DefaultCellCollection implements ICellCollection {
 		if (!d2.getRuleSetCollection().equals(ruleSets))
 			return 0;
 
-		final Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
-		toSearch.retainAll(getCellIDs());
+		// Compare nucleus IDs, not cell ids
+		final Set<UUID> toSearch = d2.getNuclei().stream().map(Nucleus::getId).collect(Collectors.toSet());
+		toSearch.retainAll(this.getNuclei().stream().map(Nucleus::getId).collect(Collectors.toSet()));
 		return toSearch.size();
 	}
 
