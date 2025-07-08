@@ -200,7 +200,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
 					final String rowKey = CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup + "_"
 							+ group.getGroupName();
-					final String colKey = collection.getName();
+					final String colKey = collection.getName() + "_" + collection.getId();
 					/*
 					 * For charting, use offset angles, otherwise the boxplots will fail on wrapped
 					 * signals

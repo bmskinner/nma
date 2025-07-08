@@ -35,7 +35,7 @@ public class UpdateChecker {
 	 * 
 	 * @return the latest version found. Will be the current version on error.
 	 */
-	public static Version fetchLatestVersion() {
+	public static Version fetchLatestVersionOnRemote() {
 		Version latestVersion = new Version(1, 13, 0); // an arbitrarily old version to start age checking from
 		try {
 
@@ -71,7 +71,7 @@ public class UpdateChecker {
 
 		boolean isLaterVersion = false;
 
-		final Version latestVersion = fetchLatestVersion();
+		final Version latestVersion = fetchLatestVersionOnRemote();
 		isLaterVersion = latestVersion.isNewerThan(testVersion);
 
 		if (isLaterVersion) {

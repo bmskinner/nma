@@ -9,6 +9,7 @@ bin/*
 doc/*
 res/user-guide/*
 res/screens/*
+res/version.template
 scripts/package*
 scripts/render*
 scripts/upload*
@@ -21,6 +22,7 @@ test/samples/images/*
 *.bak
 
 # Non-project related files
+artifacts/*
 maven.bat
 Launch4j_config.xml
 src/plugins.config
