@@ -265,6 +265,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
                 if(g.isPresent()){
                 	final Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(row));
                 	renderer.setSeriesPaint(series, colour);
+
                 }
                 series++;
             }
