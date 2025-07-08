@@ -197,7 +197,7 @@ public class Version {
 			return false;
 		if (revision != other.revision)
 			return false;
-		if (suffix != other.suffix)
+		if (!suffix.equals(other.suffix))
 			return false;
 		return true;
 	}

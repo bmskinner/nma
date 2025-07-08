@@ -159,6 +159,9 @@ public class VersionTest {
 		assertFalse(Version.parseString("1.13.4").equals(v2));
 
 		assertFalse(Version.parseString("1.13.4").equals(new Object()));
+
+		assertEquals("Suffix strings should be in equality test",
+				Version.parseString("1.13.4.alpha-1"), (Version.parseString("1.13.4.alpha-1")));
 	}
 
 	@Test
@@ -174,6 +177,11 @@ public class VersionTest {
 	@Test
 	public void testGetRevision() {
 		assertEquals(4, Version.parseString("1.13.4").getRevision());
+	}
+
+	@Test
+	public void testGetSuffix() {
+		assertEquals("alpha-1", Version.parseString("1.13.4.alpha-1").getSuffix());
 	}
 
 	@Test
