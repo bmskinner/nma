@@ -81,23 +81,24 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	}
 
 	private JPanel createHeader() {
-		JPanel panel = new JPanel(new FlowLayout());
+		final JPanel panel = new JPanel(new FlowLayout());
 
 		imageSpinner = createMaxImageSpinner();
 
-		JCheckBox showImagesBox = new JCheckBox("Show images", false);
+		final JCheckBox showImagesBox = new JCheckBox("Show images", false);
 		showImagesBox.addActionListener(l -> {
 			if (showImagesBox.isSelected()) {
-				Runnable r = () -> DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
+
+				final Runnable r = () -> DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
 						group,
 						chartPanel.getChart(), ((Double) imageSpinner.getValue()).intValue());
-				ThreadManager.getInstance().submit(r);
+				ThreadManager.getInstance().submitUIUpdate(r);
 			} else {
 				chartPanel.getChart().getXYPlot().getRenderer().removeAnnotations();
 			}
 		});
 
-		JCheckBox showPointsBox = new JCheckBox("Show points", true);
+		final JCheckBox showPointsBox = new JCheckBox("Show points", true);
 		showPointsBox.addActionListener(l -> {
 			if (showPointsBox.isSelected()) {
 				updateChart(ColourByType.CLUSTER);
@@ -111,12 +112,12 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 				imageSpinner.commitEdit();
 				if (showImagesBox.isSelected()) {
 					chartPanel.getChart().getXYPlot().getRenderer().removeAnnotations();
-					Runnable r = () -> DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
+					final Runnable r = () -> DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
 							group,
 							chartPanel.getChart(), ((Double) imageSpinner.getValue()).intValue());
-					ThreadManager.getInstance().submit(r);
+					ThreadManager.getInstance().submitUIUpdate(r);
 				}
-			} catch (ParseException e1) {
+			} catch (final ParseException e1) {
 				LOGGER.log(Level.SEVERE, "Error parsing input", e);
 			}
 		});
@@ -134,26 +135,29 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 
 		// The default number of images per cluster should depend on the number of
 		// clusters
-		double initialImages = Math.max(1,
+		final double initialImages = Math.max(1,
 				Math.min(MAX_NUCLEI_PER_CLUSTER / group.size(), MAX_NUCLEI_PER_CLUSTER));
 
-		SpinnerNumberModel model = new SpinnerNumberModel((int) initialImages, 1,
+		final SpinnerNumberModel model = new SpinnerNumberModel((int) initialImages, 1,
 				MAX_NUCLEI_PER_CLUSTER, 1);
-		JSpinner spinner = new JSpinner(model);
+		final JSpinner spinner = new JSpinner(model);
 		spinner.setToolTipText("Number of images to load per cluster");
 		return spinner;
 	}
 
 	private void updateChart(ColourByType type) {
-		XYPlot plot = chartPanel.getChart().getXYPlot();
-		List<UUID> childIds = group.getUUIDs();
-		for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
-			IAnalysisDataset childDataset = dataset.getChildDataset(childIds.get(i));
-			Paint colour = ColourByType.CLUSTER.equals(type)
-					? childDataset.getDatasetColour().orElse(ColourSelecter.getColor(i))
-					: Color.WHITE;
-			plot.getRenderer().setSeriesPaint(i, colour);
-		}
+		final Runnable r = () -> {
+			final XYPlot plot = chartPanel.getChart().getXYPlot();
+			final List<UUID> childIds = group.getUUIDs();
+			for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
+				final IAnalysisDataset childDataset = dataset.getChildDataset(childIds.get(i));
+				final Paint colour = ColourByType.CLUSTER.equals(type)
+						? childDataset.getDatasetColour().orElse(ColourSelecter.getColor(i))
+						: Color.WHITE;
+				plot.getRenderer().setSeriesPaint(i, colour);
+			}
+		};
+		ThreadManager.getInstance().submitUIUpdate(r);
 	}
 
 	private void createChart(ColourByType type, IClusterGroup colourGroup) {

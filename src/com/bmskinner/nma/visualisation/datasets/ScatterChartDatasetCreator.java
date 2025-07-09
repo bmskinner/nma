@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import com.bmskinner.nma.analysis.classification.DimensionalityReductionMethod;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
@@ -37,7 +38,6 @@ import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.measure.MissingMeasurementException;
-import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.rules.OrientationMark;
@@ -234,26 +234,22 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 	 */
 	public static XYDataset createDimensionalityReductionScatterDataset(IAnalysisDataset d,
 			ColourByType type,
-			IClusterGroup plotGroup, IClusterGroup colourGroup)
+			IClusterGroup plotGroup,
+			IClusterGroup colourGroup)
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		final ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
+		
+		
+		final DimensionalityReductionMethod method = DimensionalityReductionMethod
+				.fromClusterGroupOptions(plotGroup.getOptions().get());
 
-		final boolean isUMAP = plotGroup.getOptions().get()
-				.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY);
-		final boolean isTsne = plotGroup.getOptions().get()
-				.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY);
-		final boolean isPca = plotGroup.getOptions().get()
-				.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY);
-
-//		// TODO: add an input parameter for which method we want to display
-//		final String prefix1 = isUMAP ? Measurement.Names.UMAP + "1_"
-//				: isTsne ? Measurement.Names.TSNE + "1_" : "PC1_";
-//		final String prefix2 = isUMAP ? Measurement.Names.UMAP + "2_"
-//				: isTsne ? Measurement.Names.TSNE + "2_" : "PC2_";
-
-		final Measurement measurement = isUMAP ? Measurement.makeUMAP(plotGroup.getId())
-				: isTsne ? Measurement.makeTSNE(plotGroup.getId())
-						: Measurement.makePrincipalComponent(plotGroup.getId());
+		// Choose the array measurement to use
+		final Measurement measurement = switch(method) {
+		case PCA -> Measurement.makePrincipalComponent(plotGroup.getId());
+		case TSNE -> Measurement.makeTSNE(plotGroup.getId());
+		case UMAP -> Measurement.makeUMAP(plotGroup.getId());
+		case NONE -> Measurement.makeUMAP(plotGroup.getId());
+		};
 
 		if (type.equals(ColourByType.CLUSTER) && colourGroup == null) {
 			type = ColourByType.NONE;
@@ -297,7 +293,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 	}
 
 	/**
-	 * Create a matrix of plottable values for the given array measurment
+	 * Create a matrix of plottable values for the given array measurement. Choose
+	 * which indexes of the array measurement are to be plotted on the x and y axes.
 	 * 
 	 * @param nuclei      the nuclei to plot
 	 * @param measurement the array measurement to plot

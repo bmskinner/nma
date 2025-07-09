@@ -57,25 +57,29 @@ public class ThreadManager {
 	/** Thread pool for UI update tasks */
 	private final ExecutorService uiExecutorService;
 
-	private AtomicInteger uiQueueLength = new AtomicInteger();
-	private AtomicInteger methodQueueLength = new AtomicInteger();
+	private final AtomicInteger uiQueueLength = new AtomicInteger();
+	private final AtomicInteger methodQueueLength = new AtomicInteger();
 
 	/**
 	 * Private constructor since this should be accessed as a singleton
 	 */
 	private ThreadManager() {
 		int maxThreads = Runtime.getRuntime().availableProcessors();
-		if (maxThreads > 2) // if this is a dual core machine, we can't afford to be nice
+		if (maxThreads > 2)
+		 { // if this is a dual core machine, we can't afford to be nice
 			maxThreads -= 1; // otherwise, leave something for the OS, EDT etc.
+		}
 
 		int maxMethodThreads = 2; // if on a low core system, have two threads to prevent blocking
 		if (maxThreads > 10)
+		 {
 			maxMethodThreads = maxThreads / 3; // if we're on a server, go wild
+		}
 
 		// The bulk of threads should still be devoted to redrawing charts
-		int maxUiThreads = Math.max(1, maxThreads - maxMethodThreads);
+		final int maxUiThreads = Math.max(1, maxThreads - maxMethodThreads);
 
-		int maxForkJoinThreads = Math.max(1, maxUiThreads - 1); // ensure FJPs don't block the ui
+		final int maxForkJoinThreads = Math.max(1, maxUiThreads - 1); // ensure FJPs don't block the ui
 		System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
 				String.valueOf(maxForkJoinThreads));
 
@@ -90,7 +94,7 @@ public class ThreadManager {
 		LOGGER.config("Allowed processors: %d, split %d for UI, %d for methods".formatted(
 				maxThreads, maxUiThreads, maxMethodThreads));
 
-		long maxMemory = Runtime.getRuntime().maxMemory();
+		final long maxMemory = Runtime.getRuntime().maxMemory();
 		long maxMemoryHuman = maxMemory / (1024 * 1024);
 
 		// Pretty format for readability
@@ -141,12 +145,12 @@ public class ThreadManager {
 	 * @return
 	 */
 	public synchronized Future<?> submitUIUpdate(Runnable r) {
-		TrackedRunnable t = new TrackedRunnable(r);
+		final TrackedRunnable t = new TrackedRunnable(r);
 		return uiExecutorService.submit(t);
 	}
 
 	public synchronized Future<?> submit(Runnable r) {
-		TrackedRunnable t = new TrackedRunnable(r);
+		final TrackedRunnable t = new TrackedRunnable(r);
 		if (r instanceof InterfaceUpdater)
 			return uiExecutorService.submit(t);
 		return methodExecutorService.submit(t);
@@ -178,7 +182,7 @@ public class ThreadManager {
 			Object o = null;
 			try {
 				o = r.call();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error calling submittable callable", e);
 				return null;
 			} finally {
@@ -198,23 +202,25 @@ public class ThreadManager {
 	 *
 	 */
 	private class TrackedRunnable implements Runnable {
-		private Runnable r;
+		private final Runnable r;
 
 		public TrackedRunnable(Runnable r) {
-			if (r instanceof InterfaceUpdater) // Increment queue when submitting task.
+			if (r instanceof InterfaceUpdater) { // Increment queue when submitting task.
 				uiQueueLength.incrementAndGet();
-			else
+			} else { // Increment queue when submitting task.
 				methodQueueLength.incrementAndGet();
+			}
 			this.r = r;
 		}
 
 		@Override
 		public void run() {
 			r.run();
-			if (r instanceof InterfaceUpdater)
+			if (r instanceof InterfaceUpdater) {
 				uiQueueLength.decrementAndGet();
-			else
+			} else {
 				methodQueueLength.decrementAndGet();
+			}
 		}
 
 		public Runnable getSubmittedRunnable() {

@@ -37,6 +37,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.Labels;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.renderers.JTextAreaCellRenderer;
@@ -66,10 +67,10 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 
 	private static final String NO_CLUSTERS_LBL = "No clusters present";
 
-	private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
+	private final JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
 	private JPanel statusPanel = new JPanel(new BorderLayout());
 
-	private JPanel mainPanel;
+	private final JPanel mainPanel;
 	private ExportableTable table;
 
 	public ClusterDetailPanel() {
@@ -95,14 +96,14 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 	 * @return
 	 */
 	private JPanel createMainPanel() {
-		JPanel panel = new JPanel();
+		final JPanel panel = new JPanel();
 
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-		TableModel optionsModel = AbstractTableCreator.createBlankTable();
+		final TableModel optionsModel = AbstractTableCreator.createBlankTable();
 
-		TableCellRenderer buttonRenderer = new JButtonRenderer();
-		TableCellRenderer textRenderer = new JTextAreaCellRenderer(false);
+		final TableCellRenderer buttonRenderer = new JButtonRenderer();
+		final TableCellRenderer textRenderer = new JTextAreaCellRenderer(false);
 
 		table = new ExportableTable(optionsModel) {
 
@@ -116,37 +117,36 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 				if ((this.getValueAt(row, 0).equals(Labels.Clusters.TREE)
 						|| this.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT))
 						&& column > 0
-						&& !(getValueAt(row, column).equals(Labels.NA))) {
+						&& !(getValueAt(row, column).equals(Labels.NA)))
 					return buttonRenderer;
-				}
 				return textRenderer;
 			}
 		};
 
-		MouseListener mouseListener = new MouseListener() {
+		final MouseListener mouseListener = new MouseListener() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				int row = table.rowAtPoint(e.getPoint());
-				int col = table.columnAtPoint(e.getPoint());
+				final int row = table.rowAtPoint(e.getPoint());
+				final int col = table.columnAtPoint(e.getPoint());
 				if (col == 0)
 					return;
 
-				ClusterGroupTableModel model = (ClusterGroupTableModel) table.getModel();
+				final ClusterGroupTableModel model = (ClusterGroupTableModel) table.getModel();
 
-				IClusterGroup group = model.getClusterGroup(table.convertColumnIndexToModel(col));
-				IAnalysisDataset d = model.getDataset(table.convertColumnIndexToModel(col));
+				final IClusterGroup group = model.getClusterGroup(table.convertColumnIndexToModel(col));
+				final IAnalysisDataset d = model.getDataset(table.convertColumnIndexToModel(col));
 
 				if (table.getValueAt(row, 0).equals(Labels.Clusters.TREE)
 						&& !table.getValueAt(row, col).equals(Labels.NA)) {
-					Runnable r = () -> new ClusterTreeDialog(d, group);
-					new Thread(r).start();
+					final Runnable r = () -> new ClusterTreeDialog(d, group);
+					ThreadManager.getInstance().execute(r);
 				}
 
 				if (table.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)
 						&& !table.getValueAt(row, col).equals(Labels.NA)) {
-					Runnable r = () -> new DimensionalityReductionPlotDialog(d, group);
-					new Thread(r).start();
+					final Runnable r = () -> new DimensionalityReductionPlotDialog(d, group);
+					ThreadManager.getInstance().execute(r);
 				}
 
 			}
@@ -177,9 +177,9 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 
 		table.setRowSelectionAllowed(false);
 
-		JScrollPane scrollPane = new JScrollPane(table);
+		final JScrollPane scrollPane = new JScrollPane(table);
 
-		JPanel tablePanel = new JPanel(new BorderLayout());
+		final JPanel tablePanel = new JPanel(new BorderLayout());
 
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
 		tablePanel.add(table.getTableHeader(), BorderLayout.NORTH);
@@ -196,7 +196,7 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 	 */
 	private JPanel createHeader() {
 
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 		panel.add(statusLabel, BorderLayout.CENTER);
 		return panel;
 	}
@@ -211,7 +211,7 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 	protected synchronized void updateMultiple() {
 		setEnabled(true);
 
-		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(table)
+		final TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setTarget(table)
 				.build();
 
 		setTable(options);
@@ -219,27 +219,24 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 		if (!hasDatasets()) {
 			statusLabel.setText(Labels.NULL_DATASETS);
 			setEnabled(false);
-		} else {
+		} else if (isSingleDataset()) {
 
-			if (isSingleDataset()) {
+			setEnabled(true);
 
-				setEnabled(true);
+			if (!activeDataset().hasClusters()) {
 
-				if (!activeDataset().hasClusters()) {
+				statusLabel.setText(NO_CLUSTERS_LBL);
 
-					statusLabel.setText(NO_CLUSTERS_LBL);
-
-				} else {
-					int nGroups = activeDataset().getClusterGroups().size();
-					String plural = nGroups == 1 ? "" : "s";
-					statusLabel.setText(
-							"Dataset has " + activeDataset().getClusterGroups().size()
-									+ " cluster group" + plural);
-				}
-			} else { // more than one dataset selected
-				statusLabel.setText(Labels.MULTIPLE_DATASETS);
-				setEnabled(false);
+			} else {
+				final int nGroups = activeDataset().getClusterGroups().size();
+				final String plural = nGroups == 1 ? "" : "s";
+				statusLabel.setText(
+						"Dataset has " + activeDataset().getClusterGroups().size()
+								+ " cluster group" + plural);
 			}
+		} else { // more than one dataset selected
+			statusLabel.setText(Labels.MULTIPLE_DATASETS);
+			setEnabled(false);
 		}
 	}
 
