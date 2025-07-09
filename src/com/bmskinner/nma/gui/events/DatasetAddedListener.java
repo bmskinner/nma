@@ -33,4 +33,11 @@ public interface DatasetAddedListener {
 	 */
 	void datasetDeleted(List<IAnalysisDataset> datasets);
 
+	/**
+	 * Inform the listener the given datasets have been deleted
+	 * 
+	 * @param datasets
+	 */
+	void datasetDeleted(IAnalysisDataset dataset);
+
 }

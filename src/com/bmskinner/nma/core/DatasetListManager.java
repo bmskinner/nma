@@ -35,6 +35,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
 import com.bmskinner.nma.gui.events.DatasetAddedListener;
+import com.bmskinner.nma.gui.events.DatasetUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
 
 /**
@@ -45,7 +46,7 @@ import com.bmskinner.nma.gui.events.UIController;
  * @author Ben Skinner
  *
  */
-public final class DatasetListManager implements DatasetAddedListener {
+public final class DatasetListManager implements DatasetAddedListener, DatasetUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(DatasetListManager.class.getName());
 
@@ -61,7 +62,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 	private List<IAnalysisDataset> rootDatasets = new CopyOnWriteArrayList<>();
 
 	/** The datasets currently selected in the UI. Includes child datasets */
-	private List<IAnalysisDataset> selected = new CopyOnWriteArrayList<>(); // low efficiency if
+	private final List<IAnalysisDataset> selected = new CopyOnWriteArrayList<>(); // low efficiency if
 																			// this is written
 																			// frequently
 
@@ -95,8 +96,9 @@ public final class DatasetListManager implements DatasetAddedListener {
 			return instance;
 
 		synchronized (lockObject) {
-			if (instance == null)
+			if (instance == null) {
 				instance = new DatasetListManager();
+			}
 
 		}
 		return instance;
@@ -108,7 +110,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public final synchronized List<IAnalysisDataset> getRootDatasets() {
-		List<IAnalysisDataset> result = new ArrayList<>();
+		final List<IAnalysisDataset> result = new ArrayList<>();
 		result.addAll(rootDatasets);
 		return result;
 	}
@@ -130,7 +132,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public final List<IAnalysisDataset> getSelectedDatasets() {
-		List<IAnalysisDataset> result = new ArrayList<>();
+		final List<IAnalysisDataset> result = new ArrayList<>();
 		result.addAll(selected);
 		return result;
 	}
@@ -142,7 +144,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public final synchronized List<IAnalysisDataset> getDatasets(@NonNull List<UUID> ids) {
-		return ids.stream().map(id -> getDataset(id)).collect(Collectors.toList());
+		return ids.stream().map(this::getDataset).collect(Collectors.toList());
 	}
 
 	/**
@@ -170,10 +172,10 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public final boolean isMergeSource(@NonNull final IAnalysisDataset d) {
-		for (IAnalysisDataset r : rootDatasets) {
+		for (final IAnalysisDataset r : rootDatasets) {
 			if (r.hasMergeSource(d))
 				return true;
-			for (IAnalysisDataset c : r.getAllChildDatasets())
+			for (final IAnalysisDataset c : r.getAllChildDatasets())
 				if (c.hasMergeSource(d))
 					return true;
 		}
@@ -230,14 +232,14 @@ public final class DatasetListManager implements DatasetAddedListener {
 
 			if (this.hasDatasets()) {
 
-				List<IAnalysisDataset> allDatasets = this.getAllDatasets().stream().toList();
-				for (IAnalysisDataset dataset : allDatasets) {
+				final List<IAnalysisDataset> allDatasets = this.getAllDatasets().stream().toList();
+				for (final IAnalysisDataset dataset : allDatasets) {
 					dataset.refreshClusterGroups();
 				}
 				UIController.getInstance().fireClusterGroupsUpdated(allDatasets);
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error refreshing clusters", e);
 		}
 	}
@@ -250,12 +252,13 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 */
 	public synchronized Set<IAnalysisDataset> getRootParents(
 			@NonNull List<IAnalysisDataset> datasets) {
-		Set<IAnalysisDataset> result = new HashSet<>();
-		for (IAnalysisDataset d : datasets) {
-			if (d.isRoot())
+		final Set<IAnalysisDataset> result = new HashSet<>();
+		for (final IAnalysisDataset d : datasets) {
+			if (d.isRoot()) {
 				result.add(d);
-			else
+			} else {
 				result.add(getRootParent(d));
+			}
 		}
 		return result;
 	}
@@ -271,7 +274,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 
 		if (d.isRoot())
 			return d;
-		for (IAnalysisDataset root : getRootDatasets())
+		for (final IAnalysisDataset root : getRootDatasets())
 			if (root.hasAnyChild(d))
 				return root;
 		return null;
@@ -284,7 +287,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public synchronized IAnalysisDataset getRootParent(@NonNull ICellCollection collection) {
-		for (IAnalysisDataset d : getRootDatasets()) {
+		for (final IAnalysisDataset d : getRootDatasets()) {
 			if (d.getCollection().equals(collection) || d.getAllChildDatasets().stream()
 					.map(IAnalysisDataset::getCollection)
 					.anyMatch(c -> c.getId().equals(collection.getId())))
@@ -305,9 +308,9 @@ public final class DatasetListManager implements DatasetAddedListener {
 		if (d.isRoot())
 			return d;
 
-		IAnalysisDataset result = null;
+		final IAnalysisDataset result = null;
 
-		for (IAnalysisDataset root : this.getRootDatasets()) {
+		for (final IAnalysisDataset root : this.getRootDatasets()) {
 			if (root.hasDirectChild(d))
 				return root;
 
@@ -315,10 +318,9 @@ public final class DatasetListManager implements DatasetAddedListener {
 
 				// Get the child of the root dataset which is a parent
 				// to the input dataset
-				for (IAnalysisDataset parent : root.getAllChildDatasets()) {
-					if (parent.hasDirectChild(d)) {
+				for (final IAnalysisDataset parent : root.getAllChildDatasets()) {
+					if (parent.hasDirectChild(d))
 						return parent;
-					}
 				}
 
 			}
@@ -334,8 +336,8 @@ public final class DatasetListManager implements DatasetAddedListener {
 	@NonNull
 	public final synchronized Set<IAnalysisDataset> getAllDatasets() {
 
-		Set<IAnalysisDataset> result = new HashSet<>();
-		for (IAnalysisDataset d : rootDatasets) {
+		final Set<IAnalysisDataset> result = new HashSet<>();
+		for (final IAnalysisDataset d : rootDatasets) {
 			result.add(d);
 			result.addAll(d.getAllChildDatasets());
 		}
@@ -351,14 +353,13 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public final synchronized boolean hasDataset(@NonNull UUID id) {
-		for (IAnalysisDataset d : rootDatasets) {
+		for (final IAnalysisDataset d : rootDatasets) {
 			if (d.getId().equals(id))
 				return true;
 
-			for (IAnalysisDataset child : d.getAllChildDatasets()) {
-				if (child.getId().equals(id)) {
+			for (final IAnalysisDataset child : d.getAllChildDatasets()) {
+				if (child.getId().equals(id))
 					return true;
-				}
 			}
 		}
 		return false;
@@ -371,10 +372,9 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public final synchronized boolean hasRootDataset(@NonNull UUID id) {
-		for (IAnalysisDataset d : rootDatasets) {
-			if (d.getId().equals(id)) {
+		for (final IAnalysisDataset d : rootDatasets) {
+			if (d.getId().equals(id))
 				return true;
-			}
 		}
 		return false;
 	}
@@ -386,15 +386,13 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public final synchronized IAnalysisDataset getDataset(@NonNull UUID id) {
-		for (IAnalysisDataset d : rootDatasets) {
-			if (d.getId().equals(id)) {
+		for (final IAnalysisDataset d : rootDatasets) {
+			if (d.getId().equals(id))
 				return d;
-			}
 
-			for (IAnalysisDataset child : d.getAllChildDatasets()) {
-				if (child.getId().equals(id)) {
+			for (final IAnalysisDataset child : d.getAllChildDatasets()) {
+				if (child.getId().equals(id))
 					return child;
-				}
 			}
 		}
 		return null;
@@ -407,11 +405,12 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 */
 	public final void addDataset(@NonNull IAnalysisDataset d) {
 		// Ensure not run on the EDT
-		Runnable r = () ->{
+		final Runnable r = () ->{
 			if (d.isRoot() && !rootDatasets.contains(d)) {
 				rootDatasets.add(d);
 				LOGGER.fine("Added dataset %s".formatted(d.getName()));
 				datasetHashcodeMap.put(d.getId(), d.hashCode());
+				d.addDatasetUpdatedListener(this);
 			}
 		};
 		ThreadManager.getInstance().submit(r);
@@ -436,6 +435,8 @@ public final class DatasetListManager implements DatasetAddedListener {
 
 		datasetHashcodeMap.remove(d.getId());
 		selected.remove(d);
+		d.removeDatasetUpdatedListener(this);
+		UIController.getInstance().fireDatasetDeleted(d);
 	}
 
 	/**
@@ -472,9 +473,8 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 */
 	public final synchronized boolean hashCodeChanged(@NonNull IAnalysisDataset d) {
 		if (d.isRoot()) {
-			if (datasetHashcodeMap.containsKey(d.getId())) {
+			if (datasetHashcodeMap.containsKey(d.getId()))
 				return d.hashCode() != datasetHashcodeMap.get(d.getId());
-			}
 			// No hashcode present, presumably a new dataset. Compute and return
 			LOGGER.fine("Missing root dataset hashcode, computing");
 			datasetHashcodeMap.put(d.getId(), d.hashCode());
@@ -491,9 +491,8 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return true if the hashcode is different to the stored value
 	 */
 	public final synchronized boolean hashCodeChanged(@NonNull IWorkspace w) {
-		if (workspaceHashcodeMap.containsKey(w.getId())) {
+		if (workspaceHashcodeMap.containsKey(w.getId()))
 			return w.hashCode() != workspaceHashcodeMap.get(w.getId());
-		}
 		LOGGER.fine("Missing workspace hashcode");
 		workspaceHashcodeMap.put(w.getId(), w.hashCode());
 		return true;
@@ -506,12 +505,12 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public final synchronized boolean hashCodeChanged() {
-		for (IAnalysisDataset d : rootDatasets) {
+		for (final IAnalysisDataset d : rootDatasets) {
 			if (hashCodeChanged(d))
 				return true;
 		}
 
-		for (IWorkspace w : workspaces) {
+		for (final IWorkspace w : workspaces) {
 			if (hashCodeChanged(w))
 				return true;
 		}
@@ -524,10 +523,11 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return the datasets that have changed
 	 */
 	public final synchronized @NonNull Set<IAnalysisDataset> getUnsavedRootDatasets() {
-		Set<IAnalysisDataset> result = new HashSet<>();
-		for (IAnalysisDataset d : rootDatasets) {
-			if (hashCodeChanged(d))
+		final Set<IAnalysisDataset> result = new HashSet<>();
+		for (final IAnalysisDataset d : rootDatasets) {
+			if (hashCodeChanged(d)) {
 				result.add(d);
+			}
 		}
 		return result;
 	}
@@ -559,10 +559,10 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @param d
 	 */
 	public final synchronized void updateHashCodes() {
-		for (IAnalysisDataset d : rootDatasets) {
+		for (final IAnalysisDataset d : rootDatasets) {
 			updateHashCode(d);
 		}
-		for (IWorkspace w : workspaces) {
+		for (final IWorkspace w : workspaces) {
 			updateHashCode(w);
 		}
 	}
@@ -603,7 +603,7 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public final synchronized boolean isInWorkspace(@NonNull IAnalysisDataset d) {
-		for (IWorkspace w : workspaces) {
+		for (final IWorkspace w : workspaces) {
 			if (w.has(d))
 				return true;
 		}
@@ -617,10 +617,11 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public final synchronized @NonNull List<IWorkspace> getWorkspaces(@NonNull IAnalysisDataset d) {
-		List<IWorkspace> result = new ArrayList<>();
-		for (IWorkspace w : workspaces) {
-			if (w.has(d))
+		final List<IWorkspace> result = new ArrayList<>();
+		for (final IWorkspace w : workspaces) {
+			if (w.has(d)) {
 				result.add(w);
+			}
 		}
 		return result;
 	}
@@ -631,18 +632,20 @@ public final class DatasetListManager implements DatasetAddedListener {
 	 * @return
 	 */
 	public final synchronized @NonNull List<IWorkspace> getUnsavedWorkspaces() {
-		List<IWorkspace> result = new ArrayList<>();
-		for (IWorkspace w : workspaces) {
-			if (hashCodeChanged(w))
+		final List<IWorkspace> result = new ArrayList<>();
+		for (final IWorkspace w : workspaces) {
+			if (hashCodeChanged(w)) {
 				result.add(w);
+			}
 		}
 		return result;
 	}
 
 	@Override
 	public void datasetAdded(List<IAnalysisDataset> datasets) {
-		for (IAnalysisDataset d : datasets)
+		for (final IAnalysisDataset d : datasets) {
 			addDataset(d);
+		}
 	}
 
 	@Override
@@ -651,9 +654,27 @@ public final class DatasetListManager implements DatasetAddedListener {
 	}
 
 	@Override
+	public void datasetDeleted(IAnalysisDataset dataset) {
+		// No action here
+	}
+
+	@Override
 	public void datasetDeleted(List<IAnalysisDataset> datasets) {
 		// No action here
 
 	}
+
+	@Override
+	public void datasetUpdated(IAnalysisDataset dataset) {
+		UIController.getInstance().fireDatasetUpdated(dataset);
+
+	}
+
+	@Override
+	public void datasetUpdated(List<IAnalysisDataset> datasets) {
+		UIController.getInstance().fireDatasetUpdated(datasets);
+	}
+
+
 
 }

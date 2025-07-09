@@ -47,6 +47,8 @@ public class UIController {
 
 	private final List<GLCMUpdateListener> glcmUpdatedListeners = new ArrayList<>();
 
+	private final List<DatasetUpdatedListener> datasetUpdatedListeners = new ArrayList<>();
+
 	private UIController() {
 	}
 
@@ -59,18 +61,21 @@ public class UIController {
 	}
 
 	public void fireConsensusNucleusChanged(@NonNull List<IAnalysisDataset> datasets) {
-		for (ConsensusUpdatedListener l : consensusListeners)
+		for (final ConsensusUpdatedListener l : consensusListeners) {
 			l.consensusUpdated(datasets);
+		}
 	}
 
 	public void fireConsensusNucleusChanged(@NonNull IAnalysisDataset d) {
-		for (ConsensusUpdatedListener l : consensusListeners)
+		for (final ConsensusUpdatedListener l : consensusListeners) {
 			l.consensusUpdated(d);
+		}
 	}
 
 	public void fireConsensusNucleusFillStateChanged() {
-		for (ConsensusUpdatedListener l : consensusListeners)
+		for (final ConsensusUpdatedListener l : consensusListeners) {
 			l.consensusFillStateUpdated();
+		}
 	}
 
 	public void addNuclearSignalUpdatedListener(NuclearSignalUpdatedListener l) {
@@ -78,13 +83,15 @@ public class UIController {
 	}
 
 	public void fireNuclearSignalUpdated(@NonNull List<IAnalysisDataset> datasets) {
-		for (NuclearSignalUpdatedListener l : nuclearSignalListeners)
+		for (final NuclearSignalUpdatedListener l : nuclearSignalListeners) {
 			l.nuclearSignalUpdated(datasets);
+		}
 	}
 
 	public void fireNuclearSignalUpdated(@NonNull IAnalysisDataset d) {
-		for (NuclearSignalUpdatedListener l : nuclearSignalListeners)
+		for (final NuclearSignalUpdatedListener l : nuclearSignalListeners) {
 			l.nuclearSignalUpdated(d);
+		}
 	}
 
 	public void addProfilesUpdatedListener(ProfilesUpdatedListener l) {
@@ -92,13 +99,15 @@ public class UIController {
 	}
 
 	public void fireProfilesUpdated(@NonNull List<IAnalysisDataset> datasets) {
-		for (ProfilesUpdatedListener l : profilesListeners)
+		for (final ProfilesUpdatedListener l : profilesListeners) {
 			l.profilesUpdated(datasets);
+		}
 	}
 
 	public void fireProfilesUpdated(@NonNull IAnalysisDataset d) {
-		for (ProfilesUpdatedListener l : profilesListeners)
+		for (final ProfilesUpdatedListener l : profilesListeners) {
 			l.profilesUpdated(d);
+		}
 	}
 
 	public void addScaleUpdatedListener(ScaleUpdatedListener l) {
@@ -106,18 +115,21 @@ public class UIController {
 	}
 
 	public void fireScaleUpdated(@NonNull List<IAnalysisDataset> datasets) {
-		for (ScaleUpdatedListener l : scaleListeners)
+		for (final ScaleUpdatedListener l : scaleListeners) {
 			l.scaleUpdated(datasets);
+		}
 	}
 
 	public void fireScaleUpdated(@NonNull IAnalysisDataset d) {
-		for (ScaleUpdatedListener l : scaleListeners)
+		for (final ScaleUpdatedListener l : scaleListeners) {
 			l.scaleUpdated(d);
+		}
 	}
 
 	public void fireScaleUpdated() {
-		for (ScaleUpdatedListener l : scaleListeners)
+		for (final ScaleUpdatedListener l : scaleListeners) {
 			l.scaleUpdated();
+		}
 	}
 
 	public void addSwatchUpdatedListener(SwatchUpdatedListener l) {
@@ -125,8 +137,9 @@ public class UIController {
 	}
 
 	public void fireSwatchUpdated() {
-		for (SwatchUpdatedListener l : swatchListeners)
+		for (final SwatchUpdatedListener l : swatchListeners) {
 			l.globalPaletteUpdated();
+		}
 	}
 
 	/**
@@ -135,8 +148,9 @@ public class UIController {
 	 * @param dataset
 	 */
 	public void fireDatasetColourUpdated(IAnalysisDataset dataset) {
-		for (SwatchUpdatedListener l : swatchListeners)
+		for (final SwatchUpdatedListener l : swatchListeners) {
 			l.colourUpdated(dataset);
+		}
 	}
 
 	public void addDatasetSelectionUpdatedListener(DatasetSelectionUpdatedListener l) {
@@ -144,13 +158,31 @@ public class UIController {
 	}
 
 	public void fireDatasetSelectionUpdated(@NonNull List<IAnalysisDataset> datasets) {
-		for (DatasetSelectionUpdatedListener l : datasetSelectionListeners)
+		for (final DatasetSelectionUpdatedListener l : datasetSelectionListeners) {
 			l.datasetSelectionUpdated(datasets);
+		}
 	}
 
 	public void fireDatasetSelectionUpdated(@NonNull IAnalysisDataset d) {
-		for (DatasetSelectionUpdatedListener l : datasetSelectionListeners)
+		for (final DatasetSelectionUpdatedListener l : datasetSelectionListeners) {
 			l.datasetSelectionUpdated(d);
+		}
+	}
+
+	public void addDatasetUpdatedListener(DatasetUpdatedListener l) {
+		datasetUpdatedListeners.add(l);
+	}
+
+	public void fireDatasetUpdated(@NonNull IAnalysisDataset dataset) {
+		for (final DatasetUpdatedListener l : datasetUpdatedListeners) {
+			l.datasetUpdated(dataset);
+		}
+	}
+
+	public void fireDatasetUpdated(@NonNull List<IAnalysisDataset> datasets) {
+		for (final DatasetUpdatedListener l : datasetUpdatedListeners) {
+			l.datasetUpdated(datasets);
+		}
 	}
 
 	public void addDatasetAddedListener(DatasetAddedListener l) {
@@ -158,8 +190,9 @@ public class UIController {
 	}
 
 	public void fireDatasetAdded(@NonNull List<IAnalysisDataset> datasets) {
-		for (DatasetAddedListener l : datasetAddedListeners)
+		for (final DatasetAddedListener l : datasetAddedListeners) {
 			l.datasetAdded(datasets);
+		}
 	}
 
 	/**
@@ -168,8 +201,9 @@ public class UIController {
 	 * @param d
 	 */
 	public void fireDatasetAdded(@NonNull IAnalysisDataset d) {
-		for (DatasetAddedListener l : datasetAddedListeners)
+		for (final DatasetAddedListener l : datasetAddedListeners) {
 			l.datasetAdded(d);
+		}
 	}
 
 	/**
@@ -178,8 +212,20 @@ public class UIController {
 	 * @param d
 	 */
 	public void fireDatasetDeleted(@NonNull List<IAnalysisDataset> datasets) {
-		for (DatasetAddedListener l : datasetAddedListeners)
+		for (final DatasetAddedListener l : datasetAddedListeners) {
 			l.datasetDeleted(datasets);
+		}
+	}
+
+	/**
+	 * Inform listeners that a dataset has been removed from display
+	 * 
+	 * @param d
+	 */
+	public void fireDatasetDeleted(@NonNull IAnalysisDataset dataset) {
+		for (final DatasetAddedListener l : datasetAddedListeners) {
+			l.datasetDeleted(dataset);
+		}
 	}
 
 	public void addWorkspaceAddedListener(WorkspaceAddedListener l) {
@@ -187,23 +233,27 @@ public class UIController {
 	}
 
 	public void fireWorkspaceAdded(@NonNull IWorkspace ws) {
-		for (WorkspaceAddedListener l : workspaceAddedListeners)
+		for (final WorkspaceAddedListener l : workspaceAddedListeners) {
 			l.workspaceAdded(ws);
+		}
 	}
 
 	public void fireWorkspaceDeleted(@NonNull IWorkspace ws) {
-		for (WorkspaceAddedListener l : workspaceAddedListeners)
+		for (final WorkspaceAddedListener l : workspaceAddedListeners) {
 			l.workspaceDeleted(ws);
+		}
 	}
 
 	public void fireDatasetAdded(@NonNull IWorkspace ws, IAnalysisDataset d) {
-		for (WorkspaceAddedListener l : workspaceAddedListeners)
+		for (final WorkspaceAddedListener l : workspaceAddedListeners) {
 			l.datasetAdded(ws, d);
+		}
 	}
 
 	public void fireDatasetRemoved(@NonNull IWorkspace ws, IAnalysisDataset d) {
-		for (WorkspaceAddedListener l : workspaceAddedListeners)
+		for (final WorkspaceAddedListener l : workspaceAddedListeners) {
 			l.datasetRemoved(ws, d);
+		}
 	}
 
 	public void addFilePathUpdatedListener(FilePathUpdatedListener l) {
@@ -211,13 +261,15 @@ public class UIController {
 	}
 
 	public void fireFilePathUpdated(@NonNull List<IAnalysisDataset> datasets) {
-		for (FilePathUpdatedListener l : filePathUpdatedListeners)
+		for (final FilePathUpdatedListener l : filePathUpdatedListeners) {
 			l.filePathUpdated(datasets);
+		}
 	}
 
 	public void fireFilePathUpdated(@NonNull IAnalysisDataset d) {
-		for (FilePathUpdatedListener l : filePathUpdatedListeners)
+		for (final FilePathUpdatedListener l : filePathUpdatedListeners) {
 			l.filePathUpdated(d);
+		}
 	}
 
 	public void addClusterGroupsUpdatedListener(ClusterGroupsUpdatedListener l) {
@@ -225,18 +277,21 @@ public class UIController {
 	}
 
 	public void fireClusterGroupsUpdated(@NonNull List<IAnalysisDataset> datasets) {
-		for (ClusterGroupsUpdatedListener l : clusterGroupsUpdatedListeners)
+		for (final ClusterGroupsUpdatedListener l : clusterGroupsUpdatedListeners) {
 			l.clusterGroupsUpdated(datasets);
+		}
 	}
 
 	public void fireClusterGroupsUpdated(@NonNull IAnalysisDataset d) {
-		for (ClusterGroupsUpdatedListener l : clusterGroupsUpdatedListeners)
+		for (final ClusterGroupsUpdatedListener l : clusterGroupsUpdatedListeners) {
 			l.clusterGroupsUpdated(d);
+		}
 	}
 
 	public void fireClusterGroupAdded(@NonNull IAnalysisDataset d, IClusterGroup g) {
-		for (ClusterGroupsUpdatedListener l : clusterGroupsUpdatedListeners)
+		for (final ClusterGroupsUpdatedListener l : clusterGroupsUpdatedListeners) {
 			l.clusterGroupAdded(d, g);
+		}
 	}
 
 	public void addCellUpdatedEventListener(CellUpdatedEventListener l) {
@@ -244,8 +299,9 @@ public class UIController {
 	}
 
 	public void fireCellUpdatedEvent(@NonNull IAnalysisDataset d, ICell c) {
-		for (CellUpdatedEventListener l : cellUpdatedListeners)
+		for (final CellUpdatedEventListener l : cellUpdatedListeners) {
 			l.cellUpdatedEventReceived(new CellUpdatedEvent(this, c, d));
+		}
 	}
 
 	public void addGlcmUpdatedEventListener(GLCMUpdateListener l) {
@@ -253,8 +309,9 @@ public class UIController {
 	}
 
 	public void fireGLCMDataAdded(@NonNull List<IAnalysisDataset> datasets) {
-		for (GLCMUpdateListener l : glcmUpdatedListeners)
+		for (final GLCMUpdateListener l : glcmUpdatedListeners) {
 			l.GLCMDataAdded(datasets);
+		}
 	}
 
 }

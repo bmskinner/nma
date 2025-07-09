@@ -300,6 +300,7 @@ public class DefaultCellCollection implements ICellCollection {
 	@Override
 	public void setName(@NonNull String s) {
 		this.name = s;
+		fireComponentUpdated();
 	}
 
 	@Override

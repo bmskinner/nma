@@ -39,6 +39,7 @@ import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
+import com.bmskinner.nma.gui.events.DatasetUpdatedListener;
 
 /**
  * This is the most primitive information an analysis dataset requires. This
@@ -88,6 +89,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	protected IAnalysisOptions analysisOptions = null;
 	
 	transient protected List<ComponentUpdateListener> componentUpdateListeners = new ArrayList<>();
+	transient protected List<DatasetUpdatedListener> datasetUpdatedListeners = new ArrayList<>();
 	
 	transient protected boolean isRecalcHashcode = true;
 	transient protected int hashcodeCache = 0;
@@ -109,37 +111,41 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 		if (!Version.versionIsSupported(versionLastSaved))
 			throw new UnsupportedVersionException(versionLastSaved);
 
-		if (e.getAttribute(XMLNames.XML_COLOUR) != null)
+		if (e.getAttribute(XMLNames.XML_COLOUR) != null) {
 			datasetColour = Color.decode(e.getAttributeValue(XMLNames.XML_COLOUR));
+		}
 
-		for (Element el : e.getChildren(XMLNames.XML_CLUSTER_GROUP)) {
+		for (final Element el : e.getChildren(XMLNames.XML_CLUSTER_GROUP)) {
 			clusterGroups.add(new DefaultClusterGroup(el));
 		}
 
-		if (e.getChild(XMLNames.XML_ANALYSIS_OPTIONS) != null)
+		if (e.getChild(XMLNames.XML_ANALYSIS_OPTIONS) != null) {
 			analysisOptions = new DefaultAnalysisOptions(e.getChild(XMLNames.XML_ANALYSIS_OPTIONS));
+		}
 
 		// Restore parent relationships for children
 		if (e.getChild(XMLNames.XML_CHILD_DATASETS) != null) {
-			for (Element el : e.getChild(XMLNames.XML_CHILD_DATASETS).getChildren()) {
-				VirtualDataset v = new VirtualDataset(el);
+			for (final Element el : e.getChild(XMLNames.XML_CHILD_DATASETS).getChildren()) {
+				final VirtualDataset v = new VirtualDataset(el);
 				v.parentDataset = this;
 				childDatasets.add(v);
+				v.addComponentUpdateListener(this);
 			}
 		}
 		// Restore parent relationships for merge sources
 		if (e.getChild(XMLNames.XML_OTHER_DATASETS) != null) {
-			for (Element el : e.getChild(XMLNames.XML_OTHER_DATASETS).getChildren()) {
-				VirtualDataset v = new VirtualDataset(el);
+			for (final Element el : e.getChild(XMLNames.XML_OTHER_DATASETS).getChildren()) {
+				final VirtualDataset v = new VirtualDataset(el);
 				v.parentDataset = this;
 				otherDatasets.add(v);
+				v.addComponentUpdateListener(this);
 			}
 		}
 
-		for (Element el : e.getChildren(XMLNames.XML_MERGE_SOURCE)) {
+		for (final Element el : e.getChildren(XMLNames.XML_MERGE_SOURCE)) {
 			mergeSources.add(UUID.fromString(el.getText()));
 		}
-		isRecalcHashcode = true;
+
 	}
 
 	/**
@@ -152,77 +158,84 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 		versionCreated = d.versionCreated;
 		versionLastSaved = d.versionLastSaved;
 
-		if (d.datasetColour != null)
+		if (d.datasetColour != null) {
 			datasetColour = d.datasetColour;
+		}
 
-		for (IClusterGroup g : d.clusterGroups)
+		for (final IClusterGroup g : d.clusterGroups) {
 			clusterGroups.add(g.duplicate());
+		}
 
-		for (IAnalysisDataset g : d.childDatasets) {
-			IAnalysisDataset gg = g.copy();
+		for (final IAnalysisDataset g : d.childDatasets) {
+			final IAnalysisDataset gg = g.copy();
 			childDatasets.add(gg);
 			gg.addComponentUpdateListener(this);
 		}
 
 			
-		for (IAnalysisDataset g : d.otherDatasets) {
-			IAnalysisDataset gg = g.copy();
+		for (final IAnalysisDataset g : d.otherDatasets) {
+			final IAnalysisDataset gg = g.copy();
 			otherDatasets.add(gg);
 			gg.addComponentUpdateListener(this);
 		}
 
 		mergeSources.addAll(d.mergeSources);
 
-		if (d.analysisOptions != null)
+		if (d.analysisOptions != null) {
 			analysisOptions = d.analysisOptions.duplicate();
+		}
 		
-		isRecalcHashcode = true;
+		fireComponentUpdated();
 	}
 
 	@Override
 	@NonNull public Element toXmlElement() {
-		Element e = new Element(XMLNames.XML_ANALYSIS_DATASET);
+		final Element e = new Element(XMLNames.XML_ANALYSIS_DATASET);
 
-		if (datasetColour != null)
+		if (datasetColour != null) {
 			e.setAttribute(XMLNames.XML_COLOUR, String.valueOf(datasetColour.getRGB()));
+		}
 
 		e.addContent(new Element(XMLNames.XML_VERSION_CREATED).setText(versionCreated.toString()));
 		e.addContent(
 				new Element(XMLNames.XML_VERSION_LAST_SAVED)
 						.setText(Version.currentVersion().toString()));
 
-		if (analysisOptions != null)
+		if (analysisOptions != null) {
 			e.addContent(analysisOptions.toXmlElement());
-
-		if (!mergeSources.isEmpty()) {
-			for (UUID i : mergeSources)
-				e.addContent(new Element(XMLNames.XML_MERGE_SOURCE).setText(i.toString()));
 		}
 
-		if (parentDataset != null)
+		if (!mergeSources.isEmpty()) {
+			for (final UUID i : mergeSources) {
+				e.addContent(new Element(XMLNames.XML_MERGE_SOURCE).setText(i.toString()));
+			}
+		}
+
+		if (parentDataset != null) {
 			e.addContent(
 					new Element(XMLNames.XML_PARENT).setText(parentDataset.getId().toString()));
+		}
 
-		for (IClusterGroup c : clusterGroups) {
+		for (final IClusterGroup c : clusterGroups) {
 			e.addContent(c.toXmlElement());
 		}
 
 		if (!childDatasets.isEmpty()) {
-			Element el = new Element(XMLNames.XML_CHILD_DATASETS);
-			for (IAnalysisDataset c : childDatasets) {
+			final Element el = new Element(XMLNames.XML_CHILD_DATASETS);
+			for (final IAnalysisDataset c : childDatasets) {
 				el.addContent(c.toXmlElement());
 			}
 			e.addContent(el);
 		}
 
 		if (!otherDatasets.isEmpty()) {
-			Element el = new Element(XMLNames.XML_OTHER_DATASETS);
-			for (IAnalysisDataset c : otherDatasets) {
+			final Element el = new Element(XMLNames.XML_OTHER_DATASETS);
+			for (final IAnalysisDataset c : otherDatasets) {
 				el.addContent(c.toXmlElement());
 			}
 			e.addContent(el);
 		}
-
+		fireComponentUpdated();
 		return e;
 	}
 
@@ -244,7 +257,8 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public void setDatasetColour(Color colour) {
 		datasetColour = colour;
-		isRecalcHashcode = true;
+		fireComponentUpdated();
+		fireDatasetUpdatedEvent();
 	}
 
 	@Override
@@ -265,7 +279,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public void setAnalysisOptions(@NonNull IAnalysisOptions analysisOptions) {
 		this.analysisOptions = analysisOptions;
-		isRecalcHashcode = true;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -293,13 +307,11 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public boolean hasAnyChild(@NonNull IAnalysisDataset child) {
-		if (hasDirectChild(child)) {
+		if (hasDirectChild(child))
 			return true;
-		}
-		for (IAnalysisDataset c : childDatasets) {
-			if (c.hasAnyChild(child)) {
+		for (final IAnalysisDataset c : childDatasets) {
+			if (c.hasAnyChild(child))
 				return true;
-			}
 		}
 		return false;
 	}
@@ -319,11 +331,13 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 		while (!isValidName) {
 			testName = baseName + "_" + appender;
 			isValidName = true;
-			if (testName.equals(getName()))
+			if (testName.equals(getName())) {
 				isValidName = false;
-			for (IAnalysisDataset d : childDatasets) {
-				if (d.getName().equals(testName))
+			}
+			for (final IAnalysisDataset d : childDatasets) {
+				if (d.getName().equals(testName)) {
 					isValidName = false;
+				}
 			}
 			appender++;
 		}
@@ -333,7 +347,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public void addClusterGroup(@NonNull IClusterGroup group) {
 		this.clusterGroups.add(group);
-		isRecalcHashcode = true;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -342,17 +356,17 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 		if (this.hasClusters()) {
 
-			for (IClusterGroup g : this.getClusterGroups()) {
+			for (final IClusterGroup g : this.getClusterGroups()) {
 
-				String name = g.getName();
+				final String name = g.getName();
 
-				Pattern p = Pattern.compile("^" + IClusterGroup.CLUSTER_GROUP_PREFIX + "_(\\d+)$");
+				final Pattern p = Pattern.compile("^" + IClusterGroup.CLUSTER_GROUP_PREFIX + "_(\\d+)$");
 
-				Matcher m = p.matcher(name);
+				final Matcher m = p.matcher(name);
 				if (m.find()) {
-					String s = m.group(1);
+					final String s = m.group(1);
 
-					int n = Integer.parseInt(s);
+					final int n = Integer.parseInt(s);
 					if (n > number) {
 						number = n;
 					}
@@ -364,7 +378,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public boolean hasCluster(@NonNull UUID id) {
-		for (IClusterGroup g : this.clusterGroups) {
+		for (final IClusterGroup g : this.clusterGroups) {
 			if (g.hasDataset(id))
 				return true;
 		}
@@ -378,8 +392,8 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public List<UUID> getClusterIDs() {
-		List<UUID> result = new ArrayList<>();
-		for (IClusterGroup g : this.clusterGroups) {
+		final List<UUID> result = new ArrayList<>();
+		for (final IClusterGroup g : this.clusterGroups) {
 			result.addAll(g.getUUIDs());
 		}
 		return result;
@@ -404,7 +418,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	 */
 	private void addAssociatedDataset(@NonNull final IAnalysisDataset dataset) {
 		otherDatasets.add(dataset);
-		isRecalcHashcode = true;
+		fireComponentUpdated();
 	}
 
 	/**
@@ -425,9 +439,9 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	 * @param id the UUID to remove
 	 */
 	private void removeAssociatedDataset(@NonNull final UUID id) {
-		IAnalysisDataset d = getAssociatedDataset(id);
+		final IAnalysisDataset d = getAssociatedDataset(id);
 		otherDatasets.remove(d);
-		isRecalcHashcode = true;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -436,7 +450,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 		if (this.hasMergeSource(id))
 			return this.getAssociatedDataset(id);
 
-		for (IAnalysisDataset child : this.getAllMergeSources()) {
+		for (final IAnalysisDataset child : this.getAllMergeSources()) {
 			if (child.getId().equals(id))
 				return child;
 		}
@@ -446,16 +460,15 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public Set<IAnalysisDataset> getAllMergeSources() {
 
-		Set<IAnalysisDataset> result = new HashSet<>();
+		final Set<IAnalysisDataset> result = new HashSet<>();
 
-		for (UUID id : getMergeSourceIDs()) {
+		for (final UUID id : getMergeSourceIDs()) {
 
-			IAnalysisDataset source = this.getAssociatedDataset(id);
+			final IAnalysisDataset source = this.getAssociatedDataset(id);
 			if (source != null && source.hasMergeSources()) {
 				result.addAll(source.getAllMergeSources());
-			} else {
-				if (source != null)
-					result.add(source);
+			} else if (source != null) {
+				result.add(source);
 			}
 		}
 		return result;
@@ -463,12 +476,13 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public void addMergeSource(@NonNull IAnalysisDataset dataset) {
-		VirtualDataset mergeSource = new VirtualDataset(this, dataset.getName(), dataset.getId());
+		final VirtualDataset mergeSource = new VirtualDataset(this, dataset.getName(), dataset.getId());
 		mergeSource.addAll(dataset.getCollection().getCells());
 
 		// May not be present
-		if (dataset.getAnalysisOptions().isPresent())
+		if (dataset.getAnalysisOptions().isPresent()) {
 			mergeSource.setAnalysisOptions(dataset.getAnalysisOptions().get().duplicate());
+		}
 
 		// Ensure profile collection copied over
 		try {
@@ -481,14 +495,15 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 		this.mergeSources.add(mergeSource.getId());
 		this.addAssociatedDataset(mergeSource);
-		isRecalcHashcode = true;
+		fireComponentUpdated();
 	}
 
 	@Override
 	public List<IAnalysisDataset> getMergeSources() {
-		List<IAnalysisDataset> result = new ArrayList<>();
-		for (UUID id : mergeSources)
+		final List<IAnalysisDataset> result = new ArrayList<>();
+		for (final UUID id : mergeSources) {
 			result.add(this.getAssociatedDataset(id));
+		}
 		return result;
 	}
 
@@ -496,7 +511,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	public void deleteMergeSource(@NonNull final UUID id) {
 		if (this.mergeSources.contains(id)) {
 			this.removeAssociatedDataset(id);
-			isRecalcHashcode = true;
+			fireComponentUpdated();
 		}
 	}
 
@@ -508,9 +523,9 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public Set<UUID> getAllMergeSourceIDs() {
 
-		Set<UUID> result = new HashSet<>();
+		final Set<UUID> result = new HashSet<>();
 
-		for (UUID id : this.getMergeSourceIDs()) {
+		for (final UUID id : this.getMergeSourceIDs()) {
 			result.addAll(getMergeSource(id).getAllMergeSourceIDs());
 		}
 
@@ -536,7 +551,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public void componentUpdated(ComponentUpdateEvent e) {
-		isRecalcHashcode = true;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -571,7 +586,7 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AbstractAnalysisDataset other = (AbstractAnalysisDataset) obj;
+		final AbstractAnalysisDataset other = (AbstractAnalysisDataset) obj;
 		if (parentDataset == null) {
 			if (other.parentDataset != null)
 				return false;
@@ -614,7 +629,6 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	}
 
 
-
 	@Override
 	public void removeComponentUpdateListener(ComponentUpdateListener l) {
 		componentUpdateListeners.remove(l);
@@ -623,9 +637,25 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public void fireComponentUpdated() {
 		isRecalcHashcode = true;
-		for(ComponentUpdateListener l : componentUpdateListeners)
+		for(final ComponentUpdateListener l : componentUpdateListeners) {
 			l.componentUpdated(new ComponentUpdateEvent(this));
-		
+		}
+	}
+
+	@Override
+	public void addDatasetUpdatedListener(DatasetUpdatedListener l) {
+		datasetUpdatedListeners.add(l);
+	}
+
+	@Override
+	public void removeDatasetUpdatedListener(DatasetUpdatedListener l) {
+		datasetUpdatedListeners.remove(l);
+	}
+
+	public void fireDatasetUpdatedEvent() {
+		for (final DatasetUpdatedListener l : datasetUpdatedListeners) {
+			l.datasetUpdated(this);
+		}
 	}
 
 }

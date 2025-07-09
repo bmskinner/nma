@@ -37,6 +37,7 @@ import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nma.gui.events.DatasetSelectionUpdatedListener;
+import com.bmskinner.nma.gui.events.DatasetUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.visualisation.Cache;
 
@@ -50,7 +51,7 @@ import com.bmskinner.nma.visualisation.Cache;
  */
 @SuppressWarnings("serial")
 public abstract class DetailPanel extends JPanel
-		implements TabPanel, CellUpdatedEventListener, DatasetSelectionUpdatedListener {
+		implements TabPanel, CellUpdatedEventListener, DatasetSelectionUpdatedListener, DatasetUpdatedListener {
 
 	private static final Logger LOGGER = Logger.getLogger(DetailPanel.class.getName());
 
@@ -74,7 +75,7 @@ public abstract class DetailPanel extends JPanel
 	private final String panelTabDescription;
 
 	/** Track if the panel is currently in the process of updating */
-	private AtomicBoolean isUpdating = new AtomicBoolean(false);
+	private final AtomicBoolean isUpdating = new AtomicBoolean(false);
 
 	/** Perform cosmetic operations on datasets - renaming, changing colours etc. */
 	protected final transient CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
@@ -108,6 +109,7 @@ public abstract class DetailPanel extends JPanel
 
 		uiController = UIController.getInstance();
 		uiController.addDatasetSelectionUpdatedListener(this);
+		uiController.addDatasetUpdatedListener(this);
 	}
 
 	/**
@@ -203,7 +205,7 @@ public abstract class DetailPanel extends JPanel
 	public synchronized void setAnalysing(boolean b) {
 		if (b) {
 
-			for (Component c : this.getComponents()) {
+			for (final Component c : this.getComponents()) {
 				c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			}
 
@@ -211,7 +213,7 @@ public abstract class DetailPanel extends JPanel
 
 		} else {
 
-			for (Component c : this.getComponents()) {
+			for (final Component c : this.getComponents()) {
 				c.setCursor(Cursor.getDefaultCursor());
 			}
 			this.setCursor(Cursor.getDefaultCursor());
@@ -234,13 +236,13 @@ public abstract class DetailPanel extends JPanel
 	 * @param container
 	 */
 	private synchronized void updateSize(Container container) {
-		for (Component c : container.getComponents()) {
+		for (final Component c : container.getComponents()) {
 			if (c instanceof ExportableChartPanel && c.isShowing()) {
 				this.refreshCache();
 				return;
 			}
 
-			if (c instanceof Container con) {
+			if (c instanceof final Container con) {
 				updateSize(con);
 			}
 
@@ -250,9 +252,9 @@ public abstract class DetailPanel extends JPanel
 	@Override
 	public void update() {
 
-		Runnable r = () -> {
+		final Runnable r = () -> {
 			setUpdating(true);
-			List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
+			final List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
 			updateDetail(list);
 		};
 		ThreadManager.getInstance().submitUIUpdate(r);
@@ -262,7 +264,7 @@ public abstract class DetailPanel extends JPanel
 	@Override
 	public void update(final List<IAnalysisDataset> list) {
 
-		Runnable r = () -> {
+		final Runnable r = () -> {
 			setUpdating(true);
 			updateDetail(list);
 		};
@@ -287,14 +289,14 @@ public abstract class DetailPanel extends JPanel
 			}
 			updateSingle();
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.fine("Error updating panel " + this.getClass().getName());
 			LOGGER.log(Level.SEVERE, "Error updating panel", e); // save detail for fine
 																	// logging
 
 			try {
 				updateNull();
-			} catch (Exception e1) {
+			} catch (final Exception e1) {
 				LOGGER.fine(this.getClass().getName()
 						+ ": Error recovering from error updating panel");
 				LOGGER.log(Level.SEVERE, "Error recovering from error updating panel", e1);
@@ -343,8 +345,9 @@ public abstract class DetailPanel extends JPanel
 	 */
 	@Override
 	public synchronized void clearCache() {
-		if (cache != null)
+		if (cache != null) {
 			cache.clear();
+		}
 	}
 
 	/**
@@ -354,14 +357,16 @@ public abstract class DetailPanel extends JPanel
 	 */
 	@Override
 	public synchronized void clearCache(final List<IAnalysisDataset> list) {
-		if (cache != null)
+		if (cache != null) {
 			cache.clear(list);
+		}
 	}
 
 	@Override
 	public synchronized void clearCache(final IAnalysisDataset dataset) {
-		if (cache != null)
+		if (cache != null) {
 			cache.clear(dataset);
+		}
 	}
 
 	/**
@@ -371,7 +376,7 @@ public abstract class DetailPanel extends JPanel
 	 */
 	@Override
 	public synchronized void refreshCache() {
-		Runnable r = () -> {
+		final Runnable r = () -> {
 			clearCache();
 			update(getDatasets());
 		};
@@ -388,10 +393,11 @@ public abstract class DetailPanel extends JPanel
 	 */
 	@Override
 	public synchronized void refreshCache(final IAnalysisDataset dataset) {
-		Runnable r = () -> {
+		final Runnable r = () -> {
 			clearCache(dataset);
-			if (getDatasets().stream().anyMatch(d -> dataset.getId().equals(d.getId())))
+			if (getDatasets().stream().anyMatch(d -> dataset.getId().equals(d.getId()))) {
 				update(getDatasets());
+			}
 		};
 		ThreadManager.getInstance().submitUIUpdate(r);
 	}
@@ -406,10 +412,11 @@ public abstract class DetailPanel extends JPanel
 	 */
 	@Override
 	public synchronized void refreshCache(final List<IAnalysisDataset> list) {
-		Runnable r = () -> {
+		final Runnable r = () -> {
 			clearCache(list);
-			if (getDatasets().stream().anyMatch(list::contains))
+			if (getDatasets().stream().anyMatch(list::contains)) {
 				update(getDatasets());
+			}
 		};
 		ThreadManager.getInstance().submitUIUpdate(r);
 	}
@@ -449,6 +456,16 @@ public abstract class DetailPanel extends JPanel
 	@Override
 	public void datasetSelectionUpdated(IAnalysisDataset d) {
 		this.update(List.of(d));
+	}
+
+	@Override
+	public void datasetUpdated(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+	}
+
+	@Override
+	public void datasetUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
 	}
 
 }

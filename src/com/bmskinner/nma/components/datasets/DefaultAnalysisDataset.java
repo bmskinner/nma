@@ -76,6 +76,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		super();
 		this.cellCollection = collection;
 		this.savePath = saveFile;
+		cellCollection.addComponentUpdateListener(this);
 	}
 
 	DefaultAnalysisDataset(@NonNull Element e, @Nullable ProgressListener l)
@@ -136,7 +137,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	@Override
 	public void setName(@NonNull String s) {
 		cellCollection.setName(s);
-		isRecalcHashcode = true;
+		fireComponentUpdated();
+		fireDatasetUpdatedEvent();
 	}
 
 	@Override
@@ -166,7 +168,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 			}
 		}
 		childDatasets.add(dataset);
-		isRecalcHashcode = true;
+		fireComponentUpdated();
 		return dataset;
 	}
 
@@ -184,7 +186,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 				g.removeDataset(id);
 			}
 		}
-		isRecalcHashcode = true;
+		fireComponentUpdated();
+		fireDatasetUpdatedEvent();
 	}
 
 	@Override
@@ -195,7 +198,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	@Override
 	public void setSavePath(@NonNull final File file) {
 		savePath = file;
-		isRecalcHashcode = true;
+		fireComponentUpdated();
+		fireDatasetUpdatedEvent();
 	}
 
 	@Override
@@ -224,7 +228,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		for (final IAnalysisDataset child : getChildDatasets()) {
 			child.setScale(scale);
 		}
-		isRecalcHashcode = true;
+		fireComponentUpdated();
+		fireDatasetUpdatedEvent();
 	}
 
 	@Override
@@ -322,8 +327,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 				this.deleteClusterGroup(g);
 			}
 			
-			isRecalcHashcode = true;
+			fireComponentUpdated();
 		}
+		fireDatasetUpdatedEvent();
 	}
 
 	@Override
@@ -346,7 +352,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 				}
 			}
 			this.clusterGroups.remove(group);
-			isRecalcHashcode = true;
+			fireComponentUpdated();
+			fireDatasetUpdatedEvent();
 		}
 	}
 
@@ -360,7 +367,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 					.findFirst().get();
 			deleteClusterGroup(g);
 		}
-		isRecalcHashcode = true;
+		fireComponentUpdated();
 	}
 
 	@Override
@@ -373,7 +380,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		if (this.hasDirectChild(id)) {
 			this.removeChildCollection(id);
 		}
-		isRecalcHashcode = true;
+		fireComponentUpdated();
+		fireDatasetUpdatedEvent();
 	}
 
 	@Override
@@ -430,7 +438,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		for (final IAnalysisDataset child : this.getAllChildDatasets()) {
 			child.getCollection().setSourceFolder(expectedImageDirectory);
 		}
-		isRecalcHashcode = true;
+		fireComponentUpdated();
+		fireDatasetUpdatedEvent();
 		LOGGER.info("Updated image paths to new folder location");
 	}
 

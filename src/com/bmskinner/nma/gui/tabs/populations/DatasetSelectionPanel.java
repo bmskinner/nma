@@ -61,7 +61,7 @@ public class DatasetSelectionPanel extends DetailPanel
 		treeTable.addMouseListener(new DatasetMouseAdapter());
 		treeTable.setBorder(BorderFactory.createEmptyBorder());
 
-		JScrollPane js = new JScrollPane(treeTable);
+		final JScrollPane js = new JScrollPane(treeTable);
 		add(js, BorderLayout.CENTER);
 
 		uiController.addDatasetAddedListener(this);
@@ -82,11 +82,11 @@ public class DatasetSelectionPanel extends DetailPanel
 		if (treeListener.datasetSelectionOrder.equals(datasets))
 			return;
 
-		DefaultListSelectionModel tsm = new DefaultListSelectionModel();
+		final DefaultListSelectionModel tsm = new DefaultListSelectionModel();
 
-		for (IAnalysisDataset d : datasets) {
+		for (final IAnalysisDataset d : datasets) {
 
-			int i = treeTable.getRowForPath(model.getPath(d));
+			final int i = treeTable.getRowForPath(model.getPath(d));
 			tsm.addSelectionInterval(i, i);
 		}
 		treeTable.setSelectionModel(tsm);
@@ -105,13 +105,20 @@ public class DatasetSelectionPanel extends DetailPanel
 
 	@Override
 	public void datasetDeleted(List<IAnalysisDataset> datasets) {
-		for (IAnalysisDataset d : datasets)
-			model.removeNode(d);
+		for (final IAnalysisDataset d : datasets) {
+			datasetDeleted(d);
+		}
+	}
+
+
+	@Override
+	public void datasetDeleted(IAnalysisDataset dataset) {
+		model.removeNode(dataset);
 	}
 
 	@Override
 	public void workspaceAdded(IWorkspace ws) {
-		TreePath path = model.addWorkspace(ws);
+		final TreePath path = model.addWorkspace(ws);
 		expandAll(path);
 	}
 
@@ -122,13 +129,13 @@ public class DatasetSelectionPanel extends DetailPanel
 
 	@Override
 	public void datasetAdded(IWorkspace ws, IAnalysisDataset d) {
-		TreePath path = model.addDatasetToWorkspace(ws, d);
+		final TreePath path = model.addDatasetToWorkspace(ws, d);
 		expandAll(path);
 	}
 
 	@Override
 	public void datasetRemoved(IWorkspace ws, IAnalysisDataset d) {
-		TreePath path = model.removeDatasetFromWorkspace(ws, d);
+		final TreePath path = model.removeDatasetFromWorkspace(ws, d);
 		expandAll(path);
 	}
 
@@ -138,14 +145,14 @@ public class DatasetSelectionPanel extends DetailPanel
 	 * @param dataset
 	 */
 	private synchronized void addDataset(final List<IAnalysisDataset> datasets) {
-		for (IAnalysisDataset d : datasets) {
+		for (final IAnalysisDataset d : datasets) {
 
 			// The first item in the path is the root node - don't expand this
-			Runnable r = () -> {
+			final Runnable r = () -> {
 				model.addDataset(d);
 				
 				// Get the path for the dataset node to expand
-				TreePath path = new TreePath(model.getPathToRoot(model.getNode(d)));
+				final TreePath path = new TreePath(model.getPathToRoot(model.getNode(d)));
 				expandAll(path);
 			};
 			// Keep off the EDT
@@ -163,18 +170,19 @@ public class DatasetSelectionPanel extends DetailPanel
 		if (parent == null)
 			return;
 
-		TreeTableNode lastNode = (TreeTableNode) parent.getLastPathComponent();
+		final TreeTableNode lastNode = (TreeTableNode) parent.getLastPathComponent();
 		// expand the node
 		expandNode(lastNode);
 
 		// Traverse children and expand
 		if (lastNode.getChildCount() > 0) {
 
-			for (Enumeration<?> e = lastNode.children(); e.hasMoreElements();) {
+			for (final Enumeration<?> e = lastNode.children(); e.hasMoreElements();) {
 
-				TreeTableNode n = (TreeTableNode) e.nextElement();
-				if (n == null)
+				final TreeTableNode n = (TreeTableNode) e.nextElement();
+				if (n == null) {
 					continue;
+				}
 
 				expandAll(new TreePath(model.getPathToRoot(n)));
 			}
@@ -183,8 +191,8 @@ public class DatasetSelectionPanel extends DetailPanel
 	}
 
 	private void expandNode(TreeTableNode node) {
-		TreeTableNode[] nodes = model.getPathToRoot(node);
-		TreePath tp = new TreePath(nodes);
+		final TreeTableNode[] nodes = model.getPathToRoot(node);
+		final TreePath tp = new TreePath(nodes);
 		treeTable.expandPath(tp);
 	}
 
@@ -211,7 +219,7 @@ public class DatasetSelectionPanel extends DetailPanel
 	@Override
 	public void clusterGroupAdded(IAnalysisDataset dataset, IClusterGroup group) {
 		// Update the model
-		TreePath path = model.addClusterGroup(group);
+		final TreePath path = model.addClusterGroup(group);
 		treeTable.expandPath(path);
 	}
 
@@ -220,18 +228,21 @@ public class DatasetSelectionPanel extends DetailPanel
 		@Override
 		public void mouseClicked(MouseEvent e) {
 
-			int row = treeTable.rowAtPoint((e.getPoint()));
-			int col = treeTable.columnAtPoint(e.getPoint());
+			final int row = treeTable.rowAtPoint((e.getPoint()));
+			final int col = treeTable.columnAtPoint(e.getPoint());
 
-			Object o = treeTable.getModel().getValueAt(row, 0);
+			final Object o = treeTable.getModel().getValueAt(row, 0);
 
 			if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == DOUBLE_CLICK) {
-				if (o instanceof IClusterGroup g)
+				if (o instanceof final IClusterGroup g) {
 					cosmeticHandler.renameClusterGroup(g);
-				if (o instanceof IAnalysisDataset d)
+				}
+				if (o instanceof final IAnalysisDataset d) {
 					datasetClicked(d, col);
-				if (o instanceof IWorkspace w)
+				}
+				if (o instanceof final IWorkspace w) {
 					cosmeticHandler.renameWorkspace(w);
+				}
 			}
 
 			if (e.getButton() == MouseEvent.BUTTON3) {
@@ -240,11 +251,13 @@ public class DatasetSelectionPanel extends DetailPanel
 		}
 
 		private void datasetClicked(IAnalysisDataset d, int column) {
-			if (column == 0)
+			if (column == 0) {
 				cosmeticHandler.renameDataset(d);
+			}
 
-			if (column == 2)
+			if (column == 2) {
 				cosmeticHandler.changeDatasetColour(d);
+			}
 		}
 
 	}
@@ -265,17 +278,18 @@ public class DatasetSelectionPanel extends DetailPanel
 		public void valueChanged(TreeSelectionEvent e) {
 			try {
 
-				if (!ctrlPress.isCtrlPressed())
+				if (!ctrlPress.isCtrlPressed()) {
 					datasetSelectionOrder.clear();
+				}
 
 				// Find the selected rows
-				TreeSelectionModel lsm = (TreeSelectionModel) e.getSource();
+				final TreeSelectionModel lsm = (TreeSelectionModel) e.getSource();
 
 				// Track the order in which the rows are selected
 				setSelectedDatasets(lsm);
 
 				// Update table header with number of selected cells
-				int cellCount = datasetSelectionOrder.stream().map(d -> d.getCollection().size())
+				final int cellCount = datasetSelectionOrder.stream().map(d -> d.getCollection().size())
 						.reduce(0, Integer::sum);
 
 				treeTable.getColumnModel().getColumn(0)
@@ -287,7 +301,7 @@ public class DatasetSelectionPanel extends DetailPanel
 
 				DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
 
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOGGER.log(Level.SEVERE, "Error in tree selection handler: %s".formatted(ex.getMessage()),
 						ex);
 			}
@@ -304,15 +318,15 @@ public class DatasetSelectionPanel extends DetailPanel
 		private void setSelectedDatasets(TreeSelectionModel lsm) {
 
 			// Add all the datasets in the selection to a new list
-			int[] selectedRows = lsm.getSelectionRows();
-			List<Integer> currentHashCodes = datasetSelectionOrder.stream()
+			final int[] selectedRows = lsm.getSelectionRows();
+			final List<Integer> currentHashCodes = datasetSelectionOrder.stream()
 					.map(IAnalysisDataset::hashCode) .collect(Collectors.toCollection(ArrayList::new));
 			
-			List<IAnalysisDataset> datasets = new ArrayList<>();
+			final List<IAnalysisDataset> datasets = new ArrayList<>();
 			
 			for (int i = 0; i < selectedRows.length; i++) {
 
-				if (treeTable.getValueAt(selectedRows[i], 0)instanceof IAnalysisDataset d) {
+				if (treeTable.getValueAt(selectedRows[i], 0)instanceof final IAnalysisDataset d) {
 					datasets.add(d);
 					if (!currentHashCodes.contains(d.hashCode())) {
 						datasetSelectionOrder.add(d);
@@ -325,15 +339,17 @@ public class DatasetSelectionPanel extends DetailPanel
 			// and must be removed from the datasetSelectionOrder list
 			if (datasetSelectionOrder.size() > datasets.size()) {
 				// Go through tree table and check for the deselected dataset
-				Iterator<IAnalysisDataset> it = datasetSelectionOrder.iterator();
+				final Iterator<IAnalysisDataset> it = datasetSelectionOrder.iterator();
 
 				while (it.hasNext()) {
-					IAnalysisDataset d = it.next();
-					if (!datasets.contains(d))
+					final IAnalysisDataset d = it.next();
+					if (!datasets.contains(d)) {
 						it.remove();
+					}
 				}
 			}
 		}
 	}
+
 
 }

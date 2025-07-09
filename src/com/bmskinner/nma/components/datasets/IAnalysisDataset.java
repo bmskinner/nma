@@ -38,6 +38,7 @@ import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.components.profiles.MissingProfileException;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
+import com.bmskinner.nma.gui.events.DatasetUpdatedListener;
 import com.bmskinner.nma.io.XmlSerializable;
 
 /**
@@ -451,16 +452,30 @@ public interface IAnalysisDataset extends XmlSerializable, ComponentUpdateListen
 	void updateSourceImageDirectory(@NonNull File expectedImageDirectory);
 
 	/**
+	 * Add a listener for generic dataset updates to the UI
+	 * 
+	 * @param l
+	 */
+	void addDatasetUpdatedListener(DatasetUpdatedListener l);
+
+
+	/**
+	 * Remove a listener for generic dataset updates to the UI
+	 * 
+	 * @param l
+	 */
+	void removeDatasetUpdatedListener(DatasetUpdatedListener l);
+
+	/**
 	 * Test if all the datasets in the list have a consensus nucleus
 	 * 
 	 * @param list
 	 * @return
 	 */
 	static boolean haveConsensusNuclei(@NonNull List<IAnalysisDataset> list) {
-		for (IAnalysisDataset d : list) {
-			if (!d.getCollection().hasConsensus()) {
+		for (final IAnalysisDataset d : list) {
+			if (!d.getCollection().hasConsensus())
 				return false;
-			}
 		}
 		return true;
 	}
@@ -473,13 +488,12 @@ public interface IAnalysisDataset extends XmlSerializable, ComponentUpdateListen
 	 */
 	static boolean haveSameRulesets(@NonNull List<IAnalysisDataset> list) {
 
-		RuleSetCollection col = list.get(0).getCollection().getRuleSetCollection();
+		final RuleSetCollection col = list.get(0).getCollection().getRuleSetCollection();
 
-		for (IAnalysisDataset d : list) {
-			RuleSetCollection next = d.getCollection().getRuleSetCollection();
-			if (!next.equals(col)) {
+		for (final IAnalysisDataset d : list) {
+			final RuleSetCollection next = d.getCollection().getRuleSetCollection();
+			if (!next.equals(col))
 				return false;
-			}
 		}
 		return true;
 	}
@@ -493,11 +507,11 @@ public interface IAnalysisDataset extends XmlSerializable, ComponentUpdateListen
 	 */
 	static boolean mergedSourceOptionsAreSame(@NonNull IAnalysisDataset dataset) {
 
-		List<IAnalysisDataset> list = dataset.getMergeSources();
+		final List<IAnalysisDataset> list = dataset.getMergeSources();
 
 		boolean ok = true;
 
-		for (IAnalysisDataset d1 : list) {
+		for (final IAnalysisDataset d1 : list) {
 
 			/*
 			 * If the dataset has merge sources, the options are null In this case,
@@ -509,7 +523,7 @@ public interface IAnalysisDataset extends XmlSerializable, ComponentUpdateListen
 
 			} else {
 
-				for (IAnalysisDataset d2 : list) {
+				for (final IAnalysisDataset d2 : list) {
 					if (d1 == d2) {
 						continue; // ignore self self comparisons
 					}
@@ -525,8 +539,8 @@ public interface IAnalysisDataset extends XmlSerializable, ComponentUpdateListen
 						continue;
 					}
 
-					IAnalysisOptions a1 = d1.getAnalysisOptions().get();
-					IAnalysisOptions a2 = d2.getAnalysisOptions().get();
+					final IAnalysisOptions a1 = d1.getAnalysisOptions().get();
+					final IAnalysisOptions a2 = d2.getAnalysisOptions().get();
 
 					if (!a1.equals(a2)) {
 						ok = false;
