@@ -97,7 +97,6 @@ public class ComponentBuilderFactory {
 			private File file = null;
 			private int channel = -1;
 			private IPoint com = null;
-			private UUID id = null;
 			private int[] original = null;
 			private boolean isOffset = false;
 
@@ -129,11 +128,6 @@ public class ComponentBuilderFactory {
 				return this;
 			}
 
-			public NucleusBuilder withId(UUID u) {
-				id = u;
-				return this;
-			}
-
 			public NucleusBuilder withOriginalPos(int[] pos) {
 				original = pos;
 				return this;
@@ -145,50 +139,39 @@ public class ComponentBuilderFactory {
 			}
 
 			public Nucleus build() throws ComponentCreationException {
-				Rectangle bounds = roi.getBounds();
+				final Rectangle bounds = roi.getBounds();
 
-				if (original == null)
+				if (original == null) {
 					original = new int[] { (int) roi.getXBase(), (int) roi.getYBase(),
 							(int) bounds.getWidth(),
 							(int) bounds.getHeight() };
+				}
 
-				if (id == null)
-					id = UUID.randomUUID();
+				final int number = nucleusCount++;
 
-				int number = nucleusCount++;
-
-				Nucleus n = new DefaultNucleus(roi, com, file, channel, number, rsc);
+				final Nucleus n = new DefaultNucleus(roi, com, file, channel, number, rsc);
 
 				if (isOffset) {
-					IPoint offsetCoM = new FloatPoint(com.getX() - (int) roi.getXBase(),
+					final IPoint offsetCoM = new FloatPoint(com.getX() - (int) roi.getXBase(),
 							com.getY() - (int) roi.getYBase());
 					n.moveCentreOfMass(offsetCoM);
 				}
 
 				n.setScale(scale);
 				try {
-//					// Calculate basic parameters
-//					for (Measurement m : Measurement.getComponentStats()) {
-//						n.setMeasurement(m, ComponentMeasurer.calculate(m, n));
-//					}
-//
+
+					// Create the profiles, and determine if the object should be reversed
 					n.createProfiles(windowProp);
-//
-//					// Calculate measurements that rely on profiles
-//					for (Measurement m : Measurement.getNucleusStats()) {
-//						n.setMeasurement(m, ComponentMeasurer.calculate(m, n));
-//					}
 
 					ProfileIndexFinder.assignLandmarks(n, rsc);
 
 					if (ProfileIndexFinder.shouldReverseProfile(n)) {
 						n.reverse();
 						n.clearMeasurements();
-						n.createProfiles(windowProp); // ensure all profiles match - rare case
+						n.createProfiles(windowProp); // ensure profiles match border ordering
 						ProfileIndexFinder.assignLandmarks(n, rsc);
-
 					}
-					LOGGER.finer(n.getNameAndNumber() + ": Assigned landmarks");
+
 				} catch (MissingDataException | SegmentUpdateException e) {
 					LOGGER.fine(() -> "Unable to reverse profile in nucleus");
 					throw new ComponentCreationException(e);
@@ -198,11 +181,11 @@ public class ComponentBuilderFactory {
 			}
 
 			private Roi toRoi(List<IPoint> list) {
-				float[] xpoints = new float[list.size()];
-				float[] ypoints = new float[list.size()];
+				final float[] xpoints = new float[list.size()];
+				final float[] ypoints = new float[list.size()];
 
 				for (int i = 0; i < list.size(); i++) {
-					IPoint p = list.get(i);
+					final IPoint p = list.get(i);
 					xpoints[i] = (float) p.getX();
 					ypoints[i] = (float) p.getY();
 				}
@@ -211,8 +194,8 @@ public class ComponentBuilderFactory {
 				// during object creation may disrupt the border. Ensure the spacing
 				// is corrected to something larger. This is the reverse of the
 				// smoothing carried out in component creation.
-				Roi r = new PolygonRoi(xpoints, ypoints, Roi.POLYGON);
-				FloatPolygon smoothed = r.getInterpolatedPolygon(2, false);
+				final Roi r = new PolygonRoi(xpoints, ypoints, Roi.POLYGON);
+				final FloatPolygon smoothed = r.getInterpolatedPolygon(2, false);
 				return new PolygonRoi(smoothed.xpoints, smoothed.ypoints, Roi.POLYGON);
 			}
 
@@ -291,10 +274,11 @@ public class ComponentBuilderFactory {
 			}
 
 			public INuclearSignal build() {
-				if (id == null)
+				if (id == null) {
 					id = UUID.randomUUID();
+				}
 
-				INuclearSignal s = new DefaultNuclearSignal(roi, com, file, channel, id);
+				final INuclearSignal s = new DefaultNuclearSignal(roi, com, file, channel, id);
 
 				s.setScale(scale);
 

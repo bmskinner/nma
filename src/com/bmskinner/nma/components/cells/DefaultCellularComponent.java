@@ -130,13 +130,19 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	
 	transient protected List<ComponentUpdateListener> componentUpdateListeners = new ArrayList<>();
 	
+	/**
+	 * Does the hashcode need to be recalculated? This should be updated if the
+	 * values in the object change
+	 */
 	transient protected boolean isRecalcHashcode = true;
+
+	/** A cache of the hashcode so dataset hashes are computed faster */
 	transient protected int hashcodeCache = 0;
 
 	/**
 	 * Create a UUID from an ROI and centre of mass. This hashes shapes to
 	 * repoducible UUIDs, allowing the same cells to be identified across different
-	 * analysis runs
+	 * analysis runs even in the image names are different.
 	 * 
 	 * @param roi          the ROI
 	 * @param centreOfMass the centre of mass
@@ -165,22 +171,19 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source,
 			int channel) {
 
-		// If we have no UUID given, can we create a deterministic UUID from the roi and
-		// CoM?
+		// If we have no UUID given, create a deterministic UUID from the roi and CoM
 		this(roi, centreOfMass, source, channel, makeUUID(roi, centreOfMass));
 	}
 
 	/**
 	 * Construct with an ROI, a source image and channel, and the original position
 	 * in the source image. It sets the immutable original centre of mass, and the
-	 * mutable current centre of mass. It also assigns a random ID to the component.
+	 * mutable current centre of mass.
 	 * 
 	 * @param roi          the roi of the object
 	 * @param centerOfMass the original centre of mass of the component
 	 * @param source       the image file the component was found in
 	 * @param channel      the RGB channel the component was found in
-	 * @param position     the bounding position of the component in the original
-	 *                     image
 	 * @param id           the id of the component. Only use when deserialising!
 	 */
 	protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source,
@@ -944,9 +947,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	}
 
 	/*
-	 * For two NucleusBorderPoints in a Nucleus, find the point that lies halfway
-	 * between them Used for obtaining a consensus between potential tail positions.
-	 * Ensure we choose the smaller distance
+	 * For two border points, find the point that lies halfway between them. Ensure
+	 * we choose the smaller distance.
 	 */
 	@Override
 	public int getPositionBetween(@NonNull IPoint pointA, @NonNull IPoint pointB) {
