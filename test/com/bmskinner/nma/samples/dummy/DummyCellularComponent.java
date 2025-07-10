@@ -176,6 +176,16 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
+	public int[] xpoints() {
+		return component.xpoints();
+	}
+
+	@Override
+	public int[] ypoints() {
+		return component.ypoints();
+	}
+
+	@Override
 	public boolean containsPoint(IPoint p) {
 		return component.containsPoint(p);
 	}

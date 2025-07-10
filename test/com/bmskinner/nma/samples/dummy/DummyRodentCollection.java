@@ -27,6 +27,7 @@ import com.bmskinner.nma.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nma.analysis.IAnalysisMethod;
 import com.bmskinner.nma.analysis.IAnalysisWorker;
 import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.DefaultCell;
@@ -37,6 +38,7 @@ import com.bmskinner.nma.components.datasets.DefaultCellCollection;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 
 public class DummyRodentCollection extends DefaultCellCollection {
@@ -51,7 +53,7 @@ public class DummyRodentCollection extends DefaultCellCollection {
 			try {
 				dummy = makeDummyCell(i);
 				this.add(dummy);
-			} catch (ComponentCreationException e) {
+			} catch (final ComponentCreationException | MissingDataException | SegmentUpdateException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -60,21 +62,21 @@ public class DummyRodentCollection extends DefaultCellCollection {
 
 	}
 
-	private ICell makeDummyCell(int i) throws ComponentCreationException {
+	private ICell makeDummyCell(int i) throws ComponentCreationException, MissingDataException, SegmentUpdateException {
 
-		Nucleus n = new DummyRodentSpermNucleus("Nucleus " + i);
-		ICell c = new DefaultCell(n);
+		final Nucleus n = new DummyRodentSpermNucleus("Nucleus " + i);
+		final ICell c = new DefaultCell(n);
 		return c;
 
 	}
 
 	public static void main(String[] args) {
 
-		DummyRodentCollection collection = new DummyRodentCollection(10000);
-		IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File("C:\\"));
-		IAnalysisMethod profiler = new DefaultDatasetProfilingMethod(d);
+		final DummyRodentCollection collection = new DummyRodentCollection(10000);
+		final IAnalysisDataset d = new DefaultAnalysisDataset(collection, new File("C:\\"));
+		final IAnalysisMethod profiler = new DefaultDatasetProfilingMethod(d);
 
-		IAnalysisWorker w = new DefaultAnalysisWorker(profiler);
+		final IAnalysisWorker w = new DefaultAnalysisWorker(profiler);
 		w.run();
 
 		try {
@@ -88,7 +90,7 @@ public class DummyRodentCollection extends DefaultCellCollection {
 		try {
 			area = collection.getMedian(Measurement.AREA, CellularComponent.NUCLEUS,
 					MeasurementScale.PIXELS);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 

@@ -90,7 +90,7 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 
 	@Override
 	@NonNull public Element toXmlElement() {
-		Element e = super.toXmlElement().setName(XMLNames.XML_SIGNAL);
+		final Element e = super.toXmlElement().setName(XMLNames.XML_SIGNAL);
 		e.addContent(
 				new Element(XMLNames.XML_SIGNAL_CLOSEST_BORDER)
 						.setText(String.valueOf(closestNuclearBorderPoint)));
@@ -113,7 +113,8 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DefaultNuclearSignal other = (DefaultNuclearSignal) obj;
+		final DefaultNuclearSignal other = (DefaultNuclearSignal) obj;
 		return closestNuclearBorderPoint == other.closestNuclearBorderPoint;
 	}
+
 }

@@ -114,6 +114,8 @@ public abstract class XMLReader {
 	 * @return
 	 */
 	public static int[] parseIntArray(String arrayText) {
+		if (arrayText == null)
+			return new int[0];
 		final String[] s = arrayText.replace("[", "")
 				.replace("]", "")
 				.replace(" ", "")

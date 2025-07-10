@@ -356,6 +356,20 @@ public interface CellularComponent extends Imageable, XmlSerializable,
 	void reverse() throws MissingDataException, SegmentUpdateException, ComponentCreationException;
 
 	/**
+	 * Temp methods for testing outline consistency
+	 * 
+	 * @return
+	 */
+	int[] xpoints();
+
+	/**
+	 * Temp methods for testing outline consistency
+	 * 
+	 * @return
+	 */
+	int[] ypoints();
+
+	/**
 	 * Wrap arrays. If an index falls of the end, it is returned to the start and
 	 * vice versa
 	 * 
@@ -395,10 +409,10 @@ public interface CellularComponent extends Imageable, XmlSerializable,
 	 * @return the offset array
 	 */
 	static float[] offset(float[] arr, int j) {
-		float[] newArray = new float[arr.length];
+		final float[] newArray = new float[arr.length];
 
-		int newStartIndex = CellularComponent.wrapIndex(j, arr.length);
-		int nElements = arr.length - newStartIndex;
+		final int newStartIndex = CellularComponent.wrapIndex(j, arr.length);
+		final int nElements = arr.length - newStartIndex;
 
 		// Copy from the new start index to the end of the array
 		System.arraycopy(arr, newStartIndex, newArray, 0, nElements);
@@ -437,7 +451,7 @@ public interface CellularComponent extends Imageable, XmlSerializable,
 		int bestIndex = 0;
 
 		for (int i = minOffset; i < maxOffset; i++) {
-			double score = squareDifference(CellularComponent.offset(arr1, i), arr2);
+			final double score = squareDifference(CellularComponent.offset(arr1, i), arr2);
 			if (score < bestScore) {
 				bestScore = score;
 				bestIndex = i;

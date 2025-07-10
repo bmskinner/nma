@@ -42,30 +42,30 @@ public class DefaultRodentSpermNucleusTest {
 	private Nucleus testNucleus;
 
 	@Before
-	public void setUp() throws ComponentCreationException {
+	public void setUp() throws ComponentCreationException, MissingDataException, SegmentUpdateException {
 		testNucleus = new DummyRodentSpermNucleus();
 	}
 
 	@Test
 	public void testGetChannel() {
-		int expected = 0;
+		final int expected = 0;
 		assertThat(testNucleus.getChannel(), is(expected));
 	}
 
 	@Test
 	public void testGetScale() {
-		double expected = 1;
+		final double expected = 1;
 		assertThat(testNucleus.getScale(), is(expected));
 	}
 
 	@Test
 	public void testGetStatisticPlottableStatisticMeasurementScale()
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
-		double scale = 5;
+		final double scale = 5;
 
 		// Get and save the values with default scale 1
-		Map<Measurement, Double> map = new HashMap<>();
-		for (Measurement stat : testNucleus.getMeasurements()) {
+		final Map<Measurement, Double> map = new HashMap<>();
+		for (final Measurement stat : testNucleus.getMeasurements()) {
 			map.put(stat, testNucleus.getMeasurement(stat));
 		}
 
@@ -73,14 +73,14 @@ public class DefaultRodentSpermNucleusTest {
 		testNucleus.setScale(scale);
 
 		// Get the actual values for microns and pixels
-		for (Measurement stat : testNucleus.getMeasurements()) {
-			double m = testNucleus.getMeasurement(stat, MeasurementScale.MICRONS);
+		for (final Measurement stat : testNucleus.getMeasurements()) {
+			final double m = testNucleus.getMeasurement(stat, MeasurementScale.MICRONS);
 
-			double expected = Measurement.convert(map.get(stat), scale, MeasurementScale.MICRONS,
+			final double expected = Measurement.convert(map.get(stat), scale, MeasurementScale.MICRONS,
 					stat.getDimension());
 			assertEquals(stat.toString(), expected, m, 0);
 
-			double d = testNucleus.getMeasurement(stat, MeasurementScale.PIXELS);
+			final double d = testNucleus.getMeasurement(stat, MeasurementScale.PIXELS);
 			assertEquals(stat.toString(), map.get(stat), d, 0);
 		}
 	}
@@ -88,12 +88,12 @@ public class DefaultRodentSpermNucleusTest {
 	@Test
 	public void testSetStatistic()
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
-		double epsilon = 0; // the amount of difference permitted
-		double expected = 25;
+		final double epsilon = 0; // the amount of difference permitted
+		final double expected = 25;
 
-		for (Measurement stat : Measurement.getNucleusStats()) {
+		for (final Measurement stat : Measurement.getNucleusStats()) {
 			testNucleus.setMeasurement(stat, expected);
-			double d = testNucleus.getMeasurement(stat);
+			final double d = testNucleus.getMeasurement(stat);
 			assertEquals(stat.toString(), expected, d, epsilon);
 		}
 	}

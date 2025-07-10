@@ -27,6 +27,8 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nma.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nma.components.ComponentMeasurer;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.DefaultNucleus;
@@ -130,32 +132,38 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 
 	Nucleus nucleus = (Nucleus) component;
 
-	public DummyRodentSpermNucleus() throws ComponentCreationException {
+	public DummyRodentSpermNucleus() throws ComponentCreationException, MissingDataException, SegmentUpdateException {
 		this("default");
 	}
 
-	public DummyRodentSpermNucleus(String name) throws ComponentCreationException {
+	public DummyRodentSpermNucleus(String name)
+			throws ComponentCreationException, MissingDataException, SegmentUpdateException {
 		component = new DefaultNucleus(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL,
 				component_NUMBER, RuleSetCollection.mouseSpermRuleSetCollection());
 		nucleus = (Nucleus) component;
 		nucleus.offset(COM.getX(), COM.getY());
 		createProfiles(PROFILE_WINDOW);
-		setMeasurement(Measurement.AREA, AREA);
-		setMeasurement(Measurement.PERIMETER, PERIMETER);
-		setMeasurement(Measurement.MIN_DIAMETER, MIN_DIAMETER);
+		for (final Measurement m : RuleSetCollection.mouseSpermRuleSetCollection().getMeasurableValues()) {
+			ComponentMeasurer.calculate(m, nucleus);
+		}
+
+//		setMeasurement(Measurement.AREA, AREA);
+//		setMeasurement(Measurement.PERIMETER, PERIMETER);
+//		setMeasurement(Measurement.MIN_DIAMETER, MIN_DIAMETER);
 		this.name = name;
 	}
 
 	@Override
 	public void createProfiles(double angleWindowProportion) throws ComponentCreationException {
 		nucleus.createProfiles(angleWindowProportion);
+		ProfileIndexFinder.assignLandmarks(nucleus, RuleSetCollection.mouseSpermRuleSetCollection());
 	}
 
 	@Override
 	public Nucleus duplicate() {
 		try {
 			return new DummyRodentSpermNucleus(name);
-		} catch (ComponentCreationException e) {
+		} catch (final ComponentCreationException | MissingDataException | SegmentUpdateException e) {
 			e.printStackTrace();
 			return null;
 		}

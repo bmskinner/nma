@@ -44,6 +44,7 @@ import com.bmskinner.nma.components.ComponentMeasurer;
 import com.bmskinner.nma.components.ComponentUpdateListener;
 import com.bmskinner.nma.components.Imageable;
 import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.components.Updatable;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
@@ -76,6 +77,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	/** The pixel spacing between border points after roi interpolation */
 	private static final int INTERPOLATION_INTERVAL_PIXELS = 1;
 
+	/**
+	 * The object identifier. This is by default calculated from the outline and
+	 * centre of mass to allow comparison between different analyses of the same
+	 * image set.
+	 */
 	private final UUID uuid;
 
 	/** The current centre of the object. */
@@ -118,6 +124,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 */
 	private IPoint[] borderList = new IPoint[0];
 
+	private final int[] xpoints;
+	private final int[] ypoints;
+
 	/**
 	 * Store the integer base coordinates for the object. Added in 2.3.0 since we do
 	 * not have the full x and y int arrays
@@ -128,6 +137,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	/** The object bounding box */
 	private Rectangle2D bounds;
 	
+	/**
+	 * Listeners for updates to this object. When a value changes that will require
+	 * e.g. the hashcode to be recalculated, listeners will be notified.
+	 * 
+	 * @see Updatable
+	 * 
+	 */
 	transient protected List<ComponentUpdateListener> componentUpdateListeners = new ArrayList<>();
 	
 	/**
@@ -207,8 +223,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		// The polygon may have empty indices in its arrays
 		// so resize these by copying the values to new
 		// arrays
-		final int[] xpoints = Arrays.copyOfRange(polygon.xpoints, 0, polygon.npoints);
-		final int[] ypoints = Arrays.copyOfRange(polygon.ypoints, 0, polygon.npoints);
+		xpoints = Arrays.copyOfRange(polygon.xpoints, 0, polygon.npoints);
+		ypoints = Arrays.copyOfRange(polygon.ypoints, 0, polygon.npoints);
 
 		makeBorderList(xpoints, ypoints);
 	}
@@ -222,7 +238,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		if (!(a instanceof final DefaultCellularComponent other))
 			throw new IllegalArgumentException(
-					"Input is incorrect class: " + a.getClass().getName());
+					"Input is incorrect class: %s".formatted(a.getClass().getName()));
 		this.uuid = UUID.fromString(a.getId().toString());
 		this.originalCentreOfMass = a.getOriginalCentreOfMass().duplicate();
 		this.centreOfMass = a.getCentreOfMass().duplicate();
@@ -258,6 +274,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			borderList[i] = other.borderList[i].duplicate();
 		}
 
+		xpoints = a.xpoints();
+		ypoints = a.ypoints();
+
 		updateBounds();
 	}
 
@@ -277,7 +296,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		originalCentreOfMass = new FloatPoint(
 				Float.parseFloat(e.getChild(XMLNames.XML_ORIGINAL_CENTRE_OF_MASS)
 						.getAttributeValue(XMLNames.XML_X)),
-				Float.parseFloat(e.getChild(XMLNames.XML_COM).getAttributeValue(XMLNames.XML_Y)));
+				Float.parseFloat(e.getChild(XMLNames.XML_ORIGINAL_CENTRE_OF_MASS)
+						.getAttributeValue(XMLNames.XML_Y)));
 
 		// Add measurements
 		for (final Element el : e.getChildren(XMLNames.XML_MEASUREMENT)) {
@@ -295,6 +315,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		channel = Integer.parseInt(e.getChildText(XMLNames.XML_CHANNEL));
 		scale = Double.parseDouble(e.getChildText(XMLNames.XML_SCALE));
 
+		xpoints = XMLReader.parseIntArray(e.getChildText(XMLNames.XML_XPOINTS));
+		ypoints = XMLReader.parseIntArray(e.getChildText(XMLNames.XML_YPOINTS));
+
 		// If border is stored already interpolated; added in 2.3.0
 		if (XMLReader.hasElement(e, XMLNames.XML_XBORDER)) {
 
@@ -311,14 +334,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 					.getAttributeValue(XMLNames.XML_REVERSE) != null;
 			updateBounds();
 		} else {
-			// Fall back to 2.2.0 and earlier
-			final int[] xpoints = XMLReader.parseIntArray(e.getChildText(XMLNames.XML_XPOINTS));
-			final int[] ypoints = XMLReader.parseIntArray(e.getChildText(XMLNames.XML_YPOINTS));
+			// 2.2.0 and earlier
 			isReversed = e.getChild(XMLNames.XML_XPOINTS)
 					.getAttributeValue(XMLNames.XML_REVERSE) != null;
-
-			xBase = Arrays.stream(xpoints).min().getAsInt();
-			yBase = Arrays.stream(ypoints).min().getAsInt();
 
 			makeBorderList(xpoints, ypoints);
 		}
@@ -638,6 +656,16 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		return result;
 	}
 
+	@Override
+	public int[] xpoints() {
+		return xpoints;
+	}
+
+	@Override
+	public int[] ypoints() {
+		return ypoints;
+	}
+
 	/**
 	 * Check if a given point lies within the nucleus
 	 * 
@@ -879,12 +907,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public Roi toRoi() {
 
-		final float[] xpoints = new float[borderList.length];
-		final float[] ypoints = new float[borderList.length];
-		for (int i = 0; i < borderList.length; i++) {
-			xpoints[i] = (float) borderList[i].getX();
-			ypoints[i] = (float) borderList[i].getY();
-		}
+//		final float[] xpoints = new float[borderList.length];
+//		final float[] ypoints = new float[borderList.length];
+//		for (int i = 0; i < borderList.length; i++) {
+//			xpoints[i] = (float) borderList[i].getX();
+//			ypoints[i] = (float) borderList[i].getY();
+//		}
 		final Roi r = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 		r.setLocation(0, 0);
 		return r;
@@ -892,12 +920,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	@Override
 	public Roi toOriginalRoi() {
-		final float[] xpoints = new float[borderList.length];
-		final float[] ypoints = new float[borderList.length];
-		for (int i = 0; i < borderList.length; i++) {
-			xpoints[i] = (float) borderList[i].getX();
-			ypoints[i] = (float) borderList[i].getY();
-		}
+//		final float[] xpoints = new float[borderList.length];
+//		final float[] ypoints = new float[borderList.length];
+//		for (int i = 0; i < borderList.length; i++) {
+//			xpoints[i] = (float) borderList[i].getX();
+//			ypoints[i] = (float) borderList[i].getY();
+//		}
 		return new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 	}
 
@@ -1033,6 +1061,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		final String newLine = System.getProperty("line.separator");
 		final StringBuilder builder = new StringBuilder("ID: " + uuid.toString() + newLine);
 		builder.append(
+				String.format("Original base x %s y %s", xBase, yBase));
+		builder.append(newLine);
+		builder.append(
 				String.format("X bounds: %s-%s", this.getBase().getX(),
 						this.getBase().getX() + this.getWidth()));
 		builder.append(newLine);
@@ -1041,7 +1072,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 						this.getBase().getY() + this.getHeight()));
 		builder.append(newLine);
 
-		builder.append("Border " + borderList.length + ": ");
+		builder.append("Border has %s elements:".formatted(borderList.length));
+		builder.append(newLine);
 		builder.append(Arrays.deepToString(borderList));
 
 		builder.append(newLine);
@@ -1077,7 +1109,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				uuid.toString());
 
 		e.addContent(new Element(XMLNames.XML_COM)
-				.setAttribute(XMLNames.XML_X, String.valueOf(centreOfMass.getX()))
+				.setAttribute(XMLNames.XML_X,
+						String.valueOf(centreOfMass.getX()))
 				.setAttribute(XMLNames.XML_Y,
 						String.valueOf(centreOfMass.getY())));
 
@@ -1103,12 +1136,22 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		e.addContent(new Element(XMLNames.XML_XBASE).setText(String.valueOf(xBase)));
 		e.addContent(new Element(XMLNames.XML_YBASE).setText(String.valueOf(yBase)));
 
+		final Element xEl1 = new Element(XMLNames.XML_XPOINTS)
+				.setText(Arrays.toString(xpoints));
+		final Element yEl1 = new Element(XMLNames.XML_YPOINTS)
+				.setText(Arrays.toString(ypoints));
+
 		final Element xEl = new Element(XMLNames.XML_XBORDER)
 				.setText(Arrays.toString(ArrayUtils.toArray(borderList, XMLNames.XML_XBORDER)));
 
 		if (isReversed) {
 			xEl.setAttribute(XMLNames.XML_REVERSE, "true"); // don't waste space if false
+			xEl1.setAttribute(XMLNames.XML_REVERSE, "true"); // don't waste space if false
 		}
+
+		e.addContent(xEl1);
+		e.addContent(yEl1);
+
 		e.addContent(xEl);
 
 		final Element yEl = new Element(XMLNames.XML_YBORDER)
