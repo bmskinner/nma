@@ -54,6 +54,10 @@ import com.bmskinner.nma.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nma.io.ConfigFileReader;
 import com.bmskinner.nma.io.ConfigFileReader.RulesetEntry;
 
+/**
+ * The main preferences for NMA. This reads and saves to the global config
+ * options file.
+ */
 @SuppressWarnings("serial")
 public class MainPreferencesDialog extends SettingsDialog implements ActionListener {
 
@@ -106,16 +110,16 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
     @Override
     protected JPanel createFooter() {
 
-        JPanel panel = new JPanel();
+        final JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout(FlowLayout.CENTER));
-        JButton okButton = new JButton("Save and close");
+        final JButton okButton = new JButton("Save and close");
         okButton.addActionListener(e -> {
         	if(!GlobalOptions.getInstance().equals(oldOptions)) {
         		// options have changed, write them to file
         		try {
         			LOGGER.fine("Writing changed options to config file");
 					ConfigFileReader.writeGlobalOptionsToConfigFile();
-				} catch (IOException e1) {
+				} catch (final IOException e1) {
 					LOGGER.log(Level.SEVERE, "Unable to save options to config file: %s".formatted(e1.getMessage()));
 				}
         	}
@@ -128,46 +132,47 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
     }
 
     private JPanel createMainPanel() {
-        JPanel panel = new JPanel();
-        BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
+        final JPanel panel = new JPanel();
+        final BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
         panel.setLayout(bl);
         panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         // Checkboxes
         
-        JCheckBox antiAliasBox = new JCheckBox((String) null, currentOptions.isAntiAlias());
+        final JCheckBox antiAliasBox = new JCheckBox((String) null, currentOptions.isAntiAlias());
         antiAliasBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.IS_USE_ANTIALIASING, 
         		antiAliasBox.isSelected()));
 
-        JCheckBox checkUpdatesBox = new JCheckBox("(notifies only, updates will not be downloaded)", currentOptions.getBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY));
+        final JCheckBox checkUpdatesBox = new JCheckBox("(notifies only, updates will not be downloaded)", currentOptions.getBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY));
         checkUpdatesBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY, 
         		checkUpdatesBox.isSelected()));
         
-        JCheckBox consensusBox = new JCheckBox((String) null, currentOptions.getBoolean(GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY));
+        final JCheckBox consensusBox = new JCheckBox((String) null, currentOptions.getBoolean(GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY));
         consensusBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY, 
         		consensusBox.isSelected()));
         
-        JCheckBox memoryBox = new JCheckBox("(less than half system memory available)", currentOptions.getBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION));
+		final JCheckBox memoryBox = new JCheckBox("(if less than half system memory available)",
+				currentOptions.getBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION));
         memoryBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION, 
         		memoryBox.isSelected()));
         
         
         // Comboboxes
-        RulesetEntry[] availableRules = ConfigFileReader.getAvailableRulesets();
-        JComboBox<RulesetEntry> rulesetBox = new JComboBox<>(availableRules);
+        final RulesetEntry[] availableRules = ConfigFileReader.getAvailableRulesets();
+        final JComboBox<RulesetEntry> rulesetBox = new JComboBox<>(availableRules);
         rulesetBox.addActionListener(e -> {
-			RulesetEntry selected = (RulesetEntry) rulesetBox.getSelectedItem();
+			final RulesetEntry selected = (RulesetEntry) rulesetBox.getSelectedItem();
 			currentOptions.setString(GlobalOptions.DEFAULT_RULESET_KEY, selected.rsc().getName());
 		});
         
         
-        JComboBox<ColourSwatch> paletteBox = new JComboBox<>(ColourSwatch.values());
+        final JComboBox<ColourSwatch> paletteBox = new JComboBox<>(ColourSwatch.values());
         paletteBox.setSelectedItem(currentOptions.getSwatch());
         paletteBox.addActionListener(e -> {
 			currentOptions.setSwatch((ColourSwatch) paletteBox.getSelectedItem());
 		});
         
-        JComboBox<MeasurementScale> measurementScaleBox = new JComboBox<>(MeasurementScale.values());
+        final JComboBox<MeasurementScale> measurementScaleBox = new JComboBox<>(MeasurementScale.values());
         measurementScaleBox.setSelectedItem(currentOptions.getDisplayScale());
         measurementScaleBox.addActionListener(e -> {
 			currentOptions.setDisplayScale((MeasurementScale) measurementScaleBox.getSelectedItem());
@@ -175,22 +180,22 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
         
         // Spinners
         
-        JSpinner scaleSpinner = new JSpinner(new SpinnerNumberModel(
+        final JSpinner scaleSpinner = new JSpinner(new SpinnerNumberModel(
         		currentOptions.getImageScale(), 0, 100, 0.1));
         
         scaleSpinner.addChangeListener(e -> {
 			try {
-				JSpinner j = (JSpinner) e.getSource();
+				final JSpinner j = (JSpinner) e.getSource();
 				scaleSpinner.commitEdit();
 				currentOptions.setImageScale((Double)j.getValue());
-			} catch (ParseException e1) {
+			} catch (final ParseException e1) {
 				LOGGER.log(Level.SEVERE, "Parsing error in image scale: %s".formatted(e1.getMessage()), e1);
 			}
         });
         
         // File selector
         
-		JTextField  defaultDirBox = new JTextField(currentOptions.getDefaultDir().getAbsolutePath());
+		final JTextField  defaultDirBox = new JTextField(currentOptions.getDefaultDir().getAbsolutePath());
 		defaultDirBox.setEditable(false);
 		defaultDirBox.setEnabled(false);
 		defaultDirBox.addMouseListener(new MouseAdapter() {
@@ -200,10 +205,10 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
 				// Image directory may have been specified; if not, request from user
 
 				try {
-					File f = new DefaultInputSupplier().requestFolder(GlobalOptions.getInstance().getDefaultDir());
+					final File f = new DefaultInputSupplier().requestFolder(GlobalOptions.getInstance().getDefaultDir());
 					currentOptions.setFile(GlobalOptions.DEFAULT_DIR_KEY, f);
 					defaultDirBox.setText(f.getAbsolutePath());
-				} catch (RequestCancelledException ex) {
+				} catch (final RequestCancelledException ex) {
 					// user cancelled
 				}
 			}
@@ -212,11 +217,11 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
 		
         // Layout display options
         
-		JPanel displayPanel = new JPanel();
-		GridBagLayout gl = new GridBagLayout();
+		final JPanel displayPanel = new JPanel();
+		final GridBagLayout gl = new GridBagLayout();
 		displayPanel.setLayout(gl);
-		List<JLabel> displayLabels = new ArrayList<>();
-		List<Component> displayFields = new ArrayList<>();
+		final List<JLabel> displayLabels = new ArrayList<>();
+		final List<Component> displayFields = new ArrayList<>();
 		
 		displayPanel.setBorder(BorderFactory.createTitledBorder(DISPLAY_DEFAULTS_LBL));
 
@@ -237,11 +242,11 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
 		
         // Layout program options
         
-        JPanel progamPanel = new JPanel();
-		GridBagLayout progamgl = new GridBagLayout();
+        final JPanel progamPanel = new JPanel();
+		final GridBagLayout progamgl = new GridBagLayout();
 		progamPanel.setLayout(progamgl);
-		List<JLabel> progamLabels = new ArrayList<>();
-		List<Component> progamFields = new ArrayList<>();
+		final List<JLabel> progamLabels = new ArrayList<>();
+		final List<Component> progamFields = new ArrayList<>();
 		progamPanel.setBorder(BorderFactory.createTitledBorder(PROGRAM_DEFAULT_LBL));
         
 		progamLabels.add(new JLabel(CHECK_FOR_UPDATES_LBL));
@@ -253,11 +258,11 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
 
         // Layout analysis setup options
         
-        JPanel analysisPanel = new JPanel();
-		GridBagLayout analysisGl = new GridBagLayout();
+        final JPanel analysisPanel = new JPanel();
+		final GridBagLayout analysisGl = new GridBagLayout();
 		analysisPanel.setLayout(progamgl);
-		List<JLabel> analysisLabels = new ArrayList<>();
-		List<Component> analysisFields = new ArrayList<>();
+		final List<JLabel> analysisLabels = new ArrayList<>();
+		final List<Component> analysisFields = new ArrayList<>();
 		analysisPanel.setBorder(BorderFactory.createTitledBorder(NEW_ANALYSIS_DEFAULTS_LBL));
 
         analysisLabels.add(new JLabel(DEFAULT_IMAGE_DIR_LBL));

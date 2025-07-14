@@ -47,7 +47,7 @@ public class VersionHelpDialog extends SettingsDialog {
 	private static final Logger LOGGER = Logger.getLogger(VersionHelpDialog.class.getName());
 
 	private static final String DIALOG_TITLE = "About";
-	private static final String SITE_URL = "https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Home/";
+	private static final String SITE_URL = "https://github.com/bmskinner/nma/wiki";
 	private static final String VIST_WEBSITE_LBL = "Visit website";
 
 	private static final Dimension PREF_SIZE = new Dimension(120, 300);
@@ -101,12 +101,13 @@ public class VersionHelpDialog extends SettingsDialog {
 		final String text = """
 				 <b>Nuclear Morphology Analysis version %s</b><p>
 
+				 A full guide to the software is included via Help > 'Open user guide'
+				 <p>
 				 Help, tutorials, and the source code are available at:<br>
 				 <a href=%s>%s</a><br>
 				 (click the button below to open this link in your web browser)
 				 <p>
-				 A full guide to the software is included via Help > 'Open user guide'
-				 <p>
+
 				 If you use this in your research, please cite our papers!
 				 <p>
 				 <b>Morphology analysis:</b><br>
