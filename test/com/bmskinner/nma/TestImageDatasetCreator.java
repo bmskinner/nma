@@ -12,18 +12,18 @@ import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.bmskinner.nma.analysis.classification.NucleusClusteringMethod;
+import com.bmskinner.nma.analysis.image.CellHistogramCalculationMethod;
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.analysis.nucleus.NucleusDetectionMethod;
-import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nma.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
+import com.bmskinner.nma.analysis.profiles.DefaultDatasetProfilingMethod;
 import com.bmskinner.nma.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nma.analysis.signals.SignalWarpingMethod;
 import com.bmskinner.nma.analysis.signals.shells.ShellAnalysisMethod;
@@ -31,6 +31,7 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
+import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.components.workspaces.IWorkspace;
@@ -43,7 +44,6 @@ import com.bmskinner.nma.io.WorkspaceExporter;
 import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
-
 
 import ij.Prefs;
 
@@ -95,9 +95,10 @@ public class TestImageDatasetCreator {
 	private static void deleteContents(File f) throws IOException {
 		if (!f.exists())
 			return;
-		for (File file : f.listFiles()) {
-			if (file.isDirectory())
+		for (final File file : f.listFiles()) {
+			if (file.isDirectory()) {
 				deleteContents(file);
+			}
 			Files.delete(file.toPath());
 		}
 	}
@@ -105,9 +106,10 @@ public class TestImageDatasetCreator {
 	@Before
 	public void setUp() {
 		Prefs.setThreads(2); // Attempt to avoid issue 162
-		for (Handler h : LOGGER.getHandlers())
+		for (final Handler h : LOGGER.getHandlers()) {
 			LOGGER.removeHandler(h);
-		Handler h = new ConsoleHandler(new ConsoleFormatter());
+		}
+		final Handler h = new ConsoleHandler(new ConsoleFormatter());
 		LOGGER.setLevel(Level.FINE);
 		h.setLevel(Level.FINE);
 		LOGGER.addHandler(h);
@@ -116,9 +118,9 @@ public class TestImageDatasetCreator {
 	@Test
 	public void createMouseDataset() throws Exception {
 
-		File testFolder = TestResources.MOUSE_INPUT_FOLDER;
-		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
-		IAnalysisDataset d = createTestDataset(TestResources.MOUSE_OUTPUT_FOLDER, op, false);
+		final File testFolder = TestResources.MOUSE_INPUT_FOLDER;
+		final IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+		final IAnalysisDataset d = createTestDataset(TestResources.MOUSE_OUTPUT_FOLDER, op, false);
 
 		assertEquals("The test dataset should be the mouse dataset", TestResources.MOUSE, d.getName());
 
@@ -126,14 +128,14 @@ public class TestImageDatasetCreator {
 		testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
 
 		// Use mouse dataset to create a workspace
-		IWorkspace w = WorkspaceFactory.createWorkspace(d);
+		final IWorkspace w = WorkspaceFactory.createWorkspace(d);
 
-		File f = new File(TestResources.DATASET_FOLDER, TestResources.WORKSPACE_NAME);
+		final File f = new File(TestResources.DATASET_FOLDER, TestResources.WORKSPACE_NAME);
 		w.setSaveFile(f);
 
 		WorkspaceExporter.exportWorkspace(w);
 
-		IWorkspace result = XMLReader.readWorkspace(f);
+		final IWorkspace result = XMLReader.readWorkspace(f);
 
 		assertEquals("The test workspace dataset should be the mouse dataset", TestResources.MOUSE, result.getName());
 		assertEquals("Test workspace should have 1 file", 1, result.getFiles().size());
@@ -142,9 +144,9 @@ public class TestImageDatasetCreator {
 	@Test
 	public void createPigDataset() throws Exception {
 
-		File testFolder = TestResources.PIG_INPUT_FOLDER.getAbsoluteFile();
-		IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
-		IAnalysisDataset d = createTestDataset(TestResources.PIG_OUTPUT_FOLDER, op, false);
+		final File testFolder = TestResources.PIG_INPUT_FOLDER.getAbsoluteFile();
+		final IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
+		final IAnalysisDataset d = createTestDataset(TestResources.PIG_OUTPUT_FOLDER, op, false);
 		saveTestDataset(d, TestResources.PIG_TEST_DATASET);
 		testUnmarshalling(d, TestResources.PIG_TEST_DATASET);
 	}
@@ -152,70 +154,70 @@ public class TestImageDatasetCreator {
 	@Test
 	public void createRoundDataset() throws Exception {
 
-		File testFolder = TestResources.ROUND_INPUT_FOLDER.getAbsoluteFile();
-		IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
-		IAnalysisDataset d = createTestDataset(TestResources.ROUND_OUTPUT_FOLDER, op, false);
+		final File testFolder = TestResources.ROUND_INPUT_FOLDER.getAbsoluteFile();
+		final IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
+		final IAnalysisDataset d = createTestDataset(TestResources.ROUND_OUTPUT_FOLDER, op, false);
 		saveTestDataset(d, TestResources.ROUND_TEST_DATASET);
 		testUnmarshalling(d, TestResources.ROUND_TEST_DATASET);
 	}
 
 	@Test
 	public void createMultipleSource1Dataset() throws Exception {
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultRodentAnalysisOptions(TestResources.MULTIPLE_SOURCE_1_FOLDER);
-		IAnalysisDataset d = createTestDataset(TestResources.MULTIPLE_SOURCE_1_FOLDER, op, false);
+		final IAnalysisDataset d = createTestDataset(TestResources.MULTIPLE_SOURCE_1_FOLDER, op, false);
 		saveTestDataset(d, TestResources.MULTIPLE1_TEST_DATASET);
 		testUnmarshalling(d, TestResources.MULTIPLE1_TEST_DATASET);
 	}
 
 	@Test
 	public void createMultipleSource2Dataset() throws Exception {
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultRodentAnalysisOptions(TestResources.MULTIPLE_SOURCE_2_FOLDER);
-		IAnalysisDataset d = createTestDataset(TestResources.MULTIPLE_SOURCE_2_FOLDER, op, false);
+		final IAnalysisDataset d = createTestDataset(TestResources.MULTIPLE_SOURCE_2_FOLDER, op, false);
 		saveTestDataset(d, TestResources.MULTIPLE2_TEST_DATASET);
 		testUnmarshalling(d, TestResources.MULTIPLE2_TEST_DATASET);
 	}
 
 	@Test
 	public void createMouseWithClustersDataset() throws Exception {
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultRodentAnalysisOptions(TestResources.MOUSE_CLUSTERS_INPUT_FOLDER);
-		IAnalysisDataset d = createTestDataset(TestResources.MOUSE_OUTPUT_FOLDER, op, true);
+		final IAnalysisDataset d = createTestDataset(TestResources.MOUSE_OUTPUT_FOLDER, op, true);
 		saveTestDataset(d, TestResources.MOUSE_CLUSTERS_DATASET);
 		testUnmarshalling(d, TestResources.MOUSE_CLUSTERS_DATASET);
 	}
 
 	@Test
 	public void createPigWithClustersDataset() throws Exception {
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultPigAnalysisOptions(TestResources.PIG_CLUSTERS_INPUT_FOLDER);
-		IAnalysisDataset d = createTestDataset(TestResources.PIG_OUTPUT_FOLDER, op, true);
+		final IAnalysisDataset d = createTestDataset(TestResources.PIG_OUTPUT_FOLDER, op, true);
 		saveTestDataset(d, TestResources.PIG_CLUSTERS_DATASET);
 		testUnmarshalling(d, TestResources.PIG_CLUSTERS_DATASET);
 	}
 
 	@Test
 	public void createRoundWithClustersDataset() throws Exception {
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultRoundAnalysisOptions(TestResources.ROUND_CLUSTERS_INPUT_FOLDER);
-		IAnalysisDataset d = createTestDataset(TestResources.ROUND_OUTPUT_FOLDER, op, true);
+		final IAnalysisDataset d = createTestDataset(TestResources.ROUND_OUTPUT_FOLDER, op, true);
 		saveTestDataset(d, TestResources.ROUND_CLUSTERS_DATASET);
 		testUnmarshalling(d, TestResources.ROUND_CLUSTERS_DATASET);
 	}
 
 	@Test
 	public void createMouseWithSignalsDataset() throws Exception {
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultRodentAnalysisOptions(TestResources.MOUSE_SIGNALS_INPUT_FOLDER);
-		HashOptions nucleus = op.getNucleusDetectionOptions().get();
+		final HashOptions nucleus = op.getNucleusDetectionOptions().get();
 		nucleus.setDouble(HashOptions.MIN_CIRC, 0.15);
 		nucleus.setDouble(HashOptions.MAX_CIRC, 0.85);
 
 		nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 2000);
 		nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 10000);
 
-		IAnalysisDataset d = createTestSignalDataset(op, true, false);
+		final IAnalysisDataset d = createTestSignalDataset(op, true, false);
 		saveTestDataset(d, TestResources.MOUSE_SIGNALS_DATASET);
 
 		// We know what should be detected for these images
@@ -228,22 +230,22 @@ public class TestImageDatasetCreator {
 
 	@Test
 	public void createPigWithSignalsDataset() throws Exception {
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultPigAnalysisOptions(TestResources.PIG_SIGNALS_INPUT_FOLDER);
-		HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
+		final HashOptions nucleus = op.getDetectionOptions(CellularComponent.NUCLEUS).get();
 		nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
 		nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 15000);
 
-		IAnalysisDataset d = createTestSignalDataset(op, false, true);
+		final IAnalysisDataset d = createTestSignalDataset(op, false, true);
 		saveTestDataset(d, TestResources.PIG_SIGNALS_DATASET);
 		testUnmarshalling(d, TestResources.PIG_SIGNALS_DATASET);
 	}
 
 	@Test
 	public void createRoundWithSignalsDataset() throws Exception {
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultRoundAnalysisOptions(TestResources.ROUND_SIGNALS_INPUT_FOLDER);
-		IAnalysisDataset d = createTestSignalDataset(op, true, true);
+		final IAnalysisDataset d = createTestSignalDataset(op, true, true);
 		saveTestDataset(d, TestResources.ROUND_SIGNALS_DATASET);
 		testUnmarshalling(d, TestResources.ROUND_SIGNALS_DATASET);
 	}
@@ -260,12 +262,12 @@ public class TestImageDatasetCreator {
 	public static IAnalysisDataset createTestSignalDataset(IAnalysisOptions op, boolean addRed,
 			boolean addGreen) throws Exception {
 
-		File testFolder = op.getNucleusDetectionFolder().get();
+		final File testFolder = op.getNucleusDetectionFolder().get();
 
 		if (!testFolder.exists())
 			throw new IllegalArgumentException("Detection folder does not exist");
 
-		IAnalysisDataset d = new NucleusDetectionMethod(testFolder, op).call().getFirstDataset();
+		final IAnalysisDataset d = new NucleusDetectionMethod(testFolder, op).call().getFirstDataset();
 
 		new DefaultDatasetProfilingMethod(d)
 				.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
@@ -276,7 +278,7 @@ public class TestImageDatasetCreator {
 				.call();
 
 		if (addRed) {
-			HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions()
+			final HashOptions redOptions = OptionsFactory.makeNuclearSignalOptions()
 					.withValue(HashOptions.CHANNEL, 0)
 					.withValue(HashOptions.THRESHOLD, 70)
 					.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
@@ -291,14 +293,14 @@ public class TestImageDatasetCreator {
 			assertTrue("Dataset should have red signals",
 					d.getCollection().getSignalManager().getSignalCount(RED_SIGNAL_ID) > 0);
 
-			SignalWarpingRunSettings sw = new SignalWarpingRunSettings(d, d, RED_SIGNAL_ID);
+			final SignalWarpingRunSettings sw = new SignalWarpingRunSettings(d, d, RED_SIGNAL_ID);
 			sw.setInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY, 70);
 			new SignalWarpingMethod(d, sw).call();
 
 		}
 
 		if (addGreen) {
-			HashOptions greenOptions = OptionsFactory.makeNuclearSignalOptions()
+			final HashOptions greenOptions = OptionsFactory.makeNuclearSignalOptions()
 					.withValue(HashOptions.CHANNEL, 1)
 					.withValue(HashOptions.THRESHOLD, 70)
 					.withValue(HashOptions.MIN_SIZE_PIXELS, 5)
@@ -313,11 +315,21 @@ public class TestImageDatasetCreator {
 			assertTrue("Dataset should have green signals",
 					d.getCollection().getSignalManager().getSignalCount(GREEN_SIGNAL_ID) > 0);
 
-			SignalWarpingRunSettings sw = new SignalWarpingRunSettings(d, d, GREEN_SIGNAL_ID);
+			final SignalWarpingRunSettings sw = new SignalWarpingRunSettings(d, d, GREEN_SIGNAL_ID);
 			sw.setInt(SignalWarpingRunSettings.MIN_THRESHOLD_KEY, 70);
 			new SignalWarpingMethod(d, sw).call();
 		}
 
+		// If there are signals in the dataset, run image histogram for relevant
+		// channels
+		final HashOptions histogramOptions = new OptionsBuilder()
+				.withValue(CellularComponent.NUCLEUS, true)
+				.withValue(CellularComponent.NUCLEAR_SIGNAL + RED_SIGNAL_ID, addRed)
+				.withValue(CellularComponent.NUCLEAR_SIGNAL + GREEN_SIGNAL_ID, addGreen)
+				.build();
+		new CellHistogramCalculationMethod(d, histogramOptions).call();
+
+		// Run shell analysis
 		new ShellAnalysisMethod(d, OptionsFactory.makeShellAnalysisOptions().build()).call();
 		return d;
 	}
@@ -334,15 +346,15 @@ public class TestImageDatasetCreator {
 	public static IAnalysisDataset createTestDataset(File outputFolder, IAnalysisOptions op,
 			boolean makeClusters) throws Exception {
 
-		File inputFolder = op.getNucleusDetectionFolder().get();
+		final File inputFolder = op.getNucleusDetectionFolder().get();
 		if (!inputFolder.exists())
 			throw new IllegalArgumentException(
 					"Input folder does not exist: " + inputFolder.getAbsolutePath());
 
-		IAnalysisDataset d = new NucleusDetectionMethod(outputFolder.getAbsoluteFile(), op).call()
+		final IAnalysisDataset d = new NucleusDetectionMethod(outputFolder.getAbsoluteFile(), op).call()
 				.getFirstDataset();
 
-		HashOptions clusterOptions = OptionsFactory.makeDefaultClusteringOptions().build();
+		final HashOptions clusterOptions = OptionsFactory.makeDefaultClusteringOptions().build();
 
 		new DefaultDatasetProfilingMethod(d)
 				.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
@@ -354,8 +366,9 @@ public class TestImageDatasetCreator {
 				.call();
 
 		if (makeClusters) {
-			for (IAnalysisDataset child : d.getAllChildDatasets())
+			for (final IAnalysisDataset child : d.getAllChildDatasets()) {
 				new ConsensusAveragingMethod(child).call();
+			}
 			assertFalse("Dataset should have clusters", d.getClusterGroups().isEmpty());
 		}
 		return d;
@@ -371,8 +384,9 @@ public class TestImageDatasetCreator {
 	 * @throws Exception
 	 */
 	public static void saveTestDataset(IAnalysisDataset d, File saveFile) throws Exception {
-		if (saveFile.exists())
+		if (saveFile.exists()) {
 			saveFile.delete();
+		}
 
 		assertFalse("Expecting output file to be deleted: " + saveFile.getAbsolutePath(),
 				saveFile.exists());
@@ -382,12 +396,14 @@ public class TestImageDatasetCreator {
 
 		// Copy the saved file into backup file for comparison and conversion testing in
 		// the next version.
-		String bakName = saveFile.getAbsolutePath().replaceAll(".nmd$", ".bak");
-		File bakFile = new File(bakName);
-		if (!bakFile.getParentFile().exists())
+		final String bakName = saveFile.getAbsolutePath().replaceAll(".nmd$", ".bak");
+		final File bakFile = new File(bakName);
+		if (!bakFile.getParentFile().exists()) {
 			bakFile.getParentFile().mkdirs();
-		if (bakFile.exists())
+		}
+		if (bakFile.exists()) {
 			bakFile.delete();
+		}
 		assertFalse("Expecting backup file to be deleted: " + bakFile.getAbsolutePath(),
 				bakFile.exists());
 		Files.copy(saveFile.getAbsoluteFile().toPath(), bakFile.getAbsoluteFile().toPath(),
@@ -395,11 +411,12 @@ public class TestImageDatasetCreator {
 		assertTrue("Expecting backup copied to " + bakFile.getAbsolutePath(), bakFile.exists());
 
 		// Create an xml representation of the analysis options for pipeline testing
-		String xmlName = saveFile.getAbsolutePath().replaceAll(".nmd$", ".options.xml");
+		final String xmlName = saveFile.getAbsolutePath().replaceAll(".nmd$", ".options.xml");
 
-		File xmlFile = new File(xmlName);
-		if (xmlFile.exists())
+		final File xmlFile = new File(xmlName);
+		if (xmlFile.exists()) {
 			xmlFile.delete();
+		}
 
 		assertFalse("Expecting xml file to be deleted: " + xmlFile.getAbsolutePath(),
 				xmlFile.exists());
@@ -417,7 +434,7 @@ public class TestImageDatasetCreator {
 	 * @throws Exception
 	 */
 	public static void testUnmarshalling(IAnalysisDataset d, File saveFile) throws Exception {
-		IAnalysisDataset t = SampleDatasetReader.openDataset(saveFile);
+		final IAnalysisDataset t = SampleDatasetReader.openDataset(saveFile);
 		LOGGER.fine("Sample dataset opened: " + saveFile.getName());
 		ComponentTester.testDuplicatesByField(d.getName(), d, t);
 		assertEquals("Datasets should match", d, t);

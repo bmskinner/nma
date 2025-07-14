@@ -1,6 +1,7 @@
 package com.bmskinner.nma.analysis.image;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -20,7 +21,23 @@ import com.bmskinner.nma.io.ImageImporter;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
+/**
+ * Calculate image histograms for desired components. To set nucleus or signals
+ * to be included, options can be set as:
+ * 
+ * <pre>
+ * 
+ * ISignalGroup sg; // from dataset
+ * HashOptions options = new DefaultOptions();
+ * options.setBoolean(CellularComponent.NUCLEUS, true);
+ * options.setBoolean(CellularComponent.NUCLEAR_SIGNAL + sg.getId(), true);
+ * 
+ * </pre>
+ * 
+ */
 public class CellHistogramCalculationMethod extends SingleDatasetAnalysisMethod {
+
+	private static final Logger LOGGER = Logger.getLogger(CellHistogramCalculationMethod.class.getName());
 
 	private final HashOptions options;
 
@@ -66,6 +83,8 @@ public class CellHistogramCalculationMethod extends SingleDatasetAnalysisMethod 
 		// Look at nuclei if requested
 		if (options.getBoolean(CellularComponent.NUCLEUS)) {
 
+			LOGGER.fine("Creating histogram for nucleus channel");
+
 			final int nucleusChannel = dataset.getAnalysisOptions().get().getNucleusDetectionOptions().get()
 					.getInt(HashOptions.CHANNEL);
 
@@ -90,6 +109,8 @@ public class CellHistogramCalculationMethod extends SingleDatasetAnalysisMethod 
 			if (!options.getBoolean(CellularComponent.NUCLEAR_SIGNAL + sg.getId())) {
 				continue;
 			}
+
+			LOGGER.fine("Creating histogram for signal channel %s".formatted(sg.getId()));
 
 			final HashOptions sgOptions = dataset.getAnalysisOptions().get().getNuclearSignalOptions(sg.getId()).get();
 			final int sgChannel = sgOptions.getInt(HashOptions.CHANNEL);

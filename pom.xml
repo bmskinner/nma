@@ -17,6 +17,7 @@
 		<project.template.directory>templates</project.template.directory>
 		<project.scripts.directory>scripts</project.scripts.directory>
 		<project.wiki.directory>wiki</project.wiki.directory>
+		<project.screenshot.directory>res/screens/${os.name}</project.screenshot.directory>
 		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
 	</properties>
 
@@ -50,8 +51,6 @@
 				<script.packaging>packageAppImage.bat</script.packaging>
 				<script.rendering>renderUserGuide.bat</script.rendering>
 				<script.dependencies>installDependencies.bat</script.dependencies>
-
-				<project.screenshot.directory>res/screens/Windows 10</project.screenshot.directory>
 			</properties>
 		</profile>
 
@@ -69,8 +68,6 @@
 				<script.packaging>packageAppImage.sh</script.packaging>
 				<script.rendering>renderUserGuide.sh</script.rendering>
 				<script.dependencies>installDependencies.sh</script.dependencies>
-
-				<project.screenshot.directory>res/screens/Linux</project.screenshot.directory>
 			</properties>
 		</profile>
 
@@ -87,8 +84,6 @@
 				<script.packaging>packageDMG.sh</script.packaging>
 				<script.rendering>renderUserGuide.sh</script.rendering>
 				<script.dependencies>installDependencies.sh</script.dependencies>
-
-				<project.screenshot.directory>res/screens/MacOS</project.screenshot.directory>
 			</properties>
 		</profile>
 		<profile>
