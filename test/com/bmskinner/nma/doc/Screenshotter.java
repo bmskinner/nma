@@ -25,7 +25,6 @@ import java.awt.Robot;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.annotation.NonNull;
@@ -107,25 +106,38 @@ public class Screenshotter {
 	private boolean run() throws InterruptedException, IOException {
 
 		// clear previous runs
-		File rootFolder = new File(SCREENSHOT_FOLDER);
+		final File rootFolder = new File(SCREENSHOT_FOLDER);
 		FileUtils.deleteQuietly(rootFolder);
 		rootFolder.mkdirs();
 
-		if (allFilesExist()) {
-
-			LOGGER.fine("Outputting to " + rootFolder.getAbsolutePath());
-
-			takeSingleDatasetScreenshots(TestResources.MOUSE_SIGNALS_DATASET, rootFolder);
-			takeSingleDatasetScreenshots(TestResources.MOUSE_TEST_DATASET, rootFolder);
-
-			takeMultiDatasetScreenshots(TestResources.MOUSE_TEST_DATASET,
-					TestResources.MOUSE_CLUSTERS_DATASET, rootFolder);
-		} else {
+		if (!allFilesExist())
 			return false;
-		}
+		LOGGER.fine("Outputting to " + rootFolder.getAbsolutePath());
+
+		takeNoDatasetScreenshots(rootFolder);
+
+		takeSingleDatasetScreenshots(TestResources.MOUSE_SIGNALS_DATASET, rootFolder);
+		takeSingleDatasetScreenshots(TestResources.MOUSE_TEST_DATASET, rootFolder);
+
+		takeMultiDatasetScreenshots(TestResources.MOUSE_TEST_DATASET,
+				TestResources.MOUSE_CLUSTERS_DATASET, rootFolder);
 
 		nma.mw.setVisible(false);
 		return true;
+	}
+
+	/**
+	 * Take screenshots of NMA with no datasets loaded
+	 * 
+	 * @param rootFolder the root folder for the screenshots.
+	 * @throws InterruptedException
+	 * @throws IOException
+	 */
+	public void takeNoDatasetScreenshots(@NonNull File rootFolder)
+			throws InterruptedException, IOException {
+		LOGGER.fine("Taking screenshots with no nmd file loaded ");
+
+		takeScreenshots(rootFolder, "None");
 	}
 
 	/**
@@ -191,14 +203,14 @@ public class Screenshotter {
 	 */
 	private void takeScreenshots(File rootFolder, String prefix)
 			throws IOException, InterruptedException {
-		File outputFolder = new File(rootFolder, prefix);
+		final File outputFolder = new File(rootFolder, prefix);
 		outputFolder.mkdirs();
 
-		TabPanelSwitcher s = new TabPanelSwitcher(nma.mw);
+		final TabPanelSwitcher s = new TabPanelSwitcher(nma.mw);
 
-		DetailPanelScreenshotter dps = new DetailPanelScreenshotter(nma.mw, robot);
+		final DetailPanelScreenshotter dps = new DetailPanelScreenshotter(nma.mw, robot);
 		while (s.hasNext()) {
-			DetailPanel d = s.nextTab();
+			final DetailPanel d = s.nextTab();
 			Thread.sleep(SLEEP_TIME_MILLIS);
 			dps.takeScreenShots(d, outputFolder, "");
 		}
