@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
@@ -85,7 +84,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	private static final String LOOKING_LBL = "Looking for images...";
 	private static final double IMAGE_SCREEN_PROPORTION = 0.70;
 
-	private Window parentWindow;
+	private final Window parentWindow;
 	private JLabel imageLabel;
 	private JLabel headerLabel; // Basic info. Default to HEADER_LBL
 
@@ -136,7 +135,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 
 		try {
 			LOGGER.finer("Firing panel updating event");
-			int imageNumber = fileIndex + 1;
+			final int imageNumber = fileIndex + 1;
 			setImageLabel(FOLDER_LBL + imageNumber + " of " + imageFiles.size() + ": "
 					+ imageFile.getAbsolutePath());
 			firePanelUpdatingEvent(PanelUpdatingEvent.UPDATING);
@@ -146,7 +145,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 
 			finder.findInFile(imageFile);
 
-		} catch (ImageImportException e) { // end try
+		} catch (final ImageImportException e) { // end try
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			setImageLabel("Error probing " + imageFile.getAbsolutePath());
 			new DefaultInputSupplier().announceMessage(
@@ -165,8 +164,8 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	protected void createUI() {
 		setLayout(new BorderLayout());
 
-		JPanel headerPanel = createHeader();
-		JPanel tablePanel = createTablePanel();
+		final JPanel headerPanel = createHeader();
+		final JPanel tablePanel = createTablePanel();
 
 		nextButton = new JButton(NEXT_IMAGE_BTN);
 		nextButton.addActionListener(e -> {
@@ -193,11 +192,13 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	public void run() {
 
 		((ProberTableModel) table.getModel()).setRowCount(0);
-		Runnable r = () -> {
+		final Runnable r = () -> {
 			try {
 				importAndDisplayImage(openImage);
-			} catch (Exception e) {
-				LOGGER.log(Level.SEVERE, "Error in image prober: " + e.getMessage(), e);
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE,
+						"Error in image prober: %s for image file %s".formatted(e.getMessage(), openImage.getName()),
+						e);
 
 			}
 		};
@@ -247,14 +248,13 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	 */
 	private List<File> importImages(final File folder) {
 
-		List<File> files = new ArrayList<>();
-		if (folder.listFiles() == null) {
+		final List<File> files = new ArrayList<>();
+		if (folder.listFiles() == null)
 			return files;
-		}
 
 		Stream.of(folder.listFiles()).forEach(file -> {
 
-			boolean ok = ImageImporter.isFileImportable(file); // check file
+			final boolean ok = ImageImporter.isFileImportable(file); // check file
 																// extension
 
 			if (ok) {
@@ -308,16 +308,16 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	}
 
 	private JPanel createTablePanel() {
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-		ProberTableModel model = new ProberTableModel();
+		final ProberTableModel model = new ProberTableModel();
 
 		finder.addDetectionEventListener(model);
 
 		table = createTable(model);
 
-		JScrollPane scrollPane = new JScrollPane(table);
+		final JScrollPane scrollPane = new JScrollPane(table);
 		panel.add(scrollPane, BorderLayout.CENTER);
 
 		progressBar = new JProgressBar();
@@ -335,7 +335,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	 * @return
 	 */
 	private JPanel createHeader() {
-		JPanel panel = new JPanel();
+		final JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
 		headerLabel = new JLabel(HEADER_LBL);
@@ -359,11 +359,12 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	}
 
 	protected JTable createTable(TableModel model) {
-		JTable table = new JTable(model);
+		final JTable table = new JTable(model);
 
 		int maxDimension = 250;
-		if (model instanceof ProberTableModel)
+		if (model instanceof ProberTableModel) {
 			maxDimension = ((ProberTableModel) model).getMaxDimension();
+		}
 		table.setRowHeight(maxDimension + 20);
 
 		for (int i = 0; i < table.getColumnCount(); i++) {
@@ -382,13 +383,13 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 				if (e.getClickCount() == 1) {
 
 					// Get the data model for this table
-					TableModel model = table.getModel();
+					final TableModel model = table.getModel();
 
-					Point pnt = e.getPoint();
-					int row = table.rowAtPoint(pnt);
-					int col = table.columnAtPoint(pnt);
+					final Point pnt = e.getPoint();
+					final int row = table.rowAtPoint(pnt);
+					final int col = table.columnAtPoint(pnt);
 
-					ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
+					final ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
 
 					if (selectedData != null) {
 
@@ -406,9 +407,9 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 
 	public static class ProberTableCell {
 		private ImageIcon smallIcon;
-		private ImageIcon largeIcon;
+		private final ImageIcon largeIcon;
 		private boolean enabled;
-		private String label;
+		private final String label;
 
 		public ProberTableCell(ImageIcon largeIcon, String label, boolean enabled) {
 			this.largeIcon = largeIcon;
@@ -441,22 +442,21 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 		 */
 		public ImageIcon getLargeIconFitToScreen(double fraction) {
 
-			if (largeIcon == null) {
+			if (largeIcon == null)
 				throw new IllegalArgumentException("Large icon is null");
-			}
 
-			int originalWidth = largeIcon.getImage().getWidth(null);
-			int originalHeight = largeIcon.getImage().getHeight(null);
+			final int originalWidth = largeIcon.getImage().getWidth(null);
+			final int originalHeight = largeIcon.getImage().getHeight(null);
 
 			// keep the image aspect ratio
-			double ratio = (double) originalWidth / (double) originalHeight;
+			final double ratio = (double) originalWidth / (double) originalHeight;
 
-			Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+			final Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 
 			// set the new width
 			int newWidth = (int) (screenSize.getWidth() * fraction);
 			int newHeight = (int) (newWidth / ratio);
-			int maxHeight = (int) (screenSize.getHeight() * fraction);
+			final int maxHeight = (int) (screenSize.getHeight() * fraction);
 
 			// Check height is OK. If not, recalculate sizes
 			if (newHeight >= maxHeight) {
@@ -465,7 +465,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 			}
 			// Create the image
 
-			Image result = largeIcon.getImage().getScaledInstance(newWidth, newHeight,
+			final Image result = largeIcon.getImage().getScaledInstance(newWidth, newHeight,
 					Image.SCALE_FAST);
 
 			return new ImageIcon(result);
@@ -493,7 +493,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 
 		public double getFactor() {
 			// Translate coordinates back to large image
-			double factor = (double) largeIcon.getIconWidth() / (double) smallIcon.getIconWidth();
+			final double factor = (double) largeIcon.getIconWidth() / (double) smallIcon.getIconWidth();
 			return factor;
 		}
 	}
@@ -514,7 +514,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 				super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
 						column);
 
-				ProberTableCell info = (ProberTableCell) value;
+				final ProberTableCell info = (ProberTableCell) value;
 
 				setTextHorizontalAlignment(JLabel.CENTER);
 				setHorizontalTextPosition(JLabel.CENTER);
@@ -537,7 +537,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 					setIcon(null);
 				}
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Prober cell renderer error", e);
 				setIcon(null);
 				setText("");
@@ -601,8 +601,8 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 	}
 
 	protected void firePanelUpdatingEvent(int type) {
-		Iterator<PanelUpdatingEventListener> it = updatingListeners.iterator();
-		PanelUpdatingEvent e = new PanelUpdatingEvent(this, type);
+		final Iterator<PanelUpdatingEventListener> it = updatingListeners.iterator();
+		final PanelUpdatingEvent e = new PanelUpdatingEvent(this, type);
 		while (it.hasNext()) {
 			it.next().panelUpdatingEventReceived(e);
 		}
@@ -623,7 +623,7 @@ public class GenericImageProberPanel extends JPanel implements ProberReloadEvent
 		public static final int UPDATING = 0;
 		public static final int COMPLETE = 1;
 
-		private int type;
+		private final int type;
 
 		public PanelUpdatingEvent(Object source, int type) {
 			super(source);

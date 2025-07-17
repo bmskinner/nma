@@ -40,11 +40,12 @@ import ij.plugin.ChannelSplitter;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+import loci.common.DebugTools;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
 import loci.plugins.util.ImageProcessorReader;
 import loci.plugins.util.LociPrefs;
-import ome.scifio.common.DebugTools;
+
 
 /**
  * This class takes any given input image, and will convert it to the ImageStack
@@ -104,7 +105,7 @@ public class ImageImporter implements Importer {
 	 */
 	public static ImageProcessor importCroppedImageTo24bitGreyscale(@NonNull ICell cell,
 			@NonNull CellularComponent c) {
-		ImageProcessor ip = importFullImageTo24bitGreyscale(c);
+		final ImageProcessor ip = importFullImageTo24bitGreyscale(c);
 		return ImageFilterer.crop(ip, cell);
 	}
 
@@ -119,7 +120,7 @@ public class ImageImporter implements Importer {
 	 * @return an RGB greyscale image cropped to the component
 	 */
 	public static ImageProcessor importCroppedImageTo24bitGreyscale(@NonNull CellularComponent c) {
-		ImageProcessor ip = importFullImageTo24bitGreyscale(c);
+		final ImageProcessor ip = importFullImageTo24bitGreyscale(c);
 		return ImageFilterer.crop(ip, c);
 	}
 
@@ -137,7 +138,7 @@ public class ImageImporter implements Importer {
 	 */
 	public static ImageProcessor importCroppedOrientedImageTo24bitGreyscale(
 			@NonNull Nucleus c) throws MissingLandmarkException, ComponentCreationException {
-		ImageProcessor ip = importCroppedImageTo24bitGreyscale(c);
+		final ImageProcessor ip = importCroppedImageTo24bitGreyscale(c);
 		ip.flipVertical(); // Y axis needs inverting
 		return ImageFilterer.orientImage(ip, c);
 	}
@@ -154,7 +155,7 @@ public class ImageImporter implements Importer {
 	 */
 	public static ImageProcessor importCroppedImageTo24bitRGB(@NonNull CellularComponent c)
 			throws ImageImportException {
-		ImageProcessor ip = importFullImageTo24bitRGB(c);
+		final ImageProcessor ip = importFullImageTo24bitRGB(c);
 		return ImageFilterer.crop(ip, c);
 	}
 
@@ -168,15 +169,14 @@ public class ImageImporter implements Importer {
 	 * @return an RGB greyscale image containing the component
 	 */
 	public static ImageProcessor importFullImageTo24bitGreyscale(@NonNull CellularComponent c) {
-		if (!c.getSourceFile().exists()) {
+		if (!c.getSourceFile().exists())
 			return ImageFilterer.createWhiteColorProcessor(
 					(int) c.getMaxX() + Imageable.COMPONENT_BUFFER,
 					(int) c.getMaxY() + Imageable.COMPONENT_BUFFER);
-		}
 		try {
-			ImageProcessor ip = importImage(c.getSourceFile(), c.getChannel());
+			final ImageProcessor ip = importImage(c.getSourceFile(), c.getChannel());
 			return new ImageConverter(ip).convertToRGBGreyscale().invert().toProcessor();
-		} catch (ImageImportException e) {
+		} catch (final ImageImportException e) {
 			return ImageFilterer.createWhiteColorProcessor(
 					(int) c.getMaxX() + Imageable.COMPONENT_BUFFER,
 					(int) c.getMaxY() + Imageable.COMPONENT_BUFFER);
@@ -194,11 +194,10 @@ public class ImageImporter implements Importer {
 	 */
 	public static ImageProcessor importFullImageTo24bitRGB(@NonNull CellularComponent c)
 			throws ImageImportException {
-		if (!c.getSourceFile().exists()) {
+		if (!c.getSourceFile().exists())
 			return ImageFilterer.createWhiteColorProcessor(
 					(int) c.getMaxX() + Imageable.COMPONENT_BUFFER,
 					(int) c.getMaxY() + Imageable.COMPONENT_BUFFER);
-		}
 
 		return importFileTo24bit(c.getSourceFile());
 	}
@@ -219,15 +218,15 @@ public class ImageImporter implements Importer {
 
 		try {
 		// Get the stack, make greyscale and invert
-			int stack = ImageImporter.rgbToStack(c.getChannel());
+			final int stack = ImageImporter.rgbToStack(c.getChannel());
 
-			ImageStack imageStack = importToStack(c.getSourceFile());
+			final ImageStack imageStack = importToStack(c.getSourceFile());
 			return imageStack.getProcessor(stack);
-		} catch (ImageImportException e) {
+		} catch (final ImageImportException e) {
 			LOGGER.log(Level.WARNING,
 					"%s : '%s'".formatted(e.getMessage(), c.getSourceFile().getAbsolutePath()));
 			throw new UnloadableImageException(SOURCE_IMAGE_IS_NOT_AVAILABLE, e);
-		} catch( IllegalArgumentException e) {
+		} catch( final IllegalArgumentException e) {
 			LOGGER.log(Level.WARNING,
 					"%s : '%s'".formatted(e.getMessage(), c.getSourceFile().getAbsolutePath()));
 			throw new UnloadableImageException(e);
@@ -244,7 +243,7 @@ public class ImageImporter implements Importer {
 	 */
 	public static ImageProcessor importCroppedImageTo8bit(@NonNull CellularComponent c)
 			throws UnloadableImageException {
-		ImageProcessor ip = importFullImageTo8bit(c);
+		final ImageProcessor ip = importFullImageTo8bit(c);
 		return ImageFilterer.crop(ip, c);
 	}
 
@@ -262,9 +261,9 @@ public class ImageImporter implements Importer {
 			return false;
 		if (!file.isFile())
 			return false;
-		String fileName = file.getName();
+		final String fileName = file.getName();
 
-		for (String prefix : PREFIXES_TO_IGNORE)
+		for (final String prefix : PREFIXES_TO_IGNORE)
 			if (fileName.startsWith(prefix))
 				return false;
 
@@ -279,7 +278,7 @@ public class ImageImporter implements Importer {
 	 * @return
 	 */
 	public static boolean isImageFile(File file) {
-		for (String fileType : IMPORTABLE_FILE_TYPES)
+		for (final String fileType : IMPORTABLE_FILE_TYPES)
 			if (file.getName().endsWith(fileType))
 				return true;
 		return false;
@@ -341,25 +340,24 @@ public class ImageImporter implements Importer {
 		// Suppress Bio-formats logging
 		DebugTools.enableLogging("OFF");
 
-		ImageProcessorReader r = new ImageProcessorReader(
-				new ChannelSeparator(LociPrefs.makeImageReader()));
-
-		try {
+		try (final ImageProcessorReader r = new ImageProcessorReader(
+				new ChannelSeparator(LociPrefs.makeImageReader()));) {
 			r.setId(f.getAbsolutePath());
 
 			if (r.getImageCount() > 1)
 				throw new ImageImportException("Cannot open ND2 with more than one image");
 
-			int width = r.getSizeX();
-			int height = r.getSizeY();
-			ImageStack stack = new ImageStack(width, height);
+			final int width = r.getSizeX();
+			final int height = r.getSizeY();
+			final ImageStack stack = new ImageStack(width, height);
 
-			ImageProcessor[] channels = r.openProcessors(0);
+			final ImageProcessor[] channels = r.openProcessors(0);
 
 			for (int c = 0; c < channels.length; c++) {
-				ImageProcessor ip = channels[c].convertToByte(true);
+				final ImageProcessor ip = channels[c].convertToByte(true);
 				stack.addSlice("" + (c + 1), ip);
 			}
+
 
 			return stack;
 
@@ -380,17 +378,16 @@ public class ImageImporter implements Importer {
 			return importND2ToStack(f);
 
 		// otherwise ImageJ can do it alone
-		ImagePlus image = new ImagePlus(f.getAbsolutePath());
+		final ImagePlus image = new ImagePlus(f.getAbsolutePath());
 
 		// Except there may be reading error if the file is malformed
 		// Check the ImageJ error log; null if last command succeeded
-		String potentialErrorMessage = IJ.getErrorMessage();
-		if (null != potentialErrorMessage) {
+		final String potentialErrorMessage = IJ.getErrorMessage();
+		if (null != potentialErrorMessage)
 			throw new ImageImportException(
 					"Error importing image file " + f.getName() + ": " + potentialErrorMessage);
-		}
 
-		ImageStack stack = convertToStack(image);
+		final ImageStack stack = convertToStack(image);
 		image.close();
 		return stack;
 	}
@@ -404,8 +401,8 @@ public class ImageImporter implements Importer {
 	public static ImageProcessor importFileTo24bit(@NonNull File f) throws ImageImportException {
 
 		if (isND2(f)) {
-			ImageStack stack = importND2ToStack(f);
-			ColorProcessor cp = new ColorProcessor(stack.getWidth(), stack.getHeight());
+			final ImageStack stack = importND2ToStack(f);
+			final ColorProcessor cp = new ColorProcessor(stack.getWidth(), stack.getHeight());
 			if (stack.size() > 1) { // set each colour channel
 				for (int i = 1; i <= stack.getSize(); i++) {
 					cp.setChannel(i, (ByteProcessor) stack.getProcessor(i));
@@ -429,7 +426,7 @@ public class ImageImporter implements Importer {
 	 */
 	public static ImageProcessor importImageAndInvert(File f, int channel)
 			throws ImageImportException {
-		ImageProcessor ip = importImage(f, channel);
+		final ImageProcessor ip = importImage(f, channel);
 		ip.invert();
 		return ip;
 	}
@@ -442,8 +439,8 @@ public class ImageImporter implements Importer {
 	 * @return
 	 */
 	public static ImageProcessor importImage(File f, int channel) throws ImageImportException {
-		ImageStack s = importToStack(f);
-		int stack = rgbToStack(channel);
+		final ImageStack s = importToStack(f);
+		final int stack = rgbToStack(channel);
 		if (stack > s.getSize())
 			throw new ImageImportException(f.getAbsolutePath() + " has only " + s.getSize()
 					+ " slices; trying to fetch slice " + stack);
@@ -457,7 +454,7 @@ public class ImageImporter implements Importer {
 	 * @return
 	 */
 	private static boolean isImportable(@NonNull ImagePlus image) {
-		for (int i : IMAGE_TYPES_PROCESSED)
+		for (final int i : IMAGE_TYPES_PROCESSED)
 			if (i == image.getType())
 				return true;
 		return false;
@@ -496,7 +493,7 @@ public class ImageImporter implements Importer {
 	 * @return a stack with the input image as position 0
 	 */
 	private static ImageStack convert8bitToStack(@NonNull final ImagePlus image) {
-		ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, EIGHT_BIT);
+		final ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, EIGHT_BIT);
 		result.addSlice("counterstain", image.getProcessor());
 		result.deleteSlice(1); // remove the blank first slice
 		return result;
@@ -510,16 +507,16 @@ public class ImageImporter implements Importer {
 	 */
 	private static ImageStack convert24bitToStack(@NonNull final ImagePlus image) {
 
-		int imageDepth = 0; // number of images in the stack to begin
-		int bitDepth = 8; // default 8 bit images
+		final int imageDepth = 0; // number of images in the stack to begin
+		final int bitDepth = 8; // default 8 bit images
 
 		// Create a new empty stack. There will be a blank image in the
 		// stack at index 1. NB stacks do not use zero indexing.
-		ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), imageDepth,
+		final ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), imageDepth,
 				bitDepth);
 
 		// split out colour channel
-		ImagePlus[] channels = ChannelSplitter.split(image);
+		final ImagePlus[] channels = ChannelSplitter.split(image);
 
 		// Put each channel into the correct stack position
 		result.addSlice("counterstain", channels[RGB_BLUE].getProcessor());
@@ -539,7 +536,7 @@ public class ImageImporter implements Importer {
 	private static ImageStack convert16bitTo8bit(ImagePlus image) {
 		// this is the ij.process.ImageConverter, not my
 		// analysis.image.ImageConverter
-		ij.process.ImageConverter converter = new ij.process.ImageConverter(image);
+		final ij.process.ImageConverter converter = new ij.process.ImageConverter(image);
 		converter.convertToGray8();
 		return convert8bitToStack(image);
 	}

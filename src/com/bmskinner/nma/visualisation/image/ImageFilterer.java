@@ -18,6 +18,7 @@ package com.bmskinner.nma.visualisation.image;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -185,7 +186,7 @@ public class ImageFilterer {
 	 */
 	public ImageFilterer convertToByteProcessor() {
 		if (!isByteProcessor()) {
-			TypeConverter tc = new TypeConverter(ip, false);
+			final TypeConverter tc = new TypeConverter(ip, false);
 			ip = tc.convertToByte();
 		}
 		return this;
@@ -199,7 +200,7 @@ public class ImageFilterer {
 	 */
 	public ImageFilterer convertToShortProcessor() {
 		if (!isShortProcessor()) {
-			TypeConverter tc = new TypeConverter(ip, false);
+			final TypeConverter tc = new TypeConverter(ip, false);
 			ip = tc.convertToShort();
 		}
 		return this;
@@ -213,7 +214,7 @@ public class ImageFilterer {
 	 */
 	public ImageFilterer convertToColorProcessor() {
 		if (!isColorProcessor()) {
-			TypeConverter tc = new TypeConverter(ip, false);
+			final TypeConverter tc = new TypeConverter(ip, false);
 			ip = tc.convertToRGB();
 		}
 		return this;
@@ -250,9 +251,11 @@ public class ImageFilterer {
 	 * @return
 	 */
 	public static ImageProcessor createWhiteColorProcessor(int w, int h) {
-		ImageProcessor ip = new ColorProcessor(w, h);
+		final ImageProcessor ip = new ColorProcessor(w, h);
 		for (int i = 0; i < ip.getPixelCount(); i++)
+		 {
 			ip.set(i, RGB_WHITE); // set all to white initially
+		}
 		return ip;
 	}
 
@@ -264,7 +267,7 @@ public class ImageFilterer {
 	 * @return
 	 */
 	public static ImageProcessor createWhiteByteProcessor(int w, int h) {
-		ImageProcessor ip = new ByteProcessor(w, h);
+		final ImageProcessor ip = new ByteProcessor(w, h);
 		for (int i = 0; i < ip.getPixelCount(); i++) {
 			ip.set(i, 255); // set all to white initially
 		}
@@ -279,9 +282,11 @@ public class ImageFilterer {
 	 * @return
 	 */
 	public static ImageProcessor createBlackColorProcessor(int w, int h) {
-		ImageProcessor ip = new ColorProcessor(w, h);
+		final ImageProcessor ip = new ColorProcessor(w, h);
 		for (int i = 0; i < ip.getPixelCount(); i++)
+		 {
 			ip.set(i, RGB_BLACK); // set all to white initially
+		}
 		return ip;
 	}
 
@@ -293,9 +298,10 @@ public class ImageFilterer {
 	 * @return
 	 */
 	public static ImageProcessor createBlackByteProcessor(int w, int h) {
-		ImageProcessor ip = new ByteProcessor(w, h);
-		for (int i = 0; i < ip.getPixelCount(); i++)
+		final ImageProcessor ip = new ByteProcessor(w, h);
+		for (int i = 0; i < ip.getPixelCount(); i++) {
 			ip.set(i, 0);
+		}
 		return ip;
 	}
 
@@ -309,21 +315,21 @@ public class ImageFilterer {
 	public static List<ImageProcessor> fitToCommonCanvas(List<ImageProcessor> images) {
 		int maxWidth = 0;
 		int maxHeight = 0;
-		for (ImageProcessor raw : images) {
+		for (final ImageProcessor raw : images) {
 			maxWidth = Math.max(maxWidth, raw.getWidth());
 			maxHeight = Math.max(maxHeight, raw.getHeight());
 		}
 
-		List<ImageProcessor> result = new ArrayList<>();
-		for (ImageProcessor raw : images) {
+		final List<ImageProcessor> result = new ArrayList<>();
+		for (final ImageProcessor raw : images) {
 			// Beware of single pixel offsets
-			int wDiff = maxWidth - raw.getWidth();
-			int lbuffer = wDiff % 2 == 0 ? wDiff / 2 : wDiff / 2 + 1;
-			int rbuffer = wDiff / 2;
+			final int wDiff = maxWidth - raw.getWidth();
+			final int lbuffer = wDiff % 2 == 0 ? wDiff / 2 : wDiff / 2 + 1;
+			final int rbuffer = wDiff / 2;
 
-			int hDiff = maxHeight - raw.getHeight();
-			int tbuffer = hDiff % 2 == 0 ? hDiff / 2 : hDiff / 2 + 1;
-			int bbuffer = hDiff / 2;
+			final int hDiff = maxHeight - raw.getHeight();
+			final int tbuffer = hDiff % 2 == 0 ? hDiff / 2 : hDiff / 2 + 1;
+			final int bbuffer = hDiff / 2;
 
 			result.add(ImageConverter.expandCanvas(raw, lbuffer,
 					rbuffer, tbuffer, bbuffer, Color.BLACK));
@@ -350,21 +356,21 @@ public class ImageFilterer {
 		 * Keep the hue, and make a scale for s and b towards white
 		 */
 
-		float[] hsb = Color.RGBtoHSB(colour.getRed(), colour.getGreen(), colour.getBlue(), null);
+		final float[] hsb = Color.RGBtoHSB(colour.getRed(), colour.getGreen(), colour.getBlue(), null);
 
 		// Scale the brightness from 0-bri across the image
-		ColorProcessor cp = new ColorProcessor(ip.getWidth(), ip.getHeight());
+		final ColorProcessor cp = new ColorProcessor(ip.getWidth(), ip.getHeight());
 
 		for (int i = 0; i < ip.getPixelCount(); i++) {
 
-			float h = hsb[0];
+			final float h = hsb[0];
 			float s = hsb[1];
 //            float b = hsb[2];
 
-			int pixel = ip.get(i);
+			final int pixel = ip.get(i);
 
 			if (pixel == 255) { // skip fully white pixels
-				int full = RGB_WHITE;
+				final int full = RGB_WHITE;
 				cp.set(i, full);
 
 			} else {
@@ -373,8 +379,8 @@ public class ImageFilterer {
 				// Since we are scaling from 255-0, this is 1- the actual
 				// fraction
 
-				float invF = (pixel) / 255f;
-				float f = 1f - invF;
+				final float invF = (pixel) / 255f;
+				final float f = 1f - invF;
 
 				// Set the saturation to the fractional intensity of the
 				// selected colour
@@ -384,7 +390,7 @@ public class ImageFilterer {
 
 				// Make the full pixel
 
-				int full = Color.HSBtoRGB(h, s, 1);
+				final int full = Color.HSBtoRGB(h, s, 1);
 				cp.set(i, full);
 
 			}
@@ -410,7 +416,7 @@ public class ImageFilterer {
 			float weight2) {
 		ip1.invert();
 		ip2.invert();
-		ImageProcessor result = ip1.duplicate();
+		final ImageProcessor result = ip1.duplicate();
 		FloatProcessor fp1 = null;
 		FloatProcessor fp2 = null; // non-float images will be converted to these
 		for (int i = 0; i < ip1.getNChannels(); i++) { // grayscale: once. RBG: once per color,
@@ -442,14 +448,15 @@ public class ImageFilterer {
 	 */
 	private static void blendFloat(FloatProcessor fp1, float weight1, FloatProcessor fp2,
 			float weight2) {
-		int width = fp1.getWidth();
-		float[] pixels1 = (float[]) fp1.getPixels(); // array of the pixels of fp1
-		float[] pixels2 = (float[]) fp2.getPixels();
-		for (int y = 0; y < fp1.getHeight(); y++) // loop over all pixels inside the roi rectangle
+		final int width = fp1.getWidth();
+		final float[] pixels1 = (float[]) fp1.getPixels(); // array of the pixels of fp1
+		final float[] pixels2 = (float[]) fp2.getPixels();
+		for (int y = 0; y < fp1.getHeight(); y++) { // loop over all pixels inside the roi rectangle
 			for (int x = 0; x < fp1.getWidth(); x++) {
-				int i = x + y * width; // this is how the pixels are addressed
-				pixels1[i] = weight1 * pixels1[i] + weight2 * pixels2[i]; // the weighted sum
-			}
+							final int i = x + y * width; // this is how the pixels are addressed
+							pixels1[i] = weight1 * pixels1[i] + weight2 * pixels2[i]; // the weighted sum
+						}
+		}
 	}
 
 	/**
@@ -471,9 +478,8 @@ public class ImageFilterer {
 		if (ip == null)
 			throw new IllegalArgumentException("Image processor is null");
 
-		if (c.hasCytoplasm()) {
+		if (c.hasCytoplasm())
 			return crop(ip, c.getCytoplasm());
-		}
 		return crop(ip, c.getPrimaryNucleus());
 	}
 
@@ -498,8 +504,8 @@ public class ImageFilterer {
 		if (ip == null)
 			throw new IllegalArgumentException("Image processor is null");
 		// Choose a clip for the image (an enlargement of the original nucleus ROI
-		int wideW = (int) c.getWidth() + Imageable.COMPONENT_BUFFER * 2;
-		int wideH = (int) c.getHeight() + Imageable.COMPONENT_BUFFER * 2;
+		final int wideW = (int) c.getWidth() + Imageable.COMPONENT_BUFFER * 2;
+		final int wideH = (int) c.getHeight() + Imageable.COMPONENT_BUFFER * 2;
 		int wideX = c.getXBase() - Imageable.COMPONENT_BUFFER;
 		int wideY = c.getYBase() - Imageable.COMPONENT_BUFFER;
 
@@ -522,11 +528,11 @@ public class ImageFilterer {
 	public static ImageProcessor resizeKeepingAspect(@NonNull ImageProcessor ip, int maxWidth,
 			int maxHeight) {
 
-		int originalWidth = ip.getWidth();
-		int originalHeight = ip.getHeight();
+		final int originalWidth = ip.getWidth();
+		final int originalHeight = ip.getHeight();
 
 		// keep the image aspect ratio
-		double ratio = (double) originalWidth / (double) originalHeight;
+		final double ratio = (double) originalWidth / (double) originalHeight;
 
 		double finalWidth = maxHeight * ratio; // fix height
 		finalWidth = finalWidth > maxWidth ? maxWidth : finalWidth; // but
@@ -558,13 +564,13 @@ public class ImageFilterer {
 	 */
 	public static ImageProcessor rotateImage(final ImageProcessor ip, double degrees) {
 
-		double rad = Math.toRadians(degrees);
+		final double rad = Math.toRadians(degrees);
 
 		// Calculate the new width and height of the canvas
 		// new width is h sin(a) + w cos(a) and vice versa for height
-		double newWidth = Math.abs(Math.sin(rad) * ip.getHeight())
+		final double newWidth = Math.abs(Math.sin(rad) * ip.getHeight())
 				+ Math.abs(Math.cos(rad) * ip.getWidth());
-		double newHeight = Math.abs(Math.sin(rad) * ip.getWidth())
+		final double newHeight = Math.abs(Math.sin(rad) * ip.getWidth())
 				+ Math.abs(Math.cos(rad) * ip.getHeight());
 
 		int w = (int) Math.ceil(newWidth);
@@ -577,12 +583,12 @@ public class ImageFilterer {
 		h = h < ip.getHeight() ? ip.getHeight() : h;
 
 		// paste old image to centre of enlarged canvas
-		int xBase = (w - ip.getWidth()) >> 1;
-		int yBase = (h - ip.getHeight()) >> 1;
+		final int xBase = (w - ip.getWidth()) >> 1;
+		final int yBase = (h - ip.getHeight()) >> 1;
 
 		LOGGER.finer(String.format("New image %sx%s from %sx%s : Rot: %s", w, h, ip.getWidth(),
 				ip.getHeight(), degrees));
-		ColorProcessor newIp = new ColorProcessor(w, h);
+		final ColorProcessor newIp = new ColorProcessor(w, h);
 
 		newIp.setColor(Color.WHITE); // fill current space with white
 		newIp.fill();
@@ -603,9 +609,9 @@ public class ImageFilterer {
 	public static ImageProcessor orientImage(final ImageProcessor ip, final Nucleus n) {
 		try {
 			ImageProcessor newIp = ip.duplicate();
-			double angle = ComponentOrienter.calcAngleToAlignVertically(n);
+			final double angle = ComponentOrienter.calcAngleToAlignVertically(n);
 			newIp = rotateImage(ip, angle);
-			boolean isFlip = ComponentOrienter.isFlipNeeded(n);
+			final boolean isFlip = ComponentOrienter.isFlipNeeded(n);
 			if (isFlip) {
 				if (PriorityAxis.Y.equals(n.getPriorityAxis())) {
 					newIp.flipHorizontal();
@@ -637,12 +643,12 @@ public class ImageFilterer {
 
 		double rMax = min, gMax = min, bMax = min;
 		double rMin = max, gMin = max, bMin = max;
-		ImageProcessor result = new ColorProcessor(ip.getWidth(), ip.getHeight());
+		final ImageProcessor result = new ColorProcessor(ip.getWidth(), ip.getHeight());
 
 		for (int i = 0; i < ip.getPixelCount(); i++) {
-			int pixel = ip.get(i);
+			final int pixel = ip.get(i);
 
-			int[] rgb = intToRgb(pixel);
+			final int[] rgb = intToRgb(pixel);
 
 			rMax = Math.max(rgb[0], rMax);
 			gMax = Math.max(rgb[1], gMax);
@@ -653,24 +659,24 @@ public class ImageFilterer {
 			bMin = Math.min(rgb[2], bMin);
 		}
 
-		double rRange = rMax - rMin;
-		double gRange = gMax - gMin;
-		double bRange = bMax - bMin;
+		final double rRange = rMax - rMin;
+		final double gRange = gMax - gMin;
+		final double bRange = bMax - bMin;
 
 		// Adjust each pixel to the proportion in range min-max
 		for (int i = 0; i < ip.getPixelCount(); i++) {
-			int pixel = ip.get(i);
-			int[] rgb = intToRgb(pixel);
+			final int pixel = ip.get(i);
+			final int[] rgb = intToRgb(pixel);
 
-			double rProp = (rgb[0] - rMin) / rRange;
-			double gProp = (rgb[1] - gMin) / gRange;
-			double bProp = (rgb[2] - bMin) / bRange;
+			final double rProp = (rgb[0] - rMin) / rRange;
+			final double gProp = (rgb[1] - gMin) / gRange;
+			final double bProp = (rgb[2] - bMin) / bRange;
 
-			int rNew = (int) (max * rProp);
-			int gNew = (int) (max * gProp);
-			int bNew = (int) (max * bProp);
+			final int rNew = (int) (max * rProp);
+			final int gNew = (int) (max * gProp);
+			final int bNew = (int) (max * bProp);
 
-			int newPixel = rgbToInt(rNew, gNew, bNew);
+			final int newPixel = rgbToInt(rNew, gNew, bNew);
 			result.set(i, newPixel);
 		}
 		return result;
@@ -721,37 +727,35 @@ public class ImageFilterer {
 			result = new ByteProcessor(ip.getWidth(), ip.getHeight());
 		}
 
-		if (result == null) {
+		if (result == null)
 			throw new IllegalArgumentException(
 					"Unsupported image type: " + ip.getClass().getSimpleName());
-		}
 
 		// Find the range in the image
 
 		for (int i = 0; i < ip.getPixelCount(); i++) {
-			int pixel = ip.get(i);
+			final int pixel = ip.get(i);
 			maxIntensity = pixel > maxIntensity ? pixel : maxIntensity;
 			minIntensity = pixel < minIntensity ? pixel : minIntensity;
 		}
 
-		if (maxIntensity == 0) {
+		if (maxIntensity == 0)
 			return ip;
-		}
 
-		double range = maxIntensity - minIntensity < 0.01 ? 0d : maxIntensity - minIntensity;
+		final double range = maxIntensity - minIntensity < 0.01 ? 0d : maxIntensity - minIntensity;
 		LOGGER.finer("Max intensity: " + maxIntensity);
 		LOGGER.finer("Min intensity: " + minIntensity);
 		LOGGER.finer("Rescaling image across image range " + range);
 
 		// Adjust each pixel to the proportion in range 0-255
 		for (int i = 0; i < ip.getPixelCount(); i++) {
-			int pixel = ip.get(i);
+			final int pixel = ip.get(i);
 
 			if (range == 0) {
 				result.set(i, 128);
 			} else {
-				double proportion = (pixel - minIntensity) / range;
-				int newPixel = (int) (255 * proportion);
+				final double proportion = (pixel - minIntensity) / range;
+				final int newPixel = (int) (255 * proportion);
 				result.set(i, newPixel);
 			}
 		}
@@ -770,20 +774,21 @@ public class ImageFilterer {
 			throw new IllegalArgumentException("List null or empty");
 
 		// Check images are same dimensions
-		int w = list.get(0).getWidth();
-		int h = list.get(0).getHeight();
+		final int w = list.get(0).getWidth();
+		final int h = list.get(0).getHeight();
 		int nonNull = 0;
 
 		// check sizes match
-		for (ImageProcessor ip : list) {
-			if (ip == null)
+		for (final ImageProcessor ip : list) {
+			if (ip == null) {
 				continue;
+			}
 			if (w != ip.getWidth() || h != ip.getHeight())
 				throw new IllegalArgumentException(DIMENSIONS_DO_NOT_MATCH_ERROR);
 			nonNull++;
 		}
 		// Create an empty white processor of the correct dimensions
-		ImageProcessor mergeProcessor = ImageFilterer.createBlackByteProcessor(w, h);
+		final ImageProcessor mergeProcessor = ImageFilterer.createBlackByteProcessor(w, h);
 
 		if (nonNull == 0)
 			return mergeProcessor;
@@ -793,7 +798,7 @@ public class ImageFilterer {
 			for (int y = 0; y < h; y++) {
 
 				int pixelTotal = 0;
-				for (ImageProcessor ip : list) {
+				for (final ImageProcessor ip : list) {
 					if (ip == null) {
 						continue;
 					}
@@ -804,8 +809,9 @@ public class ImageFilterer {
 
 				// Ignore anything that is not signal -
 				// the background is already black
-				if (pixelTotal > 0)
+				if (pixelTotal > 0) {
 					mergeProcessor.set(x, y, pixelTotal);
+				}
 			}
 		}
 		return mergeProcessor;
@@ -822,14 +828,13 @@ public class ImageFilterer {
 			throw new IllegalArgumentException("List null or empty");
 
 		// Check images are same dimensions
-		int w = list.get(0).getWidth();
-		int h = list.get(0).getHeight();
+		final int w = list.get(0).getWidth();
+		final int h = list.get(0).getHeight();
 
 		// check sizes match
-		for (ImageProcessor ip : list) {
-			if (ip == null) {
+		for (final ImageProcessor ip : list) {
+			if (ip == null)
 				return new ShortProcessor(w, h);
-			}
 
 			if (w != ip.getWidth() || h != ip.getHeight())
 				throw new IllegalArgumentException(DIMENSIONS_DO_NOT_MATCH_ERROR);
@@ -838,14 +843,15 @@ public class ImageFilterer {
 
 		// Average the pixels. Track the highest value to avoid short overflows
 		int maxPixelValue = 0;
-		int[][] imageTotals = new int[w][h];
+		final int[][] imageTotals = new int[w][h];
 
 		for (int x = 0; x < w; x++) {
 			for (int y = 0; y < h; y++) {
 				int pixelTotal = 0;
-				for (ImageProcessor ip : list) {
-					if (ip == null)
+				for (final ImageProcessor ip : list) {
+					if (ip == null) {
 						continue;
+					}
 					pixelTotal += ip.get(x, y);
 				}
 				maxPixelValue = Math.max(maxPixelValue, pixelTotal);
@@ -866,10 +872,10 @@ public class ImageFilterer {
 	 * @return
 	 */
 	private static ImageProcessor createScaledShortProcessor(int[][] pixelValues, int maxValue) {
-		int w = pixelValues.length;
-		int h = pixelValues[0].length;
+		final int w = pixelValues.length;
+		final int h = pixelValues[0].length;
 
-		ImageProcessor result = new ShortProcessor(w, h);
+		final ImageProcessor result = new ShortProcessor(w, h);
 
 		if (maxValue > Short.MAX_VALUE) {
 			LOGGER.log(Level.FINE, "Rescaling pixels with max value {0} to fit short range",
@@ -902,46 +908,44 @@ public class ImageFilterer {
 	 */
 	public static ImageProcessor cowarpalise(ImageProcessor imageA, ImageProcessor imageB) {
 
-		if (imageA == null || imageB == null) {
+		if (imageA == null || imageB == null)
 			throw new IllegalArgumentException("Image(s) null");
-		}
 
 		// Check images are same dimensions
-		if (imageA.getWidth() != imageB.getWidth() || imageA.getHeight() != imageB.getHeight()) {
+		if (imageA.getWidth() != imageB.getWidth() || imageA.getHeight() != imageB.getHeight())
 			throw new IllegalArgumentException(DIMENSIONS_DO_NOT_MATCH_ERROR);
-		}
 
 		// Set the saturation scaled by intensity
 
-		ImageProcessor cp = new ColorProcessor(imageA.getWidth(), imageA.getHeight());
+		final ImageProcessor cp = new ColorProcessor(imageA.getWidth(), imageA.getHeight());
 
 		for (int i = 0; i < imageA.getPixelCount(); i++) {
-			int r = imageA.get(i);
-			int b = imageB.get(i);
+			final int r = imageA.get(i);
+			final int b = imageB.get(i);
 
 			if (r == 255 && b == 255) {
 				cp.set(i, rgbToInt(255, 255, 255));
 				continue;
 			}
 
-			float diff = r - (float) b;
-			float scaled = Math.abs(diff) / 255f; // fraction of 8bit space
-			float ranged = 0.17f * scaled;
+			final float diff = r - (float) b;
+			final float scaled = Math.abs(diff) / 255f; // fraction of 8bit space
+			final float ranged = 0.17f * scaled;
 
 			// Scale to fit in hue range 240-360
 
 			// Needs to be a fractional number that can be multiplied by 360
 			// Therefore range is 0.66-1
-			float h = diff < 0 ? 0.83f - ranged : 0.83f + ranged;
+			final float h = diff < 0 ? 0.83f - ranged : 0.83f + ranged;
 			// float h = 0.83f + diff; // start at purple, variation of up to
 			// 128
 			// float h = 300f + diff; // start at purple, variation of up to 128
 
-			float s = diff < 0 ? 1 - (b / 255f) : 1 - (r / 255f);
+			final float s = diff < 0 ? 1 - (b / 255f) : 1 - (r / 255f);
 
-			float v = 1f;
+			final float v = 1f;
 
-			int rgb = Color.HSBtoRGB(h, s, v);
+			final int rgb = Color.HSBtoRGB(h, s, v);
 			cp.set(i, rgb);
 
 		}
@@ -967,7 +971,7 @@ public class ImageFilterer {
 
 	protected static int[] intToRgb(int i) {
 		// pixel values for this image
-		int[] rgb = new int[3];
+		final int[] rgb = new int[3];
 		rgb[0] = (i >> 16) & 0xFF;
 		rgb[1] = (i >> 8) & 0xFF;
 		rgb[2] = i & 0xFF;
@@ -996,10 +1000,10 @@ public class ImageFilterer {
 			throw new IllegalArgumentException("List null or empty");
 
 		// Check images are same dimensions
-		int w = list.get(0).getWidth();
-		int h = list.get(0).getHeight();
+		final int w = list.get(0).getWidth();
+		final int h = list.get(0).getHeight();
 
-		for (ImageProcessor ip : list) {
+		for (final ImageProcessor ip : list) {
 
 			if (ip == null)
 				throw new IllegalArgumentException(
@@ -1010,18 +1014,18 @@ public class ImageFilterer {
 						ip.getWidth(), ip.getHeight()));
 		}
 
-		ImageProcessor cp = new ColorProcessor(w, h);
+		final ImageProcessor cp = new ColorProcessor(w, h);
 
 		// Average the colours at each pixel
 		for (int i = 0; i < w * h; i++) {
 
 			int r = 0, g = 0, b = 0; // total pixel values
 
-			for (ImageProcessor ip : list) {
-				int pixel = ip.get(i);
+			for (final ImageProcessor ip : list) {
+				final int pixel = ip.get(i);
 
 				// pixel values for this image
-				int[] rgb = intToRgb(pixel);
+				final int[] rgb = intToRgb(pixel);
 
 				r += rgb[0];
 				g += rgb[1];
@@ -1032,7 +1036,7 @@ public class ImageFilterer {
 			g /= list.size();
 			b /= list.size();
 
-			int rgb = rgbToInt(r, g, b);
+			final int rgb = rgbToInt(r, g, b);
 			cp.set(i, rgb);
 
 		}
@@ -1050,8 +1054,9 @@ public class ImageFilterer {
 	 */
 	public ImageFilterer threshold(int threshold) {
 		LOGGER.finest("Running thresholding");
-		if (ip.isGrayscale())
+		if (ip.isGrayscale()) {
 			ip.threshold(threshold);
+		}
 		LOGGER.finest("Ran thresholding");
 		return this;
 	}
@@ -1085,10 +1090,11 @@ public class ImageFilterer {
 	 * @return this filterer
 	 */
 	public ImageFilterer setBlackLevel(int threshold) {
-		ImageProcessor result = ip.duplicate();
+		final ImageProcessor result = ip.duplicate();
 		for (int i = 0; i < result.getPixelCount(); i++) {
-			if (result.get(i) < threshold)
+			if (result.get(i) < threshold) {
 				result.set(i, 0);
+			}
 		}
 		return new ImageFilterer(result);
 	}
@@ -1100,10 +1106,11 @@ public class ImageFilterer {
 	 * @return this filterer
 	 */
 	public ImageFilterer setWhiteLevel(int threshold) {
-		ImageProcessor result = ip.duplicate();
+		final ImageProcessor result = ip.duplicate();
 		for (int i = 0; i < result.getPixelCount(); i++) {
-			if (result.get(i) > threshold)
+			if (result.get(i) > threshold) {
 				result.set(i, BYTE_MAX);
+			}
 		}
 		return new ImageFilterer(result);
 	}
@@ -1118,7 +1125,7 @@ public class ImageFilterer {
 	 */
 	public ImageFilterer setMaximumPixelValue(int threshold) {
 		LOGGER.finest("Setting max pixel value");
-		ImageProcessor result = ip.duplicate();
+		final ImageProcessor result = ip.duplicate();
 
 		for (int i = 0; i < result.getPixelCount(); i++) {
 
@@ -1139,11 +1146,12 @@ public class ImageFilterer {
 	 */
 	public ImageFilterer setMinimumPixelValue(int threshold) {
 
-		ImageProcessor result = ip.duplicate();
+		final ImageProcessor result = ip.duplicate();
 
 		for (int i = 0; i < result.getPixelCount(); i++) {
-			if (result.get(i) < threshold)
+			if (result.get(i) < threshold) {
 				result.set(i, threshold);
+			}
 		}
 		ip = result;
 		return this;
@@ -1160,18 +1168,17 @@ public class ImageFilterer {
 	 */
 	public ImageFilterer bridgePixelGaps(int bridgeSize) {
 
-		if (bridgeSize % 2 == 0) {
+		if (bridgeSize % 2 == 0)
 			throw new IllegalArgumentException("Kernel size must be odd");
-		}
-		ByteProcessor result = ip.convertToByteProcessor();
+		final ByteProcessor result = ip.convertToByteProcessor();
 
-		int[][] array = result.getIntArray();
-		int[][] input = result.getIntArray();
+		final int[][] array = result.getIntArray();
+		final int[][] input = result.getIntArray();
 
 		for (int x = 0; x < ip.getWidth(); x++) {
 			for (int y = 0; y < ip.getHeight(); y++) {
 
-				int[][] kernel = getKernel(input, x, y);
+				final int[][] kernel = getKernel(input, x, y);
 				if (bridgePixel(kernel)) {
 					array[y][x] = 255;
 				}
@@ -1221,17 +1228,16 @@ public class ImageFilterer {
 	 * @return the resized image, preserving aspect ratio
 	 */
 	public static ImageProcessor fitToScreen(ImageProcessor ip, double fraction) {
-		if (ip == null) {
+		if (ip == null)
 			throw new IllegalArgumentException("Image processor is null");
-		}
 
-		int originalWidth = ip.getWidth();
-		int originalHeight = ip.getHeight();
+		final int originalWidth = ip.getWidth();
+		final int originalHeight = ip.getHeight();
 
 		// keep the image aspect ratio
-		double ratio = (double) originalWidth / (double) originalHeight;
+		final double ratio = (double) originalWidth / (double) originalHeight;
 
-		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+		final Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 
 		// set the new width
 		int newWidth = (int) (screenSize.getWidth() * fraction);
@@ -1258,11 +1264,11 @@ public class ImageFilterer {
 		if (ip == null)
 			throw new IllegalArgumentException("Image processor is null");
 
-		int originalWidth = ip.getWidth();
+		final int originalWidth = ip.getWidth();
 
-		double finalWidth = originalWidth * fraction; // fix height
+		final double finalWidth = originalWidth * fraction; // fix height
 
-		ImageProcessor result = ip.duplicate().resize((int) finalWidth);
+		final ImageProcessor result = ip.duplicate().resize((int) finalWidth);
 		ip = result;
 		return this;
 	}
@@ -1280,7 +1286,7 @@ public class ImageFilterer {
 		/*
 		 * Create the kernel array, and zero it
 		 */
-		int[][] result = new int[3][3];
+		final int[][] result = new int[3][3];
 		for (int w = 0; w < 3; w++) {
 
 			for (int h = 0; h < 3; h++) {
@@ -1322,9 +1328,8 @@ public class ImageFilterer {
 		/*
 		 * If the central pixel is filled, do nothing.
 		 */
-		if (array[1][1] == 255) {
+		if (array[1][1] == 255)
 			return false;
-		}
 
 		/*
 		 * If there is a vertical or horizontal stripe of black pixels, they should be
@@ -1342,9 +1347,8 @@ public class ImageFilterer {
 			}
 		}
 
-		if (vStripe < 3 && hStripe < 3) {
+		if (vStripe < 3 && hStripe < 3)
 			return false;
-		}
 
 		/*
 		 * Are two white pixels present?
@@ -1358,9 +1362,8 @@ public class ImageFilterer {
 				}
 
 			}
-			if (count >= 2) {
+			if (count >= 2)
 				return true;
-			}
 		}
 		return false;
 	}
@@ -1390,7 +1393,7 @@ public class ImageFilterer {
 		// using the MorphoLibJ library
 		ImageProcessor result = ip.convertToByteProcessor();
 
-		Strel strel = DiskStrel.fromRadius(closingRadius);
+		final Strel strel = DiskStrel.fromRadius(closingRadius);
 		result = strel.dilation(result);
 
 		fill(result);
@@ -1410,7 +1413,7 @@ public class ImageFilterer {
 		// using the MorphoLibJ library
 		ImageProcessor result = ip.convertToByteProcessor();
 
-		Strel strel = DiskStrel.fromRadius(amount);
+		final Strel strel = DiskStrel.fromRadius(amount);
 
 		result = Morphology.dilation(result, strel);
 		ip = result;
@@ -1425,32 +1428,37 @@ public class ImageFilterer {
 	 * @param ip the image to fill
 	 */
 	private static void fill(ImageProcessor ip) {
-		int foreground = 255;
-		int background = 0;
+		final int foreground = 255;
+		final int background = 0;
 
-		int width = ip.getWidth();
-		int height = ip.getHeight();
-		FloodFiller ff = new FloodFiller(ip);
+		final int width = ip.getWidth();
+		final int height = ip.getHeight();
+		final FloodFiller ff = new FloodFiller(ip);
 		ip.setColor(127);
 		for (int y = 0; y < height; y++) {
-			if (ip.getPixel(0, y) == background)
+			if (ip.getPixel(0, y) == background) {
 				ff.fill(0, y);
-			if (ip.getPixel(width - 1, y) == background)
+			}
+			if (ip.getPixel(width - 1, y) == background) {
 				ff.fill(width - 1, y);
+			}
 		}
 		for (int x = 0; x < width; x++) {
-			if (ip.getPixel(x, 0) == background)
+			if (ip.getPixel(x, 0) == background) {
 				ff.fill(x, 0);
-			if (ip.getPixel(x, height - 1) == background)
+			}
+			if (ip.getPixel(x, height - 1) == background) {
 				ff.fill(x, height - 1);
+			}
 		}
-		byte[] pixels = (byte[]) ip.getPixels();
-		int n = width * height;
+		final byte[] pixels = (byte[]) ip.getPixels();
+		final int n = width * height;
 		for (int i = 0; i < n; i++) {
-			if (pixels[i] == 127)
+			if (pixels[i] == 127) {
 				pixels[i] = (byte) background;
-			else
+			} else {
 				pixels[i] = (byte) foreground;
+			}
 		}
 	}
 
@@ -1462,7 +1470,6 @@ public class ImageFilterer {
 	 *         image
 	 */
 	public ImageFilterer cannyEdgeDetection(@NonNull HashOptions options) {
-		LOGGER.finest("Running Canny edge detection");
 		ByteProcessor result = null;
 
 		// // calculation of auto threshold
@@ -1470,21 +1477,44 @@ public class ImageFilterer {
 			autoDetectCannyThresholds(options, ip);
 		}
 
-		CannyEdgeDetector canny = new CannyEdgeDetector(options);
-		canny.setSourceImage(ip.duplicate().getBufferedImage());
+		final CannyEdgeDetector canny = new CannyEdgeDetector(options);
+
+		final BufferedImage bp = ip.duplicate().getBufferedImage();
+		// The buffered image may use TYPE_BYTE_INDEXED. Ensure convered before running
+		// Canny
+//		final BufferedImage bp = convertToGrayScaleTypeByteGrey(ip.getBufferedImage());
+
+		canny.setSourceImage(bp);
 
 		canny.process();
-		BufferedImage edges = canny.getEdgesImage();
+		final BufferedImage edges = canny.getEdgesImage();
 
 		// convert to an unsigned byte processor
-		BufferedImage converted = new BufferedImage(edges.getWidth(), edges.getHeight(),
+		final BufferedImage converted = new BufferedImage(edges.getWidth(), edges.getHeight(),
 				BufferedImage.TYPE_BYTE_GRAY);
 		converted.getGraphics().drawImage(edges, 0, 0, null);
 
 		result = new ByteProcessor(converted);
 		ip = result;
-		LOGGER.finest("Ran Canny edge detection");
 		return this;
+	}
+
+	/**
+	 * Convert the given buffered image to TYPE_BYTE_GRAY. Useful if there is a
+	 * TYPE_BYTE_INDEXED image to process
+	 * 
+	 * @param image
+	 * @return
+	 */
+	private static BufferedImage convertToGrayScaleTypeByteGrey(BufferedImage image) {
+		final BufferedImage result = new BufferedImage(
+				image.getWidth(),
+				image.getHeight(),
+				BufferedImage.TYPE_BYTE_GRAY);
+		final Graphics g = result.getGraphics();
+		g.drawImage(image, 0, 0, null);
+		g.dispose();
+		return result;
 	}
 
 	/**
@@ -1508,7 +1538,7 @@ public class ImageFilterer {
 		}
 
 		// set the thresholds either side of the median
-		double sigma = 0.33; // default value - TODO: enable change
+		final double sigma = 0.33; // default value - TODO: enable change
 		double lower = Math.max(0, (1.0 - (2.5 * sigma)) * medianPixel);
 		lower = lower < 0.1 ? 0.1 : lower; // hard limit
 		double upper = Math.min(255, (1.0 + (0.6 * sigma)) * medianPixel);
@@ -1526,10 +1556,11 @@ public class ImageFilterer {
 	 * @return the median pixel intensity
 	 */
 	private double findMedianIntensity(ImageProcessor image) {
-		int max = image.getPixelCount();
-		double[] values = new double[max];
-		for (int i = 0; i < max; i++)
+		final int max = image.getPixelCount();
+		final double[] values = new double[max];
+		for (int i = 0; i < max; i++) {
 			values[i] = image.get(i);
+		}
 		return Stats.quartile(values, Stats.MEDIAN);
 	}
 
@@ -1544,25 +1575,24 @@ public class ImageFilterer {
 	public static ImageProcessor normaliseToCounterStain(@NonNull ImageProcessor ip,
 			@NonNull ImageProcessor counterstain) {
 		if (ip.getWidth() != counterstain.getWidth()
-				|| ip.getHeight() != counterstain.getHeight()) {
+				|| ip.getHeight() != counterstain.getHeight())
 			throw new IllegalArgumentException("Image dimensions must match: input 1 " +
 					ip.getWidth() + " x " + ip.getHeight() + "; input 2 " + counterstain.getWidth()
 					+ " x " +
 					counterstain.getHeight());
-		}
 
-		FloatProcessor result = new FloatProcessor(ip.getWidth(), ip.getHeight());
+		final FloatProcessor result = new FloatProcessor(ip.getWidth(), ip.getHeight());
 
-		float[][] input = ip.getFloatArray();
+		final float[][] input = ip.getFloatArray();
 
 		for (int i = 0; i < ip.getWidth(); i++) {
 			for (int j = 0; j < ip.getHeight(); j++) {
 
 				// divide by zero is bad; ensure if counterstain is zero
 				// we zero the result
-				float cs = counterstain.get(i, j);
-				float im = ip.get(i, j);
-				float out = cs == 0f ? 0 : im / cs;
+				final float cs = counterstain.get(i, j);
+				final float im = ip.get(i, j);
+				final float out = cs == 0f ? 0 : im / cs;
 				input[i][j] = out;
 			}
 		}
@@ -1589,7 +1619,7 @@ public class ImageFilterer {
 	 * @return the watershed image
 	 */
 	public static ImageProcessor watershed(@NonNull ImageProcessor source) {
-		ImageProcessor result = source.duplicate();
+		final ImageProcessor result = source.duplicate();
 		new EDM().toWatershed(result);
 		return result;
 	}
