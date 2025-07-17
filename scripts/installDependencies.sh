@@ -13,4 +13,4 @@ if [[ ! -e "artifacts/jebl-0.4.jar" ]]; then
 	if [[ -e "artifacts/jebl-0.4.jar" ]]; then
 		mvn install:install-file -Dfile="artifacts/jebl-0.4.jar" -DgroupId=jebl -DartifactId=jebl -Dversion=0.4 -Dpackaging=jar
 	fi
-
+fi
