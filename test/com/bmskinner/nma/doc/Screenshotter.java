@@ -33,6 +33,7 @@ import org.junit.Test;
 import com.bmskinner.nma.TestResources;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.core.DatasetListManager;
+import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.NuclearMorphologyAnalysis;
 import com.bmskinner.nma.gui.events.FileImportEventListener.FileImportEvent;
 import com.bmskinner.nma.gui.events.UserActionController;
@@ -65,8 +66,11 @@ public class Screenshotter {
 
 	public Screenshotter() throws AWTException, InterruptedException {
 		robot = new Robot();
+		GlobalOptions.getInstance().set(GlobalOptions.ALLOW_UPDATE_CHECK_KEY, false);
+		GlobalOptions.getInstance().set(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION, false);
 		nma = NuclearMorphologyAnalysis.getInstance();
 		nma.runWithGUI();
+
 		Thread.sleep(LOAD_TIME_MILLIS);
 
 		uac = UserActionController.getInstance();
