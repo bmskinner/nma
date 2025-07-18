@@ -6,6 +6,8 @@
 # Note that this script should be adjusted if you use a non-default local
 # Maven repo.
 
+mkdir -p artifacts
+
 if [[ ! -e "artifacts/jebl-0.4.jar" ]]; then
 	JEBL_REMOTE="https://downloads.sourceforge.net/project/jebl/jebl/jebl-0.4/jebl-0.4.jar"
 	curl -L -o artifacts/jebl-0.4.jar $JEBL_REMOTE
