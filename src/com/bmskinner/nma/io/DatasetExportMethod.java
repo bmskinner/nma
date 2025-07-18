@@ -69,8 +69,9 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 		backupExistingSaveFile();
 		isOk = saveAnalysisDatasetToXML(dataset, saveFile);
 
-		if (!isOk)
+		if (!isOk) {
 			LOGGER.warning("Save was unsucessful");
+		}
 	}
 
 	/**
@@ -83,12 +84,16 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 	 */
 	public boolean saveAnalysisDatasetToXML(IAnalysisDataset dataset, File saveFile)
 			throws IOException {
-		boolean ok = true;
+		final boolean ok = true;
 		LOGGER.fine("Saving XML dataset to " + saveFile.getAbsolutePath());
 
-		File parentFolder = saveFile.getParentFile();
-		if (!parentFolder.exists())
+		final File parentFolder = saveFile.getParentFile();
+		if (!parentFolder.exists()) {
 			parentFolder.mkdirs();
+		}
+
+		parentFolder.setReadable(true, false);
+		parentFolder.setWritable(true, false);
 
 		if (saveFile.isDirectory())
 			throw new IllegalArgumentException(
@@ -100,12 +105,12 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 			throw new IllegalArgumentException(String.format("Parent directory %s is not writable",
 					saveFile.getParentFile().getName()));
 
-		Document doc = new Document(dataset.toXmlElement());
+		final Document doc = new Document(dataset.toXmlElement());
 
-		OutputStream os = new FileOutputStream(saveFile);
-		CountedOutputStream cos = new CountedOutputStream(os);
-		cos.addCountListener((l) -> fireProgressEvent(l));
-		XMLOutputter xmlOutput = new XMLOutputter();
+		final OutputStream os = new FileOutputStream(saveFile);
+		final CountedOutputStream cos = new CountedOutputStream(os);
+		cos.addCountListener(this::fireProgressEvent);
+		final XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
 		xmlOutput.output(doc, cos);
 
@@ -116,16 +121,16 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 	 * Create a backup file of the existing nmd
 	 */
 	private void backupExistingSaveFile() {
-		File saveFile = dataset.getSavePath();
+		final File saveFile = dataset.getSavePath();
 		if (!saveFile.exists())
 			return;
 
-		File backupFile = new File(saveFile.getParent(),
+		final File backupFile = new File(saveFile.getParent(),
 				saveFile.getName().replaceAll(Io.NMD_FILE_EXTENSION,
 						Io.BACKUP_FILE_EXTENSION));
 		try {
 			copyFile(saveFile, backupFile);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
 	}
@@ -138,11 +143,14 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 	 * @throws IOException
 	 */
 	public static void copyFile(File sourceFile, File destFile) throws IOException {
-		if (!destFile.exists())
+		if (!destFile.exists()) {
 			destFile.createNewFile();
+		}
 
-		try (FileChannel source = new FileInputStream(sourceFile).getChannel();
-				FileChannel destination = new FileOutputStream(destFile).getChannel();) {
+		try (FileInputStream is = new FileInputStream(sourceFile);
+				FileOutputStream os = new FileOutputStream(destFile);) {
+			final FileChannel source = is.getChannel();
+			final FileChannel destination = os.getChannel();
 			destination.transferFrom(source, 0, source.size());
 		}
 	}

@@ -75,6 +75,20 @@ public class TestImageDatasetCreator {
 	 */
 	@BeforeClass
 	public static void removeUnitTestFolders() throws IOException {
+
+		// Ensure unit test folders are writable
+		TestResources.DATASET_FOLDER.setWritable(true, false);
+		TestResources.MOUSE_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.PIG_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.ROUND_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.MULTIPLE_BASE_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.MOUSE_SIGNALS_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.PIG_SIGNALS_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.ROUND_SIGNALS_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.MOUSE_CLUSTERS_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.PIG_CLUSTERS_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.ROUND_CLUSTERS_OUTPUT_FOLDER.setWritable(true, false);
+
 		deleteContents(TestResources.DATASET_FOLDER);
 
 		deleteContents(TestResources.MOUSE_OUTPUT_FOLDER);
@@ -119,6 +133,7 @@ public class TestImageDatasetCreator {
 	public void createMouseDataset() throws Exception {
 
 		final File testFolder = TestResources.MOUSE_INPUT_FOLDER;
+		testFolder.setWritable(true, false);
 		final IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 		final IAnalysisDataset d = createTestDataset(TestResources.MOUSE_OUTPUT_FOLDER, op, false);
 
