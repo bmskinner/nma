@@ -40,9 +40,11 @@ import ij.plugin.ChannelSplitter;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
 import loci.common.DebugTools;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
+import loci.formats.FormatTools;
 import loci.plugins.util.ImageProcessorReader;
 import loci.plugins.util.LociPrefs;
 
@@ -339,7 +341,7 @@ public class ImageImporter implements Importer {
 
 		// Suppress Bio-formats logging
 		DebugTools.enableLogging("OFF");
-
+		
 		try (final ImageProcessorReader r = new ImageProcessorReader(
 				new ChannelSeparator(LociPrefs.makeImageReader()));) {
 			r.setId(f.getAbsolutePath());
@@ -347,22 +349,40 @@ public class ImageImporter implements Importer {
 			if (r.getImageCount() > 1)
 				throw new ImageImportException("Cannot open ND2 with more than one image");
 
+			LOGGER.fine(
+					"ND2 file has pixel type %s on import".formatted(FormatTools.getPixelTypeString(r.getPixelType())));
+
+			// Create a new image stack
 			final int width = r.getSizeX();
 			final int height = r.getSizeY();
 			final ImageStack stack = new ImageStack(width, height);
 
-			final ImageProcessor[] channels = r.openProcessors(0);
+			// Note that while there is a direct method to get and convert an
+			// ImageProcessor:
+			// final ImageProcessor[] channels = r.openProcessors(0);
+			// channels[i].convertToByte(true);
+			// this method does not work correctly for our ND2 files. Hence doing it
+			// manually
+			for (int i = 0; i < r.getRGBChannelCount(); i++) {
 
-			for (int c = 0; c < channels.length; c++) {
-				final ImageProcessor ip = channels[c].convertToByte(true);
-				stack.addSlice("" + (c + 1), ip);
+				// Read the image channel as raw bytes
+				// Convert to short array
+				final byte[] bytes = r.openBytes(i);
+				final short[] shorts = new short[bytes.length / 2];
+				for (int s = 0; s < bytes.length; s += 2) {
+					shorts[s / 2] = (short) ((bytes[s + 1] << 8) | (bytes[s] & 0xFF));
+				}
+
+				// Make a new 16-bit image from the pixels then convert to 8-bit
+				final ShortProcessor sp = new ShortProcessor(width, height, shorts, null);
+				final ImageProcessor ip = sp.convertToByteProcessor(true);
+
+				stack.addSlice("" + (i + 1), ip);
 			}
-
-
 			return stack;
 
 		} catch (FormatException | IOException e) {
-			throw new ImageImportException("Error opening .nd2 file", e);
+			throw new ImageImportException("Error opening .nd2 file: %s".formatted(e.getMessage()), e);
 		}
 	}
 

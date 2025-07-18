@@ -11,7 +11,7 @@
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
 		<version>${project.version}</version>
 		<!-- Suffix should always start with a . e.g. .alpha-1 -->
-		<version.suffix>.alpha-4</version.suffix>
+		<version.suffix></version.suffix>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<jar.finalName>${project.full.name}_${project.version}${version.suffix}</jar.finalName>
 		<project.template.directory>templates</project.template.directory>
@@ -445,6 +445,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version>
 				<configuration>
+					<release>16</release>
 					<source>16</source>
 					<target>16</target>
 				</configuration>
@@ -524,21 +525,25 @@
 			<url>https://jitpack.io</url>
 		</repository>
 
+		<!-- Repository for SciJava artifacts -->
+		<!-- Includes MorpoLibJ and bio-formats_plugins -->
 		<!-- T-SNE is in this repo. via https://github.com/lejon/T-SNE-Java/issues/24 -->
 		<repository>
 			<id>scijava.public</id>
-			<url>https://maven.scijava.org/content/groups/public</url>
+			<url>https://maven.scijava.org/content/repositories/public/</url>
 		</repository>
 
 	</repositories>
 
+	<!-- Define dependencies to be installed from all repositories  -->
 	<dependencies>
-
+	
 		<!--Not available in Maven Central -->
+		<!--Fetch from Github directly -->
 		<dependency>
 			<groupId>com.github.lejon</groupId>
 			<artifactId>T-SNE-Java</artifactId>
-			<version>2.5.0</version>
+			<version>2.6.4</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.github.lejon.T-SNE-Java</groupId>
@@ -546,13 +551,14 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
-		<!--Not available in Maven Central, fetch from Github -->
+		
+		<!-- Fetch from Github directly -->
+		<!--Available in SciJava repo, but this is not downloading artifacts -->
 		<dependency>
-			<groupId>com.github.ijpb</groupId>
-			<artifactId>MorphoLibJ</artifactId>
-			<version>v1.5.1</version>
-		</dependency>
+		    <groupId>fr.inra.ijpb</groupId>
+		    <artifactId>MorphoLibJ_</artifactId>
+		    <version>1.6.4</version>
+		</dependency>	
 
 
 		<!--Not available in Maven Central; no tagged versions on Github, using 
@@ -677,7 +683,9 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- Missing dependency from batik required for PNG transcoder -->
+		
+		<!-- Missing dependency from batik required for PNG transcoder
+			Exclusions required to avoid duplication of xml apis -->
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-codec</artifactId>
@@ -694,28 +702,13 @@
 			</exclusions>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/ome/bio-formats -->
-		<dependency>
-			<groupId>ome</groupId>
-			<artifactId>bio-formats</artifactId>
-			<version>5.0.0-rc2</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>java.xml</groupId>
-					<artifactId>java.xml</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/ome/bio-formats_plugins -->
+		<!-- Used for ND2 / CZI reading. Version 5.0.0 can read our ND2s without issue -->
 		<dependency>
 			<groupId>ome</groupId>
 			<artifactId>bio-formats_plugins</artifactId>
-			<version>6.13.0</version>
+			<version>8.2.0</version>
+			<!-- Exclusions required to avoid duplication of xml apis -->
 			<exclusions>
 				<exclusion>
 					<groupId>xml-apis</groupId>
@@ -731,7 +724,7 @@
 
 	</dependencies>
 	<name>Nuclear Morphology Analysis</name>
-	<url>https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Home</url>
+	<url>https://github.com/bmskinner/nma</url>
 	<description>Nuclear Morphology Analysis is a program that allows for automated detection of round or asymmetric nuclei in images, and subsequent morphological analysis.</description>
 	<inceptionYear>2015</inceptionYear>
 	<licenses>

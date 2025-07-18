@@ -3,6 +3,7 @@ package com.bmskinner.nma.io;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 
 import org.junit.Test;
@@ -34,7 +35,7 @@ public class ImageImporterTest {
 	}
 
 	@Test
-	public void testND2Is8Bit() throws ImageImportException, InterruptedException {
+	public void testND2Is8BitGreyScale() throws ImageImportException, InterruptedException {
 
 		final File testFolder = new File(TestResources.IMAGE_FOLDER_BASE, "ND2");
 
@@ -46,6 +47,14 @@ public class ImageImporterTest {
 
 		final ImageProcessor ip = is.getProcessor(1);
 
+//		final ImagePlus img = new ImagePlus("", ip);
+//		img.show();
+//		while (img.isVisible()) {
+//			Thread.sleep(1000);
+//		}
+
+		assertEquals("ND2 stack image should be TYPE_BYTE_GRAY", BufferedImage.TYPE_BYTE_GRAY,
+				ip.getBufferedImage().getType());
 		assertEquals("ND2 image should be 8 bit", 8, ip.getBitDepth());
 	}
 
@@ -68,9 +77,9 @@ public class ImageImporterTest {
 
 		final ImageProcessor ip = is.getProcessor(1);
 
+		// Canny detection should proceed without errors
 		final ImageFilterer filt = new ImageFilterer(ip);
 		final HashOptions op = OptionsFactory.makeCannyOptions().build();
-
 		filt.cannyEdgeDetection(op);
 
 	}
