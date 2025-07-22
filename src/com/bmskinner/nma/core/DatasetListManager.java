@@ -406,9 +406,14 @@ public final class DatasetListManager implements DatasetAddedListener, DatasetUp
 	public final void addDataset(@NonNull IAnalysisDataset d) {
 		// Ensure not run on the EDT
 		final Runnable r = () ->{
+			if (this.hasDataset(d.getId())) {
+				LOGGER.fine("Dataset %s already exists in manager, not adding again".formatted(d.getName()));
+				return;
+			}
+
 			if (d.isRoot() && !rootDatasets.contains(d)) {
 				rootDatasets.add(d);
-				LOGGER.fine("Added dataset %s".formatted(d.getName()));
+				LOGGER.fine("Added dataset %s to dataset manager".formatted(d.getName()));
 				datasetHashcodeMap.put(d.getId(), d.hashCode());
 				d.addDatasetUpdatedListener(this);
 			}

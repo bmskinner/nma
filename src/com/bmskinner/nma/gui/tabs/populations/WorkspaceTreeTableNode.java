@@ -134,8 +134,9 @@ public class WorkspaceTreeTableNode implements MutableTreeTableNode {
 
 	@Override
 	public void setParent(MutableTreeTableNode newParent) {
-		if (this != newParent)
+		if (this != newParent) {
 			parent = newParent;
+		}
 	}
 
 	@Override

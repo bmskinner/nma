@@ -333,6 +333,14 @@ public interface IAnalysisDataset extends XmlSerializable, ComponentUpdateListen
 	List<UUID> getClusterIDs();
 
 	/**
+	 * Get the datasets belonging to the given cluster group
+	 * 
+	 * @param clusterId the id of the cluster group to fetch
+	 * @return the datasets in the group, or an empty list if none were found
+	 */
+	List<IAnalysisDataset> getClusterGroup(@NonNull UUID clusterId);
+
+	/**
 	 * Check if the dataset has clusters
 	 * 
 	 * @return

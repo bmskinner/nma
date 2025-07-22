@@ -149,11 +149,24 @@ public class DatasetSelectionPanel extends DetailPanel
 
 			// The first item in the path is the root node - don't expand this
 			final Runnable r = () -> {
-				model.addDataset(d);
-				
-				// Get the path for the dataset node to expand
-				final TreePath path = new TreePath(model.getPathToRoot(model.getNode(d)));
-				expandAll(path);
+
+				// The dataset may be in a workspace
+				if (DatasetListManager.getInstance().isInWorkspace(d) && d.isRoot()) {
+
+
+					// Get the first workspace that the dataset is a member of
+					final IWorkspace w = DatasetListManager.getInstance().getWorkspaces(d).get(0);
+					LOGGER.fine("Dataset %s is in a workspace %s, adding to list panel".formatted(d.getName(),
+							w.getName()));
+					model.addDatasetToWorkspace(w, d);
+				} else {
+					LOGGER.fine("Dataset %s adding to list panel".formatted(d.getName()));
+					model.addDataset(d);
+
+					// Get the path for the dataset node to expand
+					final TreePath path = new TreePath(model.getPathToRoot(model.getNode(d)));
+					expandAll(path);
+				}
 			};
 			// Keep off the EDT
 			ThreadManager.getInstance().submitUIUpdate(r);
@@ -248,6 +261,7 @@ public class DatasetSelectionPanel extends DetailPanel
 			if (e.getButton() == MouseEvent.BUTTON3) {
 				// No actions yet
 			}
+			DatasetSelectionPanel.this.repaint();
 		}
 
 		private void datasetClicked(IAnalysisDataset d, int column) {
@@ -258,6 +272,7 @@ public class DatasetSelectionPanel extends DetailPanel
 			if (column == 2) {
 				cosmeticHandler.changeDatasetColour(d);
 			}
+			treeTable.repaint();
 		}
 
 	}
@@ -300,6 +315,7 @@ public class DatasetSelectionPanel extends DetailPanel
 						.setHeaderValue(String.format("Cells (%d)", cellCount));
 
 				DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
+				treeTable.repaint();
 
 			} catch (final Exception ex) {
 				LOGGER.log(Level.SEVERE, "Error in tree selection handler: %s".formatted(ex.getMessage()),

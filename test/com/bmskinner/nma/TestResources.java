@@ -1,7 +1,12 @@
 package com.bmskinner.nma;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
+
 import org.eclipse.jdt.annotation.NonNull;
+import org.junit.Test;
+
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.io.Io;
 
@@ -169,6 +174,51 @@ public class TestResources {
 	 */
 	@NonNull public static final File outputFolder(@NonNull String imageset, @NonNull Version version) {
 		return new File(imageset, unitTestFolderName(version));
+	}
+
+	/**
+	 * Ensure test output directories exist and are writable
+	 */
+	@Test
+	public void outputDirectoriesCreated() {
+
+		datasetOutputFolder().mkdirs();
+		MOUSE_OUTPUT_FOLDER.mkdirs();
+		MOUSE_SIGNALS_OUTPUT_FOLDER.mkdirs();
+		MOUSE_CLUSTERS_OUTPUT_FOLDER.mkdirs();
+		PIG_OUTPUT_FOLDER.mkdirs();
+		PIG_SIGNALS_OUTPUT_FOLDER.mkdirs();
+		PIG_CLUSTERS_OUTPUT_FOLDER.mkdirs();
+		ROUND_OUTPUT_FOLDER.mkdirs();
+		ROUND_SIGNALS_OUTPUT_FOLDER.mkdirs();
+		ROUND_CLUSTERS_OUTPUT_FOLDER.mkdirs();
+
+		TestResources.datasetOutputFolder().setWritable(true, false);
+		TestResources.DATASET_FOLDER.setWritable(true, false);
+		TestResources.MOUSE_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.PIG_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.ROUND_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.MULTIPLE_BASE_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.MOUSE_SIGNALS_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.PIG_SIGNALS_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.ROUND_SIGNALS_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.MOUSE_CLUSTERS_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.PIG_CLUSTERS_OUTPUT_FOLDER.setWritable(true, false);
+		TestResources.ROUND_CLUSTERS_OUTPUT_FOLDER.setWritable(true, false);
+
+		assertTrue(datasetOutputFolder().exists());
+		assertTrue(MOUSE_OUTPUT_FOLDER.exists());
+		assertTrue(MOUSE_SIGNALS_OUTPUT_FOLDER.exists());
+		assertTrue(MOUSE_CLUSTERS_OUTPUT_FOLDER.exists());
+
+		assertTrue(PIG_OUTPUT_FOLDER.exists());
+		assertTrue(PIG_SIGNALS_OUTPUT_FOLDER.exists());
+		assertTrue(PIG_CLUSTERS_OUTPUT_FOLDER.exists());
+
+		assertTrue(ROUND_OUTPUT_FOLDER.exists());
+		assertTrue(ROUND_SIGNALS_OUTPUT_FOLDER.exists());
+		assertTrue(ROUND_CLUSTERS_OUTPUT_FOLDER.exists());
+
 	}
 
 }

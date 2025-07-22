@@ -17,7 +17,10 @@
 package com.bmskinner.nma.gui.actions;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -66,16 +69,19 @@ public class ImportWorkspaceAction extends VoidResultAction {
 		try {
 
 			if (doc != null) {
-				IWorkspace w = new DefaultWorkspace(file, doc.getRootElement());
+				final IWorkspace w = new DefaultWorkspace(file, doc.getRootElement());
 				DatasetListManager.getInstance().addWorkspace(w);
 
-				for (File dataFile : w.getFiles()) {
-					if (!dataFile.exists())
+				final List<IAnalysisDataset> newDatasets = new ArrayList<>();
+
+				for (final File dataFile : w.getFiles()) {
+					if (!dataFile.exists()) {
 						continue;
+					}
 
 					// Try to load the dataset and wait for success
 					// First read the XML file
-					XMLImportMethod method = new XMLImportMethod(dataFile);
+					final XMLImportMethod method = new XMLImportMethod(dataFile);
 					worker = new DefaultAnalysisWorker(method);
 					ThreadManager.getInstance().execute(worker);
 
@@ -83,27 +89,32 @@ public class ImportWorkspaceAction extends VoidResultAction {
 						worker.get();
 
 						// Now unmarshall the XML file into a dataset
-						Document datasetDoc = method.getXMLDocument();
-						IAnalysisMethod importMethod = new DatasetImportMethod(datasetDoc);
+						final Document datasetDoc = method.getXMLDocument();
+						final IAnalysisMethod importMethod = new DatasetImportMethod(datasetDoc);
 						worker = new DefaultAnalysisWorker(importMethod);
 						ThreadManager.getInstance().execute(worker);
 
-						IAnalysisResult r = worker.get();
-						IAnalysisDataset d = r.getFirstDataset();
+						final IAnalysisResult r = worker.get();
+						final IAnalysisDataset d = r.getFirstDataset();
+
 						// Update the save file to the file we just opened, in case it has moved
 						d.setSavePath(dataFile);
+						newDatasets.add(d);
+						LOGGER.fine("Imported %s".formatted(d.getName()));
 
-						LOGGER.fine("Imported " + d.getName());
-						UIController.getInstance().fireDatasetAdded(d);
-						UIController.getInstance().fireDatasetAdded(w, d);
-
-					} catch (ExecutionException e) {
-						LOGGER.warning("Unable to import dataset: " + e.getMessage());
+					} catch (final ExecutionException e) {
+						LOGGER.warning("Unable to import dataset: %s".formatted(e.getMessage()));
+					} catch (final Exception e) {
+						LOGGER.log(Level.SEVERE, "Error in import: %s".formatted(e.getMessage()), e);
+						throw e;
 					}
 				}
 
+
+				UIController.getInstance().fireDatasetAdded(newDatasets);
+
 			}
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			LOGGER.fine("Import workspace interrupted: " + e.getMessage());
 
 		} finally {

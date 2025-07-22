@@ -400,6 +400,22 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 	}
 
 	@Override
+	public List<IAnalysisDataset> getClusterGroup(@NonNull UUID clusterId) {
+		final List<IAnalysisDataset> result = new ArrayList<>();
+
+		for (final IClusterGroup g : this.getClusterGroups()) {
+			if (g.getId().equals(clusterId)) {
+
+				for (final UUID id : g.getUUIDs()) {
+					result.add(this.getChildDataset(id));
+				}
+			}
+		}
+
+		return result;
+	}
+
+	@Override
 	public boolean hasClusters() {
 		return this.clusterGroups != null && !this.clusterGroups.isEmpty();
 	}

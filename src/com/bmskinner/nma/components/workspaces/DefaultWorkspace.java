@@ -27,6 +27,7 @@ import org.jdom2.Element;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.io.Io.Importer;
+import com.bmskinner.nma.io.WorkspaceExporter;
 
 /**
  * This is a grouping of open AnalysisDatasets, which can act as a shortcut to
@@ -38,11 +39,11 @@ import com.bmskinner.nma.io.Io.Importer;
  */
 public class DefaultWorkspace implements IWorkspace {
 
-	private Set<File> datasets = new LinkedHashSet<>();
+	private final Set<File> datasets = new LinkedHashSet<>();
 
 	private File saveFile = null;
 	private String name;
-	private UUID id = UUID.randomUUID();
+	private final UUID id = UUID.randomUUID();
 
 	public DefaultWorkspace(@NonNull final File f) {
 		this.saveFile = f;
@@ -62,10 +63,10 @@ public class DefaultWorkspace implements IWorkspace {
 		name = e.getAttributeValue(XMLNames.XML_WORKSPACE_NAME);
 		saveFile = f;
 
-		Element datasetElement = e.getChild(XMLNames.XML_DATASETS_ELEMENT);
+		final Element datasetElement = e.getChild(XMLNames.XML_DATASETS_ELEMENT);
 
-		for (Element dataset : datasetElement.getChildren()) {
-			String path = dataset.getChild(XMLNames.XML_DATASET_PATH).getText();
+		for (final Element dataset : datasetElement.getChildren()) {
+			final String path = dataset.getChild(XMLNames.XML_DATASET_PATH).getText();
 			add(new File(path));
 		}
 	}
@@ -73,14 +74,14 @@ public class DefaultWorkspace implements IWorkspace {
 	@Override
 	@NonNull public Element toXmlElement() {
 		// root element
-		Element rootElement = new Element(XMLNames.XML_WORKSPACE)
+		final Element rootElement = new Element(XMLNames.XML_WORKSPACE)
 				.setAttribute(XMLNames.XML_WORKSPACE_NAME, name);
 
 		// Add datasets
-		Element datasetsElement = new Element(XMLNames.XML_DATASETS_ELEMENT);
-		for (File f : getFiles()) {
-			Element dataset = new Element(XMLNames.XML_WORKSPACE_DATASET_ELEMENT);
-			Element datasetPath = new Element(XMLNames.XML_DATASET_PATH);
+		final Element datasetsElement = new Element(XMLNames.XML_DATASETS_ELEMENT);
+		for (final File f : getFiles()) {
+			final Element dataset = new Element(XMLNames.XML_WORKSPACE_DATASET_ELEMENT);
+			final Element datasetPath = new Element(XMLNames.XML_DATASET_PATH);
 
 			datasetPath.setText(f.getAbsolutePath());
 			dataset.addContent(datasetPath);
@@ -107,8 +108,9 @@ public class DefaultWorkspace implements IWorkspace {
 
 	@Override
 	public void add(final @NonNull IAnalysisDataset d) {
-		if (d.isRoot())
+		if (d.isRoot()) {
 			datasets.add(d.getSavePath());
+		}
 	}
 
 	@Override
@@ -149,7 +151,7 @@ public class DefaultWorkspace implements IWorkspace {
 
 	@Override
 	public void save() {
-		// TODO Auto-generated method stub
+		WorkspaceExporter.exportWorkspace(this);
 
 	}
 
@@ -177,7 +179,7 @@ public class DefaultWorkspace implements IWorkspace {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DefaultWorkspace other = (DefaultWorkspace) obj;
+		final DefaultWorkspace other = (DefaultWorkspace) obj;
 		if (datasets == null) {
 			if (other.datasets != null)
 				return false;
