@@ -2,7 +2,6 @@ package com.bmskinner.nma.gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.Paint;
 import java.text.ParseException;
 import java.util.List;
@@ -10,7 +9,9 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -25,6 +26,7 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
+import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog.ColourByType;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.DimensionalityChartFactory;
 
@@ -47,6 +49,10 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	private final IClusterGroup group;
 
 	private JSpinner imageSpinner;
+
+	private JComboBox colourBox;
+
+	private JCheckBox showImagesBox;
 
 	private static final double MAX_NUCLEI_PER_CLUSTER = 200;
 
@@ -77,33 +83,42 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	}
 
 	public enum ColourByType {
-		NONE, CLUSTER, MERGE_SOURCE;
+		NONE("None"), CLUSTER("Cluster"), MERGE_SOURCE("Merge source");
+
+		private String name;
+
+		private ColourByType(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
 	}
 
 	private JPanel createHeader() {
-		final JPanel panel = new JPanel(new FlowLayout());
+
+		final JPanel panel = new JPanel();
+		BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
+		panel.setLayout(bl);
 
 		imageSpinner = createMaxImageSpinner();
 
-		final JCheckBox showImagesBox = new JCheckBox("Show images", false);
+		colourBox = new JComboBox<ColourByType>(ColourByType.values());
+		colourBox.setSelectedItem(ColourByType.CLUSTER);
+
+		showImagesBox = new JCheckBox("Show images", false);
 		showImagesBox.addActionListener(l -> {
 			if (showImagesBox.isSelected()) {
 
 				final Runnable r = () -> DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
 						group,
+						(ColourByType) colourBox.getSelectedItem(),
 						chartPanel.getChart(), ((Double) imageSpinner.getValue()).intValue());
 				ThreadManager.getInstance().submitUIUpdate(r);
 			} else {
 				chartPanel.getChart().getXYPlot().getRenderer().removeAnnotations();
-			}
-		});
-
-		final JCheckBox showPointsBox = new JCheckBox("Show points", true);
-		showPointsBox.addActionListener(l -> {
-			if (showPointsBox.isSelected()) {
-				updateChart(ColourByType.CLUSTER);
-			} else {
-				updateChart(ColourByType.NONE);
 			}
 		});
 
@@ -114,6 +129,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 					chartPanel.getChart().getXYPlot().getRenderer().removeAnnotations();
 					final Runnable r = () -> DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
 							group,
+							(ColourByType) colourBox.getSelectedItem(),
 							chartPanel.getChart(), ((Double) imageSpinner.getValue()).intValue());
 					ThreadManager.getInstance().submitUIUpdate(r);
 				}
@@ -122,11 +138,22 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 			}
 		});
 
-		panel.add(new JLabel(HELP_LBL));
-		panel.add(showImagesBox);
-		panel.add(new JLabel("Max images per cluster:"));
-		panel.add(imageSpinner);
-		panel.add(showPointsBox);
+		colourBox.addActionListener(e -> {
+			updateChart((ColourByType) colourBox.getSelectedItem());
+		});
+
+		JPanel textPanel = new JPanel();
+		textPanel.add(new JLabel(HELP_LBL));
+		JPanel btnPanel = new JPanel();
+
+		btnPanel.add(new JLabel("Colour points by:"));
+		btnPanel.add(colourBox);
+		btnPanel.add(showImagesBox);
+		btnPanel.add(new JLabel("Max images per cluster:"));
+		btnPanel.add(imageSpinner);
+
+		panel.add(textPanel);
+		panel.add(btnPanel);
 
 		return panel;
 	}
@@ -148,14 +175,34 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	private void updateChart(ColourByType type) {
 		final Runnable r = () -> {
 			final XYPlot plot = chartPanel.getChart().getXYPlot();
-			final List<UUID> childIds = group.getUUIDs();
-			for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
-				final IAnalysisDataset childDataset = dataset.getChildDataset(childIds.get(i));
-				final Paint colour = ColourByType.CLUSTER.equals(type)
-						? childDataset.getDatasetColour().orElse(ColourSelecter.getColor(i))
-						: Color.WHITE;
-				plot.getRenderer().setSeriesPaint(i, colour);
+
+			switch (type) {
+			case CLUSTER: {
+				final List<UUID> childIds = group.getUUIDs();
+				for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
+					final IAnalysisDataset childDataset = dataset.getChildDataset(childIds.get(i));
+					final Paint colour = childDataset.getDatasetColour().orElse(ColourSelecter.getColor(i));
+					plot.getRenderer().setSeriesPaint(i, colour);
+				}
 			}
+			case NONE: {
+				for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
+					plot.getRenderer().setSeriesPaint(i, Color.WHITE);
+				}
+			}
+			case MERGE_SOURCE: {
+				createChart(type, group);
+			}
+			}
+
+			chartPanel.getChart().getXYPlot().getRenderer().removeAnnotations();
+			if (showImagesBox.isSelected()) {
+				DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
+						group,
+						type,
+						chartPanel.getChart(), ((Double) imageSpinner.getValue()).intValue());
+			}
+
 		};
 		ThreadManager.getInstance().submitUIUpdate(r);
 	}

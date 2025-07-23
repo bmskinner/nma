@@ -140,6 +140,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @param chart
 	 */
 	public static void addAnnotatedNucleusImages(IAnalysisDataset d, IClusterGroup plotGroup,
+			ColourByType type,
 			JFreeChart chart,
 			int maxImagePerCluster) {
 
@@ -157,34 +158,65 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 		final double scale = Math.log10(d.getCollection().size()) * 4;
 
+
 		int dataset = 0;
+		if (type.equals(ColourByType.MERGE_SOURCE)) {
+			for (final IAnalysisDataset mergeSource : d.getMergeSources()) {
+				List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
+				final Color colour = ColourSelecter.getColor(dataset);
+				// If the number of nuclei is high, there is no point drawing them all
+				// so pick a random subset
+				if (nuclei.size() > maxImagePerCluster) {
+					Collections.shuffle(nuclei);
+					nuclei = nuclei.subList(0, maxImagePerCluster);
+				}
 
-		// Add each cluster group nuclei
-		for (final UUID id : plotGroup.getUUIDs()) {
-			final IAnalysisDataset childDataset = d.getChildDataset(id);
-			List<Nucleus> nList = new ArrayList<>();
-			nList.addAll(childDataset.getCollection().getNuclei());
+				final List<Nucleus> batchList = nuclei;
 
-			final Color colour = childDataset.getDatasetColour()
-					.orElse(ColourSelecter.getColor(dataset));
+				// Add in batches to allow the user to see they are loading
+				IntStream.range(0, (batchList.size() + BATCH_SIZE - 1) / BATCH_SIZE)
+						.mapToObj(i -> batchList.subList(i * BATCH_SIZE,
+								Math.min(batchList.size(), (i + 1) * BATCH_SIZE)))
+						.forEach(batch -> processBatch(batch, d, plotGroup, chart, measurement, 0, 1,
+								colour, scale));
 
-			// If the number of nuclei is high, there is no point drawing them all
-			// so pick a random subset
-			if (nList.size() > maxImagePerCluster) {
-				Collections.shuffle(nList);
-				nList = nList.subList(0, maxImagePerCluster);
+				dataset++;
 			}
+			return;
+		}
 
-			final List<Nucleus> batchList = nList;
+		dataset = 0;
+		if (type.equals(ColourByType.CLUSTER) | type.equals(ColourByType.NONE)) {
 
-			// Add in batches to allow the user to see they are loading
-			IntStream.range(0, (batchList.size() + BATCH_SIZE - 1) / BATCH_SIZE)
-					.mapToObj(i -> batchList.subList(i * BATCH_SIZE,
-							Math.min(batchList.size(), (i + 1) * BATCH_SIZE)))
-					.forEach(batch -> processBatch(batch, d, plotGroup, chart, measurement, 0, 1,
-							colour, scale));
+			// Add each cluster group nuclei
+			for (final UUID id : plotGroup.getUUIDs()) {
+				final IAnalysisDataset childDataset = d.getChildDataset(id);
+				List<Nucleus> nList = new ArrayList<>();
+				nList.addAll(childDataset.getCollection().getNuclei());
 
-			dataset++;
+
+				final Color colour = type.equals(ColourByType.NONE) ? Color.BLACK
+						: childDataset.getDatasetColour()
+						.orElse(ColourSelecter.getColor(dataset));
+
+				// If the number of nuclei is high, there is no point drawing them all
+				// so pick a random subset
+				if (nList.size() > maxImagePerCluster) {
+					Collections.shuffle(nList);
+					nList = nList.subList(0, maxImagePerCluster);
+				}
+
+				final List<Nucleus> batchList = nList;
+
+				// Add in batches to allow the user to see they are loading
+				IntStream.range(0, (batchList.size() + BATCH_SIZE - 1) / BATCH_SIZE)
+						.mapToObj(i -> batchList.subList(i * BATCH_SIZE,
+								Math.min(batchList.size(), (i + 1) * BATCH_SIZE)))
+						.forEach(batch -> processBatch(batch, d, plotGroup, chart, measurement, 0, 1,
+								colour, scale));
+
+				dataset++;
+			}
 		}
 	}
 
