@@ -50,7 +50,6 @@ import org.virion.jam.controlpanels.BasicControlPalette;
 
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ICell;
-import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.DefaultClusterGroup;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.ICellCollection;
@@ -97,13 +96,13 @@ public class ClusterTreeDialog extends MessagingDialog {
 
 	private JPanel buttonPanel;
 	private DraggableTreeViewer viewer;
-	private IAnalysisDataset dataset;
-	private IClusterGroup group;
+	private final IAnalysisDataset dataset;
+	private final IClusterGroup group;
 
 	private DatasetSelectionPanel selectedClusterBox;
 	private ClusterGroupSelectionPanel selectedClusterGroupBox;
 
-	private List<ICellCollection> clusterList = new ArrayList<>(0);
+	private final List<ICellCollection> clusterList = new ArrayList<>(0);
 
 	public ClusterTreeDialog(final IAnalysisDataset dataset, final IClusterGroup group) {
 		super();
@@ -127,14 +126,17 @@ public class ClusterTreeDialog extends MessagingDialog {
 
 			this.add(buttonPanel, BorderLayout.NORTH);
 
-			RootedTree r = importTree();
+			final RootedTree r = importTree();
 
 			if (r == null) {
 				LOGGER.warning("Unable to import tree");
 				this.dispose();
 
 			} else {
-				displayTree(r);
+
+//				final HierarchyVisualizer hv = new HierarchyVisualizer(group.getTree());
+//				this.setContentPane(hv);
+			displayTree(r);
 				this.setModal(false);
 				this.setMinimumSize(new Dimension(500, 500));
 				this.pack();
@@ -143,7 +145,8 @@ public class ClusterTreeDialog extends MessagingDialog {
 				this.setVisible(true);
 			}
 
-		} catch (Exception e) {
+
+		} catch (final Exception e) {
 
 			LOGGER.log(Level.WARNING, "Error creating tree view");
 			LOGGER.log(Level.SEVERE, "Error creating tree view", e);
@@ -157,39 +160,40 @@ public class ClusterTreeDialog extends MessagingDialog {
 	 * @return
 	 */
 	private RootedTree importTree() {
+
 		RootedTree topTree = null;
 		LOGGER.fine("Reading tree");
-		StringReader reader = new StringReader(group.getTree());
+		final StringReader reader = new StringReader(group.getTree());
 
-		boolean readUnquotedLabels = true;
-		NewickImporter imp = new NewickImporter(reader, readUnquotedLabels);
+		final boolean readUnquotedLabels = true;
+		final NewickImporter imp = new NewickImporter(reader, readUnquotedLabels);
 
 		try {
-			List<Tree> trees = imp.importTrees();
+			final List<Tree> trees = imp.importTrees();
 			topTree = (RootedTree) trees.get(0);
 
 			// Add the cells to the external nodes as attributes
 			// Also set the short names for the nodes
-			for (Node n : topTree.getNodes()) {
+			for (final Node n : topTree.getNodes()) {
 
 				if (topTree.isExternal(n)) { // choose the taxon nodes
 
-					Taxon t = topTree.getTaxon(n);
-					ICell c = getCell(t).get();
+					final Taxon t = topTree.getTaxon(n);
+
+					final ICell c = dataset.getCollection().getCell(UUID.fromString(t.getName()));
 					t.setAttribute("Cell", c);
 					n.setAttribute("ShortName",
 							c.getPrimaryNucleus().getSourceFolder().getName() + "/"
 									+ c.getPrimaryNucleus().getNameAndNumber());
 				}
 			}
-		} catch (IOException e) {
-			LOGGER.log(Level.WARNING, "Unable to display tree: Error reading data");
+
+			LOGGER.fine("Imported tree");
+		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Error reading tree", e);
-		} catch (DuplicateTaxaException e) {
-			LOGGER.log(Level.WARNING, "Unable to display tree: duplicate taxon names");
+		} catch (final DuplicateTaxaException e) {
 			LOGGER.log(Level.SEVERE, "Duplicate taxon names", e);
-		} catch (ImportException e) {
-			LOGGER.log(Level.WARNING, "Unable to display tree: error importing newick tree");
+		} catch (final ImportException e) {
 			LOGGER.log(Level.SEVERE, "Error in tree IO", e);
 		}
 		return topTree;
@@ -200,11 +204,10 @@ public class ClusterTreeDialog extends MessagingDialog {
 	 */
 	private void displayTree(RootedTree tree) {
 
-		int numTaxa = tree.getTaxa().size();
-		LOGGER.fine("Tree has " + numTaxa + " taxa");
+		final int numTaxa = tree.getTaxa().size();
+		LOGGER.fine("Tree has %s taxa".formatted(numTaxa));
 
 		viewer.setTree(tree);
-
 		viewer.setSelectionMode(SelectionMode.CLADE);
 		viewer.setTreeLayoutType(TreeLayoutType.RECTILINEAR);
 		viewer.getTreePane().setBranchTransform(true, TransformedRootedTree.Transform.PROPORTIONAL);
@@ -223,58 +226,34 @@ public class ClusterTreeDialog extends MessagingDialog {
 	 * @return
 	 */
 	private Optional<ICell> getCell(Taxon t) {
-
-		// Check if the taxon name is a UUID, as the tree format is changing for
-		// 1.13.2
-		// 4ca18dcd-7f5c-4443-89bc-c705435c30f7
-
-		boolean isUUID = false;
-		UUID id = null;
-		if (t.getName().length() == 36) {
-
-			try {
-				id = UUID.fromString(t.getName());
-				isUUID = true;
-			} catch (IllegalArgumentException e) {
-				// 36 char String was not a UUID
-			}
-		}
-
-		if (isUUID && id != null)
-			return Optional.of(dataset.getCollection().getCell(id));
-		return dataset.getCollection().streamCells()
-				.filter(c -> hasMatchingNucleusName(t.getName(), c)).findFirst();
-	}
-
-	private boolean hasMatchingNucleusName(String name, ICell c) {
-		return c.getNuclei().stream().anyMatch(n -> taxonNamesMatch(name, n));
+		return Optional.ofNullable((ICell) t.getAttribute("Cell"));
 	}
 
 	private JPanel createButtonPanel() {
-		JPanel panel = new JPanel(new FlowLayout());
+		final JPanel panel = new JPanel(new FlowLayout());
 
-		JButton extractButton = new JButton(EXTRACT_LBL);
+		final JButton extractButton = new JButton(EXTRACT_LBL);
 		extractButton.addActionListener(a -> {
 			try {
 				extractSelectedNodesToCluster();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.warning("Error extracting cells");
 				LOGGER.log(Level.SEVERE, "Error extracting cells", e);
 			}
 		});
 		panel.add(extractButton);
 
-		JButton analyseButton = new JButton(ANALYSE_LBL);
+		final JButton analyseButton = new JButton(ANALYSE_LBL);
 		analyseButton.addActionListener(a -> analyseClusters());
 		panel.add(analyseButton);
 
 		if (dataset.hasMergeSources()) {
-			JButton mergeSourceButton = new JButton(SHOW_MGE_SRC_LBL);
+			final JButton mergeSourceButton = new JButton(SHOW_MGE_SRC_LBL);
 			mergeSourceButton.addActionListener(a -> showMergeSources());
 			panel.add(mergeSourceButton);
 		}
 
-		List<IAnalysisDataset> l = dataset.getAllChildDatasets();
+		final List<IAnalysisDataset> l = dataset.getAllChildDatasets();
 		l.add(0, dataset);
 		selectedClusterBox = new DatasetSelectionPanel(l);
 		selectedClusterBox.setSelectionNull();
@@ -292,10 +271,10 @@ public class ClusterTreeDialog extends MessagingDialog {
 		});
 		panel.add(selectedClusterGroupBox);
 
-		JButton copyNewickButton = new JButton(COPY_NEWICK_LBL);
+		final JButton copyNewickButton = new JButton(COPY_NEWICK_LBL);
 		copyNewickButton.addActionListener(a -> {
-			StringSelection stringSelection = new StringSelection(group.getTree());
-			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			final StringSelection stringSelection = new StringSelection(group.getTree());
+			final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 			clipboard.setContents(stringSelection, null);
 			LOGGER.info("Copied Newick tree for cluster " + group.getName());
 		});
@@ -304,7 +283,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 	}
 
 	private void updateNodePainter() {
-		VariableNodePainter painter = new VariableNodePainter("Cluster",
+		final VariableNodePainter painter = new VariableNodePainter("Cluster",
 				viewer.getTreePane().getTree(),
 				PainterIntent.TIP);
 		painter.setBorder(Color.BLACK, new BasicStroke(2f));
@@ -330,10 +309,10 @@ public class ClusterTreeDialog extends MessagingDialog {
 	private void colourTreeNodesByClusterGroup(final IClusterGroup group) {
 
 		if (group != null) {
-			LOGGER.finer("Colouring nodes by cluster group: " + group.getName());
+			LOGGER.fine("Colouring nodes by cluster group: " + group.getName());
 
 			int clusterNumber = 0;
-			for (UUID id : group.getUUIDs()) {
+			for (final UUID id : group.getUUIDs()) {
 
 				// Find the appropriate dataset
 				IAnalysisDataset cluster = null;
@@ -353,10 +332,10 @@ public class ClusterTreeDialog extends MessagingDialog {
 					return;
 				}
 
-				Paint colour = ColourSelecter.getColor(clusterNumber++);
+				final Paint colour = ColourSelecter.getColor(clusterNumber++);
 				setNodeColour(cluster.getCollection(), colour);
 
-				LOGGER.finer("Node colours assigned");
+				LOGGER.fine("Node colours assigned");
 
 			}
 //            updateNodePainter();
@@ -370,71 +349,32 @@ public class ClusterTreeDialog extends MessagingDialog {
 	/**
 	 * Set the label colour for the given cells
 	 * 
-	 * @param cells
+	 * @param collection
 	 * @param colour
 	 */
 	private void setNodeColour(final ICellCollection collection, final Paint colour) {
 
-		RootedTree tree = viewer.getTreePane().getTree();
+		final RootedTree tree = viewer.getTreePane().getTree();
 
-		for (Node n : tree.getNodes()) {
+		for (final Node n : tree.getNodes()) {
 
 			if (tree.isExternal(n)) { // choose the taxon nodes
-
-				Taxon t = tree.getTaxon(n);
-
-				ICell c = (ICell) t.getAttribute("Cell");
-				collection.streamCells().filter(cell -> cell.equals(c))
-						.forEach(cell -> n.setAttribute("Color", colour));
+				final Taxon t = tree.getTaxon(n);
+				if (collection.contains(((ICell) t.getAttribute("Cell")).getId())) {
+					n.setAttribute("Color", colour);
+				}
 			}
 		}
-	}
-
-	/**
-	 * Check that a taxon name matches a nucleus name
-	 * 
-	 * @param name
-	 * @param nucleus
-	 * @return
-	 */
-	private boolean taxonNamesMatch(String name, Nucleus nucleus) {
-
-		/*
-		 * Testing name: P106.tiff-3 Testing J:\Protocols\Scripts and
-		 * macros\Testing_cluster_images\P100.tiff-P100.tiff-0 Testing
-		 * Testing_cluster_images-P100.tiff-0 Testing P100.tiff-0 Name not found
-		 */
-		String nucleusName = nucleus.getSourceFile() + "-" + nucleus.getNameAndNumber();
-
-		// the ideal is full file path
-		if (name.equals(nucleusName)) // 'C:\bla\image.tiff-image.tiff-1'
-			return true;
-
-		nucleusName = nucleus.getSourceFolder().getAbsolutePath() + "-"
-				+ nucleus.getNameAndNumber();
-
-		if (name.equals(nucleusName))
-			return true;
-
-		// Can't get just names from merge sources
-		if (dataset.hasMergeSources())
-			return false;
-
-		// otherwise look for just the name from an old dataset
-		nucleusName = nucleus.getNameAndNumber();
-		if (name.equals(nucleusName))
-			return true;
-		return false;
 	}
 
 	private String checkName(int offset) {
 
 		int maxExisting = 0;
-		Pattern pattern = Pattern.compile(dataset.getName() + "_ManualCluster_(\\d+)$");
+		final Pattern pattern = Pattern.compile(dataset.getName() + "_ManualCluster_(\\d+)$");
 
-		for (IAnalysisDataset d : dataset.getChildDatasets()) {
+		for (final IAnalysisDataset d : dataset.getChildDatasets()) {
 
-			Matcher matcher = pattern.matcher(d.getName());
+			final Matcher matcher = pattern.matcher(d.getName());
 
 			int digit = 0;
 
@@ -448,29 +388,29 @@ public class ClusterTreeDialog extends MessagingDialog {
 			}
 		}
 
-		int clusterNumber = maxExisting + offset;
+		final int clusterNumber = maxExisting + offset;
 
-		String result = dataset.getName() + "_ManualCluster_" + clusterNumber;
+		final String result = dataset.getName() + "_ManualCluster_" + clusterNumber;
 
 		return result;
 	}
 
 	private void extractSelectedNodesToCluster() throws Exception {
-		ICellCollection template = dataset.getCollection();
+		final ICellCollection template = dataset.getCollection();
 
 		String newName = template.getName() + "_ManualCluster_" + clusterList.size();
 		newName = checkName(clusterList.size());
-		ICellCollection clusterCollection = new VirtualDataset(dataset, newName);
+		final ICellCollection clusterCollection = new VirtualDataset(dataset, newName);
 
-		Tree tree = viewer.getTreePane().getTree();
+		final Tree tree = viewer.getTreePane().getTree();
 
-		Set<Node> nodes = viewer.getTreePane().getSelectedNodes();
-		for (Node n : nodes) {
+		final Set<Node> nodes = viewer.getTreePane().getSelectedNodes();
+		for (final Node n : nodes) {
 
 			if (tree.isExternal(n)) {
 
-				Taxon t = tree.getTaxon(n);
-				ICell c = (ICell) t.getAttribute("Cell");
+				final Taxon t = tree.getTaxon(n);
+				final ICell c = (ICell) t.getAttribute("Cell");
 				clusterCollection.add(c);
 			}
 		}
@@ -485,12 +425,12 @@ public class ClusterTreeDialog extends MessagingDialog {
 	}
 
 	private void analyseClusters() {
-		List<IAnalysisDataset> list = new ArrayList<>();
+		final List<IAnalysisDataset> list = new ArrayList<>();
 
-		for (ICellCollection c : clusterList) {
+		for (final ICellCollection c : clusterList) {
 			if (c.hasCells()) {
 				try {
-					IAnalysisDataset clusterDataset = dataset.addChildCollection(c);
+					final IAnalysisDataset clusterDataset = dataset.addChildCollection(c);
 					list.add(clusterDataset);
 
 				} catch (MissingDataException | SegmentUpdateException e) {
@@ -518,12 +458,13 @@ public class ClusterTreeDialog extends MessagingDialog {
 		selectedClusterGroupBox.setSelectionNull();
 		selectedClusterBox.setSelectionNull();
 
-		List<IAnalysisDataset> list = new ArrayList<>(dataset.getAllMergeSources());
+		final List<IAnalysisDataset> list = new ArrayList<>(dataset.getAllMergeSources());
 
-		IClusterGroup mergeGroup = makeNewClusterGroup(list);
+		final IClusterGroup mergeGroup = makeNewClusterGroup(list);
 
-		for (IAnalysisDataset d : list)
+		for (final IAnalysisDataset d : list) {
 			mergeGroup.addDataset(d);
+		}
 
 		colourTreeNodesByClusterGroup(mergeGroup);
 	}
@@ -536,11 +477,11 @@ public class ClusterTreeDialog extends MessagingDialog {
 	 * @return
 	 */
 	private IClusterGroup makeNewClusterGroup(List<IAnalysisDataset> list) {
-		HashOptions newOptions = group.getOptions().get().duplicate();
+		final HashOptions newOptions = group.getOptions().get().duplicate();
 		newOptions.setInt(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY, list.size());
 
-		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-		IClusterGroup newGroup = new DefaultClusterGroup(
+		final int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
+		final IClusterGroup newGroup = new DefaultClusterGroup(
 				IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber,
 				newOptions, group.getTree(), UUID.randomUUID());
 		return newGroup;
@@ -554,11 +495,11 @@ public class ClusterTreeDialog extends MessagingDialog {
 	 */
 	private boolean cellsPresentOnlyOnce(List<IAnalysisDataset> list) {
 		boolean ok = true;
-		Set<UUID> cellIDsFound = new HashSet<>();
+		final Set<UUID> cellIDsFound = new HashSet<>();
 
-		for (IAnalysisDataset d : list) {
+		for (final IAnalysisDataset d : list) {
 
-			for (ICell c : d.getCollection().getCells()) {
+			for (final ICell c : d.getCollection().getCells()) {
 				ok &= !cellIDsFound.contains(c.getId());
 				cellIDsFound.add(c.getId());
 			}
@@ -574,10 +515,10 @@ public class ClusterTreeDialog extends MessagingDialog {
 	 * @return true if all cells in the list are present in a cluster
 	 */
 	private boolean cellsAllPresent(List<IAnalysisDataset> clusters) {
-		boolean ok = true;
+		final boolean ok = true;
 
-		List<UUID> cellIDsFound = new ArrayList<UUID>();
-		for (IAnalysisDataset d : clusters) {
+		final List<UUID> cellIDsFound = new ArrayList<UUID>();
+		for (final IAnalysisDataset d : clusters) {
 			d.getCollection().getCells().forEach(c -> cellIDsFound.add(c.getId()));
 		}
 
@@ -608,7 +549,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 
 			// Offer to make a cluster group
 			try {
-				boolean join = new DefaultInputSupplier().requestApproval(
+				final boolean join = new DefaultInputSupplier().requestApproval(
 						"Join the new clusters into a cluster group?",
 						"Create cluster group");
 
@@ -616,10 +557,10 @@ public class ClusterTreeDialog extends MessagingDialog {
 					LOGGER.fine("Creating cluster group");
 					// Make the group
 
-					IClusterGroup newGroup = makeNewClusterGroup(list);
+					final IClusterGroup newGroup = makeNewClusterGroup(list);
 
 					int i = 0;
-					for (IAnalysisDataset d : list) {
+					for (final IAnalysisDataset d : list) {
 						d.setName(newGroup.getName() + "_Cluster_" + i);
 						newGroup.addDataset(d);
 						i++;
@@ -629,7 +570,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 				} else {
 					LOGGER.info("Adding as standard manual clusters");
 				}
-			} catch (RequestCancelledException e) {
+			} catch (final RequestCancelledException e) {
 				LOGGER.info("Adding as standard manual clusters");
 			}
 		}
@@ -649,11 +590,11 @@ public class ClusterTreeDialog extends MessagingDialog {
 		@Override
 		public void mouseMoved(MouseEvent e) {
 
-			Point location = viewer.getMousePosition();
-			double lineLength = viewer.getTreePane().getBounds().getHeight();
+			final Point location = viewer.getMousePosition();
+			final double lineLength = viewer.getTreePane().getBounds().getHeight();
 			LOGGER.fine("Mouse at " + location + " length " + lineLength);
 
-			Line2D.Double line = new Line2D.Double(location.getX(), 0, location.getX(), lineLength);
+			final Line2D.Double line = new Line2D.Double(location.getX(), 0, location.getX(), lineLength);
 
 			viewer.addLine(line);
 			viewer.repaint();
