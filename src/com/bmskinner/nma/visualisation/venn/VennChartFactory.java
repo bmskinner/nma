@@ -2,6 +2,7 @@ package com.bmskinner.nma.visualisation.venn;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -14,7 +15,6 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.components.ColourSelecter;
-import com.bmskinner.nma.logging.Loggable;
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
@@ -32,23 +32,26 @@ public class VennChartFactory extends AbstractChartFactory {
 		if (!options.hasDatasets())
 			return createEmptyChart();
 
+		if (options.getDatasets().size() > 5)
+			return createTextAnnotatedEmptyChart("Cannot display more than 5 datasets as a Venn diagram");
+
 		try {
 
-			VennChartDataset d = new VennChartDataset(options.getDatasets());
+			final VennChartDataset d = new VennChartDataset(options.getDatasets());
 
 			if (!d.isValid())
 				return createTextAnnotatedEmptyChart(
 						"Cannot display more than five overlapping datasets");
 
-			JFreeChart chart = ChartFactory.createScatterPlot(null, null, null, d,
+			final JFreeChart chart = ChartFactory.createScatterPlot(null, null, null, d,
 					PlotOrientation.VERTICAL,
 					DEFAULT_CREATE_LEGEND, DEFAULT_CREATE_TOOLTIPS, DEFAULT_CREATE_URLS);
 
-			XYPlot plot = chart.getXYPlot();
+			final XYPlot plot = chart.getXYPlot();
 			plot.setBackgroundPaint(Color.WHITE);
 
 			// Hide the points
-			XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
+			final XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
 			rend.setDefaultLinesVisible(false);
 			rend.setDefaultShapesVisible(false);
 			rend.setDefaultSeriesVisibleInLegend(false);
@@ -56,11 +59,11 @@ public class VennChartFactory extends AbstractChartFactory {
 			plot.setRenderer(rend);
 
 			// Draw circles
-			List<IAnalysisDataset> allDatasets = options.getDatasets();
+			final List<IAnalysisDataset> allDatasets = options.getDatasets();
 
-			for (VennShape c : d.getCircles()) {
-				int colourIndex = allDatasets.indexOf(c.dataset());
-				Color datasetColour = c.dataset().getDatasetColour()
+			for (final VennShape c : d.getCircles()) {
+				final int colourIndex = allDatasets.indexOf(c.dataset());
+				final Color datasetColour = c.dataset().getDatasetColour()
 						.orElse(ColourSelecter.getColor(colourIndex));
 
 				plot.addAnnotation(c.toAnnotation(ColourSelecter.makeTransparent(datasetColour, 30),
@@ -69,15 +72,15 @@ public class VennChartFactory extends AbstractChartFactory {
 			}
 
 			// Add shared counts and labels
-			for (Label a : d.getLabels()) {
+			for (final Label a : d.getLabels()) {
 				plot.addAnnotation(new XYTextAnnotation(a.label(), a.x(), a.y()));
 			}
 
 			applyDefaultAxisOptions(chart);
 			return chart;
 
-		} catch (Exception e) {
-			LOGGER.log(Loggable.STACK, "Error making venn chart: " + e.getMessage(), e);
+		} catch (final Exception e) {
+			LOGGER.log(Level.SEVERE, "Error making venn chart: " + e.getMessage(), e);
 			return createErrorChart();
 		}
 	}

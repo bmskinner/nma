@@ -22,7 +22,7 @@ public class VennChartPanel extends ChartDetailPanel implements SwatchUpdatedLis
 	private static final Logger LOGGER = Logger.getLogger(VennChartPanel.class.getName());
 	private static final String PANEL_TITLE_LBL = "Venn diagrams";
 
-	private ExportableChartPanel chartPanel;
+	private final ExportableChartPanel chartPanel;
 
 	public VennChartPanel() {
 		super();
@@ -44,10 +44,10 @@ public class VennChartPanel extends ChartDetailPanel implements SwatchUpdatedLis
 	@Override
 	protected synchronized void updateMultiple() {
 
-		ChartOptions options = new ChartOptionsBuilder()
+		final ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setFillConsensus(GlobalOptions.getInstance().isFillConsensus())
-				.setScale(GlobalOptions.getInstance().getScale())
+				.setScale(GlobalOptions.getInstance().getDisplayScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setShowXAxis(false)
 				.setShowYAxis(false)
