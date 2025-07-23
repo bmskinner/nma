@@ -102,6 +102,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		this.saveFile = saveFile;
 		this.pairedSignalGroups = pairedSignalGroups;
 		this.operation = operation;
+
+		LOGGER.finer("Created merge method for datasets %s"
+				.formatted(datasets.stream().map(IAnalysisDataset::getName).collect(Collectors.joining(", "))));
 	}
 
 	@Override
@@ -111,8 +114,11 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	}
 
 	private IAnalysisDataset run() throws Exception {
-		if (!datasetsCanBeMerged())
+
+		if (!datasetsCanBeMerged()) {
+			LOGGER.fine("Unable to merge datasets");
 			return null;
+		}
 
 		// Set the names for the new collection
 		// ensure the new file name is valid
@@ -145,6 +151,8 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	private IAnalysisDataset buildDataset(ICellCollection newCollection)
 			throws MissingDataException, SegmentUpdateException {
 
+		LOGGER.fine("Building new dataset");
+
 		for (Nucleus n : newCollection.getNuclei()) {
 			// Ensure that all nuclei have any existing segments removed
 			// and replaced with the default segment starting at the RP
@@ -160,7 +168,6 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
 		IAnalysisOptions mergedOptions = mergeOptions(newDataset);
 		newDataset.setAnalysisOptions(mergedOptions);
-
 		mergeSignalOptions(newDataset);
 
 		return newDataset;
@@ -249,7 +256,6 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	private IAnalysisDataset performOr(@NonNull String newDatasetName)
 			throws ComponentCreationException, MissingDataException,
 			SegmentUpdateException {
-
 		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
 				.toList();
 
@@ -262,7 +268,6 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		for (IAnalysisDataset d : datasets) {
 			newDataset.addMergeSource(d);
 		}
-
 		return newDataset;
 	}
 
@@ -333,8 +338,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 					canAdd &= Objects.equals(result, nOptions.getValue(s));
 				}
 
-				if (canAdd)
+				if (canAdd) {
 					mergedOptions.set(s, result);
+				}
 			}
 
 			// Ensure the new options have the correct id
@@ -362,8 +368,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 				canAdd &= Objects.equals(result, nOptions.getValue(s));
 			}
 
-			if (canAdd)
+			if (canAdd) {
 				mergedOptions.set(s, result);
+			}
 		}
 	}
 
