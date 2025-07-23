@@ -94,17 +94,17 @@ public class DatasetSelectionPanel extends DetailPanel
 	}
 
 	@Override
-	public void datasetAdded(List<IAnalysisDataset> datasets) {
+	public synchronized void datasetAdded(List<IAnalysisDataset> datasets) {
 		addDataset(datasets);
 	}
 
 	@Override
-	public void datasetAdded(IAnalysisDataset dataset) {
+	public synchronized void datasetAdded(IAnalysisDataset dataset) {
 		addDataset(List.of(dataset));
 	}
 
 	@Override
-	public void datasetDeleted(List<IAnalysisDataset> datasets) {
+	public synchronized void datasetDeleted(List<IAnalysisDataset> datasets) {
 		for (final IAnalysisDataset d : datasets) {
 			datasetDeleted(d);
 		}
@@ -112,29 +112,29 @@ public class DatasetSelectionPanel extends DetailPanel
 
 
 	@Override
-	public void datasetDeleted(IAnalysisDataset dataset) {
+	public synchronized void datasetDeleted(IAnalysisDataset dataset) {
 		model.removeNode(dataset);
 	}
 
 	@Override
-	public void workspaceAdded(IWorkspace ws) {
+	public synchronized void workspaceAdded(IWorkspace ws) {
 		final TreePath path = model.addWorkspace(ws);
 		expandAll(path);
 	}
 
 	@Override
-	public void workspaceDeleted(IWorkspace ws) {
+	public synchronized void workspaceDeleted(IWorkspace ws) {
 		model.removeNode(ws);
 	}
 
 	@Override
-	public void datasetAdded(IWorkspace ws, IAnalysisDataset d) {
+	public synchronized void datasetAdded(IWorkspace ws, IAnalysisDataset d) {
 		final TreePath path = model.addDatasetToWorkspace(ws, d);
 		expandAll(path);
 	}
 
 	@Override
-	public void datasetRemoved(IWorkspace ws, IAnalysisDataset d) {
+	public synchronized void datasetRemoved(IWorkspace ws, IAnalysisDataset d) {
 		final TreePath path = model.removeDatasetFromWorkspace(ws, d);
 		expandAll(path);
 	}
@@ -156,11 +156,11 @@ public class DatasetSelectionPanel extends DetailPanel
 
 					// Get the first workspace that the dataset is a member of
 					final IWorkspace w = DatasetListManager.getInstance().getWorkspaces(d).get(0);
-					LOGGER.fine("Dataset %s is in a workspace %s, adding to list panel".formatted(d.getName(),
+					LOGGER.finer("Dataset %s is in a workspace %s, adding to list panel".formatted(d.getName(),
 							w.getName()));
 					model.addDatasetToWorkspace(w, d);
 				} else {
-					LOGGER.fine("Dataset %s adding to list panel".formatted(d.getName()));
+					LOGGER.finer("Dataset %s adding to list panel".formatted(d.getName()));
 					model.addDataset(d);
 
 					// Get the path for the dataset node to expand

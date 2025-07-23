@@ -44,7 +44,7 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 
 		// don't re-add datasets already present in the model
 		if (hasNode(dataset)) {
-			LOGGER.fine("Dataset node %s exists in table model, not re-adding".formatted(dataset.getName()));
+			LOGGER.finer("Dataset node %s exists in table model, not re-adding".formatted(dataset.getName()));
 			final MutableTreeTableNode node = this.getNode(dataset);
 			return new TreePath(getPathToRoot(node));
 		}
@@ -52,11 +52,11 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 		// If dataset is root, parent will be the same dataset
 		final IAnalysisDataset parent = DatasetListManager.getInstance().getParent(dataset);
 		if (parent == null) {
-			LOGGER.fine("No parent dataset found for " + dataset.getName());
+			LOGGER.finer("No parent dataset found for " + dataset.getName());
 			return null;
 		}
 
-		LOGGER.fine("Adding new node for dataset %s".formatted(dataset.getName()));
+		LOGGER.finer("Adding new node for dataset %s".formatted(dataset.getName()));
 
 		final MutableTreeTableNode parentNode = dataset.isRoot() ? (MutableTreeTableNode) getRoot()
 				: getNode(parent);
@@ -106,7 +106,7 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 			return new TreePath(getPathToRoot(node));
 		}
 
-		LOGGER.fine("Adding new node for workspace %s".formatted(ws.getName()));
+		LOGGER.finer("Adding new node for workspace %s".formatted(ws.getName()));
 		final MutableTreeTableNode parentNode = (MutableTreeTableNode) this.getRoot();
 		final MutableTreeTableNode newNode = createNode(ws);
 		final int newIndex = parentNode.getChildCount();
@@ -124,17 +124,17 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	 * @param d
 	 * @return the path to the workspace
 	 */
-	public TreePath addDatasetToWorkspace(@NonNull IWorkspace ws, @NonNull IAnalysisDataset d) {
+	public synchronized TreePath addDatasetToWorkspace(@NonNull IWorkspace ws, @NonNull IAnalysisDataset d) {
 		final MutableTreeTableNode wsNode = getNode(ws);
 		final MutableTreeTableNode dsNode = getNode(d);
 
 		if (wsNode == null) {
-			LOGGER.fine("No node detected for %s, not adding dataset %s".formatted(ws.getName(), d.getName()));
+			LOGGER.finer("No node detected for %s, not adding dataset %s".formatted(ws.getName(), d.getName()));
 			return null;
 		}
 
 		if (dsNode == null) {
-			LOGGER.fine("No existing node detected for %s, adding dataset to workspace node".formatted(d.getName()));
+			LOGGER.finer("No existing node detected for %s, adding dataset to workspace node".formatted(d.getName()));
 			// Get the root dataset node for the given dataset
 			final IAnalysisDataset parent = DatasetListManager.getInstance().getParent(d);
 			final MutableTreeTableNode parentNode = d.isRoot() ? wsNode
@@ -143,11 +143,11 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 			final MutableTreeTableNode newNode = createNode(d);
 			insertNodeInto(newNode, wsNode, 0);
 		} else if (hasNode(wsNode, dsNode)) {
-			LOGGER.fine(
+			LOGGER.finer(
 					"Node %s is already in the workspace %s, no action needed".formatted(d.getName(), ws.getName()));
 		} else {
 
-			LOGGER.fine(
+			LOGGER.finer(
 					"Dataset node for %s detected, moving to workspace %s node".formatted(d.getName(), ws.getName()));
 			removeNodeFromParent(dsNode);
 			insertNodeInto(dsNode, wsNode, 0);
@@ -187,7 +187,7 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	public void insertNodeInto(MutableTreeTableNode newChild,
 			MutableTreeTableNode parent, int index) {
 
-		LOGGER.fine("Inserting node %s into parent".formatted(newChild.toString()));
+		LOGGER.finer("Inserting node %s into parent".formatted(newChild.toString()));
 		parent.insert(newChild, index);
 
 		modelSupport.fireChildAdded(new TreePath(getPathToRoot(parent)), index,
@@ -200,7 +200,7 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	 * to remove a node as it handles the event creation for you.
 	 */
 	public void removeNodeFromParent(MutableTreeTableNode node) {
-		LOGGER.fine("Removing node %s from parent".formatted(node.toString()));
+		LOGGER.finer("Removing node %s from parent".formatted(node.toString()));
 		final MutableTreeTableNode parent = (MutableTreeTableNode) node.getParent();
 
 		if (parent == null)
@@ -300,7 +300,7 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 	 * @return
 	 */
 	private MutableTreeTableNode createNode(@NonNull IAnalysisDataset dataset) {
-		LOGGER.fine("Creating new table node for %s".formatted(dataset.getName()));
+		LOGGER.finer("Creating new table node for %s".formatted(dataset.getName()));
 		final DatasetTreeTableNode n = new DatasetTreeTableNode(dataset);
 
 		// Add cluster groups separately
@@ -343,13 +343,13 @@ public class DatasetTreeTableModel extends AbstractTreeTableModel {
 				// Check if the node needs to be moved or created
 				if (hasNode(d)) {
 
-					LOGGER.fine("Dataset %s belongs to workspace %s, moving as a child of the workspace node"
+					LOGGER.finer("Dataset %s belongs to workspace %s, moving as a child of the workspace node"
 							.formatted(d.getName(), ws.getName()));
 					final MutableTreeTableNode dsNode = getNode(d);
 					removeNodeFromParent(dsNode);
 					n.add(dsNode);
 				} else {
-					LOGGER.fine("Dataset %s does not have a node, creating within workspace %s".formatted(d.getName(),
+					LOGGER.finer("Dataset %s does not have a node, creating within workspace %s".formatted(d.getName(),
 							ws.getName()));
 					n.add(createNode(d));
 				}
