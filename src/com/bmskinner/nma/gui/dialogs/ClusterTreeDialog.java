@@ -42,7 +42,9 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
@@ -90,7 +92,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 	private static final Logger LOGGER = Logger.getLogger(ClusterTreeDialog.class.getName());
 
 	private static final String ANALYSE_LBL = "Analyse new clusters";
-	private static final String SHOW_MGE_SRC_LBL = "Show merge sources";
+	private static final String SHOW_MGE_SRC_LBL = "Colour by merge source";
 	private static final String EXTRACT_LBL = "Extract selected as cluster";
 	private static final String COPY_NEWICK_LBL = "Copy Newick";
 
@@ -230,7 +232,13 @@ public class ClusterTreeDialog extends MessagingDialog {
 	}
 
 	private JPanel createButtonPanel() {
-		final JPanel panel = new JPanel(new FlowLayout());
+
+		final JPanel panel = new JPanel();
+		BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
+		panel.setLayout(bl);
+		final JPanel txtPanel = new JPanel(new FlowLayout());
+
+		final JPanel btnPanel = new JPanel(new FlowLayout());
 
 		final JButton extractButton = new JButton(EXTRACT_LBL);
 		extractButton.addActionListener(a -> {
@@ -241,17 +249,10 @@ public class ClusterTreeDialog extends MessagingDialog {
 				LOGGER.log(Level.SEVERE, "Error extracting cells", e);
 			}
 		});
-		panel.add(extractButton);
+
 
 		final JButton analyseButton = new JButton(ANALYSE_LBL);
 		analyseButton.addActionListener(a -> analyseClusters());
-		panel.add(analyseButton);
-
-		if (dataset.hasMergeSources()) {
-			final JButton mergeSourceButton = new JButton(SHOW_MGE_SRC_LBL);
-			mergeSourceButton.addActionListener(a -> showMergeSources());
-			panel.add(mergeSourceButton);
-		}
 
 		final List<IAnalysisDataset> l = dataset.getAllChildDatasets();
 		l.add(0, dataset);
@@ -261,7 +262,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 			selectedClusterGroupBox.setSelectionNull();
 			colourTreeNodesByCluster(selectedClusterBox.getSelectedDataset().getCollection());
 		});
-		panel.add(selectedClusterBox);
+
 
 		selectedClusterGroupBox = new ClusterGroupSelectionPanel(dataset.getClusterGroups());
 		selectedClusterGroupBox.setSelectedGroup(group);
@@ -269,7 +270,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 			selectedClusterBox.setSelectionNull();
 			colourTreeNodesByClusterGroup(selectedClusterGroupBox.getSelectedItem());
 		});
-		panel.add(selectedClusterGroupBox);
+
 
 		final JButton copyNewickButton = new JButton(COPY_NEWICK_LBL);
 		copyNewickButton.addActionListener(a -> {
@@ -278,7 +279,28 @@ public class ClusterTreeDialog extends MessagingDialog {
 			clipboard.setContents(stringSelection, null);
 			LOGGER.info("Copied Newick tree for cluster " + group.getName());
 		});
-		panel.add(copyNewickButton);
+
+		txtPanel.add(new JLabel("Cluster extraction:"));
+
+		txtPanel.add(extractButton);
+		txtPanel.add(analyseButton);
+		txtPanel.add(copyNewickButton);
+
+		btnPanel.add(new JLabel("Tree visualisation:"));
+		btnPanel.add(new JLabel("Colour by one cluster:"));
+		btnPanel.add(selectedClusterBox);
+		btnPanel.add(new JLabel("Colour by cluster group:"));
+		btnPanel.add(selectedClusterGroupBox);
+
+		if (dataset.hasMergeSources()) {
+			final JButton mergeSourceButton = new JButton(SHOW_MGE_SRC_LBL);
+			mergeSourceButton.addActionListener(a -> showMergeSources());
+			btnPanel.add(mergeSourceButton);
+		}
+
+		panel.add(txtPanel);
+		panel.add(btnPanel);
+
 		return panel;
 	}
 
