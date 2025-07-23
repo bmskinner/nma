@@ -75,6 +75,7 @@ Canny high threshold | Suppress weak edge pixels due to noise higher than this v
 Canny kernel radius | The radius for [Gaussian blurring](https://en.wikipedia.org/wiki/Gaussian_blur?searchDepth=1). The radius of the Gaussian convolution kernel used to smooth the source image prior to gradient calculation. The default value is 16.
 Canny kernel width | The number of pixels across which the Gaussian kernel is applied. The included implementation will reduce the radius if the contribution of pixel values is deemed negligable, so this is actually a maximum radius. Must be at least 2.
 Gap closing radius | The radius of the circle used for [morphological closing](https://en.wikipedia.org/wiki/Closing_%28morphology%29).
+Filter poor edge detection | Use unusally sharp angles in profiles to exclude cells with sharp corners that are most likely due to inaccurate edge detection. Defaults to false.
 Watershed | If your nuclei are close together or partially overlapping, e.g. from cell culture, this will use [watershed segmentation](https://en.wikipedia.org/wiki/Watershed_segmentation) to separate individual cells. Note that this is primarily designed for round nuclei, and the effect on asymmetric nuclei may not be what you want!
 
 ### Filtering
@@ -92,6 +93,11 @@ Setting | Controls
 --------|----------
 Nucleus type | A dropdown list to select the type of nucleus being analysed. The choice of nucleus type determines the rules that will be used to identify landmarks in the nucleus. The rulesets listed correspond to the files in the [rulesets folder](#config-rulesets). Custom rule definitions can be added by the user.
 Profile window | The window size used to generate morphology profiles. Too low, and you won't detect any features of interest. Too high, and you get enough resolution. The profile window is set as a faction of the perimeter of each nucleus, from zero to one. The default value is 5% of the perimeter, 0.05. The effect of the window size can be seen in the angle window explorer via the [Editing tab](#editing-tab). The angle window can be altered after an analysis has been run.
+Segment profiles | Should the angle profiles be segmented at local maxima and minima? This is the default, but it doesn't give extra information for all nuclei (e.g. round nuclei).
+
+### Detected objects
+
+This contains a table showing the area in pixels and circularity of all objects detected in the current image. Any objects that will be excluded by the size or circularity filters are in red. You can use this to help choose the best size and circularity filtering thresholds for your images.
 
 ### Start the analysis
 
