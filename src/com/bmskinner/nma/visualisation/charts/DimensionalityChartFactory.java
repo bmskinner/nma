@@ -3,6 +3,7 @@ package com.bmskinner.nma.visualisation.charts;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYDataImageAnnotation;
 import org.jfree.chart.annotations.XYLineAnnotation;
+import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
@@ -386,16 +388,38 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 				? DatasetUtils.findDomainBounds(cd).getUpperBound() + (xRange.getLength() * 0.01)
 				: DatasetUtils.findDomainBounds(cd).getLowerBound() - (xRange.getLength() * 0.01);
 
-		// Get the y boundaries fro the line
+		// Get the y boundaries for the line
 		final Range yRangeCd = DatasetUtils.findRangeBounds(cd);
 
 		// Draw a line from the consensus to the centroid of the cluster
+		// First, a thick white line to give a space around the real line
+		// The the narrower real line in the correct colour
+		final XYLineAnnotation spacer = new XYLineAnnotation(ccl.centroid().getX(), ccl.centroid().getY(),
+				xBound, ny,
+				new BasicStroke(5.0f), Color.WHITE);
 		final XYLineAnnotation line = new XYLineAnnotation(ccl.centroid().getX(), ccl.centroid().getY(),
 				xBound, ny,
 				new BasicStroke(2.0f), colour);
+
+		double spacerRadius = Math.min(xRange.getLength(), yRange.getLength()) / 100;
+		final XYShapeAnnotation circleSpacer = new XYShapeAnnotation(
+				new Ellipse2D.Double(ccl.centroid().getX() - spacerRadius,
+						ccl.centroid().getY() - spacerRadius, spacerRadius + spacerRadius, spacerRadius + spacerRadius),
+				null, null, Color.WHITE);
+
+		double circleRadius = spacerRadius * 0.75;
+		final XYShapeAnnotation circle = new XYShapeAnnotation(
+				new Ellipse2D.Double(ccl.centroid().getX() - circleRadius,
+						ccl.centroid().getY() - circleRadius, circleRadius + circleRadius, circleRadius + circleRadius),
+				null, null, colour);
+
+		renderer.addAnnotation(circleSpacer);
+		renderer.addAnnotation(spacer);
+		renderer.addAnnotation(circle);
 		renderer.addAnnotation(line);
 
 		// Make a line defining the x bound
+		// Does not need a spacer line, there is nothing else out here
 		final XYLineAnnotation xline = new XYLineAnnotation(xBound, yRangeCd.getUpperBound(), xBound,
 				yRangeCd.getLowerBound(), new BasicStroke(2.0f), colour);
 		renderer.addAnnotation(xline);
