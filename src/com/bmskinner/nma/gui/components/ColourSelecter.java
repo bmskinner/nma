@@ -33,7 +33,7 @@ public class ColourSelecter {
 	public static final Color DEFAULT_CELL_OUTLINE = Color.CYAN;
 	public static final Color DEFAULT_LOBE_OUTLINE = Color.GREEN;
 
-	protected static Color[] segmentColourList = {
+	protected static final Color[] DEFAULT_PALETTE = {
 
 			Color.BLUE, Color.ORANGE, Color.GREEN, Color.MAGENTA, Color.DARK_GRAY, Color.CYAN,
 			Color.RED, Color.YELLOW,
@@ -42,32 +42,34 @@ public class ColourSelecter {
 	};
 
 	// Colours for FISH signals in nuclei
-	protected static Color[] signalColourList = { Color.RED, Color.GREEN, Color.CYAN, Color.MAGENTA,
+	protected static final Color[] FISH_SIGNAL_PALETTE = { Color.RED, Color.GREEN, Color.CYAN,
+			Color.MAGENTA,
 			Color.YELLOW,
 			Color.LIGHT_GRAY };
 
 	// Color blind friendly swatch
 	// See http://optional.is/required/2011/06/20/accessible-color-swatches/
-	protected static Color[] optimisedSwatchList = { Color.decode("#fff200"),
+	protected static final Color[] ACCESSIBLE_PALETTE = { Color.decode("#fff200"),
 			Color.decode("#006f45"),
 			Color.decode("#f7941e"), Color.decode("#008fd5"), Color.decode("#abd69c"),
 			Color.decode("#741472") };
 
-	// AI generated colour names from a neural network:
-	// http://lewisandquark.tumblr.com/post/160776374467/new-paint-colors-invented-by-neural-network
-	protected static Color[] aiSwatchList = { new Color(48, 94, 83), // Grade Bat
-			new Color(112, 113, 84), // Clardic Fug
-			new Color(216, 200, 185), // Stummy Beige
-			new Color(61, 63, 66), // Dorkwood
-			new Color(176, 99, 108), // Grass Bat
-			new Color(204, 205, 194), // Sindis Poop
-			new Color(190, 164, 116), // Turdly
-			new Color(201, 199, 165), // Snowbonk
-			new Color(197, 162, 171) // Stanky Bean
-
+	/**
+	 * Colour palette DARK2 from RColorBrewer
+	 * https://cran.r-project.org/web/packages/RColorBrewer/index.html
+	 */
+	protected static final Color[] DARK2_PALETTE = {
+			Color.decode("#1B9E77"),
+			Color.decode("#D95F02"),
+			Color.decode("#7570B3"),
+			Color.decode("#E7298A"),
+			Color.decode("#66A61E"),
+			Color.decode("#E6AB02"),
+			Color.decode("#A6761D"),
+			Color.decode("#666666")
 	};
 
-	protected static Color[] blackList = { Color.BLACK };
+	protected static final Color[] BLACK_PALETTE = { Color.BLACK };
 
 	/**
 	 * The available colour choices, used for default dataset, segment and signal
@@ -77,7 +79,10 @@ public class ColourSelecter {
 	 *
 	 */
 	public enum ColourSwatch {
-		REGULAR_SWATCH("Regular"), NO_SWATCH("No colours"), ACCESSIBLE_SWATCH("Accessible colours");
+		REGULAR_SWATCH("Regular"),
+		NO_SWATCH("No colours"),
+		ACCESSIBLE_SWATCH("Accessible colours"),
+		DARK2_SWATCH("RColorBrewer Dark2");
 
 		private final String name;
 
@@ -105,11 +110,13 @@ public class ColourSelecter {
 	public static Color getColor(int i, ColourSwatch swatch) {
 		switch (swatch) {
 		case ACCESSIBLE_SWATCH:
-			return getOptimisedColor(i);
+			return getAccessibleColor(i);
 		case NO_SWATCH:
 			return Color.BLACK;
 		case REGULAR_SWATCH:
 			return getRegularColor(i);
+		case DARK2_SWATCH:
+			return getDark2Color(i);
 		default:
 			return getRegularColor(i);
 		}
@@ -145,7 +152,7 @@ public class ColourSelecter {
 	 * @return a colour
 	 */
 	private static Color getRegularColor(int i) {
-		return ColourSelecter.segmentColourList[i % ColourSelecter.segmentColourList.length];
+		return ColourSelecter.DEFAULT_PALETTE[i % ColourSelecter.DEFAULT_PALETTE.length];
 	}
 
 	/**
@@ -156,9 +163,14 @@ public class ColourSelecter {
 	 * @param i the number of the colour to return
 	 * @return a colour
 	 */
-	private static Color getOptimisedColor(int i) {
-		return ColourSelecter.optimisedSwatchList[i
-				% ColourSelecter.optimisedSwatchList.length];
+	private static Color getAccessibleColor(int i) {
+		return ColourSelecter.ACCESSIBLE_PALETTE[i
+				% ColourSelecter.ACCESSIBLE_PALETTE.length];
+	}
+
+	private static Color getDark2Color(int i) {
+		return ColourSelecter.DARK2_PALETTE[i
+				% ColourSelecter.DARK2_PALETTE.length];
 	}
 
 	/**
@@ -172,8 +184,8 @@ public class ColourSelecter {
 	 */
 	public static Color getSignalColour(int channel, boolean transparent, int defaultAlpha) {
 		Color result;
-		Color color = ColourSelecter.signalColourList[channel
-				% ColourSelecter.signalColourList.length];
+		Color color = ColourSelecter.FISH_SIGNAL_PALETTE[channel
+				% ColourSelecter.FISH_SIGNAL_PALETTE.length];
 		result = transparent
 				? new Color(color.getRed(), color.getGreen(), color.getBlue(), defaultAlpha)
 				: color;
@@ -226,8 +238,8 @@ public class ColourSelecter {
 	/**
 	 * Make the given colour transparent
 	 * 
-	 * @param c
-	 * @param alpha
+	 * @param c     the colour to make transparent
+	 * @param alpha the alpha level in the range 0-255
 	 * @return
 	 */
 	public static Color makeTransparent(Color c, int alpha) {

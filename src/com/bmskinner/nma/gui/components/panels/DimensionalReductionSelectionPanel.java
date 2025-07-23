@@ -229,7 +229,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	 */
 	private JSpinner makeUmapNeighbourSpinner() {
 		int initialValue = options.getInt(UMAPMethod.N_NEIGHBOUR_KEY);
-		initialValue = NumberTools.constrain(initialValue, MIN_UMAP_NEIGHBOUR,
+		initialValue = NumberTools.clamp(initialValue, MIN_UMAP_NEIGHBOUR,
 				dataset.getCollection().size());
 		SpinnerModel model = new SpinnerNumberModel(initialValue, MIN_UMAP_NEIGHBOUR,
 				dataset.getCollection().size(), STEP_UMAP_NEIGHBOUR);
@@ -281,7 +281,7 @@ public class DimensionalReductionSelectionPanel extends OptionsPanel {
 	 */
 	private JSpinner makeMaxIterationsSpinner() {
 		int initialIterations = options.getInt(TsneMethod.MAX_ITERATIONS_KEY);
-		initialIterations = NumberTools.constrain(initialIterations, MIN_ITERATIONS,
+		initialIterations = NumberTools.clamp(initialIterations, MIN_ITERATIONS,
 				MAX_ITERATIONS);
 
 		SpinnerModel iterationsModel = new SpinnerNumberModel(initialIterations, MIN_ITERATIONS,
