@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
@@ -223,19 +224,22 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 	}
 
 	/**
-	 * A temporary method to create tSNE and PCA plots
+	 * Create a scatter dataset for dimensionality reduction plots. The plot may be
+	 * coloured by merge source, or by another cluster group.
 	 * 
-	 * @param r
+	 * @param d           the dataset to plot
+	 * @param type        the colour scheme to apply
+	 * @param plotGroup   the cluster group for cell point locations
+	 * @param colourGroup the cluster group for cell point colours
 	 * @return
-	 * @throws SegmentUpdateException
-	 * @throws ComponentCreationException
 	 * @throws MissingDataException
-	 * @throws ChartDatasetCreationException
+	 * @throws ComponentCreationException
+	 * @throws SegmentUpdateException
 	 */
-	public static XYDataset createDimensionalityReductionScatterDataset(IAnalysisDataset d,
-			ColourByType type,
-			IClusterGroup plotGroup,
-			IClusterGroup colourGroup)
+	public static XYDataset createDimensionalityReductionScatterDataset(@NonNull IAnalysisDataset d,
+			@NonNull ColourByType type,
+			@NonNull IClusterGroup plotGroup,
+			@Nullable IClusterGroup colourGroup)
 			throws MissingDataException, ComponentCreationException, SegmentUpdateException {
 		final ComponentXYDataset<Nucleus> ds = new ComponentXYDataset<>();
 		

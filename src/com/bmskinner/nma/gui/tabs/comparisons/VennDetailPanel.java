@@ -72,7 +72,7 @@ public class VennDetailPanel extends TableDetailPanel {
 			vennTable.setEnabled(false);
 
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error creating venn panel", e);
+			LOGGER.log(Level.SEVERE, "Error creating venn panel: %s".formatted(e.getMessage()), e);
 		}
 
 	}
@@ -144,9 +144,8 @@ public class VennDetailPanel extends TableDetailPanel {
 					pct = nf.parse(pctString).doubleValue();
 
 				} catch (final ParseException e) {
-					LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName
-							+ ": "
-							+ e.getMessage());
+					LOGGER.fine("Error parsing value: %s in column %s: %s".formatted(cellContents, columnName,
+							e.getMessage()));
 					pct = 0;
 				}
 

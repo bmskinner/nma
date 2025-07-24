@@ -26,7 +26,6 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
-import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog.ColourByType;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.DimensionalityChartFactory;
 
@@ -85,7 +84,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	public enum ColourByType {
 		NONE("None"), CLUSTER("Cluster"), MERGE_SOURCE("Merge source");
 
-		private String name;
+		private final String name;
 
 		private ColourByType(String name) {
 			this.name = name;
@@ -100,7 +99,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	private JPanel createHeader() {
 
 		final JPanel panel = new JPanel();
-		BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
+		final BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
 		panel.setLayout(bl);
 
 		imageSpinner = createMaxImageSpinner();
@@ -142,9 +141,9 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 			updateChart((ColourByType) colourBox.getSelectedItem());
 		});
 
-		JPanel textPanel = new JPanel();
+		final JPanel textPanel = new JPanel();
 		textPanel.add(new JLabel(HELP_LBL));
-		JPanel btnPanel = new JPanel();
+		final JPanel btnPanel = new JPanel();
 
 		btnPanel.add(new JLabel("Colour points by:"));
 		btnPanel.add(colourBox);
@@ -214,7 +213,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	}
 
 	private void updateTitle() {
-		setTitle("Dimensional reduction for " + dataset.getName() + ": " + group.getName());
+		setTitle("Dimensionality reduction for %s: %s".formatted(dataset.getName(), group.getName()));
 	}
 
 }

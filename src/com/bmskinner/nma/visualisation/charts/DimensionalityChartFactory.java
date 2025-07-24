@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYDataImageAnnotation;
 import org.jfree.chart.annotations.XYLineAnnotation;
@@ -32,6 +32,7 @@ import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nma.analysis.classification.DimensionalityReductionMethod;
+import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.Nucleus;
@@ -41,12 +42,11 @@ import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
-import com.bmskinner.nma.components.profiles.MissingLandmarkException;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog.ColourByType;
 import com.bmskinner.nma.io.ImageImporter;
+import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.visualisation.charts.ScatterChartFactory.ScatterChartRenderer;
-import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.ComponentOutlineDataset;
 import com.bmskinner.nma.visualisation.datasets.ScatterChartDatasetCreator;
 import com.bmskinner.nma.visualisation.image.ImageAnnotator;
@@ -75,20 +75,23 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	}
 
 	/**
-	 * Temporary method to create tSNE plots
+	 * Create dimensionality reduction plots with a given colouring scheme. A plot
+	 * must have a cluster group that identifies cell locations. The colouring
+	 * scheme may be based on a cluster group or on merge sources if the dataset is
+	 * merged.
 	 * 
-	 * @param r
+	 * @param d           the dataset to plot
+	 * @param type        the colour scheme to apply
+	 * @param plotGroup   the cluster group for cell point locations
+	 * @param colourGroup the cluster group for cell point colours
 	 * @return
-	 * @throws ChartDatasetCreationException
 	 */
-	public static JFreeChart createDimensionalityReductionChart(IAnalysisDataset d,
-			ColourByType type,
-			IClusterGroup plotGroup, IClusterGroup colourGroup) {
+	public static JFreeChart createDimensionalityReductionChart(@NonNull IAnalysisDataset d,
+			@NonNull ColourByType type, @NonNull IClusterGroup plotGroup, @Nullable IClusterGroup colourGroup) {
 
 		try {
 			final XYDataset ds = ScatterChartDatasetCreator.createDimensionalityReductionScatterDataset(d,
-					type, plotGroup,
-					colourGroup);
+					type, plotGroup, colourGroup);
 
 			final DimensionalityReductionMethod method = DimensionalityReductionMethod
 					.fromClusterGroupOptions(plotGroup.getOptions().get());
@@ -108,27 +111,42 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			final XYItemRenderer renderer = new ScatterChartRenderer();
 			plot.setRenderer(renderer);
 
-			final List<UUID> clusterIds = colourGroup.getUUIDs();
-			for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
+			// Set the series colours
+			if (type.equals(ColourByType.MERGE_SOURCE)) {
+				final UUID[] mergeIds = d.getMergeSourceIDs().toArray(new UUID[0]);
+				for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
 
-				// If we are colouring the points, use the dataset colour if set,
-				// otherwise pick a sensible colour
-				final IAnalysisDataset childDataset = d.getChildDataset(clusterIds.get(i));
-				final Paint colour = type.equals(ColourByType.NONE) ? Color.WHITE
-						: childDataset.hasDatasetColour() ? childDataset.getDatasetColour().get()
-								: ColourSelecter.getColor(i);
-				renderer.setSeriesPaint(i, colour);
+					// Use the dataset colour if set, otherwise pick a sensible colour
+					final IAnalysisDataset mergeSource = d.getMergeSource(mergeIds[i]);
+					final Paint colour = mergeSource.getDatasetColour().orElse(ColourSelecter.getColor(i));
+					renderer.setSeriesPaint(i, colour);
+				}
+			}
+
+			if (type.equals(ColourByType.CLUSTER)) {
+				final List<UUID> clusterIds = colourGroup.getUUIDs();
+				for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
+
+					// Use the dataset colour if set, otherwise pick a sensible colour
+					final IAnalysisDataset childDataset = d.getChildDataset(clusterIds.get(i));
+					final Paint colour = childDataset.getDatasetColour().orElse(ColourSelecter.getColor(i));
+					renderer.setSeriesPaint(i, colour);
+				}
+			}
+
+			if (type.equals(ColourByType.NONE)) {
+				for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
+					renderer.setSeriesPaint(i, Color.WHITE);
+				}
 			}
 
 			// Add a legend
 			chart.addLegend(new LegendTitle(plot));
 
-			addClusterGroupConsensusNuclei(d, plotGroup, chart);
+			addConsensusNuclei(d, plotGroup, type, chart);
 
 			return chart;
-		} catch (ChartDatasetCreationException | MissingDataException
-				| ComponentCreationException
-				| SegmentUpdateException e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Unable to make dimensionality reduction chart: %s".formatted(e.getMessage()), e);
 			return createErrorChart();
 		}
@@ -160,9 +178,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 		final double scale = Math.log10(d.getCollection().size()) * 4;
 
-
-		int dataset = 0;
 		if (type.equals(ColourByType.MERGE_SOURCE)) {
+			int dataset = 0;
 			for (final IAnalysisDataset mergeSource : d.getMergeSources()) {
 				List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
 				final Color colour = ColourSelecter.getColor(dataset);
@@ -187,9 +204,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			return;
 		}
 
-		dataset = 0;
 		if (type.equals(ColourByType.CLUSTER) | type.equals(ColourByType.NONE)) {
-
+			int dataset = 0;
 			// Add each cluster group nuclei
 			for (final UUID id : plotGroup.getUUIDs()) {
 				final IAnalysisDataset childDataset = d.getChildDataset(id);
@@ -223,7 +239,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	}
 
 	/**
-	 * Find the centroid of the points in the given dataset
+	 * Find the centroid of the points in the given chart dataset
 	 * 
 	 * @param dataset
 	 * @param chart
@@ -231,7 +247,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 */
 	private static Point2D findCentroid(int dataset, JFreeChart chart) {
 
-		// Find the centre of mass of the cluster
+		// Find the centroid of the cluster
 		// Each cluster group is a series in the first dataset
 		final int items = chart.getXYPlot().getDataset(0).getItemCount(dataset - 1);
 
@@ -247,14 +263,18 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			yvals[i] = y;
 		}
 
-		final double xmean = DoubleStream.of(xvals).average().orElse(0);
-		final double ymean = DoubleStream.of(yvals).average().orElse(0);
+		final double xmedian = Stats.median(xvals);
+		final double ymedian = Stats.median(yvals);
 
-		return new Point2D.Double(xmean, ymean);
+		return new Point2D.Double(xmedian, ymedian);
 	}
 
-	private record ConsensusCentroidLink(UUID datasetId, Point2D centroid, int datasetIndex) {
-		double getY() {
+	private record ConsensusLocation(IAnalysisDataset dataset, Point2D centroid, int datasetIndex) {
+
+		double x() {
+			return centroid.getX();
+		}
+		double y() {
 			return centroid.getY();
 		}
 	}
@@ -265,14 +285,12 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @param d
 	 * @param plotGroup
 	 * @param chart
-	 * @throws MissingLandmarkException
-	 * @throws ComponentCreationException
-	 * @throws ChartDatasetCreationException
+	 * @throws Exception
 	 */
-	private static void addClusterGroupConsensusNuclei(IAnalysisDataset d, IClusterGroup plotGroup,
+	private static void addConsensusNuclei(IAnalysisDataset d, IClusterGroup plotGroup,
+			ColourByType type,
 			JFreeChart chart)
-			throws MissingLandmarkException, ComponentCreationException,
-			ChartDatasetCreationException {
+			throws Exception {
 
 		// Choose a sensible scale for the consensus nuclei based on the
 		// range of the plot
@@ -284,36 +302,56 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		LOGGER.finer("Domain is %s; Range is %s; Scale is %s".formatted(xRange.getLength(), yRange.getLength(), scale));
 
 		// Calculate centroids for sorting consenusus nuclei
-		final List<ConsensusCentroidLink> leftCentroids = new ArrayList<>();
-		final List<ConsensusCentroidLink> rightCentroids = new ArrayList<>();
-		int dataset = 1;
-		for (final UUID clusterId : plotGroup.getUUIDs()) {
-			final Point2D centroid = findCentroid(dataset, chart);
-			final ConsensusCentroidLink ccl = new ConsensusCentroidLink(clusterId, centroid, dataset);
-			if (centroid.getX() < xRange.getCentralValue()) {
-				leftCentroids.add(ccl);
-			} else {
-				rightCentroids.add(ccl);
+		final List<ConsensusLocation> leftCentroids = new ArrayList<>();
+		final List<ConsensusLocation> rightCentroids = new ArrayList<>();
+
+		// Are we showing the consensus of the cluster group or of merge sources?
+
+		if (ColourByType.CLUSTER.equals(type)) {
+			int dataset = 1;
+			for (final UUID clusterId : plotGroup.getUUIDs()) {
+				final Point2D centroid = findCentroid(dataset, chart);
+				final ConsensusLocation ccl = new ConsensusLocation(d.getChildDataset(clusterId), centroid, dataset);
+				if (centroid.getX() < xRange.getCentralValue()) {
+					leftCentroids.add(ccl);
+				} else {
+					rightCentroids.add(ccl);
+				}
+				dataset++;
 			}
-			dataset++;
+		}
+
+		if (ColourByType.MERGE_SOURCE.equals(type)) {
+			int dataset = 1;
+
+			for (final UUID mergeSourceId : d.getMergeSourceIDs()) {
+				final Point2D centroid = findCentroid(dataset, chart);
+				final ConsensusLocation ccl = new ConsensusLocation(d.getMergeSource(mergeSourceId), centroid, dataset);
+				if (centroid.getX() < xRange.getCentralValue()) {
+					leftCentroids.add(ccl);
+				} else {
+					rightCentroids.add(ccl);
+				}
+				dataset++;
+			}
 		}
 
 		// Sort by y descending
-		leftCentroids.sort(Comparator.comparingDouble(ConsensusCentroidLink::getY).reversed());
-		rightCentroids.sort(Comparator.comparingDouble(ConsensusCentroidLink::getY).reversed());
+		leftCentroids.sort(Comparator.comparingDouble(ConsensusLocation::y).reversed());
+		rightCentroids.sort(Comparator.comparingDouble(ConsensusLocation::y).reversed());
 
 		// Draw each consensus at a y location. Y values are steps of 1/n+1
 		// to make even spacing
 		int yOrder = 0;
 		double separations = 1d / (leftCentroids.size() + 1);
-		for (final ConsensusCentroidLink ccl : leftCentroids) {
+		for (final ConsensusLocation ccl : leftCentroids) {
 			plotConsensus(d, ccl, chart, scale, yOrder, separations);
 			yOrder++;
 		}
 
 		yOrder = 0;
 		separations = 1d / (rightCentroids.size() + 1);
-		for (final ConsensusCentroidLink ccl : rightCentroids) {
+		for (final ConsensusLocation ccl : rightCentroids) {
 			plotConsensus(d, ccl, chart, scale, yOrder, separations);
 			yOrder++;
 		}
@@ -323,31 +361,27 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * Draw the consensus nucleus at an appropriate position on the chart and add a
 	 * line to the cluster centroid
 	 * 
-	 * @param d
-	 * @param ccl
+	 * @param parent      the dataset with all cells being displayed
+	 * @param ccl         the centroid of the cluster being drawn
 	 * @param chart
 	 * @param scale
 	 * @param index
 	 * @param separations
-	 * @throws MissingLandmarkException
-	 * @throws ComponentCreationException
-	 * @throws ChartDatasetCreationException
+	 * @throws Exception
 	 */
-	private static void plotConsensus(IAnalysisDataset d, ConsensusCentroidLink ccl,
+	private static void plotConsensus(IAnalysisDataset parent, ConsensusLocation ccl,
 			JFreeChart chart, double scale,
 			int index, double separations)
-			throws MissingLandmarkException, ComponentCreationException,
-			ChartDatasetCreationException {
-
-		if (!d.getChildDataset(ccl.datasetId()).getCollection().hasConsensus()) {
-			LOGGER.fine("Dataset %s does not have a consensus, not drawing"
-					.formatted(d.getChildDataset(ccl.datasetId()).getName()));
-			return;
+			throws Exception {
+		
+		if (!ccl.dataset().getCollection().hasConsensus()) {
+			LOGGER.fine("Dataset %s does not have a consensus for dimensionality chart, calculating"
+					.formatted(ccl.dataset().getName()));
+			new ConsensusAveragingMethod(ccl.dataset()).call();
 		}
+		
 
-		final IAnalysisDataset childDataset = d.getChildDataset(ccl.datasetId());
-		final Paint colour = childDataset.getDatasetColour()
-				.orElse(ColourSelecter.getColor(ccl.datasetIndex() - 1));
+		final Paint colour = ccl.dataset().getDatasetColour().orElse(ColourSelecter.getColor(ccl.datasetIndex() - 1));
 
 		final Range xRange = DatasetUtils.findDomainBounds(chart.getXYPlot().getDataset());
 		final Range yRange = DatasetUtils.findRangeBounds(chart.getXYPlot().getDataset());
@@ -355,7 +389,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		// Place the consensus somewhere sensible. Scale here has been chosen to reflect
 		// the ranges of the plot; this should avoid making the consensus too small or
 		// too large for the chart
-		final Nucleus n = d.getChildDataset(ccl.datasetId()).getCollection().getConsensus();
+		final Nucleus n = ccl.dataset().getCollection().getConsensus();
 		n.setScale(scale);
 
 		final boolean isLeft = ccl.centroid().getX() < xRange.getCentralValue();
@@ -401,13 +435,13 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 				xBound, ny,
 				new BasicStroke(2.0f), colour);
 
-		double spacerRadius = Math.min(xRange.getLength(), yRange.getLength()) / 100;
+		final double spacerRadius = Math.min(xRange.getLength(), yRange.getLength()) / 100;
 		final XYShapeAnnotation circleSpacer = new XYShapeAnnotation(
 				new Ellipse2D.Double(ccl.centroid().getX() - spacerRadius,
 						ccl.centroid().getY() - spacerRadius, spacerRadius + spacerRadius, spacerRadius + spacerRadius),
 				null, null, Color.WHITE);
 
-		double circleRadius = spacerRadius * 0.75;
+		final double circleRadius = spacerRadius * 0.75;
 		final XYShapeAnnotation circle = new XYShapeAnnotation(
 				new Ellipse2D.Double(ccl.centroid().getX() - circleRadius,
 						ccl.centroid().getY() - circleRadius, circleRadius + circleRadius, circleRadius + circleRadius),
