@@ -1,7 +1,9 @@
 package com.bmskinner.nma.visualisation.tables;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
@@ -26,15 +28,15 @@ public class VennTableModel extends DatasetTableModel {
 		}
 
 		colNames = makeColNames(datasets);
-		int colCount = colNames.length;
+		final int colCount = colNames.length;
 
-		int rowCount = datasets.size();
+		final int rowCount = datasets.size();
 
 		rowData = new String[rowCount][colCount];
 		for (int r = 0; r < rowCount; r++) {
 			for (int c = 0; c < colCount; c++) {
 				if (c == 0) {
-					rowData[r][c] = datasets.get(r).getName();
+					rowData[r][c] = "... shared with " + datasets.get(r).getName();
 					continue;
 				}
 
@@ -43,15 +45,29 @@ public class VennTableModel extends DatasetTableModel {
 					continue;
 				}
 
-				int shared = datasets.get(r).getCollection().countShared(datasets.get(c - 1).getCollection());
+				final int shared = datasets.get(r).getCollection().countShared(datasets.get(c - 1).getCollection());
 
-				int d2size = datasets.get(c - 1).getCollection().size();
+				final int d2size = datasets.get(c - 1).getCollection().size();
 
-				double pct = d2size == 0 ? 0 : (shared / (double) d2size) * 100;
+				final double pct = d2size == 0 ? 0 : (shared / (double) d2size) * 100;
 
 				rowData[r][c] = df.format(pct) + "%";
 			}
 		}
+	}
+
+	/**
+	 * Override because we need to add a custom "has ..." to the header
+	 * 
+	 * @param datasets
+	 * @return
+	 */
+	@Override
+	protected String[] makeColNames(@NonNull List<IAnalysisDataset> datasets) {
+		final List<String> names = new ArrayList<>();
+		names.add(EMPTY_STRING);
+		names.addAll(datasets.stream().map(d -> d.getName() + " has...").toList());
+		return names.toArray(new String[0]);
 	}
 
 	@Override

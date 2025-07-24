@@ -20,8 +20,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -31,7 +31,6 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.tabs.TableDetailPanel;
-
 import com.bmskinner.nma.visualisation.options.TableOptions;
 import com.bmskinner.nma.visualisation.options.TableOptionsBuilder;
 import com.bmskinner.nma.visualisation.tables.AnalysisDatasetTableCreator;
@@ -44,8 +43,8 @@ public class VennDetailPanel extends TableDetailPanel {
 	private static final String PANEL_TITLE_LBL = "Pairwise overlaps";
 	private static final String PANEL_DESC_LBL = "Pairwise comparison of cells shared between datasets";
 
-	private static final String HEADER_LBL = "Shows the percentage of cells in each dataset column shared with each other dataset";
-	private JPanel mainPanel = new JPanel();
+	private static final String HEADER_LBL = "Each cell shows the percentage of cells in the column header dataset shared with the row dataset";
+	private final JPanel mainPanel = new JPanel();
 
 	private ExportableTable vennTable;
 
@@ -55,12 +54,12 @@ public class VennDetailPanel extends TableDetailPanel {
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
 		try {
-			JPanel vennPanel = new JPanel(new BorderLayout());
+			final JPanel vennPanel = new JPanel(new BorderLayout());
 
-			JPanel header = new JPanel();
+			final JPanel header = new JPanel();
 			header.add(new JLabel(HEADER_LBL));
 
-			JScrollPane scrollPane = new JScrollPane();
+			final JScrollPane scrollPane = new JScrollPane();
 			scrollPane.setViewportView(mainPanel);
 
 			this.add(header, BorderLayout.NORTH);
@@ -72,7 +71,7 @@ public class VennDetailPanel extends TableDetailPanel {
 			mainPanel.add(vennPanel);
 			vennTable.setEnabled(false);
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error creating venn panel", e);
 		}
 
@@ -90,7 +89,7 @@ public class VennDetailPanel extends TableDetailPanel {
 
 	@Override
 	protected void updateMultiple() {
-		TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+		final TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
 				.setTarget(vennTable)
 				.setColumnRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN,
 						new VennTableCellRenderer())
@@ -124,10 +123,10 @@ public class VennDetailPanel extends TableDetailPanel {
 			Color backColour = Color.WHITE;
 			Color foreColour = Color.BLACK;
 
-			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected,
+			final JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected,
 					hasFocus, row, column);
 
-			String cellContents = l.getText();
+			final String cellContents = l.getText();
 
 			if (cellContents == null || cellContents.equals("")) {
 
@@ -135,16 +134,16 @@ public class VennDetailPanel extends TableDetailPanel {
 
 			} else {
 
-				String columnName = table.getColumnName(column);
+				final String columnName = table.getColumnName(column);
 
-				String pctString = cellContents.replace("%", "");
+				final String pctString = cellContents.replace("%", "");
 				double pct = 0;
 				try {
 
-					NumberFormat nf = NumberFormat.getInstance();
+					final NumberFormat nf = NumberFormat.getInstance();
 					pct = nf.parse(pctString).doubleValue();
 
-				} catch (ParseException e) {
+				} catch (final ParseException e) {
 					LOGGER.fine("Error getting value: " + cellContents + " in column " + columnName
 							+ ": "
 							+ e.getMessage());
