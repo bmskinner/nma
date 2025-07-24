@@ -73,7 +73,11 @@ public class VennChartFactory extends AbstractChartFactory {
 
 			// Add shared counts and labels
 			for (final Label a : d.getLabels()) {
-				plot.addAnnotation(new XYTextAnnotation(a.label(), a.x(), a.y()));
+				// Fade labels with zero
+				final Color textColour = a.isInt() && a.intValue() == 0 ? Color.GRAY : Color.BLACK;
+				final XYTextAnnotation ta = new XYTextAnnotation(a.label(), a.x(), a.y());
+				ta.setPaint(textColour);
+				plot.addAnnotation(ta);
 			}
 
 			applyDefaultAxisOptions(chart);
