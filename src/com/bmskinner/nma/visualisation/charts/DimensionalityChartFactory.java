@@ -136,7 +136,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 			if (type.equals(ColourByType.NONE)) {
 				for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
-					renderer.setSeriesPaint(i, Color.WHITE);
+					renderer.setSeriesPaint(i, Color.BLACK);
 				}
 			}
 
@@ -269,7 +269,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		return new Point2D.Double(xmedian, ymedian);
 	}
 
-	private record ConsensusLocation(IAnalysisDataset dataset, Point2D centroid, int datasetIndex) {
+	private record ConsensusLocation(IAnalysisDataset dataset, Point2D centroid, int datasetIndex, Color colour) {
 
 		double x() {
 			return centroid.getX();
@@ -310,8 +310,11 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		if (ColourByType.CLUSTER.equals(type)) {
 			int dataset = 1;
 			for (final UUID clusterId : plotGroup.getUUIDs()) {
+				
+				final IAnalysisDataset child = d.getChildDataset(clusterId);
 				final Point2D centroid = findCentroid(dataset, chart);
-				final ConsensusLocation ccl = new ConsensusLocation(d.getChildDataset(clusterId), centroid, dataset);
+				final Color colour = child.getDatasetColour().orElse(ColourSelecter.getColor(dataset - 1));
+				final ConsensusLocation ccl = new ConsensusLocation(child, centroid, dataset, colour);
 				if (centroid.getX() < xRange.getCentralValue()) {
 					leftCentroids.add(ccl);
 				} else {
@@ -325,8 +328,26 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			int dataset = 1;
 
 			for (final UUID mergeSourceId : d.getMergeSourceIDs()) {
+				final IAnalysisDataset child = d.getMergeSource(mergeSourceId);
 				final Point2D centroid = findCentroid(dataset, chart);
-				final ConsensusLocation ccl = new ConsensusLocation(d.getMergeSource(mergeSourceId), centroid, dataset);
+				final Color colour = child.getDatasetColour().orElse(ColourSelecter.getColor(dataset - 1));
+				final ConsensusLocation ccl = new ConsensusLocation(child, centroid, dataset, colour);
+				if (centroid.getX() < xRange.getCentralValue()) {
+					leftCentroids.add(ccl);
+				} else {
+					rightCentroids.add(ccl);
+				}
+				dataset++;
+			}
+		}
+
+		if (ColourByType.NONE.equals(type)) {
+			int dataset = 1;
+
+			for (final UUID clusterId : plotGroup.getUUIDs()) {
+				final IAnalysisDataset child = d.getChildDataset(clusterId);
+				final Point2D centroid = findCentroid(dataset, chart);
+				final ConsensusLocation ccl = new ConsensusLocation(child, centroid, dataset, Color.BLACK);
 				if (centroid.getX() < xRange.getCentralValue()) {
 					leftCentroids.add(ccl);
 				} else {
@@ -379,9 +400,6 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 					.formatted(ccl.dataset().getName()));
 			new ConsensusAveragingMethod(ccl.dataset()).call();
 		}
-		
-
-		final Paint colour = ccl.dataset().getDatasetColour().orElse(ColourSelecter.getColor(ccl.datasetIndex() - 1));
 
 		final Range xRange = DatasetUtils.findDomainBounds(chart.getXYPlot().getDataset());
 		final Range yRange = DatasetUtils.findRangeBounds(chart.getXYPlot().getDataset());
@@ -412,7 +430,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		renderer.setDefaultSeriesVisibleInLegend(false);
 
 		for (int i = 0; i < cd.getSeriesCount(); i++) {
-			renderer.setSeriesPaint(i, colour);
+			renderer.setSeriesPaint(i, ccl.colour());
 			renderer.setSeriesStroke(i, new BasicStroke(2.0f));
 		}
 		chart.getXYPlot().setRenderer(ccl.datasetIndex(), renderer);
@@ -433,7 +451,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 				new BasicStroke(5.0f), Color.WHITE);
 		final XYLineAnnotation line = new XYLineAnnotation(ccl.centroid().getX(), ccl.centroid().getY(),
 				xBound, ny,
-				new BasicStroke(2.0f), colour);
+				new BasicStroke(2.0f), ccl.colour());
 
 		final double spacerRadius = Math.min(xRange.getLength(), yRange.getLength()) / 100;
 		final XYShapeAnnotation circleSpacer = new XYShapeAnnotation(
@@ -445,7 +463,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		final XYShapeAnnotation circle = new XYShapeAnnotation(
 				new Ellipse2D.Double(ccl.centroid().getX() - circleRadius,
 						ccl.centroid().getY() - circleRadius, circleRadius + circleRadius, circleRadius + circleRadius),
-				null, null, colour);
+				null, null, ccl.colour());
 
 		renderer.addAnnotation(circleSpacer);
 		renderer.addAnnotation(spacer);
@@ -455,7 +473,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 		// Make a line defining the x bound
 		// Does not need a spacer line, there is nothing else out here
 		final XYLineAnnotation xline = new XYLineAnnotation(xBound, yRangeCd.getUpperBound(), xBound,
-				yRangeCd.getLowerBound(), new BasicStroke(2.0f), colour);
+				yRangeCd.getLowerBound(), new BasicStroke(2.0f), ccl.colour());
 		renderer.addAnnotation(xline);
 	}
 

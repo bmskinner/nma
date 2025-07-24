@@ -273,16 +273,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 			return ds;
 		}
 
-
-		if (type.equals(ColourByType.NONE)) {
-			final List<Nucleus> nuclei = new ArrayList<>(d.getCollection().getNuclei());
-			final double[][] data = createDimensionalityReductionValues(nuclei,
-					measurement, 0, 1);
-			ds.addSeries("All nuclei", data, nuclei);
-			return ds;
-		}
-
-		if (type.equals(ColourByType.CLUSTER)) {
+		if (type.equals(ColourByType.CLUSTER) | type.equals(ColourByType.NONE)) {
 			// colourGroup cannot be null here, we changed type earlier if it was
 			for (final UUID childId : colourGroup.getUUIDs()) {
 				final IAnalysisDataset childDataset = d.getChildDataset(childId);

@@ -2,11 +2,6 @@ package com.bmskinner.nma.gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Paint;
-import java.text.ParseException;
-import java.util.List;
-import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
@@ -18,12 +13,12 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.core.ThreadManager;
-import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
@@ -49,9 +44,10 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 
 	private JSpinner imageSpinner;
 
-	private JComboBox colourBox;
+	private JComboBox<ColourByType> colourBox;
 
 	private JCheckBox showImagesBox;
+	private JCheckBox showPointsBox;
 
 	private static final double MAX_NUCLEI_PER_CLUSTER = 200;
 
@@ -102,39 +98,24 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 		final BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
 		panel.setLayout(bl);
 
-		imageSpinner = createMaxImageSpinner();
+
 
 		colourBox = new JComboBox<ColourByType>(ColourByType.values());
 		colourBox.setSelectedItem(ColourByType.CLUSTER);
 
-		showImagesBox = new JCheckBox("Show images", false);
-		showImagesBox.addActionListener(l -> {
-			if (showImagesBox.isSelected()) {
-
-				final Runnable r = () -> DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
-						group,
-						(ColourByType) colourBox.getSelectedItem(),
-						chartPanel.getChart(), ((Double) imageSpinner.getValue()).intValue());
-				ThreadManager.getInstance().submitUIUpdate(r);
-			} else {
-				chartPanel.getChart().getXYPlot().getRenderer().removeAnnotations();
-			}
+		showPointsBox = new JCheckBox("Show points", true);
+		showPointsBox.addActionListener(l -> {
+			updateChart((ColourByType) colourBox.getSelectedItem());
 		});
 
+		showImagesBox = new JCheckBox("Show images", false);
+		showImagesBox.addActionListener(l -> {
+			updateChart((ColourByType) colourBox.getSelectedItem());
+		});
+
+		imageSpinner = createMaxImageSpinner();
 		imageSpinner.addChangeListener(e -> {
-			try {
-				imageSpinner.commitEdit();
-				if (showImagesBox.isSelected()) {
-					chartPanel.getChart().getXYPlot().getRenderer().removeAnnotations();
-					final Runnable r = () -> DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
-							group,
-							(ColourByType) colourBox.getSelectedItem(),
-							chartPanel.getChart(), ((Double) imageSpinner.getValue()).intValue());
-					ThreadManager.getInstance().submitUIUpdate(r);
-				}
-			} catch (final ParseException e1) {
-				LOGGER.log(Level.SEVERE, "Error parsing input", e);
-			}
+			updateChart((ColourByType) colourBox.getSelectedItem());
 		});
 
 		colourBox.addActionListener(e -> {
@@ -147,6 +128,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 
 		btnPanel.add(new JLabel("Colour points by:"));
 		btnPanel.add(colourBox);
+		btnPanel.add(showPointsBox);
 		btnPanel.add(showImagesBox);
 		btnPanel.add(new JLabel("Max images per cluster:"));
 		btnPanel.add(imageSpinner);
@@ -173,34 +155,32 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 
 	private void updateChart(ColourByType type) {
 		final Runnable r = () -> {
-			final XYPlot plot = chartPanel.getChart().getXYPlot();
 
-			switch (type) {
-			case CLUSTER: {
-				final List<UUID> childIds = group.getUUIDs();
-				for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
-					final IAnalysisDataset childDataset = dataset.getChildDataset(childIds.get(i));
-					final Paint colour = childDataset.getDatasetColour().orElse(ColourSelecter.getColor(i));
-					plot.getRenderer().setSeriesPaint(i, colour);
-				}
-			}
-			case NONE: {
+			final JFreeChart chart = DimensionalityChartFactory.createDimensionalityReductionChart(dataset, type, group,
+					group);
+
+			final XYPlot plot = chart.getXYPlot();
+
+//			createChart(type, group);
+			// Override point colours if the are not to be displayed.
+			// Keep the points so that axis scaling still works
+			if (!showPointsBox.isSelected()) {
 				for (int i = 0; i < plot.getDataset().getSeriesCount(); i++) {
 					plot.getRenderer().setSeriesPaint(i, Color.WHITE);
 				}
 			}
-			case MERGE_SOURCE: {
-				createChart(type, group);
-			}
-			}
 
-			chartPanel.getChart().getXYPlot().getRenderer().removeAnnotations();
+			plot.getRenderer().removeAnnotations();
+			chartPanel.setChart(chart);
+
 			if (showImagesBox.isSelected()) {
 				DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
 						group,
 						type,
-						chartPanel.getChart(), ((Double) imageSpinner.getValue()).intValue());
+						chart, ((Double) imageSpinner.getValue()).intValue());
 			}
+
+
 
 		};
 		ThreadManager.getInstance().submitUIUpdate(r);
