@@ -212,11 +212,13 @@ public class DatasetSelectionPanel extends DetailPanel
 	@Override
 	public void globalPaletteUpdated() {
 		update(getDatasets());
+		treeTable.repaint();
 	}
 
 	@Override
 	public void colourUpdated(IAnalysisDataset dataset) {
 		refreshCache(dataset);
+		treeTable.repaint();
 	}
 
 	@Override
