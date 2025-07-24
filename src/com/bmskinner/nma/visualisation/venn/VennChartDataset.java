@@ -1234,6 +1234,21 @@ public class VennChartDataset extends DefaultXYDataset {
 		labels.add(cACDE);
 		labels.add(cBCDE);
 		labels.add(cABCDE);
+
+		labels.add(new Label(a.xCentre() * 1.1, a.yMax() * 1.1,
+				vc.getDataset(VennDatasetPosition.A).getName()));
+
+		labels.add(new Label(b.xMax(), b.yMax(),
+				vc.getDataset(VennDatasetPosition.B).getName()));
+
+		labels.add(new Label(c.xMax(), c.yMin(),
+				vc.getDataset(VennDatasetPosition.C).getName()));
+
+		labels.add(new Label(d.xMin(), d.yMin(),
+				vc.getDataset(VennDatasetPosition.D).getName()));
+
+		labels.add(new Label(e.xMin(), e.yMax(),
+				vc.getDataset(VennDatasetPosition.E).getName()));
 	}
 
 	/**
