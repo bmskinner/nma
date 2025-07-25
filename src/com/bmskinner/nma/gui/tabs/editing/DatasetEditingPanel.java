@@ -16,8 +16,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -71,7 +71,6 @@ import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.gui.tabs.ChartDetailPanel;
-
 import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.charts.ConsensusNucleusChartFactory;
@@ -91,7 +90,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	private static final String PANEL_TITLE_LBL = "Editing";
 	private static final String PANEL_DESC_LBL = "Change landmarks or segmentation patterns";
 
-	private JLabel buttonStateLbl = new JLabel(" ", SwingConstants.CENTER);
+	private final JLabel buttonStateLbl = new JLabel(" ", SwingConstants.CENTER);
 
 	private JButton segmentButton;
 	private JButton mergeButton;
@@ -100,11 +99,11 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	private JButton windowSizeButton;
 	private JButton updatewindowButton;
 
-	private ConsensusNucleusChartPanel chartPanel;
+	private final ConsensusNucleusChartPanel chartPanel;
 
-	private ShapeOverlay lmOverlay = new ShapeOverlay();
+	private final ShapeOverlay lmOverlay = new ShapeOverlay();
 
-	private EllipticalOverlay bOverlay = new EllipticalOverlay(new EllipticalOverlayObject(
+	private final EllipticalOverlay bOverlay = new EllipticalOverlay(new EllipticalOverlayObject(
 			Double.NaN, 2, Double.NaN, 2,
 			ChartComponents.MARKER_STROKE, Color.decode("#0066CC"), Color.decode("#0066CC")));
 
@@ -122,7 +121,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		this.setLayout(new BorderLayout());
 
-		JFreeChart chart = ConsensusNucleusChartFactory.createEmptyChart();
+		final JFreeChart chart = ConsensusNucleusChartFactory.createEmptyChart();
 		chartPanel = new ConsensusNucleusChartPanel(chart);
 		chartPanel.addOverlay(lmOverlay);
 		chartPanel.addOverlay(bOverlay);
@@ -141,17 +140,17 @@ public class DatasetEditingPanel extends ChartDetailPanel
 
 	private JPanel createHeader() {
 
-		JPanel headerPanel = new JPanel();
+		final JPanel headerPanel = new JPanel();
 		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
-		JPanel txtPanel = new JPanel(new FlowLayout());
+		final JPanel txtPanel = new JPanel(new FlowLayout());
 		txtPanel.add(buttonStateLbl);
 		headerPanel.add(txtPanel);
 
-		JPanel panel = new JPanel(new FlowLayout()) {
+		final JPanel panel = new JPanel(new FlowLayout()) {
 			@Override
 			public void setEnabled(boolean b) {
 				super.setEnabled(b);
-				for (Component c : this.getComponents()) {
+				for (final Component c : this.getComponents()) {
 					c.setEnabled(b);
 				}
 			}
@@ -160,7 +159,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 		segmentButton = new JButton(STR_SEGMENT_PROFILE);
 		segmentButton.addActionListener(e -> {
 			try {
-				boolean ok = getInputSupplier().requestApproval(
+				final boolean ok = getInputSupplier().requestApproval(
 						"This will resegment the dataset. Manually updated segments will be lost. Continue?",
 						"Continue?");
 				if (ok) {
@@ -170,7 +169,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 							new UserActionEvent(this, UserActionEvent.SEGMENTATION_ACTION,
 									List.of(activeDataset())));
 				}
-			} catch (RequestCancelledException e1) {
+			} catch (final RequestCancelledException e1) {
 				// user cancelled, no action
 			}
 
@@ -206,7 +205,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	protected synchronized void updateSingle() {
 		super.updateSingle();
 
-		ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+		final ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
 				.setScale(GlobalOptions.getInstance().getDisplayScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setShowAnnotations(false)
@@ -217,9 +216,8 @@ public class DatasetEditingPanel extends ChartDetailPanel
 		configureButtons(options);
 		setChart(options);
 
-		if (activeDataset() == null) {
+		if (activeDataset() == null)
 			return;
-		}
 
 		chartPanel.restoreAutoBounds();
 	}
@@ -249,7 +247,12 @@ public class DatasetEditingPanel extends ChartDetailPanel
 			return;
 		}
 
-		ICellCollection collection = options.firstDataset().getCollection();
+		if (!options.hasDatasets()) {
+			setButtonsEnabled(false);
+			return;
+		}
+
+		final ICellCollection collection = options.firstDataset().getCollection();
 		setButtonsEnabled(true);
 		if (!collection.getProfileCollection().hasSegments()) {
 			unmergeButton.setEnabled(false);
@@ -257,11 +260,12 @@ public class DatasetEditingPanel extends ChartDetailPanel
 			return;
 		}
 
-		if (!options.firstDataset().isRoot()) // only allow resegmentation of root datasets
+		if (!options.firstDataset().isRoot()) { // only allow resegmentation of root datasets
 			segmentButton.setEnabled(false);
+		}
 
 		try {
-			ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(
+			final ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(
 					ProfileType.ANGLE,
 					OrientationMark.REFERENCE, Stats.MEDIAN);
 
@@ -313,32 +317,32 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	private void mergeAction() {
 
 		try {
-			ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
+			final ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
 							Stats.MEDIAN);
 
-			List<SegMergeItem> names = new ArrayList<>();
+			final List<SegMergeItem> names = new ArrayList<>();
 
 			// Put the names of the mergable segments into a list
 
-			List<IProfileSegment> segList = medianProfile.getSegments();
+			final List<IProfileSegment> segList = medianProfile.getSegments();
 			for (int i = 0; i < segList.size() - 1; i++) { // Do not allow merges across the RP
-				IProfileSegment seg = segList.get(i);
-				SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());
+				final IProfileSegment seg = segList.get(i);
+				final SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());
 				names.add(item);
 			}
 
-			String[] nameArray = names.stream().map(SegMergeItem::toString).toArray(String[]::new);
+			final String[] nameArray = names.stream().map(SegMergeItem::toString).toArray(String[]::new);
 
-			int mergeOption = getInputSupplier().requestOption(nameArray,
+			final int mergeOption = getInputSupplier().requestOption(nameArray,
 					"Choose segments to merge", "Merge");
-			SegMergeItem item = names.get(mergeOption);
+			final SegMergeItem item = names.get(mergeOption);
 			this.setAnalysing(true);
 			UserActionController.getInstance().segmentMergeEventReceived(
 					new SegmentMergeEvent(this, activeDataset(), item.one.getID(),
 							item.two.getID()));
 
-		} catch (RequestCancelledException e) {
+		} catch (final RequestCancelledException e) {
 			LOGGER.fine("User cancelled segment merge request");
 		} catch (MissingDataException | SegmentUpdateException e1) {
 			LOGGER.warning(() -> "Unable to get median profile: %s".formatted(e1.getMessage()));
@@ -354,29 +358,29 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	private void unmergeAction() {
 
 		try {
-			ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
+			final ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
 							Stats.MEDIAN);
 
-			List<IProfileSegment> names = new ArrayList<>();
+			final List<IProfileSegment> names = new ArrayList<>();
 
 			// Put the names of the mergable segments into a list
-			for (IProfileSegment seg : medianProfile.getSegments()) {
+			for (final IProfileSegment seg : medianProfile.getSegments()) {
 				if (seg.hasMergeSources()) {
 					names.add(seg);
 				}
 			}
-			IProfileSegment[] nameArray = names.toArray(new IProfileSegment[0]);
-			String[] options = Arrays.stream(nameArray).map(IProfileSegment::getName)
+			final IProfileSegment[] nameArray = names.toArray(new IProfileSegment[0]);
+			final String[] options = Arrays.stream(nameArray).map(IProfileSegment::getName)
 					.toArray(String[]::new);
 
-			int option = getInputSupplier().requestOption(options,
+			final int option = getInputSupplier().requestOption(options,
 					"Choose merged segment to unmerge",
 					"Unmerge segment");
 			this.setAnalysing(true);
 			UserActionController.getInstance().segmentUnmergeEventReceived(
 					new SegmentUnmergeEvent(this, activeDataset(), nameArray[option].getID()));
-		} catch (RequestCancelledException e) {
+		} catch (final RequestCancelledException e) {
 			LOGGER.fine("User cancelled segment unmerge request");
 		} catch (MissingDataException | SegmentUpdateException e1) {
 			LOGGER.warning("Unable to get median profile: " + e1.getMessage());
@@ -385,23 +389,23 @@ public class DatasetEditingPanel extends ChartDetailPanel
 
 	private void splitAction() {
 		try {
-			ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
+			final ISegmentedProfile medianProfile = activeDataset().getCollection().getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
 							Stats.MEDIAN);
-			IProfileSegment[] nameArray = medianProfile.getSegments()
+			final IProfileSegment[] nameArray = medianProfile.getSegments()
 					.toArray(new IProfileSegment[0]);
 
-			String[] options = Arrays.stream(nameArray).map(IProfileSegment::getName)
+			final String[] options = Arrays.stream(nameArray).map(IProfileSegment::getName)
 					.toArray(String[]::new);
 
-			int option = getInputSupplier().requestOptionAllVisible(options,
+			final int option = getInputSupplier().requestOptionAllVisible(options,
 					"Choose segment to split",
 					STR_SPLIT_SEGMENT);
 			this.setAnalysing(true);
 			UserActionController.getInstance()
 					.segmentSplitEventReceived(new SegmentSplitEvent(this, activeDataset(),
 							nameArray[option].getID()));
-		} catch (RequestCancelledException e) {
+		} catch (final RequestCancelledException e) {
 			LOGGER.fine("User cancelled segment split request");
 		} catch (MissingDataException | SegmentUpdateException e1) {
 			LOGGER.warning("Unable to get median profile: " + e1.getMessage());
@@ -411,18 +415,19 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	private void updateCollectionWindowSize() {
 
 		double windowSizeActual = HashOptions.DEFAULT_PROFILE_WINDOW;
-		Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
-		if (op.isPresent())
+		final Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
+		if (op.isPresent()) {
 			windowSizeActual = op.get().getProfileWindowProportion();
+		}
 
 		try {
-			double windowSize = getInputSupplier().requestDouble("Select new window size",
+			final double windowSize = getInputSupplier().requestDouble("Select new window size",
 					windowSizeActual, 0.01, 0.1,
 					0.01);
 			this.setAnalysing(true);
 			UserActionController.getInstance().profileWindowProportionUpdateEventReceived(
 					new ProfileWindowProportionUpdateEvent(this, activeDataset(), windowSize));
-		} catch (RequestCancelledException e) {
+		} catch (final RequestCancelledException e) {
 			LOGGER.fine("User cancelled window proportion update request");
 		}
 	}
@@ -497,40 +502,40 @@ public class DatasetEditingPanel extends ChartDetailPanel
 			return;
 
 		// Get the mouse location on the chart
-		Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
-		JFreeChart chart = event.getChart();
-		XYPlot plot = (XYPlot) chart.getPlot();
-		ValueAxis xAxis = plot.getDomainAxis();
-		ValueAxis yAxis = plot.getRangeAxis();
-		double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
-		double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
+		final Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
+		final JFreeChart chart = event.getChart();
+		final XYPlot plot = (XYPlot) chart.getPlot();
+		final ValueAxis xAxis = plot.getDomainAxis();
+		final ValueAxis yAxis = plot.getRangeAxis();
+		final double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
+		final double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
 
-		double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
+		final double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
 		try {
 
 			// Get the closest border point, and set the overlay if close enough
-			Nucleus n = activeDataset().getCollection().getConsensus();
+			final Nucleus n = activeDataset().getCollection().getConsensus();
 
-			IPoint clicked = new FloatPoint(x, y);
+			final IPoint clicked = new FloatPoint(x, y);
 
-			Optional<IPoint> bp = n.getBorderList().stream()
+			final Optional<IPoint> bp = n.getBorderList().stream()
 					.filter(p -> p.getLengthTo(clicked) < range / 50)
 					.min((p1, p2) -> p1.getLengthTo(clicked) < p2.getLengthTo(clicked) ? -1 : 1);
 
 			if (bp.isPresent()) {
 
 				// Make the popup to change segments or landmarks
-				JPopupMenu popup = createPopup(bp.get());
+				final JPopupMenu popup = createPopup(bp.get());
 				popup.show(chartPanel, event.getTrigger().getX(), event.getTrigger().getY());
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.fine("Unable to create popup menu: " + e.getMessage());
 		}
 	}
 
 	private synchronized JPopupMenu createPopup(IPoint point) {
-		JPopupMenu popupMenu = new JPopupMenu("Popup");
+		final JPopupMenu popupMenu = new JPopupMenu("Popup");
 
 		addSegmentsToPopup(popupMenu, point);
 
@@ -550,27 +555,27 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	private void addSegmentsToPopup(JPopupMenu popupMenu, IPoint point) {
 		try {
 
-			Nucleus n = activeDataset().getCollection().getConsensus();
+			final Nucleus n = activeDataset().getCollection().getConsensus();
 
 			// Indexes in the consensus
-			int rawIndex = n.getBorderIndex(point);
-			int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
+			final int rawIndex = n.getBorderIndex(point);
+			final int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
 
 			// Get the index of the clicked point in the RP-indexed consensus profile
-			int index = n.wrapIndex(rawIndex - rpIndex);
+			final int index = n.wrapIndex(rawIndex - rpIndex);
 
 			// Convert to the index in the dataset median profile (may have different
 			// length)
-			double fIndex = index / (float) n.getBorderLength();
-			int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength()
+			final double fIndex = index / (float) n.getBorderLength();
+			final int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength()
 					* fIndex);
 
 			// Get the relevant segments
-			IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegmentContaining(rawIndex);
-			IProfileSegment prev = seg.prevSegment();
-			IProfileSegment next = seg.nextSegment();
+			final IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegmentContaining(rawIndex);
+			final IProfileSegment prev = seg.prevSegment();
+			final IProfileSegment next = seg.nextSegment();
 
-			JMenuItem prevItem = new JMenuItem("Extend " + prev.getName() + " to here");
+			final JMenuItem prevItem = new JMenuItem("Extend " + prev.getName() + " to here");
 			prevItem.setBorder(
 					BorderFactory.createLineBorder(ColourSelecter.getColor(prev.getPosition()), 3));
 			prevItem.setBorderPainted(true);
@@ -587,7 +592,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 
 			popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
 
-			JMenuItem nextItem = new JMenuItem("Extend " + next.getName() + " to here");
+			final JMenuItem nextItem = new JMenuItem("Extend " + next.getName() + " to here");
 			nextItem.setBorder(
 					BorderFactory.createLineBorder(ColourSelecter.getColor(next.getPosition()), 2));
 			nextItem.setBorderPainted(true);
@@ -615,30 +620,30 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	 */
 	private void addLandmarksToPopup(JPopupMenu popupMenu, IPoint point) {
 		try {
-			Nucleus n = activeDataset().getCollection().getConsensus();
+			final Nucleus n = activeDataset().getCollection().getConsensus();
 
 			// Indexes in the consensus
-			int rawIndex = n.getBorderIndex(point);
-			int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
+			final int rawIndex = n.getBorderIndex(point);
+			final int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
 
 			// Get the index of the clicked point in the RP-indexed consensus profile
-			int index = n.wrapIndex(rawIndex - rpIndex);
+			final int index = n.wrapIndex(rawIndex - rpIndex);
 
 			// Convert to the index in the dataset median profile (may have different
 			// length)
-			double fIndex = index / (float) n.getBorderLength();
-			int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength()
+			final double fIndex = index / (float) n.getBorderLength();
+			final int medianIndex = (int) (activeDataset().getCollection().getMedianArrayLength()
 					* fIndex);
 
-			List<Landmark> tags = activeDataset().getCollection().getProfileCollection()
+			final List<Landmark> tags = activeDataset().getCollection().getProfileCollection()
 					.getLandmarks();
 
 			Collections.sort(tags);
 
-			for (Landmark lm : tags) {
+			for (final Landmark lm : tags) {
 
 				// Colour the menu item by tag colour
-				JMenuItem item = new JMenuItem("Move " + lm.toString().toLowerCase() + " here");
+				final JMenuItem item = new JMenuItem("Move " + lm.toString().toLowerCase() + " here");
 				item.setBackground(Color.DARK_GRAY);
 				item.setBorderPainted(true);
 				item.setForeground(Color.WHITE);
@@ -676,24 +681,24 @@ public class DatasetEditingPanel extends ChartDetailPanel
 			return;
 
 		// Get the mouse location on the chart
-		Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
-		JFreeChart chart = event.getChart();
-		XYPlot plot = (XYPlot) chart.getPlot();
-		ValueAxis xAxis = plot.getDomainAxis();
-		ValueAxis yAxis = plot.getRangeAxis();
-		double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
-		double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
+		final Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
+		final JFreeChart chart = event.getChart();
+		final XYPlot plot = (XYPlot) chart.getPlot();
+		final ValueAxis xAxis = plot.getDomainAxis();
+		final ValueAxis yAxis = plot.getRangeAxis();
+		final double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
+		final double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
 
-		double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
-		double size = range / 100;
+		final double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
+		final double size = range / 100;
 		try {
 
 			// Get the closest border point, and set the overlay if close enough
-			Nucleus n = activeDataset().getCollection().getConsensus();
+			final Nucleus n = activeDataset().getCollection().getConsensus();
 
-			IPoint clicked = new FloatPoint(x, y);
+			final IPoint clicked = new FloatPoint(x, y);
 
-			Optional<IPoint> bp = n.getBorderList().stream()
+			final Optional<IPoint> bp = n.getBorderList().stream()
 					.filter(p -> p.getLengthTo(clicked) < range / 50)
 					.min((p1, p2) -> p1.getLengthTo(clicked) < p2.getLengthTo(clicked) ? -1 : 1);
 
@@ -708,7 +713,7 @@ public class DatasetEditingPanel extends ChartDetailPanel
 				bOverlay.getEllipse().setYRadius(size);
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.fine("Unable to draw border highlights: " + e.getMessage());
 		}
 	}
@@ -719,33 +724,33 @@ public class DatasetEditingPanel extends ChartDetailPanel
 			return;
 
 		// Get the mouse location on the chart
-		Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
-		JFreeChart chart = event.getChart();
-		XYPlot plot = (XYPlot) chart.getPlot();
-		ValueAxis xAxis = plot.getDomainAxis();
-		ValueAxis yAxis = plot.getRangeAxis();
-		double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
-		double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
+		final Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
+		final JFreeChart chart = event.getChart();
+		final XYPlot plot = (XYPlot) chart.getPlot();
+		final ValueAxis xAxis = plot.getDomainAxis();
+		final ValueAxis yAxis = plot.getRangeAxis();
+		final double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
+		final double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
 
-		double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
-		int textSize = (int) (range / 30);
-		double distanceLimit = range / 20;
+		final double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
+		final int textSize = (int) (range / 30);
+		final double distanceLimit = range / 20;
 		try {
 
 			// Get the closest landmarks, and set the overlay if close enough
-			Nucleus n = activeDataset().getCollection().getConsensus();
+			final Nucleus n = activeDataset().getCollection().getConsensus();
 
-			IPoint clicked = new FloatPoint(x, y);
+			final IPoint clicked = new FloatPoint(x, y);
 			lmOverlay.clearShapes();
-			for (OrientationMark lm : n.getOrientationMarks()) {
-				IPoint lmPoint = n.getBorderPoint(lm);
-				Landmark l = n.getLandmark(lm);
+			for (final OrientationMark lm : n.getOrientationMarks()) {
+				final IPoint lmPoint = n.getBorderPoint(lm);
+				final Landmark l = n.getLandmark(lm);
 
 				if (clicked.getLengthTo(lmPoint) < distanceLimit && l != null) {
 					changeLandmarkOverlay(l.toString(), lmPoint.getX(), lmPoint.getY(), textSize);
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.fine("Unable to draw landmark highlights: " + e.getMessage());
 		}
 	}
@@ -756,12 +761,12 @@ public class DatasetEditingPanel extends ChartDetailPanel
 		lmOverlay.addShape(new ShapeOverlayObject(ShapeOverlayObject.createDiamond(1, x, y),
 				ChartComponents.MARKER_STROKE, Color.DARK_GRAY, Color.DARK_GRAY));
 
-		Graphics2D g = (Graphics2D) chartPanel.getGraphics();
-		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, size);
-		FontRenderContext frc = g.getFontRenderContext();
-		TextLayout layout = new TextLayout(text, font, frc);
+		final Graphics2D g = (Graphics2D) chartPanel.getGraphics();
+		final Font font = new Font(Font.SANS_SERIF, Font.PLAIN, size);
+		final FontRenderContext frc = g.getFontRenderContext();
+		final TextLayout layout = new TextLayout(text, font, frc);
 
-		AffineTransform txt = new AffineTransform();
+		final AffineTransform txt = new AffineTransform();
 
 		txt.concatenate(
 				AffineTransform.getTranslateInstance(x + layout.getBounds().getWidth() / 1.5, y));

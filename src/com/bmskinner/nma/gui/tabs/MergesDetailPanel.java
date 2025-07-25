@@ -63,7 +63,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 	private static final Logger LOGGER = Logger.getLogger(MergesDetailPanel.class.getName());
 
 	private ExportableTable table;
-	private JLabel headerLabel = new JLabel(Labels.NULL_DATASETS);
+	private final JLabel headerLabel = new JLabel(Labels.NULL_DATASETS);
 
 	private static final String RECOVER_BUTTON_TEXT = "Recover source";
 
@@ -75,7 +75,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 
 		try {
 			createUI();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error creating merge panel", e);
 		}
 	}
@@ -89,34 +89,33 @@ public class MergesDetailPanel extends TableDetailPanel {
 	}
 
 	private JPanel createTablePanel() {
-		JPanel panel = new JPanel();
+		final JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-		TableCellRenderer buttonRenderer = new JButtonRenderer();
-		TableCellRenderer textRenderer = new JTextAreaCellRenderer();
+		final TableCellRenderer buttonRenderer = new JButtonRenderer();
+		final TableCellRenderer textRenderer = new JTextAreaCellRenderer();
 
 		table = new ExportableTable() {
 			@Override
 			public TableCellRenderer getCellRenderer(int row, int column) {
-				if ((this.getValueAt(row, 0).equals(Labels.Merges.RECOVER_SOURCE)) && column > 0) {
+				if ((this.getValueAt(row, 0).equals(Labels.Merges.RECOVER_SOURCE)) && column > 0)
 					return buttonRenderer;
-				}
 				return textRenderer;
 			}
 		};
 
-		MouseListener mouseListener = new MouseListener() {
+		final MouseListener mouseListener = new MouseListener() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				int row = table.rowAtPoint(e.getPoint());
-				int col = table.columnAtPoint(e.getPoint());
+				final int row = table.rowAtPoint(e.getPoint());
+				final int col = table.columnAtPoint(e.getPoint());
 				if (col == 0)
 					return;
 
 				if (table.getValueAt(row, 0).equals(Labels.Merges.RECOVER_SOURCE)
 						&& table.getValueAt(row, col) != null) {
-					IAnalysisDataset mergeSource = (IAnalysisDataset) table
+					final IAnalysisDataset mergeSource = (IAnalysisDataset) table
 							.getValueAt(row, col);
 					LOGGER.fine(
 							() -> String.format("Extracting merge source '%s'",
@@ -154,9 +153,9 @@ public class MergesDetailPanel extends TableDetailPanel {
 
 		table.setEnabled(false);
 		table.setDefaultRenderer(Object.class, new JTextAreaCellRenderer());
-		JScrollPane scrollPane = new JScrollPane(table);
+		final JScrollPane scrollPane = new JScrollPane(table);
 
-		JPanel tablePanel = new JPanel(new BorderLayout());
+		final JPanel tablePanel = new JPanel(new BorderLayout());
 
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
 		tablePanel.add(table.getTableHeader(), BorderLayout.NORTH);
@@ -172,7 +171,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 	}
 
 	private JPanel createHeaderPanel() {
-		JPanel panel = new JPanel();
+		final JPanel panel = new JPanel();
 		panel.add(headerLabel);
 		return panel;
 
@@ -181,13 +180,18 @@ public class MergesDetailPanel extends TableDetailPanel {
 	@Override
 	protected synchronized void updateSingle() {
 
+		if (activeDataset() == null) {
+			updateNull();
+			return;
+		}
+
 		headerLabel.setText(
 				Labels.SINGLE_DATASET + " with " + activeDataset().getAllMergeSources().size()
 						+ " merge sources");
 
-		List<IAnalysisDataset> mergeSources = new ArrayList<>(activeDataset().getAllMergeSources());
+		final List<IAnalysisDataset> mergeSources = new ArrayList<>(activeDataset().getAllMergeSources());
 
-		TableOptions options = new TableOptionsBuilder()
+		final TableOptions options = new TableOptionsBuilder()
 				.setDatasets(mergeSources)
 				.setTarget(table)
 				.setBoolean(AbstractOptions.IS_MERGE_SOURCE_OPTIONS_TABLE, true)
@@ -226,7 +230,7 @@ public class MergesDetailPanel extends TableDetailPanel {
 		public Component getTableCellRendererComponent(JTable table, Object value,
 				boolean isSelected, boolean hasFocus,
 				int row, int column) {
-			String text = value == null ? ""
+			final String text = value == null ? ""
 					: value instanceof IAnalysisDataset ? RECOVER_BUTTON_TEXT : "";
 			setText(text);
 			setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
