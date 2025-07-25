@@ -234,7 +234,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 	private JPanel createButtonPanel() {
 
 		final JPanel panel = new JPanel();
-		BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
+		final BoxLayout bl = new BoxLayout(panel, BoxLayout.Y_AXIS);
 		panel.setLayout(bl);
 		final JPanel txtPanel = new JPanel(new FlowLayout());
 
@@ -354,7 +354,7 @@ public class ClusterTreeDialog extends MessagingDialog {
 					return;
 				}
 
-				final Paint colour = ColourSelecter.getColor(clusterNumber++);
+				final Paint colour = cluster.getDatasetColour().orElse(ColourSelecter.getColor(clusterNumber++));
 				setNodeColour(cluster.getCollection(), colour);
 
 				LOGGER.fine("Node colours assigned");
