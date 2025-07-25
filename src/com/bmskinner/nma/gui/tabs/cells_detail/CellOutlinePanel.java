@@ -31,8 +31,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -71,7 +71,6 @@ import com.bmskinner.nma.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nma.gui.events.SegmentStartIndexUpdateEvent;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.events.UserActionController;
-
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.OutlineChartFactory;
@@ -97,17 +96,17 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 	private static final String PANEL_TITLE_LBL = "Outline";
 
-	private ExportableChartPanel chartPanel;
+	private final ExportableChartPanel chartPanel;
 
-	private GenericCheckboxPanel rotatePanel = new GenericCheckboxPanel("Orient");
-	private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel(
+	private final GenericCheckboxPanel rotatePanel = new GenericCheckboxPanel("Orient");
+	private final GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel(
 			"Warp image to consensus shape");
 
 	/** Overlay to show landmark names */
-	private ShapeOverlay lmOverlay = new ShapeOverlay();
+	private final ShapeOverlay lmOverlay = new ShapeOverlay();
 
 	/** Overlay to show highlighted border by mouse position */
-	private EllipticalOverlay bOverlay = new EllipticalOverlay(new EllipticalOverlayObject(
+	private final EllipticalOverlay bOverlay = new EllipticalOverlay(new EllipticalOverlayObject(
 			Double.NaN, 2, Double.NaN, 2,
 			ChartComponents.MARKER_STROKE, Color.decode("#0066CC"), Color.decode("#0066CC")));
 
@@ -116,7 +115,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 		// make the chart for each nucleus
 		this.setLayout(new BorderLayout());
 
-		JPanel header = makeHeader();
+		final JPanel header = makeHeader();
 		add(header, BorderLayout.NORTH);
 
 		chartPanel = new ExportableChartPanel(AbstractChartFactory.createEmptyChart());
@@ -132,9 +131,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	}
 
 	private JPanel makeHeader() {
-		JPanel panel = new JPanel(new FlowLayout());
+		final JPanel panel = new JPanel(new FlowLayout());
 
-		JLabel headerLabel = new JLabel(
+		final JLabel headerLabel = new JLabel(
 				"<html><body style='width: 90%'>"
 						+ "Click a border point to update segments or landmarks.</html>");
 		panel.add(headerLabel);
@@ -159,7 +158,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 	private synchronized void updateSettingsPanels() {
 
-		if (this.isMultipleDatasets() || !this.hasDatasets()) {
+		if (!this.hasDatasets() || this.isMultipleDatasets()) {
 			rotatePanel.setEnabled(false);
 			warpMeshPanel.setEnabled(false);
 			return;
@@ -182,7 +181,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	@Override
 	public synchronized void update() {
 
-		if (this.isMultipleDatasets() || !this.hasDatasets()) {
+		if (!this.hasDatasets() || this.isMultipleDatasets()) {
 			chartPanel.setChart(AbstractChartFactory.createEmptyChart());
 			return;
 		}
@@ -190,9 +189,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 		final ICell cell = getCellModel().getCell();
 		final CellularComponent component = getCellModel().getComponent();
 
-		RotationMode rm = rotatePanel.isSelected() ? RotationMode.VERTICAL : RotationMode.ACTUAL;
+		final RotationMode rm = rotatePanel.isSelected() ? RotationMode.VERTICAL : RotationMode.ACTUAL;
 
-		ChartOptions options = new ChartOptionsBuilder()
+		final ChartOptions options = new ChartOptionsBuilder()
 				.setCell(cell)
 				.setDatasets(activeDataset())
 				.addCellularComponent(component)
@@ -214,23 +213,23 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	}
 
 	@Override
-	protected void updateSingle() {
+	protected synchronized void updateSingle() {
 		update();
 	}
 
 	@Override
-	protected void updateMultiple() {
+	protected synchronized void updateMultiple() {
 		updateNull();
 	}
 
 	@Override
-	protected void updateNull() {
+	protected synchronized void updateNull() {
 		chartPanel.setChart(AbstractChartFactory.createEmptyChart());
 		updateSettingsPanels();
 	}
 
 	@Override
-	public void refreshCache() {
+	public synchronized void refreshCache() {
 		clearCache();
 		this.update();
 	}
@@ -249,42 +248,42 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	public void chartMouseClicked(ChartMouseEvent event) {
 
 		// Get the mouse location on the chart
-		Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
-		JFreeChart chart = event.getChart();
-		XYPlot plot = (XYPlot) chart.getPlot();
-		ValueAxis xAxis = plot.getDomainAxis();
-		ValueAxis yAxis = plot.getRangeAxis();
-		double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
-		double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
+		final Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
+		final JFreeChart chart = event.getChart();
+		final XYPlot plot = (XYPlot) chart.getPlot();
+		final ValueAxis xAxis = plot.getDomainAxis();
+		final ValueAxis yAxis = plot.getRangeAxis();
+		final double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
+		final double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
 
-		double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
+		final double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
 		try {
-			Nucleus n = rotatePanel.isSelected()
+			final Nucleus n = rotatePanel.isSelected()
 					? getCellModel().getCell().getPrimaryNucleus().getOrientedNucleus()
 					: getCellModel().getCell().getPrimaryNucleus();
 
 			// Get the closest border point, and set the overlay if close enough
 
-			IPoint clicked = new FloatPoint(x, y);
+			final IPoint clicked = new FloatPoint(x, y);
 
-			Optional<IPoint> bp = n.getBorderList().stream()
+			final Optional<IPoint> bp = n.getBorderList().stream()
 					.filter(p -> p.getLengthTo(clicked) < range / 50)
 					.min((p1, p2) -> p1.getLengthTo(clicked) < p2.getLengthTo(clicked) ? -1 : 1);
 
 			if (bp.isPresent()) {
 
 				// Make the popup to change segments or landmarks
-				JPopupMenu popup = createPopup(bp.get());
+				final JPopupMenu popup = createPopup(bp.get());
 				popup.show(chartPanel, event.getTrigger().getX(), event.getTrigger().getY());
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.fine("Unable to create popup menu: " + e.getMessage());
 		}
 	}
 
 	private synchronized JPopupMenu createPopup(IPoint point) {
-		JPopupMenu popupMenu = new JPopupMenu("Popup");
+		final JPopupMenu popupMenu = new JPopupMenu("Popup");
 
 		addSegmentsToPopup(popupMenu, point);
 
@@ -303,23 +302,23 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	 */
 	private void addSegmentsToPopup(JPopupMenu popupMenu, IPoint point) {
 		try {
-			Nucleus n = rotatePanel.isSelected()
+			final Nucleus n = rotatePanel.isSelected()
 					? getCellModel().getCell().getPrimaryNucleus().getOrientedNucleus()
 					: getCellModel().getCell().getPrimaryNucleus();
 
 			// Indexes in the nucleus.
-			int rawIndex = n.getBorderIndex(point);
-			int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
+			final int rawIndex = n.getBorderIndex(point);
+			final int rpIndex = n.getBorderIndex(OrientationMark.REFERENCE);
 
 			// Get the index of the clicked point in the RP-indexed profile
-			int index = n.wrapIndex(rawIndex - rpIndex);
+			final int index = n.wrapIndex(rawIndex - rpIndex);
 
 			// Get the relevant segments
-			IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegmentContaining(index);
-			IProfileSegment prev = seg.prevSegment();
-			IProfileSegment next = seg.nextSegment();
+			final IProfileSegment seg = n.getProfile(ProfileType.ANGLE).getSegmentContaining(index);
+			final IProfileSegment prev = seg.prevSegment();
+			final IProfileSegment next = seg.nextSegment();
 
-			JMenuItem prevItem = new JMenuItem("Extend " + prev.getName() + " to here");
+			final JMenuItem prevItem = new JMenuItem("Extend " + prev.getName() + " to here");
 			prevItem.setBorder(
 					BorderFactory.createLineBorder(ColourSelecter.getColor(prev.getPosition()), 3));
 			prevItem.setBorderPainted(true);
@@ -337,7 +336,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 
 			popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
 
-			JMenuItem nextItem = new JMenuItem("Extend " + next.getName() + " to here");
+			final JMenuItem nextItem = new JMenuItem("Extend " + next.getName() + " to here");
 			nextItem.setBorder(
 					BorderFactory.createLineBorder(ColourSelecter.getColor(next.getPosition()), 2));
 			nextItem.setBorderPainted(true);
@@ -366,22 +365,22 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	 */
 	private void addLandmarksToPopup(JPopupMenu popupMenu, IPoint point) {
 		try {
-			Nucleus n = rotatePanel.isSelected()
+			final Nucleus n = rotatePanel.isSelected()
 					? getCellModel().getCell().getPrimaryNucleus().getOrientedNucleus()
 					: getCellModel().getCell().getPrimaryNucleus();
 
 			// Indexes in the consensus
-			int rawIndex = n.getBorderIndex(point);
+			final int rawIndex = n.getBorderIndex(point);
 
-			List<Landmark> tags = activeDataset().getCollection().getProfileCollection()
+			final List<Landmark> tags = activeDataset().getCollection().getProfileCollection()
 					.getLandmarks();
 
 			Collections.sort(tags);
 
-			for (Landmark lm : tags) {
+			for (final Landmark lm : tags) {
 
 				// Colour the menu item by tag colour
-				JMenuItem item = new JMenuItem("Move " + lm.toString().toLowerCase() + " here");
+				final JMenuItem item = new JMenuItem("Move " + lm.toString().toLowerCase() + " here");
 				item.setBackground(Color.DARK_GRAY);
 				item.setBorderPainted(true);
 				item.setForeground(Color.WHITE);
@@ -418,26 +417,26 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	private void setBorderPointHighlight(ChartMouseEvent event) {
 
 		// Get the mouse location on the chart
-		Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
-		JFreeChart chart = event.getChart();
-		XYPlot plot = (XYPlot) chart.getPlot();
-		ValueAxis xAxis = plot.getDomainAxis();
-		ValueAxis yAxis = plot.getRangeAxis();
-		double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
-		double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
+		final Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
+		final JFreeChart chart = event.getChart();
+		final XYPlot plot = (XYPlot) chart.getPlot();
+		final ValueAxis xAxis = plot.getDomainAxis();
+		final ValueAxis yAxis = plot.getRangeAxis();
+		final double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
+		final double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
 
-		double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
-		double size = range / 100;
+		final double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
+		final double size = range / 100;
 		try {
 
 			// Get the closest border point, and set the overlay if close enough
-			Nucleus n = rotatePanel.isSelected()
+			final Nucleus n = rotatePanel.isSelected()
 					? getCellModel().getCell().getPrimaryNucleus().getOrientedNucleus()
 					: getCellModel().getCell().getPrimaryNucleus();
 
-			IPoint clicked = new FloatPoint(x, y);
+			final IPoint clicked = new FloatPoint(x, y);
 
-			Optional<IPoint> bp = n.getBorderList().stream()
+			final Optional<IPoint> bp = n.getBorderList().stream()
 					.filter(p -> p.getLengthTo(clicked) < range / 50)
 					.min((p1, p2) -> p1.getLengthTo(clicked) < p2.getLengthTo(clicked) ? -1 : 1);
 
@@ -452,7 +451,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 				bOverlay.getEllipse().setYRadius(size);
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.fine("Unable to draw border highlights: " + e.getMessage());
 		}
 	}
@@ -460,35 +459,35 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 	private void setLandmarkHighlight(ChartMouseEvent event) {
 
 		// Get the mouse location on the chart
-		Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
-		JFreeChart chart = event.getChart();
-		XYPlot plot = (XYPlot) chart.getPlot();
-		ValueAxis xAxis = plot.getDomainAxis();
-		ValueAxis yAxis = plot.getRangeAxis();
-		double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
-		double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
+		final Rectangle2D dataArea = this.chartPanel.getScreenDataArea();
+		final JFreeChart chart = event.getChart();
+		final XYPlot plot = (XYPlot) chart.getPlot();
+		final ValueAxis xAxis = plot.getDomainAxis();
+		final ValueAxis yAxis = plot.getRangeAxis();
+		final double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, RectangleEdge.BOTTOM);
+		final double y = yAxis.java2DToValue(event.getTrigger().getY(), dataArea, RectangleEdge.LEFT);
 
-		double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
-		int textSize = (int) (range / 30);
-		double distanceLimit = range / 20;
+		final double range = Math.min(xAxis.getRange().getLength(), yAxis.getRange().getLength());
+		final int textSize = (int) (range / 30);
+		final double distanceLimit = range / 20;
 		try {
 
 			// Get the closest landmarks, and set the overlay if close enough
-			Nucleus n = rotatePanel.isSelected()
+			final Nucleus n = rotatePanel.isSelected()
 					? getCellModel().getCell().getPrimaryNucleus().getOrientedNucleus()
 					: getCellModel().getCell().getPrimaryNucleus();
 
-			IPoint clicked = new FloatPoint(x, y);
+			final IPoint clicked = new FloatPoint(x, y);
 			lmOverlay.clearShapes();
-			for (OrientationMark lm : n.getOrientationMarks()) {
-				IPoint lmPoint = n.getBorderPoint(lm);
-				Landmark l = n.getLandmark(lm);
+			for (final OrientationMark lm : n.getOrientationMarks()) {
+				final IPoint lmPoint = n.getBorderPoint(lm);
+				final Landmark l = n.getLandmark(lm);
 
 				if (clicked.getLengthTo(lmPoint) < distanceLimit) {
 					changeLandmarkOverlay(l.toString(), lmPoint.getX(), lmPoint.getY(), textSize);
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.fine("Unable to draw landmark highlights: " + e.getMessage());
 		}
 	}
@@ -499,12 +498,12 @@ public class CellOutlinePanel extends AbstractCellDetailPanel
 		lmOverlay.addShape(new ShapeOverlayObject(ShapeOverlayObject.createDiamond(1, x, y),
 				ChartComponents.MARKER_STROKE, Color.DARK_GRAY, Color.DARK_GRAY));
 
-		Graphics2D g = (Graphics2D) chartPanel.getGraphics();
-		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, size);
-		FontRenderContext frc = g.getFontRenderContext();
-		TextLayout layout = new TextLayout(text, font, frc);
+		final Graphics2D g = (Graphics2D) chartPanel.getGraphics();
+		final Font font = new Font(Font.SANS_SERIF, Font.PLAIN, size);
+		final FontRenderContext frc = g.getFontRenderContext();
+		final TextLayout layout = new TextLayout(text, font, frc);
 
-		AffineTransform txt = new AffineTransform();
+		final AffineTransform txt = new AffineTransform();
 
 		txt.concatenate(
 				AffineTransform.getTranslateInstance(x + layout.getBounds().getWidth() / 1.5, y));

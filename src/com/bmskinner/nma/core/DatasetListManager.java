@@ -62,6 +62,7 @@ public final class DatasetListManager implements DatasetAddedListener, DatasetUp
 	private List<IAnalysisDataset> rootDatasets = new CopyOnWriteArrayList<>();
 
 	/** The datasets currently selected in the UI. Includes child datasets */
+
 	private final List<IAnalysisDataset> selected = new CopyOnWriteArrayList<>(); // low efficiency if
 																			// this is written
 																			// frequently
@@ -152,7 +153,7 @@ public final class DatasetListManager implements DatasetAddedListener, DatasetUp
 	 * 
 	 * @return
 	 */
-	public synchronized boolean isSingleSelectedDataset() {
+	public boolean isSingleSelectedDataset() {
 		return (selected.size() == 1);
 	}
 
@@ -161,7 +162,7 @@ public final class DatasetListManager implements DatasetAddedListener, DatasetUp
 	 * 
 	 * @return
 	 */
-	public final synchronized boolean isMultipleSelectedDatasets() {
+	public final boolean isMultipleSelectedDatasets() {
 		return (this.selected.size() > 1);
 	}
 
@@ -187,7 +188,7 @@ public final class DatasetListManager implements DatasetAddedListener, DatasetUp
 	 * 
 	 * @return true if at least one dataset is selected, false otherwise
 	 */
-	public final synchronized boolean hasSelectedDatasets() {
+	public final boolean hasSelectedDatasets() {
 		return !selected.isEmpty();
 	}
 
