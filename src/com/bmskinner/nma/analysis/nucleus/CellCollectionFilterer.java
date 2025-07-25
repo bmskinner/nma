@@ -163,7 +163,7 @@ public class CellCollectionFilterer {
 	 */
 	public static ICellCollection filter(ICellCollection collection, Predicate<ICell> pred)
 			throws CollectionFilteringException {
-		final String newName = "Filtered_" + pred.toString();
+		final String newName = collection.getName() + "_Filtered_" + pred.toString();
 
 		final ICellCollection subCollection = new DefaultCellCollection(collection, newName);
 
