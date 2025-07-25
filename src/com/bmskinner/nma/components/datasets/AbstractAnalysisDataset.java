@@ -495,6 +495,10 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 		final VirtualDataset mergeSource = new VirtualDataset(this, dataset.getName(), dataset.getId());
 		mergeSource.addAll(dataset.getCollection().getCells());
 
+		if (dataset.hasDatasetColour()) {
+			mergeSource.setDatasetColour(dataset.getDatasetColour().get());
+		}
+
 		// May not be present
 		if (dataset.getAnalysisOptions().isPresent()) {
 			mergeSource.setAnalysisOptions(dataset.getAnalysisOptions().get().duplicate());
