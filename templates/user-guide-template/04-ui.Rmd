@@ -437,13 +437,19 @@ knitr::include_graphics("img/Nuclear segments_Magnitude.png")
 
 ## Comparisons tab {#comparisons-tab}
 
-The Venn tab compares overlaps in nuclei between datasets, presented as a table.It is primarily designed to allow comparison of different child datasets after filtering or clustering.
+The Venn diagrams tab compares overlaps in nuclei between up to 5 datasets. It is primarily designed to allow comparison of different child datasets after filtering or clustering.
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
-knitr::include_graphics("img/Comparisons_Venn.png")
+knitr::include_graphics("img/Comparisons_Venn diagrams.png")
 ```
 
-Detailed Venn presents the Venn data in a pairwise format, with more detailed breakdown of the numbers of shared and unshared nuclei.
+The Pairwise overlaps tab compares overlaps in nuclei between datasets, presented as a table. It is primarily designed to allow comparison of different child datasets after filtering or clustering.
+
+```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
+knitr::include_graphics("img/Comparisons_Pairwise overlaps.png")
+```
+
+Detailed Venn presents the pairwise overlaps data in a pairwise format, with more detailed breakdown of the numbers of shared and unshared nuclei.
 
 ```{r, out.width="100%", out.height="100%", fig.show='hold', fig.align='center', echo=F}
 knitr::include_graphics("img/Comparisons_Detailed Venn.png")

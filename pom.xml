@@ -8,6 +8,7 @@
 
 	<!-- Define custom properties to be exported -->
 	<properties>
+		<java.version>21</java.version>
 		<project.full.name>Nuclear_Morphology_Analysis</project.full.name>
 		<version>${project.version}</version>
 		<!-- Suffix should always start with a . e.g. .alpha-1 -->
@@ -445,7 +446,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version>
 				<configuration>
-					<release>16</release>
+					<!--<release>16</release>-->
 					<source>16</source>
 					<target>16</target>
 				</configuration>

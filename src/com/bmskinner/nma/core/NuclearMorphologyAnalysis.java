@@ -373,7 +373,7 @@ public class NuclearMorphologyAnalysis {
 					System.getProperty("java.version")));
 			LOGGER.config(() -> "NMA version: %s".formatted(Version.currentVersion()));
 
-			// Fix for issue 170 - requires a . in version string
+			// Fix for issue 170 - tab docking requires a . in version string
 			String javaVersion = System.getProperty("java.version");
 			if (!javaVersion.contains("."))
 				System.setProperty("java.version", javaVersion + ".0");
