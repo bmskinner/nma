@@ -1,8 +1,10 @@
 REM Render the user guide from markdown
 Rscript -e "library(bookdown); library(tidyverse); bookdown::render_book('index.Rmd', clean = FALSE)"
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 REM Copy the user guide to the target folder for inclusion in the jar
 Xcopy /E /I ".\\_book" "..\\..\\target\\classes\\user-guide"
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 REM Delete the existing installed user guide in the nma folder so we can
 REM test if the packaged version is loading properly
