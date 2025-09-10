@@ -16,20 +16,28 @@
  ******************************************************************************/
 package com.bmskinner.nma.core;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 
 /**
  * Manages the threading and task queue. Analysis methods and UI updates are
- * treated separately for smoother UI refreshes.
+ * treated separately for smoother UI refreshes. Access as a singleton.
  * 
  * @author Ben Skinner
  * @since 1.13.0
@@ -45,11 +53,17 @@ public class ThreadManager {
 
 	public static final int keepAliveTime = 10000;
 
-	/** A queue for UI update tasks */
+	/** A queue for analysis update tasks */
 	private final BlockingQueue<Runnable> methodQueue = new LinkedBlockingQueue<>(1024);
 
-	/** A queue for analysis method update tasks */
+	/** A queue for UI update tasks */
 	private final BlockingQueue<Runnable> uiQueue = new LinkedBlockingQueue<>(1024);
+
+	/**
+	 * Store the UI update futures for a selected dataset order. Use to cancel
+	 * unneeded tasks when selections change
+	 **/
+	private final Map<List<IAnalysisDataset>, List<Future<?>>> uiFutures = new ConcurrentHashMap<>();
 
 	/** Thread pool for method update tasks */
 	private final ExecutorService methodExecutorService;
@@ -57,8 +71,13 @@ public class ThreadManager {
 	/** Thread pool for UI update tasks */
 	private final ExecutorService uiExecutorService;
 
-	private final AtomicInteger uiQueueLength = new AtomicInteger();
-	private final AtomicInteger methodQueueLength = new AtomicInteger();
+	/**
+	 * Mark tracked runnables as being dispatched to a specific thread pool
+	 */
+	private enum ThreadPoolType {
+		UI,
+		METHOD
+	}
 
 	/**
 	 * Private constructor since this should be accessed as a singleton
@@ -109,7 +128,7 @@ public class ThreadManager {
 	}
 
 	/**
-	 * Fetch an instance
+	 * Fetch the manager instance
 	 * 
 	 * @return
 	 */
@@ -126,11 +145,11 @@ public class ThreadManager {
 	}
 
 	public int uiQueueLength() {
-		return uiQueueLength.get();
+		return uiQueue.size();
 	}
 
 	public int methodQueueLength() {
-		return methodQueueLength.get();
+		return methodQueue.size();
 	}
 
 	@Override
@@ -141,38 +160,112 @@ public class ThreadManager {
 	/**
 	 * Submit the given runnable to the UI update thread pool
 	 * 
+	 * @param r the runnable
+	 * @return a future for the result of the task
+	 */
+	public synchronized Future<?> submitUIUpdate(Runnable r) {
+		return submitUITask(r);
+	}
+
+	/**
+	 * Submit the given runnable to a queue. If the runnable is an instance of
+	 * {@link InterfaceUpdater}, the method will be run on the UI thread pool.
+	 * 
+	 * @param r the runnable
+	 * @return a future for the result of the task
+	 */
+	public synchronized Future<?> submit(Runnable r) {
+		if (r instanceof InterfaceUpdater)
+			return submitUITask(r);
+
+		return methodExecutorService.submit(new TrackedRunnable(r, ThreadPoolType.METHOD));
+	}
+
+	/**
+	 * Submit a UI update task to the UI executor. Also track the datasets that this
+	 * UI update applies to. If a new update applies to different datasets, then the
+	 * queued tasks for other datasets will be cancelled.
+	 * 
 	 * @param r
 	 * @return
 	 */
-	public synchronized Future<?> submitUIUpdate(Runnable r) {
-		final TrackedRunnable t = new TrackedRunnable(r);
-		return uiExecutorService.submit(t);
+	private synchronized Future<?> submitUITask(Runnable r) {
+		final TrackedRunnable t = new TrackedRunnable(r, ThreadPoolType.UI);
+		// Add the future to a list associated with a dataset order
+		final Future<?> f = uiExecutorService.submit(t);
+
+		if (t.datasetsAffected().isEmpty())
+			return f;
+
+		final List<Future<?>> futures = uiFutures.computeIfAbsent(t.datasetsAffected(),
+				k -> new ArrayList<Future<?>>());
+
+		// Remove any futures from the executor service that have different datasets
+		final Iterator<Entry<List<IAnalysisDataset>, List<Future<?>>>> it = uiFutures.entrySet().iterator();
+		while (it.hasNext()) {
+			final Entry<List<IAnalysisDataset>, List<Future<?>>> entry = it.next();
+			
+			// If a queued future has the same dataset order as the current update, keep
+			// it
+			if (entry.getKey().equals(t.datasetsAffected())) {
+				LOGGER.finer("Same datasets %s as current queued request, keeping %s futures".formatted(
+						t.datasetsAffected().stream().map(IAnalysisDataset::getName)
+								.collect(Collectors.joining(", ")),
+						entry.getValue().size()));
+				
+				// Remove any completed futures that are no longer needed
+				final Iterator<Future<?>> fit = entry.getValue().iterator();
+				while (fit.hasNext()) {
+					final Future<?> fut = fit.next();
+					if (fut.isDone() || fut.isCancelled()) {
+						fit.remove();
+					}
+				}
+				continue;
+			}
+
+			// Cancel the futures we don't need
+			final List<Future<?>> queuedFutures = entry.getValue();
+			for (final Future<?> fut : queuedFutures) {
+				fut.cancel(true);
+			}
+
+			LOGGER.finer("Cancelled %s futures from %s datasets, now %s tasks".formatted(
+					queuedFutures,
+					t.datasetsAffected().stream().map(IAnalysisDataset::getName).collect(Collectors.joining(", ")),
+					uiQueue.size()));
+
+			// Remove the entire list of cancelled futures
+			it.remove();
+		}
+
+		// Add the new future task
+		futures.add(f);
+		return f;
 	}
 
-	public synchronized Future<?> submit(Runnable r) {
-		final TrackedRunnable t = new TrackedRunnable(r);
-		if (r instanceof InterfaceUpdater)
-			return uiExecutorService.submit(t);
-		return methodExecutorService.submit(t);
-	}
-
+	/**
+	 * Submit a callable method task to the method thread pool executor
+	 * 
+	 * @param r
+	 * @return
+	 */
 	public synchronized Future<?> submit(Callable<?> r) {
-		methodQueueLength.incrementAndGet();
 		return methodExecutorService.submit(makeSubmitableCallable(r));
 	}
 
 	/**
-	 * Add the given task to the executor service queue. If the job is a panel
-	 * update, any existing queued panel updates will be cancelled.
+	 * Add the given task to the executor service queue for execution.
 	 * 
 	 * @param r
 	 */
 	public synchronized void execute(Runnable r) {
 		// if a new update is requested, clear older queued updates
 		if (r instanceof InterfaceUpdater) {
-			uiExecutorService.execute(new TrackedRunnable(r));
+			final TrackedRunnable t = new TrackedRunnable(r, ThreadPoolType.UI);
+			uiExecutorService.execute(t);
 		} else {
-			methodExecutorService.execute(new TrackedRunnable(r));
+			methodExecutorService.execute(new TrackedRunnable(r, ThreadPoolType.METHOD));
 		}
 	}
 
@@ -183,10 +276,8 @@ public class ThreadManager {
 			try {
 				o = r.call();
 			} catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error calling submittable callable", e);
+				LOGGER.log(Level.SEVERE, "Error calling submittable callable: %s".formatted(e.getMessage()), e);
 				return null;
-			} finally {
-				methodQueueLength.decrementAndGet();
 			}
 			return o;
 
@@ -194,8 +285,9 @@ public class ThreadManager {
 	}
 
 	/**
-	 * Wrap a Runnable in another Runnable that updates the job queue when done, and
-	 * allows access to the original Runnable for checking the class.
+	 * Wrap a Runnable in another Runnable that allows access to the original
+	 * Runnable for checking the class, and tracks datasets affected by UI update
+	 * runnables.
 	 * 
 	 * @author Ben Skinner
 	 * @since 1.14.0
@@ -203,28 +295,27 @@ public class ThreadManager {
 	 */
 	private class TrackedRunnable implements Runnable {
 		private final Runnable r;
+		private final ThreadPoolType t;
+		private final List<IAnalysisDataset> affectedDatasets;
 
-		public TrackedRunnable(Runnable r) {
-			if (r instanceof InterfaceUpdater) { // Increment queue when submitting task.
-				uiQueueLength.incrementAndGet();
-			} else { // Increment queue when submitting task.
-				methodQueueLength.incrementAndGet();
-			}
+		public TrackedRunnable(Runnable r, ThreadPoolType t) {
+			this.t = t;
 			this.r = r;
+
+			if (r instanceof final InterfaceUpdater i) {
+				affectedDatasets = i.datasetsAffected();
+			} else {
+				affectedDatasets = new ArrayList<>();
+			}
 		}
 
 		@Override
 		public void run() {
 			r.run();
-			if (r instanceof InterfaceUpdater) {
-				uiQueueLength.decrementAndGet();
-			} else {
-				methodQueueLength.decrementAndGet();
-			}
 		}
 
-		public Runnable getSubmittedRunnable() {
-			return r;
+		public List<IAnalysisDataset> datasetsAffected() {
+			return affectedDatasets;
 		}
 	}
 }

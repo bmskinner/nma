@@ -16,6 +16,10 @@
  ******************************************************************************/
 package com.bmskinner.nma.core;
 
+import java.util.List;
+
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+
 /**
  * Used to tag runnables to be executed on the ui worker pool
  * @author Ben Skinner
@@ -24,4 +28,11 @@ package com.bmskinner.nma.core;
  */
 public interface InterfaceUpdater extends Runnable {
 	
+	/**
+	 * Get the datasets that are being updated in this runnable
+	 * 
+	 * @return
+	 */
+	List<IAnalysisDataset> datasetsAffected();
+
 }

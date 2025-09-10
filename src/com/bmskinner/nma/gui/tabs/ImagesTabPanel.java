@@ -64,7 +64,6 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
-import com.bmskinner.nma.core.InterfaceUpdater;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.Labels;
@@ -357,7 +356,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 				return;
 			}
 
-			final InterfaceUpdater r = () -> {
+			final Runnable r = () -> {
 				try {
 					ImageProcessor ip;
 					if (f.exists()) {
@@ -405,7 +404,7 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 				}
 			};
 
-			ThreadManager.getInstance().submit(r);
+			ThreadManager.getInstance().submitUIUpdate(r);
 		};
 	}
 

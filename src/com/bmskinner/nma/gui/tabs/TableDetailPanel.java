@@ -2,6 +2,7 @@ package com.bmskinner.nma.gui.tabs;
 
 import java.awt.Cursor;
 import java.awt.EventQueue;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,6 +13,7 @@ import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.InterfaceUpdater;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.CancellableRunnable;
@@ -69,22 +71,23 @@ public abstract class TableDetailPanel extends DetailPanel {
 	 */
 	protected synchronized void setTable(TableOptions options) {
 		if (cache.has(options)) {
-			TableModel model = cache.get(options);
+			final TableModel model = cache.get(options);
 
-			JTable target = options.getTarget();
+			final JTable target = options.getTarget();
 
 			if (target != null) {
 
 				// Do not invoke on the EDT
-				Runnable r = () -> {
+				final Runnable r = () -> {
 					target.setModel(model);
 					setRenderers(options);
-					if (target instanceof ExportableTable et) {
+					if (target instanceof final ExportableTable et) {
 						et.updateRowHeights();
 					}
 
-					if (options.getScrollPane() != null)
+					if (options.getScrollPane() != null) {
 						options.getScrollPane().scrollRectToVisible(getVisibleRect());
+					}
 				};
 
 				EventQueue.invokeLater(r);
@@ -94,7 +97,7 @@ public abstract class TableDetailPanel extends DetailPanel {
 
 			// Make a background worker to generate the chart and
 			// update the target chart panel when done
-			TableFactoryWorker worker = new TableFactoryWorker(options);
+			final TableFactoryWorker worker = new TableFactoryWorker(options);
 
 			ThreadManager.getInstance().submit(worker);
 		}
@@ -108,7 +111,7 @@ public abstract class TableDetailPanel extends DetailPanel {
 	 */
 	protected synchronized void setRenderer(@NonNull JTable table,
 			@NonNull TableCellRenderer renderer) {
-		int columns = table.getColumnModel().getColumnCount();
+		final int columns = table.getColumnModel().getColumnCount();
 		if (columns > 1) {
 			for (int i = 1; i < columns; i++) {
 				table.getColumnModel().getColumn(i).setCellRenderer(renderer);
@@ -131,7 +134,7 @@ public abstract class TableDetailPanel extends DetailPanel {
 		} else {
 			try {
 				model = createPanelTableType(options);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error creating table", e);
 				model = AbstractTableCreator.createBlankTable();
 			}
@@ -141,16 +144,16 @@ public abstract class TableDetailPanel extends DetailPanel {
 	}
 
 	private static void setRenderers(TableOptions options) {
-		JTable table = options.getTarget();
+		final JTable table = options.getTarget();
 
 		if (table.getRowCount() == 0)
 			return;
 
-		int columns = table.getColumnModel().getColumnCount();
+		final int columns = table.getColumnModel().getColumnCount();
 
-		for (int i : options.getRendererColumns()) {
+		for (final int i : options.getRendererColumns()) {
 
-			TableCellRenderer renderer = options.getRenderer(i);
+			final TableCellRenderer renderer = options.getRenderer(i);
 
 			if (i == TableOptions.FIRST_COLUMN) {
 
@@ -196,14 +199,15 @@ public abstract class TableDetailPanel extends DetailPanel {
 		protected synchronized TableModel doInBackground() throws Exception {
 
 			try {
-				if (options.hasTarget())
+				if (options.hasTarget()) {
 					options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				}
 
-				TableModel model = createPanelTableType(options);
+				final TableModel model = createPanelTableType(options);
 				cache.add(options, model);
 
 				return model;
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.log(Level.WARNING, "Error creating table model");
 				LOGGER.log(Level.SEVERE, "Error creating table model", e);
 				return null;
@@ -221,6 +225,11 @@ public abstract class TableDetailPanel extends DetailPanel {
 		public void cancel() {
 			LOGGER.fine("Cancelling detail panel table update");
 			this.cancel(true);
+		}
+
+		@Override
+		public List<IAnalysisDataset> datasetsAffected() {
+			return options.getDatasets();
 		}
 
 	}

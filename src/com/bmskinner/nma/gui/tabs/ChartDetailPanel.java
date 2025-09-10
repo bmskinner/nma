@@ -1,6 +1,7 @@
 package com.bmskinner.nma.gui.tabs;
 
 import java.awt.Cursor;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,6 +11,7 @@ import javax.swing.SwingWorker;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.InterfaceUpdater;
 import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.CancellableRunnable;
@@ -69,14 +71,15 @@ public abstract class ChartDetailPanel extends DetailPanel {
 	 */
 	protected synchronized void setChart(@NonNull ChartOptions options) {
 		if (cache.has(options)) {
-			JFreeChart chart = cache.get(options);
-			if (options.getTarget() != null)
+			final JFreeChart chart = cache.get(options);
+			if (options.getTarget() != null) {
 				options.getTarget().setChart(chart);
+			}
 
 		} else { // No cached chart
 			// Make a background worker to generate the chart and
 			// update the target chart panel when done
-			ChartFactoryWorker worker = new ChartFactoryWorker(options);
+			final ChartFactoryWorker worker = new ChartFactoryWorker(options);
 			ThreadManager.getInstance().submit(worker);
 		}
 	}
@@ -107,11 +110,11 @@ public abstract class ChartDetailPanel extends DetailPanel {
 					options.getTarget().setChart(AbstractChartFactory.createLoadingChart());
 				}
 
-				JFreeChart chart = createPanelChartType(options);
+				final JFreeChart chart = createPanelChartType(options);
 				cache.add(options, chart);
 
 				return chart;
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.log(Level.WARNING, "Error creating chart");
 				LOGGER.log(Level.SEVERE, "Error creating chart", e);
 				return null;
@@ -127,17 +130,22 @@ public abstract class ChartDetailPanel extends DetailPanel {
 					options.getTarget().setChart(get());
 					options.getTarget().setCursor(Cursor.getDefaultCursor());
 				}
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				LOGGER.log(Level.SEVERE, "Interruption to charting", e);
 				Thread.currentThread().interrupt();
-			} catch (ExecutionException e) {
+			} catch (final ExecutionException e) {
 				LOGGER.log(Level.SEVERE, "Excecution error charting", e);
 			}
 		}
 
 		@Override
 		public void cancel() {
-			this.cancel(true);
+			super.cancel(true);
+		}
+
+		@Override
+		public List<IAnalysisDataset> datasetsAffected() {
+			return options.getDatasets();
 		}
 
 	}
