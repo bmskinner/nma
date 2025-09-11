@@ -76,13 +76,13 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 		try {
 
 			this.setProgressMessage("Profiling: " + dataset.getName());
-			IAnalysisMethod method = new DefaultDatasetProfilingMethod(dataset);
+			final IAnalysisMethod method = new DefaultDatasetProfilingMethod(dataset);
 			worker = new DefaultAnalysisWorker(method);
 
 			worker.addPropertyChangeListener(this);
 
 			ThreadManager.getInstance().submit(worker);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			this.cancel();
 			LOGGER.log(Level.SEVERE, "Error in morphology analysis", e);
 		}
@@ -94,7 +94,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 		// ensure the progress bar gets hidden even if it is not removed
 		this.setProgressBarVisible(false);
 
-		Runnable task = () -> {
+		final Runnable task = () -> {
 
 			// if no list was provided, or no more entries remain,
 			// call the finish
@@ -107,14 +107,14 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 				// otherwise analyse the next item in the list
 				cancel(); // remove progress bar
 
-				Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0),
+				final Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0),
 						getLatch().get());
 				p.run();
 
 			}
 		};
 
-		ThreadManager.getInstance().execute(task);
+		ThreadManager.getInstance().submit(task);
 
 	}
 

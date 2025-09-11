@@ -33,13 +33,13 @@ public class ImportKeypointsAction extends SingleDatasetResultAction {
 		 * Get the file to search
 		 */
 
-		File file = FileSelector.chooseFile(dataset.getSavePath().getParentFile(), 
+		final File file = FileSelector.chooseFile(dataset.getSavePath().getParentFile(), 
 				new FileNameExtensionFilter("Text file", Io.TAB_FILE_EXTENSION_NODOT),
 				"Select keypoint file");
 
 		if (file != null) {
 
-			IAnalysisMethod m = new DatasetLandmarkImportMethod(dataset, file, new DefaultOptions());
+			final IAnalysisMethod m = new DatasetLandmarkImportMethod(dataset, file, new DefaultOptions());
 			worker = new DefaultAnalysisWorker(m);
 
 			worker.addPropertyChangeListener(this);
@@ -55,8 +55,8 @@ public class ImportKeypointsAction extends SingleDatasetResultAction {
 	public void finished() {
 		
 		UIController.getInstance().fireProfilesUpdated(dataset);
-		Runnable r = new SegmentAndRefold(dataset, progressAcceptors.get(0));
-		ThreadManager.getInstance().execute(r);
+		final Runnable r = new SegmentAndRefold(dataset, progressAcceptors.get(0));
+		ThreadManager.getInstance().submit(r);
 		super.finished();
 	}
 

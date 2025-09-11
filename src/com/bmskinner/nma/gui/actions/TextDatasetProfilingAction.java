@@ -60,11 +60,11 @@ public class TextDatasetProfilingAction  extends SingleDatasetResultAction {
 	public void run() {
 		try {
 			this.setProgressMessage("Profiling: " + dataset.getName());
-			IAnalysisMethod method = new TextDatasetProfilingMethod(dataset);
+			final IAnalysisMethod method = new TextDatasetProfilingMethod(dataset);
 			worker = new DefaultAnalysisWorker(method);
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error in text profiling: %s".formatted(e.getMessage()), e);
 			this.cancel();
 		}
@@ -76,7 +76,7 @@ public class TextDatasetProfilingAction  extends SingleDatasetResultAction {
 		// ensure the progress bar gets hidden even if it is not removed
 		this.setProgressBarVisible(false);
 
-		Runnable task = () -> {
+		final Runnable task = () -> {
 			
 			DatasetListManager.getInstance().addDataset(dataset);
 			UIController.getInstance().fireDatasetAdded(dataset);
@@ -106,14 +106,14 @@ public class TextDatasetProfilingAction  extends SingleDatasetResultAction {
 				// otherwise analyse the next item in the list
 				cancel(); // remove progress bar
 
-				Runnable p = new TextDatasetProfilingAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0),
+				final Runnable p = new TextDatasetProfilingAction(getRemainingDatasetsToProcess(), progressAcceptors.get(0),
 						getLatch().get());
 				p.run();
 
 			}
 		};
 
-		ThreadManager.getInstance().execute(task);
+		ThreadManager.getInstance().submit(task);
 
 	}
 

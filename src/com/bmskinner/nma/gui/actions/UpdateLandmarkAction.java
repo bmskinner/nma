@@ -57,12 +57,12 @@ public class UpdateLandmarkAction extends SingleDatasetResultAction {
 	@Override
 	public void run() {
 
-		IAnalysisMethod m = new UpdateLandmarkMethod(dataset, lm, newIndex);
+		final IAnalysisMethod m = new UpdateLandmarkMethod(dataset, lm, newIndex);
 
 		// Each nucleus, plus the profile collection, plus consensus nuclei
 		// plus the main dataset plus one so the bar does not appear to hang
 		// on complete
-		int progressSteps = dataset.getCollection().size()
+		final int progressSteps = dataset.getCollection().size()
 				+ (dataset.getAllChildDatasets().size() * 2) + 2;
 		worker = new DefaultAnalysisWorker(m, progressSteps);
 
@@ -78,12 +78,12 @@ public class UpdateLandmarkAction extends SingleDatasetResultAction {
 		cleanup(); // remove the property change listener
 		try {
 
-			Landmark rp = dataset.getCollection().getRuleSetCollection()
+			final Landmark rp = dataset.getCollection().getRuleSetCollection()
 					.getLandmark(OrientationMark.REFERENCE).get();
 
 			if (rp.equals(lm)) {
-				Runnable r = new SegmentAndRefold(dataset, progressAcceptors.get(0));
-				ThreadManager.getInstance().execute(r);
+				final Runnable r = new SegmentAndRefold(dataset, progressAcceptors.get(0));
+				ThreadManager.getInstance().submit(r);
 			} else {
 				UIController.getInstance().fireProfilesUpdated(dataset);
 			}

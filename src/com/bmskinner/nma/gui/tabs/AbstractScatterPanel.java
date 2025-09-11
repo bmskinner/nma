@@ -90,8 +90,8 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 	protected JPanel headerPanel; // hold buttons
 
-	private AbstractScatterChartPanel scatterPanel;
-	private AbstractScatterCorrelationPanel rhoPanel;
+	private final AbstractScatterChartPanel scatterPanel;
+	private final AbstractScatterCorrelationPanel rhoPanel;
 
 	protected JButton gateButton;
 
@@ -130,7 +130,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 	private JPanel createHeader() {
 
-		List<Measurement> stats = new ArrayList<>();
+		final List<Measurement> stats = new ArrayList<>();
 
 		stats.addAll(Arrays.stream(Measurement.getStats(component)).toList());
 
@@ -164,7 +164,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		gateButton.addActionListener(e -> scatterPanel.gateOnVisible());
 		gateButton.setEnabled(false);
 
-		JPanel panel = new JPanel(new FlowLayout());
+		final JPanel panel = new JPanel(new FlowLayout());
 
 		panel.add(new JLabel(X_AXIS_LBL));
 		panel.add(statABox);
@@ -190,7 +190,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			super();
 
 			this.setLayout(new BorderLayout());
-			JFreeChart chart = AbstractChartFactory.createEmptyChart();
+			final JFreeChart chart = AbstractChartFactory.createEmptyChart();
 
 			chartPanel = new ExportableChartPanel(chart);
 			chartPanel.getChartRenderingInfo().setEntityCollection(null);
@@ -222,45 +222,45 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 			int result;
 			try {
-				String[] options = { "Do not filter", "Filter collection" };
+				final String[] options = { "Do not filter", "Filter collection" };
 				result = this.getInputSupplier().requestOptionAllVisible(options,
 						"Filter selected datasets on visible values?", "Filter datasets?");
-			} catch (RequestCancelledException e2) {
+			} catch (final RequestCancelledException e2) {
 				return;
 			}
 
 			if (result == 0)
 				return;
 
-			MeasurementScale scale = GlobalOptions.getInstance().getDisplayScale();
+			final MeasurementScale scale = GlobalOptions.getInstance().getDisplayScale();
 
-			Range domain = getDomainBounds();
-			Range range = getRangeBounds();
-			Measurement statA = (Measurement) statABox.getSelectedItem();
-			Measurement statB = (Measurement) statBBox.getSelectedItem();
+			final Range domain = getDomainBounds();
+			final Range range = getRangeBounds();
+			final Measurement statA = (Measurement) statABox.getSelectedItem();
+			final Measurement statB = (Measurement) statBBox.getSelectedItem();
 
 			LOGGER.log(Level.FINER,
 					() -> "Filtering datasets by %s and %s".formatted(statA, statB));
 
-			FilteringOptions options = new CellCollectionFilterBuilder()
+			final FilteringOptions options = new CellCollectionFilterBuilder()
 					.setMatchType(FilterMatchType.ALL_MATCH)
 					.add(statA, component, scale, domain.getLowerBound(), domain.getUpperBound())
 					.add(statB, component, scale, range.getLowerBound(), range.getUpperBound())
 					.build();
 
-			for (IAnalysisDataset d : getDatasets()) {
+			for (final IAnalysisDataset d : getDatasets()) {
 				try {
 
 					// Get the filtered cells as a real collection
-					ICellCollection filtered = CellCollectionFilterer.filter(d.getCollection(),
+					final ICellCollection filtered = CellCollectionFilterer.filter(d.getCollection(),
 							options.getPredicate(d.getCollection()));
 
 					// Put them into a virtual collection
-					IAnalysisDataset virt = new VirtualDataset(d, "Filtered_" + statA + "_" + statB,
+					final IAnalysisDataset virt = new VirtualDataset(d, "Filtered_" + statA + "_" + statB,
 							null,
 							filtered);
 
-					IAnalysisDataset child = d.addChildDataset(virt);
+					final IAnalysisDataset child = d.addChildDataset(virt);
 
 					// Refold child collections by default
 					UserActionController.getInstance().userActionEventReceived(
@@ -281,10 +281,10 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		@Override
 		protected synchronized void updateSingle() {
 
-			Measurement statA = (Measurement) statABox.getSelectedItem();
-			Measurement statB = (Measurement) statBBox.getSelectedItem();
+			final Measurement statA = (Measurement) statABox.getSelectedItem();
+			final Measurement statB = (Measurement) statBBox.getSelectedItem();
 
-			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+			final ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
 					.addStatistic(statA)
 					.addStatistic(statB).setTarget(chartPanel).build();
 
@@ -292,8 +292,9 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 			// Check if the panel component is present
 			boolean isActive = activeDataset() != null;
-			if (isActive && component.equals(CellularComponent.NUCLEAR_SIGNAL))
+			if (isActive && component.equals(CellularComponent.NUCLEAR_SIGNAL)) {
 				isActive &= activeDataset().getCollection().getSignalManager().hasSignals();
+			}
 
 			gateButton.setEnabled(isActive);
 			statABox.setEnabled(isActive);
@@ -360,18 +361,18 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		}
 
 		private JPanel createPanel() {
-			JTextArea textArea = new WrappedLabel(SPEARMAN_LBL);
+			final JTextArea textArea = new WrappedLabel(SPEARMAN_LBL);
 
-			JPanel panel = new JPanel(new BorderLayout());
+			final JPanel panel = new JPanel(new BorderLayout());
 
-			TableModel model = AbstractTableCreator.createBlankTable();
+			final TableModel model = AbstractTableCreator.createBlankTable();
 			rhoTable = new ExportableTable(model);
 			rhoTable.setEnabled(false);
 
-			JScrollPane scrollPane = new JScrollPane();
+			final JScrollPane scrollPane = new JScrollPane();
 			scrollPane.setViewportView(rhoTable);
 			scrollPane.setColumnHeaderView(rhoTable.getTableHeader());
-			Dimension size = new Dimension(300, 200);
+			final Dimension size = new Dimension(300, 200);
 			scrollPane.setMinimumSize(size);
 			scrollPane.setPreferredSize(size);
 
@@ -389,12 +390,15 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		@Override
 		protected synchronized void updateSingle() {
 
-			Measurement statA = (Measurement) statABox.getSelectedItem();
-			Measurement statB = (Measurement) statBBox.getSelectedItem();
+			final Measurement statA = (Measurement) statABox.getSelectedItem();
+			final Measurement statB = (Measurement) statBBox.getSelectedItem();
 
-			TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets())
+			final TableOptions tableOptions = new TableOptionsBuilder()
+					.setDatasets(getDatasets())
 					.addStatistic(statA)
-					.addStatistic(statB).setTarget(rhoTable).build();
+					.addStatistic(statB)
+					.setTarget(rhoTable)
+					.build();
 
 			setTable(tableOptions);
 		}

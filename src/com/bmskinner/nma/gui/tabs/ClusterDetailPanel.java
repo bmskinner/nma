@@ -140,13 +140,13 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 				if (table.getValueAt(row, 0).equals(Labels.Clusters.TREE)
 						&& !table.getValueAt(row, col).equals(Labels.NA)) {
 					final Runnable r = () -> new ClusterTreeDialog(d, group);
-					ThreadManager.getInstance().execute(r);
+					ThreadManager.getInstance().submit(r);
 				}
 
 				if (table.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)
 						&& !table.getValueAt(row, col).equals(Labels.NA)) {
 					final Runnable r = () -> new DimensionalityReductionPlotDialog(d, group);
-					ThreadManager.getInstance().execute(r);
+					ThreadManager.getInstance().submit(r);
 				}
 
 			}

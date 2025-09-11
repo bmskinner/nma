@@ -124,7 +124,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	public void userActionEventReceived(UserActionEvent e) {
 		final Runnable r = create(e);
 		if (r != null) {
-			ThreadManager.getInstance().execute(r);
+			ThreadManager.getInstance().submit(r);
 		}
 	}
 
@@ -544,7 +544,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	public void landmarkUpdateEventReceived(LandmarkUpdateEvent event) {
 		if (event.dataset != null) {
 			ThreadManager.getInstance()
-					.execute(new UpdateLandmarkAction(event.dataset, event.lm, event.newIndex, acceptor));
+					.submit(new UpdateLandmarkAction(event.dataset, event.lm, event.newIndex, acceptor));
 		}
 	}
 
@@ -553,7 +553,7 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (event.isDataset()) {
 			ThreadManager.getInstance()
-					.execute(new UpdateSegmentIndexAction(event.dataset, event.id, event.index, acceptor));
+					.submit(new UpdateSegmentIndexAction(event.dataset, event.id, event.index, acceptor));
 
 		}
 
@@ -569,28 +569,28 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 					UIController.getInstance().fireCellUpdatedEvent(event.dataset, event.cell);
 				}
 			};
-			ThreadManager.getInstance().execute(r);
+			ThreadManager.getInstance().submit(r);
 		}
 	}
 
 	@Override
 	public void segmentMergeEventReceived(SegmentMergeEvent event) {
 		if (event.dataset != null) {
-			ThreadManager.getInstance().execute(new SegmentMergeAction(event.dataset, event.id1, event.id2, acceptor));
+			ThreadManager.getInstance().submit(new SegmentMergeAction(event.dataset, event.id1, event.id2, acceptor));
 		}
 	}
 
 	@Override
 	public void segmentUnmergeEventReceived(SegmentUnmergeEvent event) {
 		if (event.dataset != null) {
-			ThreadManager.getInstance().execute(new SegmentUnmergeAction(event.dataset, event.id, acceptor));
+			ThreadManager.getInstance().submit(new SegmentUnmergeAction(event.dataset, event.id, acceptor));
 		}
 	}
 
 	@Override
 	public void segmentSplitEventReceived(SegmentSplitEvent event) {
 		if (event.dataset != null) {
-			ThreadManager.getInstance().execute(new SegmentSplitAction(event.dataset, event.id, acceptor));
+			ThreadManager.getInstance().submit(new SegmentSplitAction(event.dataset, event.id, acceptor));
 		}
 	}
 
@@ -615,12 +615,12 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 				LOGGER.warning("Unable to update profile window proportion: " + e.getMessage());
 			}
 		};
-		ThreadManager.getInstance().execute(r);
+		ThreadManager.getInstance().submit(r);
 	}
 
 	@Override
 	public void fileImportRequested(FileImportEvent f) {
-		ThreadManager.getInstance().execute(new GenericFileImporter(f.file(), acceptor, null, f.type()));
+		ThreadManager.getInstance().submit(new GenericFileImporter(f.file(), acceptor, null, f.type()));
 
 	}
 
@@ -628,15 +628,15 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 	public void fileImported(FileImportEvent f) {
 
 		if (XMLNames.XML_ANALYSIS_DATASET.equals(f.type())) {
-			ThreadManager.getInstance().execute(new ImportDatasetAction(acceptor, f.document(), f.file(), null));
+			ThreadManager.getInstance().submit(new ImportDatasetAction(acceptor, f.document(), f.file(), null));
 		}
 
 		if (XMLNames.XML_WORKSPACE.equals(f.type())) {
-			ThreadManager.getInstance().execute(new ImportWorkspaceAction(acceptor, f.document(), f.file()));
+			ThreadManager.getInstance().submit(new ImportWorkspaceAction(acceptor, f.document(), f.file()));
 		}
 
 		if (XMLNames.XML_ANALYSIS_OPTIONS.equals(f.type())) {
-			ThreadManager.getInstance().execute(new ImportWorkflowAction(acceptor, f.file()));
+			ThreadManager.getInstance().submit(new ImportWorkflowAction(acceptor, f.file()));
 		}
 
 	}

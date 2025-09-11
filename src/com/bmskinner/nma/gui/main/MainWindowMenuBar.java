@@ -280,7 +280,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 					GlobalOptions.getInstance().setDisplayScale(m);
 					UIController.getInstance().fireScaleUpdated();
 				};
-				ThreadManager.getInstance().execute(r);
+				ThreadManager.getInstance().submit(r);
 			});
 			scaleMenu.add(j);
 
@@ -300,7 +300,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 					GlobalOptions.getInstance().setSwatch(c);
 					UIController.getInstance().fireSwatchUpdated();
 				};
-				ThreadManager.getInstance().execute(r);
+				ThreadManager.getInstance().submit(r);
 			});
 			swatchMenu.add(j);
 
@@ -400,7 +400,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 						"Error extracting user guide: %s".formatted(e.getMessage()), e);
 			}
 		};
-		ThreadManager.getInstance().execute(r);
+		ThreadManager.getInstance().submit(r);
 	}
 
 	private ContextualMenu createHelpMenu() {

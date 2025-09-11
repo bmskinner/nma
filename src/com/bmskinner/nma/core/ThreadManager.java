@@ -117,6 +117,8 @@ public class ThreadManager {
 				TimeUnit.MILLISECONDS,
 				uiQueue);
 
+		uiExecutorService.prestartAllCoreThreads();
+
 		LOGGER.config("Allowed processors: %d, split %d for UI, %d for methods".formatted(
 				maxThreads, maxUiThreads, maxMethodThreads));
 
@@ -254,22 +256,6 @@ public class ThreadManager {
 	 */
 	public Future<?> submit(Callable<?> r) {
 		return methodExecutorService.submit(makeSubmitableCallable(r));
-	}
-
-	/**
-	 * Add the given task to the executor service queue for execution.
-	 * 
-	 * @param r
-	 */
-	public void execute(Runnable r) {
-		// if a new update is requested, clear older queued updates
-		if (r instanceof InterfaceUpdater) {
-//			final TrackedRunnable t = new TrackedRunnable(r, ThreadPoolType.UI);
-//			uiExecutorService.execute(t);
-			submitUITask(r);
-		} else {
-			methodExecutorService.execute(new TrackedRunnable(r, ThreadPoolType.METHOD));
-		}
 	}
 
 	private Callable<?> makeSubmitableCallable(Callable<?> r) {

@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
 import javax.swing.JTable;
@@ -83,12 +82,12 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 	/**
 	 * Nuclei selected with the left button
 	 */
-	private List<UUID> selectedNucleiLeft = new ArrayList<>(96);
+	private final List<UUID> selectedNucleiLeft = new ArrayList<>(96);
 
 	/**
 	 * Nuclei selected with the right button
 	 */
-	private List<UUID> selectedNucleiRight = new ArrayList<>(96);
+	private final List<UUID> selectedNucleiRight = new ArrayList<>(96);
 
 	private Set<ICell> openCells = new HashSet<>();
 
@@ -103,7 +102,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 		this.dataset = dataset;
 
 		// // Make sure the table is large enought for the images
-		Dimension minPanelSize = getPreferredSize();
+		final Dimension minPanelSize = getPreferredSize();
 		minPanelSize.width = (int) (java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth()
 				* (PANEL_SCREEN_WIDTH_PROP));
 		minPanelSize.height = (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()
@@ -117,14 +116,14 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 		// size
 		// This is because the image prober is designed to show lots of small images,
 		// and this fish remapper is cobbled on top
-		ProberTableModel m = new ProberTableModel(
+		final ProberTableModel m = new ProberTableModel(
 				(int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()
 						* IMAGE_SCREEN_WIDTH_PROP));
-		JTable table = super.createTable(m);
+		final JTable table = super.createTable(m);
 		finder.addDetectionEventListener(m);
 		table.setRowHeight(m.getMaxDimension());
 
-		for (MouseListener l : table.getMouseListeners()) {
+		for (final MouseListener l : table.getMouseListeners()) {
 			table.removeMouseListener(l);
 		}
 
@@ -135,24 +134,24 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 1) {
 
-					Point pnt = e.getPoint();
-					int row = table.rowAtPoint(pnt);
-					int col = table.columnAtPoint(pnt);
+					final Point pnt = e.getPoint();
+					final int row = table.rowAtPoint(pnt);
+					final int col = table.columnAtPoint(pnt);
 
 					if (row == ORIGINAL_IMG_ROW && col == ORIGINAL_IMG_COL) {
 
-						Runnable r = () -> {
+						final Runnable r = () -> {
 							smallImageClicked(e, pnt);
 						};
 
-						ThreadManager.getInstance().execute(r);
+						ThreadManager.getInstance().submit(r);
 
 					} else { // Show a large image for the FISH image when
 								// clicked
 
-						TableModel model = table.getModel();
+						final TableModel model = table.getModel();
 
-						ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
+						final ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
 
 						if (selectedData.getLargeIcon() != null) {
 							new LargeImageDialog(selectedData, getWindow());
@@ -181,15 +180,15 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 		if (dataset.getCollection().hasCells(imageFile)) {
 			openCells = dataset.getCollection().getCells(imageFile);
 
-			ProberTableModel model = (ProberTableModel) table.getModel();
-			ProberTableCell infoCell = (ProberTableCell) model.getValueAt(ORIGINAL_IMG_COL,
+			final ProberTableModel model = (ProberTableModel) table.getModel();
+			final ProberTableCell infoCell = (ProberTableCell) model.getValueAt(ORIGINAL_IMG_COL,
 					ORIGINAL_IMG_ROW);
 
 			// Get the full size original image
-			Image largeImage = infoCell.getLargeIcon().getImage();
+			final Image largeImage = infoCell.getLargeIcon().getImage();
 
 			// Draw the cells on the full size image
-			for (ICell c : openCells) {
+			for (final ICell c : openCells) {
 				drawNucleus(c, largeImage);
 			}
 
@@ -203,7 +202,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
 	private void smallImageClicked(MouseEvent e, Point pnt) {
 
-		IPoint p = getPointInOriginalImage(pnt);
+		final IPoint p = getPointInOriginalImage(pnt);
 		if (p == null) {
 			LOGGER.warning("Cannot convert to point in original image");
 			return;
@@ -211,19 +210,19 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
 		// See if the clicked position is in a nucleus
 
-		int row = table.rowAtPoint(pnt);
-		int col = table.columnAtPoint(pnt);
+		final int row = table.rowAtPoint(pnt);
+		final int col = table.columnAtPoint(pnt);
 		// Get the rectangle covering the cell of the table
 
-		Rectangle cellRectangle = table.getCellRect(row, col, false);
+		final Rectangle cellRectangle = table.getCellRect(row, col, false);
 
 		// Get the icon cell at the clicked row and column
-		ProberTableModel model = (ProberTableModel) table.getModel();
-		ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
+		final ProberTableModel model = (ProberTableModel) table.getModel();
+		final ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
 
-		for (ICell c : openCells) {
+		for (final ICell c : openCells) {
 
-			for (Nucleus n : c.getNuclei()) {
+			for (final Nucleus n : c.getNuclei()) {
 				if (n.containsOriginalPoint(p)) {
 
 					updateSelectedNuclei(e, c);
@@ -251,10 +250,10 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 	 */
 	private @Nullable IPoint getPointInOriginalImage(Point pnt) {
 		// Get the data model for this table
-		TableModel model = table.getModel();
+		final TableModel model = table.getModel();
 
-		int row = table.rowAtPoint(pnt);
-		int col = table.columnAtPoint(pnt);
+		final int row = table.rowAtPoint(pnt);
+		final int col = table.columnAtPoint(pnt);
 
 		// The coordinates are relative to the cell of the table.
 		// The height of the image is less than the table height, so
@@ -284,46 +283,44 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 		 */
 
 		// Get the rectangle covering the cell of the table
-		Rectangle cellRectangle = table.getCellRect(row, col, false);
+		final Rectangle cellRectangle = table.getCellRect(row, col, false);
 
 		// Get the icon cell at the clicked row and column
-		ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
+		final ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
 
 		// Get the width of the icon in the icon cell
-		int iconWidth = selectedData.getSmallIcon().getIconWidth();
-		int iconHeight = selectedData.getSmallIcon().getIconHeight();
+		final int iconWidth = selectedData.getSmallIcon().getIconWidth();
+		final int iconHeight = selectedData.getSmallIcon().getIconHeight();
 
 		// // Get the width of the column of interest
-		int columnWidth = cellRectangle.width;
-		int rowHeight = cellRectangle.height;
+		final int columnWidth = cellRectangle.width;
+		final int rowHeight = cellRectangle.height;
 
 		LOGGER.finer("Column width is " + columnWidth);
 		LOGGER.finer("IconCell width is " + iconWidth);
 
 		// Split the difference
-		int xOffset = (columnWidth - iconWidth) >> 1;
-		int yOffset = (rowHeight - iconHeight - CELL_LABEL_HEIGHT_PIXELS) >> 1;
+		final int xOffset = (columnWidth - iconWidth) >> 1;
+		final int yOffset = (rowHeight - iconHeight - CELL_LABEL_HEIGHT_PIXELS) >> 1;
 
 		x -= xOffset;
 		y -= yOffset;
 
 		LOGGER.finer("Clicked in small image " + x + " : " + y);
 
-		if (x < 0 || x > iconWidth) {
+		if (x < 0 || x > iconWidth)
 			return null; // out of bounds of icon
-		}
 
-		if (y > selectedData.getSmallIcon().getIconHeight()) {
+		if (y > selectedData.getSmallIcon().getIconHeight())
 			return null; // out of image bounds in cell
-		}
 
 		// Translate coordinates back to large image
-		double factor = selectedData.getFactor();
+		final double factor = selectedData.getFactor();
 
-		double largeX = x * factor;
-		double largeY = y * factor;
+		final double largeX = x * factor;
+		final double largeY = y * factor;
 
-		IPoint p = new FloatPoint(largeX, largeY);
+		final IPoint p = new FloatPoint(largeX, largeY);
 		return p;
 	}
 
@@ -335,13 +332,13 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 	 */
 	private void drawNucleus(ICell c, Image image) {
 
-		Graphics2D g2 = (Graphics2D) image.getGraphics();
+		final Graphics2D g2 = (Graphics2D) image.getGraphics();
 
-		Color oldColor = g2.getColor();
+		final Color oldColor = g2.getColor();
 		g2.setColor(getCellColour(c));
 
-		for (Nucleus n : c.getNuclei()) {
-			Shape p = n.toOriginalShape();
+		for (final Nucleus n : c.getNuclei()) {
+			final Shape p = n.toOriginalShape();
 			g2.fill(p);
 		}
 
@@ -377,9 +374,9 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 	 */
 	protected Image scaleImage(ImageIcon ic, int width) {
 
-		double aspect = (double) ic.getIconWidth() / (double) ic.getIconHeight();
+		final double aspect = (double) ic.getIconWidth() / (double) ic.getIconHeight();
 
-		Dimension smallDimension = new Dimension(width,
+		final Dimension smallDimension = new Dimension(width,
 				table.getRowHeight() - CELL_LABEL_HEIGHT_PIXELS);
 
 		double finalWidth = smallDimension.getHeight() * aspect; // fix height
@@ -400,21 +397,21 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 	 * @throws Exception
 	 */
 	public List<ICellCollection> getSubCollections() {
-		List<ICellCollection> result = new ArrayList<>();
+		final List<ICellCollection> result = new ArrayList<>();
 
 		if (!selectedNucleiLeft.isEmpty()) {
-			ICellCollection subCollectionLeft = new VirtualDataset(dataset, "SubCollectionLeft");
-			for (UUID id : selectedNucleiLeft) {
-				ICell cell = dataset.getCollection().getCell(id);
+			final ICellCollection subCollectionLeft = new VirtualDataset(dataset, "SubCollectionLeft");
+			for (final UUID id : selectedNucleiLeft) {
+				final ICell cell = dataset.getCollection().getCell(id);
 				subCollectionLeft.add(cell);
 			}
 			result.add(subCollectionLeft);
 		}
 
 		if (!selectedNucleiRight.isEmpty()) {
-			ICellCollection subCollectionRight = new VirtualDataset(dataset, "SubCollectionRight");
-			for (UUID id : selectedNucleiRight) {
-				ICell cell = dataset.getCollection().getCell(id);
+			final ICellCollection subCollectionRight = new VirtualDataset(dataset, "SubCollectionRight");
+			for (final UUID id : selectedNucleiRight) {
+				final ICell cell = dataset.getCollection().getCell(id);
 				subCollectionRight.add(cell);
 			}
 			result.add(subCollectionRight);

@@ -5,7 +5,6 @@ import java.awt.FlowLayout;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -50,7 +49,7 @@ public class StructuralSimilarityComparisonDialog extends MessagingDialog {
 	private final JProgressBar progressBar = new JProgressBar(0, 100);
 
 	/** The MS-SSIM calculator */
-	private MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
+	private final MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
 
 	public StructuralSimilarityComparisonDialog(@NonNull final List<IAnalysisDataset> datasets) {
 		super();
@@ -58,7 +57,7 @@ public class StructuralSimilarityComparisonDialog extends MessagingDialog {
 		chartPanel = new ExportableChartPanel(ViolinChartFactory.createEmptyChart());
 		comparisonTable = new ExportableTable(AbstractTableCreator.createLoadingTable());
 
-		JPanel centrePanel = createCentrePanel();
+		final JPanel centrePanel = createCentrePanel();
 
 		setLayout(new BorderLayout());
 		add(centrePanel, BorderLayout.CENTER);
@@ -68,13 +67,13 @@ public class StructuralSimilarityComparisonDialog extends MessagingDialog {
 		setModal(false);
 
 		try {
-			ThreadManager.getInstance().execute(() -> {
-				TableModel compModel = new SSIMTableModel(datasets);
+			ThreadManager.getInstance().submit(() -> {
+				final TableModel compModel = new SSIMTableModel(datasets);
 				comparisonTable.setModel(compModel);
 				comparisonTable.setRowSorter(new TableRowSorter(compModel));
 			});
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			comparisonTable.setModel(AbstractTableCreator.createBlankTable());
 		}
@@ -86,7 +85,7 @@ public class StructuralSimilarityComparisonDialog extends MessagingDialog {
 	}
 
 	private JPanel createHeaderPanel() {
-		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		final JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		panel.add(new JLabel(
 				"Showing full MS-SSIM* values for all possible warped image comparisons"));
 		return panel;
@@ -94,10 +93,10 @@ public class StructuralSimilarityComparisonDialog extends MessagingDialog {
 
 	private JPanel createCentrePanel() {
 
-		JPanel tablePanel = new JPanel(new BorderLayout());
-		JPanel centrePanel = new JPanel(new BorderLayout());
+		final JPanel tablePanel = new JPanel(new BorderLayout());
+		final JPanel centrePanel = new JPanel(new BorderLayout());
 
-		JScrollPane scrollPane = new JScrollPane(comparisonTable);
+		final JScrollPane scrollPane = new JScrollPane(comparisonTable);
 		scrollPane.setColumnHeaderView(comparisonTable.getTableHeader());
 
 		tablePanel.add(scrollPane, BorderLayout.CENTER);

@@ -70,9 +70,9 @@ public abstract class TableDetailPanel extends DetailPanel {
 	 * @param options
 	 */
 	protected synchronized void setTable(TableOptions options) {
+
 		if (cache.has(options)) {
 			final TableModel model = cache.get(options);
-
 			final JTable target = options.getTarget();
 
 			if (target != null) {
@@ -94,11 +94,11 @@ public abstract class TableDetailPanel extends DetailPanel {
 			}
 
 		} else { // No cached chart
-
+			options.getTarget().setModel(AbstractTableCreator.createLoadingTable());
+			options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			// Make a background worker to generate the chart and
 			// update the target chart panel when done
 			final TableFactoryWorker worker = new TableFactoryWorker(options);
-
 			ThreadManager.getInstance().submit(worker);
 		}
 	}

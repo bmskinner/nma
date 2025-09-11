@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -57,7 +56,6 @@ import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.panels.MagnifiableImagePanel;
 import com.bmskinner.nma.gui.events.CellUpdatedEventListener;
 import com.bmskinner.nma.gui.events.SegmentEventListener;
-
 import com.bmskinner.nma.visualisation.image.CellImagePainter;
 import com.bmskinner.nma.visualisation.image.ImagePainter;
 import com.bmskinner.nma.visualisation.image.WarpedCellPainter;
@@ -80,7 +78,7 @@ public class InteractiveCellPanel extends JPanel {
 	protected HashOptions displayOptions;
 
 	/** Allow a magnified image to be displayed */
-	private MagnifiableImagePanel imagePanel = new MagnifiableImagePanel();
+	private final MagnifiableImagePanel imagePanel = new MagnifiableImagePanel();
 
 	/** Track the scaling ratio between the original cell and the scaled image */
 	private double scaleRatio;
@@ -148,11 +146,10 @@ public class InteractiveCellPanel extends JPanel {
 	public synchronized void createImage() {
 		LOGGER.finer("Redrawing cell image");
 
-		if (dataset == null || cell == null || component == null) {
+		if (dataset == null || cell == null || component == null)
 			return;
-		}
 
-		ImagePainter painter = createPainter();
+		final ImagePainter painter = createPainter();
 		imagePanel.set(painter);
 	}
 
@@ -208,14 +205,14 @@ public class InteractiveCellPanel extends JPanel {
 				return;
 
 			// Translate to coordinates in the cell image (remove scaling)
-			double ix = (x / scaleRatio);
-			double iy = (y / scaleRatio);
+			final double ix = (x / scaleRatio);
+			final double iy = (y / scaleRatio);
 
-			double cx = ix - Imageable.COMPONENT_BUFFER + cell.getPrimaryNucleus().getBase().getX();
-			double cy = iy - Imageable.COMPONENT_BUFFER + cell.getPrimaryNucleus().getBase().getY();
+			final double cx = ix - Imageable.COMPONENT_BUFFER + cell.getPrimaryNucleus().getBase().getX();
+			final double cy = iy - Imageable.COMPONENT_BUFFER + cell.getPrimaryNucleus().getBase().getY();
 
 			// Not a circle around the valid point to click, but close enough
-			Optional<IPoint> point = cell.getPrimaryNucleus().getBorderList().stream()
+			final Optional<IPoint> point = cell.getPrimaryNucleus().getBorderList().stream()
 					.filter(p -> cx >= p.getX() - POINT_CLICK_RADIUS_PIXELS
 							&& cx <= p.getX() + POINT_CLICK_RADIUS_PIXELS
 							&& cy >= p.getY() - POINT_CLICK_RADIUS_PIXELS
@@ -223,7 +220,7 @@ public class InteractiveCellPanel extends JPanel {
 					.findFirst();
 
 			if (point.isPresent()) {
-				JPopupMenu popup = createPopup(point.get());
+				final JPopupMenu popup = createPopup(point.get());
 				popup.show(imagePanel, x, y);
 			}
 
@@ -231,7 +228,7 @@ public class InteractiveCellPanel extends JPanel {
 
 		private synchronized void updateTag(OrientationMark tag, int newIndex) {
 
-			ThreadManager.getInstance().execute(() -> {
+			ThreadManager.getInstance().submit(() -> {
 				cell.getPrimaryNucleus().setLocked(false);
 
 				try {
@@ -248,7 +245,7 @@ public class InteractiveCellPanel extends JPanel {
 		}
 
 		private synchronized JPopupMenu createPopup(IPoint point) {
-			JPopupMenu popupMenu = new JPopupMenu("Popup");
+			final JPopupMenu popupMenu = new JPopupMenu("Popup");
 			if (cell == null)
 				return popupMenu;
 
@@ -269,20 +266,20 @@ public class InteractiveCellPanel extends JPanel {
 		 */
 		private void addSegmentsToPopup(JPopupMenu popupMenu, IPoint point) {
 			try {
-				int rawIndex = cell.getPrimaryNucleus().getBorderIndex(point);
+				final int rawIndex = cell.getPrimaryNucleus().getBorderIndex(point);
 
-				int rpIndex = cell.getPrimaryNucleus().getBorderIndex(OrientationMark.REFERENCE);
+				final int rpIndex = cell.getPrimaryNucleus().getBorderIndex(OrientationMark.REFERENCE);
 
 				// Get the index of the clicked point in the RP-indexed profile
-				int index = cell.getPrimaryNucleus().wrapIndex(rawIndex - rpIndex);
+				final int index = cell.getPrimaryNucleus().wrapIndex(rawIndex - rpIndex);
 
-				IProfileSegment seg = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE)
+				final IProfileSegment seg = cell.getPrimaryNucleus().getProfile(ProfileType.ANGLE)
 						.getSegmentContaining(rawIndex);
 
-				IProfileSegment prev = seg.prevSegment();
-				IProfileSegment next = seg.nextSegment();
+				final IProfileSegment prev = seg.prevSegment();
+				final IProfileSegment next = seg.nextSegment();
 
-				JMenuItem prevItem = new JMenuItem("Extend " + prev.getName() + " to here");
+				final JMenuItem prevItem = new JMenuItem("Extend " + prev.getName() + " to here");
 				prevItem.setBorder(BorderFactory
 						.createLineBorder(ColourSelecter.getColor(prev.getPosition()), 3));
 				prevItem.setBorderPainted(true);
@@ -298,7 +295,7 @@ public class InteractiveCellPanel extends JPanel {
 
 				popupMenu.add(Box.createVerticalStrut(2)); // stop borders touching
 
-				JMenuItem nextItem = new JMenuItem("Extend " + next.getName() + " to here");
+				final JMenuItem nextItem = new JMenuItem("Extend " + next.getName() + " to here");
 				nextItem.setBorder(BorderFactory
 						.createLineBorder(ColourSelecter.getColor(next.getPosition()), 3));
 				nextItem.setBorderPainted(true);
@@ -321,14 +318,14 @@ public class InteractiveCellPanel extends JPanel {
 		 * @param popupMenu
 		 */
 		private void addTagsToPopup(JPopupMenu popupMenu, IPoint point) {
-			List<OrientationMark> tags = dataset.getCollection().getProfileCollection()
+			final List<OrientationMark> tags = dataset.getCollection().getProfileCollection()
 					.getOrientationMarks();
 
 			Collections.sort(tags);
 
-			for (OrientationMark tag : tags) {
+			for (final OrientationMark tag : tags) {
 				// Colour the menu item by tag colour
-				JMenuItem item = new JMenuItem("Move " + tag.toString().toLowerCase() + " here");
+				final JMenuItem item = new JMenuItem("Move " + tag.toString().toLowerCase() + " here");
 				item.setBorder(BorderFactory.createLineBorder(ColourSelecter.getColour(tag), 3));
 				item.setBackground(ColourSelecter.getColour(tag).darker());
 				item.setBorderPainted(true);
@@ -336,7 +333,7 @@ public class InteractiveCellPanel extends JPanel {
 				item.setOpaque(true);
 
 				item.addActionListener(a -> {
-					int pIndex = cell.getPrimaryNucleus().getBorderIndex(point);
+					final int pIndex = cell.getPrimaryNucleus().getBorderIndex(point);
 					updateTag(tag, pIndex);
 					repaint();
 				});
@@ -345,7 +342,7 @@ public class InteractiveCellPanel extends JPanel {
 			}
 
 			// Find border tags with rulesets that have not been assigned in the median
-			List<OrientationMark> unassignedTags = new ArrayList<>();
+			final List<OrientationMark> unassignedTags = new ArrayList<>();
 //			for (OrientationMark tag : Landmark.defaultValues()) {
 //				if (!tags.contains(tag)) {
 //					unassignedTags.add(tag);
@@ -357,12 +354,12 @@ public class InteractiveCellPanel extends JPanel {
 
 				popupMenu.addSeparator();
 
-				for (OrientationMark tag : unassignedTags) {
-					JMenuItem item = new JMenuItem("Set " + tag.toString().toLowerCase() + " here");
+				for (final OrientationMark tag : unassignedTags) {
+					final JMenuItem item = new JMenuItem("Set " + tag.toString().toLowerCase() + " here");
 					item.setForeground(Color.DARK_GRAY);
 
 					item.addActionListener(a -> {
-						int pIndex = cell.getPrimaryNucleus().getBorderIndex(point);
+						final int pIndex = cell.getPrimaryNucleus().getBorderIndex(point);
 						updateTag(tag, pIndex);
 					});
 					popupMenu.add(item);

@@ -83,7 +83,7 @@ public class ImportWorkspaceAction extends VoidResultAction {
 					// First read the XML file
 					final XMLImportMethod method = new XMLImportMethod(dataFile);
 					worker = new DefaultAnalysisWorker(method);
-					ThreadManager.getInstance().execute(worker);
+					ThreadManager.getInstance().submit(worker);
 
 					try {
 						worker.get();
@@ -92,7 +92,7 @@ public class ImportWorkspaceAction extends VoidResultAction {
 						final Document datasetDoc = method.getXMLDocument();
 						final IAnalysisMethod importMethod = new DatasetImportMethod(datasetDoc);
 						worker = new DefaultAnalysisWorker(importMethod);
-						ThreadManager.getInstance().execute(worker);
+						ThreadManager.getInstance().submit(worker);
 
 						final IAnalysisResult r = worker.get();
 						final IAnalysisDataset d = r.getFirstDataset();

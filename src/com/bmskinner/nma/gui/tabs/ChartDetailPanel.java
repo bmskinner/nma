@@ -79,6 +79,8 @@ public abstract class ChartDetailPanel extends DetailPanel {
 		} else { // No cached chart
 			// Make a background worker to generate the chart and
 			// update the target chart panel when done
+			options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			options.getTarget().setChart(AbstractChartFactory.createLoadingChart());
 			final ChartFactoryWorker worker = new ChartFactoryWorker(options);
 			ThreadManager.getInstance().submit(worker);
 		}
@@ -95,9 +97,9 @@ public abstract class ChartDetailPanel extends DetailPanel {
 	protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void>
 			implements CancellableRunnable, InterfaceUpdater {
 
-		private final ChartOptions options;
+		private final @NonNull ChartOptions options;
 
-		public ChartFactoryWorker(final ChartOptions o) {
+		public ChartFactoryWorker(@NonNull final ChartOptions o) {
 			options = o;
 		}
 
@@ -117,8 +119,7 @@ public abstract class ChartDetailPanel extends DetailPanel {
 
 				return chart;
 			} catch (final Exception e) {
-				LOGGER.log(Level.WARNING, "Error creating chart");
-				LOGGER.log(Level.SEVERE, "Error creating chart", e);
+				LOGGER.log(Level.SEVERE, "Error creating chart: %s".formatted(e.getMessage()), e);
 				return null;
 			}
 
