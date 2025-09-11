@@ -683,14 +683,18 @@ public class VirtualDataset extends AbstractAnalysisDataset
 	}
 
 	@Override
+	public ImageManager getImageManager() {
+		return new ImageManager(this);
+	}
+
+	@Override
 	public RuleSetCollection getRuleSetCollection() {
 		return parentDataset.getCollection().getRuleSetCollection();
 	}
 
 	@Override
 	public void setSourceFolder(@NonNull File expectedImageDirectory) {
-		parentDataset.getCollection().setSourceFolder(expectedImageDirectory);
-		isRecalcHashcode = true;
+		this.getImageManager().updateImageDirectory(expectedImageDirectory);
 	}
 
 	/**

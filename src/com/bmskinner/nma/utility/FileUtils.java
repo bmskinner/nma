@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.core.GlobalOptions;
 
 /**
  * File handling utility methods
@@ -49,8 +50,8 @@ public class FileUtils {
 	 *         directory before using this.
 	 */
 	public static File commonPathOfDatasets(@NonNull Collection<IAnalysisDataset> datasets) {
-		List<File> files = new ArrayList<>(datasets.size());
-		for (IAnalysisDataset d : datasets) {
+		final List<File> files = new ArrayList<>(datasets.size());
+		for (final IAnalysisDataset d : datasets) {
 			files.add(d.getSavePath().getParentFile());
 		}
 		return FileUtils.commonPathOfFiles(files);
@@ -70,19 +71,19 @@ public class FileUtils {
 		if (files.isEmpty())
 			return null;
 
-		String[][] folders = new String[files.size()][];
+		final String[][] folders = new String[files.size()][];
 
 		int k = 0;
 
 		// Split out the path elements to an array
-		for (File f : files) {
-			Path p = f.toPath();
+		for (final File f : files) {
+			final Path p = f.toPath();
 			if (p != null) {
-				Iterator<Path> it = p.iterator();
-				List<String> s = new ArrayList<>();
+				final Iterator<Path> it = p.iterator();
+				final List<String> s = new ArrayList<>();
 				s.add(p.getRoot().toString());
 				while (it.hasNext()) {
-					Path n = it.next();
+					final Path n = it.next();
 					s.add(n.toString());
 				}
 				folders[k++] = s.toArray(new String[0]);
@@ -90,16 +91,17 @@ public class FileUtils {
 		}
 
 		boolean breakLoop = false;
-		List<String> common = new ArrayList<>();
+		final List<String> common = new ArrayList<>();
 		if (folders.length == 0 || folders[0] == null)
 			return new File(System.getProperty("user.home"));
 
 		for (int col = 0; col < folders[0].length; col++) {
 
-			if (breakLoop)
+			if (breakLoop) {
 				break;
+			}
 
-			String s = folders[0][col];
+			final String s = folders[0][col];
 			// Compare this column in every row to the first row
 			for (int row = 1; row < files.size(); row++) {
 				if (!s.equals(folders[row][col])) {
@@ -107,12 +109,13 @@ public class FileUtils {
 					break;
 				}
 			}
-			if (!breakLoop)
+			if (!breakLoop) {
 				common.add(s);
+			}
 		}
 
 		// Make the final path from the common elements
-		StringBuilder commonPath = new StringBuilder();
+		final StringBuilder commonPath = new StringBuilder();
 		for (int i = 0; i < common.size(); i++) {
 			commonPath.append(common.get(i));
 			if (i > 0 && i < common.size() - 1) { // don't add separator after root or at the end
@@ -126,15 +129,15 @@ public class FileUtils {
 	 * Given a file path, return the element of the path that exist. If the file
 	 * exists, the same file is returned. Otherwise, the most complete existing
 	 * directory path is returned. If none of the path exists, or the input is null,
-	 * the user home directory is returned.
+	 * the default directory in the global options is returned
 	 * 
 	 * @param file the file path to test
-	 * @return the most complete existing portion of the path, otherwise the user
-	 *         home directory
+	 * @return the most complete existing portion of the path, otherwise the default
+	 *         directory in the global options
 	 */
 	public static File extantComponent(File file) {
 		if (file == null)
-			return new File(System.getProperty("user.home"));
+			return GlobalOptions.getInstance().getDefaultDir();
 		if (file.exists())
 			return file;
 		return extantComponent(file.getParentFile());
@@ -152,12 +155,10 @@ public class FileUtils {
 	}
 
 	public static String removeStart(String str, String remove) {
-		if (isEmpty(str) || isEmpty(remove)) {
+		if (isEmpty(str) || isEmpty(remove))
 			return str;
-		}
-		if (str.startsWith(remove)) {
+		if (str.startsWith(remove))
 			return str.substring(remove.length());
-		}
 		return str;
 	}
 
@@ -169,17 +170,14 @@ public class FileUtils {
 			final File destDir) {
 		assert destDir.isDirectory();
 
-		if (!toCopy.isDirectory()) {
+		if (!toCopy.isDirectory())
 			return FileUtils.copyFile(toCopy, new File(destDir, toCopy.getName()));
-		}
 		final File newDestDir = new File(destDir, toCopy.getName());
-		if (!newDestDir.exists() && !newDestDir.mkdir()) {
+		if (!newDestDir.exists() && !newDestDir.mkdir())
 			return false;
-		}
 		for (final File child : toCopy.listFiles()) {
-			if (!FileUtils.copyFilesRecusively(child, newDestDir)) {
+			if (!FileUtils.copyFilesRecusively(child, newDestDir))
 				return false;
-			}
 		}
 
 		return true;
@@ -200,16 +198,12 @@ public class FileUtils {
 				final File f = new File(destDir, filename);
 				if (!entry.isDirectory()) {
 					final InputStream entryInputStream = jarFile.getInputStream(entry);
-					if (!FileUtils.copyStream(entryInputStream, f)) {
+					if (!FileUtils.copyStream(entryInputStream, f))
 						return false;
-					}
 					entryInputStream.close();
-				} else {
-					if (!FileUtils.ensureDirectoryExists(f)) {
-						throw new IOException("Could not create directory: "
-								+ f.getAbsolutePath());
-					}
-				}
+				} else if (!FileUtils.ensureDirectoryExists(f))
+					throw new IOException("Could not create directory: "
+							+ f.getAbsolutePath());
 			}
 		}
 		return true;
@@ -219,10 +213,9 @@ public class FileUtils {
 			final URL originUrl, final File destination) {
 		try {
 			final URLConnection urlConnection = originUrl.openConnection();
-			if (urlConnection instanceof JarURLConnection jarUrlConnection) {
+			if (urlConnection instanceof final JarURLConnection jarUrlConnection)
 				return FileUtils.copyJarResourcesRecursively(destination,
 						jarUrlConnection);
-			}
 			return FileUtils.copyFilesRecusively(new File(originUrl.getPath()),
 					destination);
 

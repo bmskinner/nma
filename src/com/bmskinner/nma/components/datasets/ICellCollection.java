@@ -344,9 +344,16 @@ public interface ICellCollection
 	/**
 	 * Get the profile manager for the collection
 	 * 
-	 * @return
+	 * @return the profile manager
 	 */
 	ProfileManager getProfileManager();
+
+	/**
+	 * Get the image manager for the collection
+	 * 
+	 * @return the image manager
+	 */
+	ImageManager getImageManager();
 
 	/**
 	 * Count the number of cells shared between this collection and another dataset.

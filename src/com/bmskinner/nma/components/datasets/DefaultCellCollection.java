@@ -579,6 +579,11 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
+	public ImageManager getImageManager() {
+		return new ImageManager(this);
+	}
+
+	@Override
 	public int getMedianArrayLength() {
 		if (size() == 0)
 			return 0;
@@ -928,22 +933,7 @@ public class DefaultCellCollection implements ICellCollection {
 
 	@Override
 	public void setSourceFolder(@NonNull File newFolder) {
-		if (!newFolder.exists())
-			return;
-
-		cells.stream().flatMap(c -> c.getNuclei().stream()).forEach(n -> {
-			final File oldFolder = n.getSourceFolder();
-			n.setSourceFolder(newFolder);
-			// Update signals in the same file
-			n.getSignalCollection().getAllSignals().stream().forEach(s -> {
-				if (s.getSourceFolder().equals(oldFolder)) {
-					s.setSourceFolder(newFolder);
-				}
-			});
-
-		});
-		isRecalcHashcode = true;
-
+		this.getImageManager().updateImageDirectory(newFolder);
 	}
 
 	@Override
