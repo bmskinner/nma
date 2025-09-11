@@ -92,7 +92,7 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 			worker = new DefaultAnalysisWorker(method, file.length());
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			super.finished();
 		}
 	}
@@ -104,7 +104,7 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 	 */
 	private File selectFile(@Nullable String fileType) {
 
-		File defaultDir = GlobalOptions.getInstance().getDefaultDir();
+		final File defaultDir = GlobalOptions.getInstance().getDefaultDir();
 		JFileChooser fc = new JFileChooser("Select a file...");
 		if (defaultDir.exists()) {
 			fc = new JFileChooser(defaultDir);
@@ -112,7 +112,7 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 
 		if (fileType != null) {
 
-			FileNameExtensionFilter filter = switch (fileType) {
+			final FileNameExtensionFilter filter = switch (fileType) {
 			case XMLNames.XML_WORKSPACE -> new FileNameExtensionFilter(WORKSPACE_FILE_TYPE,
 					Io.WRK_FILE_EXTENSION_NODOT);
 
@@ -131,10 +131,10 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 			fc.setFileFilter(filter);
 		}
 
-		int returnVal = fc.showOpenDialog(fc);
+		final int returnVal = fc.showOpenDialog(fc);
 		if (returnVal != 0)
 			return null;
-		File f = fc.getSelectedFile();
+		final File f = fc.getSelectedFile();
 
 		if (f.isDirectory())
 			return null;
@@ -149,9 +149,9 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 	 */
 	private boolean isOldNmdFormat() {
 		try (InputStream is = new FileInputStream(file);) {
-			byte[] b = is.readNBytes(4);
+			final byte[] b = is.readNBytes(4);
 			return Arrays.equals(b, NMD_V1_SIGNATURE);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Error reading first bytes of file", e);
 			return false;
 		}
@@ -166,8 +166,8 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 	 */
 	private boolean isOldXmlFormat(Document doc) {
 		if (doc.getRootElement().getChild("VersionCreated") != null) {
-			String vString = doc.getRootElement().getChildText("VersionCreated");
-			Version v = Version.fromString(vString);
+			final String vString = doc.getRootElement().getChildText("VersionCreated");
+			final Version v = Version.fromString(vString);
 			if (!Version.versionIsSupported(v)) {
 				LOGGER.info(
 						() -> "File was created in NMA version %s, and cannot be opened in this version."
@@ -180,10 +180,12 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 
 	@Override
 	public void finished() {
+		// Ensure bar is active
+		setProgressBarIndeterminate();
 
 		// Read the document with a counted listener
 		// Dispatch the document to the appropriate loader
-		Document doc = method.getXMLDocument();
+		final Document doc = method.getXMLDocument();
 
 		if (doc == null) {
 			LOGGER.info("Could not open " + file.getName());
@@ -197,20 +199,23 @@ public class GenericFileImporter extends VoidResultAction implements Importer {
 		}
 
 		// Check the name of the first element
-		String name = doc.getRootElement().getName();
+		final String name = doc.getRootElement().getName();
 
 		// Choose what to do based on the root element name
-		if (XMLNames.XML_ANALYSIS_DATASET.equals(name))
+		if (XMLNames.XML_ANALYSIS_DATASET.equals(name)) {
 			UserActionController.getInstance().fileImported(
 					new FileImportEvent(this, file, XMLNames.XML_ANALYSIS_DATASET, doc));
+		}
 
-		if (XMLNames.XML_WORKSPACE.equals(name))
+		if (XMLNames.XML_WORKSPACE.equals(name)) {
 			UserActionController.getInstance().fileImported(
 					new FileImportEvent(this, file, XMLNames.XML_WORKSPACE, doc));
+		}
 
-		if (XMLNames.XML_ANALYSIS_OPTIONS.equals(name))
+		if (XMLNames.XML_ANALYSIS_OPTIONS.equals(name)) {
 			UserActionController.getInstance().fileImported(
 					new FileImportEvent(this, file, XMLNames.XML_ANALYSIS_OPTIONS, doc));
+		}
 
 		super.finished();
 	}

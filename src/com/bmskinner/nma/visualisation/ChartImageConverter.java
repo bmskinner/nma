@@ -52,9 +52,12 @@ public class ChartImageConverter {
 	/**
 	 * Create a PNG representation of the given chart at 300 DPI
 	 * 
-	 * @param chart the chart to draw
-	 * @param w     the desired width in mm
-	 * @param h     the desired height in mm
+	 * @param chart         the chart to draw
+	 * @param w             the desired width in mm
+	 * @param h             the desired height in mm
+	 * @param dpi           the resolution of the image
+	 * @param isFixedAspect true if the chart use a fixed aspect ratio, false
+	 *                      otherwise
 	 * @return
 	 * @throws TranscoderException
 	 * @throws IOException

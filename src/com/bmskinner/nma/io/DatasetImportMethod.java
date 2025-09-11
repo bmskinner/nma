@@ -52,7 +52,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
 	private final Document doc;
 	private IAnalysisDataset dataset = null;
-	private boolean wasConverted = false;
+	private final boolean wasConverted = false;
 	public static final int WAS_CONVERTED_BOOL = 0;
 
 	/**
@@ -92,7 +92,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 			throw new UnloadableDatasetException(
 					String.format("Could not load document"));
 
-		DefaultAnalysisResult r = new DefaultAnalysisResult(dataset);
+		final DefaultAnalysisResult r = new DefaultAnalysisResult(dataset);
 		r.setBoolean(WAS_CONVERTED_BOOL, wasConverted);
 		return r;
 	}
@@ -107,15 +107,16 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 			dataset = DatasetCreator.createRoot(doc.getRootElement(), this);
 
 			fireIndeterminateState();
-			if (dataset.getVersionLastSaved().isOlderThan(Version.currentVersion()))
+			if (dataset.getVersionLastSaved().isOlderThan(Version.currentVersion())) {
 				DatasetConverter.convert(dataset);
+			}
 
 			validateDataset();
 
-		} catch (UnsupportedVersionException e) {
+		} catch (final UnsupportedVersionException e) {
 			LOGGER.warning("Invalid version detected");
 			throw new UnloadableDatasetException("Not valid XML dataset for this version", e);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error in dataset import", e);
 		}
 	}
@@ -128,15 +129,15 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 	private void validateDataset() throws Exception {
 		// Check the validity of the loaded dataset
 		// Repair if possible, or error if not
-		DatasetRepairer dr = new DatasetRepairer();
+		final DatasetRepairer dr = new DatasetRepairer();
 		dr.repair(dataset);
 
-		DatasetValidator dv = new DatasetValidator();
+		final DatasetValidator dv = new DatasetValidator();
 		if (!dv.validate(dataset)) {
-			for (String s : dv.getSummary()) {
+			for (final String s : dv.getSummary()) {
 				LOGGER.log(Level.SEVERE, s);
 			}
-			for (String s : dv.getErrors()) {
+			for (final String s : dv.getErrors()) {
 				LOGGER.log(Level.SEVERE, s);
 			}
 
