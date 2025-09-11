@@ -17,11 +17,11 @@
 package com.bmskinner.nma.gui.main;
 
 import java.awt.Dimension;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 
 import com.bmskinner.nma.core.ThreadManager;
 
@@ -33,56 +33,66 @@ import com.bmskinner.nma.core.ThreadManager;
  *
  */
 @SuppressWarnings("serial")
-public class TaskListMonitor extends JLabel
-implements Runnable {
+public class TaskListMonitor extends JLabel {
 	
 	private static final Logger LOGGER = Logger.getLogger(TaskListMonitor.class.getName());
     
 	private static final int PREFERRED_WIDTH = 50;
 	private static final int PREFERRED_HEIGHT = 20;
     
-    private static final long SLEEP_TIME = 500L;
+	private static final int SLEEP_TIME = 500;
 	
 	/**
 	 * Create with default parameters.
 	 */
 	public TaskListMonitor() {
-		super("0", SwingConstants.CENTER);
-		final Thread t = new Thread(this);
-		t.setName("Task list tracking thread");
-		t.start();
-	}
 
-	@Override
-	public void run() {
-		do  {
-			try {
-				Thread.sleep(SLEEP_TIME);
-			} catch (final InterruptedException e) {
-				LOGGER.log(Level.SEVERE, "Error in task monitoring thread: %s".formatted(e.getMessage()));
-			}
-			
+		super("0", SwingConstants.CENTER);
+//		final Thread t = new Thread(this);
+//		t.setName("Task list tracking thread");
+//		t.start();
+		
+		final Timer timer = new Timer(SLEEP_TIME, e -> {
 			final int l = ThreadManager.getInstance().uiQueueLength();
 			final int m = ThreadManager.getInstance().methodQueueLength();
 			setText("%s : %s".formatted(l, m));
 			setToolTipText("%s UI updates queued and %s analysis tasks".formatted(l, m));
+		});
 
-			// For debugging - track the current state of the task queue
-//			final Iterator<Entry<List<IAnalysisDataset>, Set<TrackedFuture>>> it = ThreadManager.getInstance()
-//					.getUITasks()
-//					.entrySet().iterator();
-//			String text = "";
-//
-//			while (it.hasNext()) {
-//				final Entry<List<IAnalysisDataset>, Set<TrackedFuture>> entry = it.next();
-//				text += "%s uiQueue: %s datasets: %s futures\t".formatted(l, entry.getKey().size(),
-//						entry.getValue().size());
-//			}
-//
-//			setText(text);
-
-		} while(true);
+		timer.start();
 	}
+
+//	@Override
+//	public void run() {
+//
+//		do  {
+//			try {
+//				Thread.sleep(SLEEP_TIME);
+//			} catch (final InterruptedException e) {
+//				LOGGER.log(Level.SEVERE, "Error in task monitoring thread: %s".formatted(e.getMessage()));
+//			}
+//			
+//			final int l = ThreadManager.getInstance().uiQueueLength();
+//			final int m = ThreadManager.getInstance().methodQueueLength();
+//			setText("%s : %s".formatted(l, m));
+//			setToolTipText("%s UI updates queued and %s analysis tasks".formatted(l, m));
+//
+//			// For debugging - track the current state of the task queue
+////			final Iterator<Entry<List<IAnalysisDataset>, Set<TrackedFuture>>> it = ThreadManager.getInstance()
+////					.getUITasks()
+////					.entrySet().iterator();
+////			String text = "";
+////
+////			while (it.hasNext()) {
+////				final Entry<List<IAnalysisDataset>, Set<TrackedFuture>> entry = it.next();
+////				text += "%s uiQueue: %s datasets: %s futures\t".formatted(l, entry.getKey().size(),
+////						entry.getValue().size());
+////			}
+////
+////			setText(text);
+//
+//		} while(true);
+//	}
 
 	@Override
 	public Dimension getPreferredSize(){

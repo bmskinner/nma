@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.core.GlobalOptions;
@@ -40,8 +41,7 @@ import com.bmskinner.nma.core.GlobalOptions;
  * @since 1.13.7
  *
  */
-public class MemoryIndicator extends JPanel
-    implements Runnable {
+public class MemoryIndicator extends JPanel {
 	
 	private static final Logger LOGGER = Logger.getLogger(MemoryIndicator.class.getName());
     
@@ -53,7 +53,7 @@ public class MemoryIndicator extends JPanel
     private static final String LOW_MEMORY_TTL = "Low memory";
     private static final String LOW_MEMORY_MSG = "Memory is running low! There is %s available to NMA.";
     
-    private static final long SLEEP_TIME = 500L;
+	private static final int SLEEP_TIME = 500;
     
     protected static final String DEFAULT_DECIMAL_FORMAT = "#0.00";
 	protected static final DecimalFormat DF = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
@@ -68,22 +68,28 @@ public class MemoryIndicator extends JPanel
     private boolean mustWarn = false;
     
     public MemoryIndicator() {
-    	Thread t = new Thread(this);
-    	t.setName("Memory use tracking thread");
-    	t.start();
+
+		final Timer timer = new Timer(SLEEP_TIME, e -> {
+			if (mustWarn && !hasWarned) {
+				showMemoryWarning();
+			}
+			repaint();
+		});
+
+		timer.start();
 
     	// If we are warning on low available JVM memory
     	if(GlobalOptions.getInstance().getBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION)) {
     		try {
     			// Get the total system memory
-    			OperatingSystemMXBean osmxb = ManagementFactory.getOperatingSystemMXBean();
-    			Method method = osmxb.getClass().getMethod("getTotalPhysicalMemorySize");
+    			final OperatingSystemMXBean osmxb = ManagementFactory.getOperatingSystemMXBean();
+    			final Method method = osmxb.getClass().getMethod("getTotalPhysicalMemorySize");
     			method.setAccessible(true);
 
-    			Long totalMemory = (Long) method.invoke(osmxb);
-    			long jvmMaxMem =  Runtime.getRuntime().maxMemory();
-    			double availableMemoryToJVM = (double)jvmMaxMem /  (double)totalMemory;
-    			long egMemory =  Double.valueOf(totalMemory*0.8d).longValue()/(1024*1024);
+    			final Long totalMemory = (Long) method.invoke(osmxb);
+    			final long jvmMaxMem =  Runtime.getRuntime().maxMemory();
+    			final double availableMemoryToJVM = (double)jvmMaxMem /  (double)totalMemory;
+    			final long egMemory =  Double.valueOf(totalMemory*0.8d).longValue()/(1024*1024);
     			if(availableMemoryToJVM<MEMORY_LOW_WARN_RATIO) {
     				LOGGER.info("NMA has only %s memory available of the system %s (%s%%). To increase maximum memory, you may wish to run the NMA standalone jar file from command line via 'java -Xmx%sm -jar Nuclear_Morphology_Analysis_%s.jar'. Disable this message via View>Preferences"
     						.formatted(formatMemory(jvmMaxMem), 
@@ -101,21 +107,6 @@ public class MemoryIndicator extends JPanel
     }
     
     @Override
-    public void run() {
-      do  {
-        try {
-          Thread.sleep(SLEEP_TIME);
-        } catch (InterruptedException e) {
-        	LOGGER.log(Level.SEVERE, "Error in memory monitoring thread: %s".formatted(e.getMessage()));
-        }
-        
-        if (mustWarn && !hasWarned)
-          showMemoryWarning();
-        repaint();
-      } while(true);
-    }
-    
-    @Override
     public Dimension getPreferredSize(){
       return new Dimension(PREFERRED_WIDTH, PREFERRED_HEIGHT);
     }
@@ -124,8 +115,6 @@ public class MemoryIndicator extends JPanel
     	if (this.hasWarned)
     		return;
     	hasWarned = true;
-
-    	
 
     	JOptionPane.showMessageDialog(null, LOW_MEMORY_MSG.formatted(formatMemory(Runtime.getRuntime().maxMemory())), LOW_MEMORY_TTL, JOptionPane.WARNING_MESSAGE);
     }
@@ -138,27 +127,27 @@ public class MemoryIndicator extends JPanel
       
     
     private void paintMemory(Graphics g){
-      int xStart = 0;
-      int xWidth = getWidth();
+      final int xStart = 0;
+      final int xWidth = getWidth();
       
-      long max = Runtime.getRuntime().maxMemory();
-      long allocated = Runtime.getRuntime().totalMemory();
-      long used = allocated - Runtime.getRuntime().freeMemory();
+      final long max = Runtime.getRuntime().maxMemory();
+      final long allocated = Runtime.getRuntime().totalMemory();
+      final long used = allocated - Runtime.getRuntime().freeMemory();
       
       this.setToolTipText("Using %s of %s".formatted(formatMemory(used), formatMemory(max)));
 
       g.setColor(DARK_GREEN);
       g.fillRect(xStart, 0, xWidth, getHeight());
       
-      int allocatedWidth = (int)(xWidth * ((double)allocated / (double)max));
+      final int allocatedWidth = (int)(xWidth * ((double)allocated / (double)max));
       g.setColor(DARK_ORANGE);
       g.fillRect(xStart, 0, allocatedWidth, getHeight());
       
-      int usedWidth = (int)(xWidth * ((double)used / (double)max));
+      final int usedWidth = (int)(xWidth * ((double)used / (double)max));
       g.setColor(DARK_RED);
       g.fillRect(xStart, 0, usedWidth, getHeight());
       
-      int usedPercentage = (int)(100.0D * ( (double)used / (double)max));
+      final int usedPercentage = (int)(100.0D * ( (double)used / (double)max));
       g.setColor(Color.WHITE);
       g.drawString(usedPercentage + "%", xStart + xWidth / 2 - 10, getHeight() - 5);
 
@@ -168,10 +157,10 @@ public class MemoryIndicator extends JPanel
     }
     
     private static String formatMemory(long value) {
-    	double mb = 1024 * 1024;
-    	double gb = mb * 1024;
-    	double m = value/mb;
-    	double g = value/gb;
+    	final double mb = 1024 * 1024;
+    	final double gb = mb * 1024;
+    	final double m = value/mb;
+    	final double g = value/gb;
     	return g < 1 ? "%s MiB".formatted(DF.format(m)) : "%s GiB".formatted(DF.format(g));
     }
 }

@@ -290,16 +290,16 @@ public abstract class DetailPanel extends JPanel
 			updateSingle();
 
 		} catch (final Exception e) {
-			LOGGER.fine("Error updating panel " + this.getClass().getName());
-			LOGGER.log(Level.SEVERE, "Error updating panel", e); // save detail for fine
-																	// logging
+			LOGGER.log(Level.SEVERE,
+					"Error updating panel %s: %s".formatted(this.getClass().getName(), e.getMessage()));
 
 			try {
 				updateNull();
 			} catch (final Exception e1) {
-				LOGGER.fine(this.getClass().getName()
-						+ ": Error recovering from error updating panel");
-				LOGGER.log(Level.SEVERE, "Error recovering from error updating panel", e1);
+				LOGGER.log(Level.SEVERE,
+						"Error recovering from error updating panel %s: %s".formatted(this.getClass().getName(),
+								e1.getMessage()));
+
 			}
 		} finally {
 			setUpdating(false);
