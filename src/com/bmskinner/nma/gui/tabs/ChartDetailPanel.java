@@ -102,7 +102,9 @@ public abstract class ChartDetailPanel extends DetailPanel {
 		}
 
 		@Override
-		protected synchronized JFreeChart doInBackground() throws Exception {
+		protected JFreeChart doInBackground() throws Exception {
+			if (this.isCancelled())
+				return null;
 
 			try {
 				if (options.hasTarget()) {
@@ -123,7 +125,7 @@ public abstract class ChartDetailPanel extends DetailPanel {
 		}
 
 		@Override
-		public synchronized void done() {
+		public void done() {
 
 			try {
 				if (options.hasTarget()) {
@@ -141,6 +143,7 @@ public abstract class ChartDetailPanel extends DetailPanel {
 		@Override
 		public void cancel() {
 			super.cancel(true);
+			Thread.currentThread().interrupt();
 		}
 
 		@Override

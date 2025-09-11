@@ -17,21 +17,22 @@
 package com.bmskinner.nma.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 
@@ -63,13 +64,13 @@ public class ThreadManager {
 	 * Store the UI update futures for a selected dataset order. Use to cancel
 	 * unneeded tasks when selections change
 	 **/
-	private final Map<List<IAnalysisDataset>, List<Future<?>>> uiFutures = new ConcurrentHashMap<>();
+	private final Map<List<IAnalysisDataset>, Set<TrackedFuture>> uiFutures = new ConcurrentHashMap<>();
 
 	/** Thread pool for method update tasks */
-	private final ExecutorService methodExecutorService;
+	private final ThreadPoolExecutor methodExecutorService;
 
 	/** Thread pool for UI update tasks */
-	private final ExecutorService uiExecutorService;
+	private final ThreadPoolExecutor uiExecutorService;
 
 	/**
 	 * Mark tracked runnables as being dispatched to a specific thread pool
@@ -77,6 +78,12 @@ public class ThreadManager {
 	private enum ThreadPoolType {
 		UI,
 		METHOD
+	}
+	
+	/**
+	 * Link a runnable and the future it generates in thread pool
+	 */
+	public record TrackedFuture(Runnable runnable, Future<?> future) {
 	}
 
 	/**
@@ -163,7 +170,7 @@ public class ThreadManager {
 	 * @param r the runnable
 	 * @return a future for the result of the task
 	 */
-	public synchronized Future<?> submitUIUpdate(Runnable r) {
+	public Future<?> submitUIUpdate(Runnable r) {
 		return submitUITask(r);
 	}
 
@@ -174,7 +181,7 @@ public class ThreadManager {
 	 * @param r the runnable
 	 * @return a future for the result of the task
 	 */
-	public synchronized Future<?> submit(Runnable r) {
+	public Future<?> submit(Runnable r) {
 		if (r instanceof InterfaceUpdater)
 			return submitUITask(r);
 
@@ -197,27 +204,24 @@ public class ThreadManager {
 		if (t.datasetsAffected().isEmpty())
 			return f;
 
-		final List<Future<?>> futures = uiFutures.computeIfAbsent(t.datasetsAffected(),
-				k -> new ArrayList<Future<?>>());
+		final Set<TrackedFuture> futures = uiFutures.computeIfAbsent(t.datasetsAffected(),
+				k -> Collections.synchronizedSet(new HashSet<TrackedFuture>()));
 
 		// Remove any futures from the executor service that have different datasets
-		final Iterator<Entry<List<IAnalysisDataset>, List<Future<?>>>> it = uiFutures.entrySet().iterator();
+		final Iterator<Entry<List<IAnalysisDataset>, Set<TrackedFuture>>> it = uiFutures.entrySet().iterator();
+
 		while (it.hasNext()) {
-			final Entry<List<IAnalysisDataset>, List<Future<?>>> entry = it.next();
-			
+			final Entry<List<IAnalysisDataset>, Set<TrackedFuture>> entry = it.next();
+
 			// If a queued future has the same dataset order as the current update, keep
 			// it
 			if (entry.getKey().equals(t.datasetsAffected())) {
-				LOGGER.finer("Same datasets %s as current queued request, keeping %s futures".formatted(
-						t.datasetsAffected().stream().map(IAnalysisDataset::getName)
-								.collect(Collectors.joining(", ")),
-						entry.getValue().size()));
 				
 				// Remove any completed futures that are no longer needed
-				final Iterator<Future<?>> fit = entry.getValue().iterator();
+				final Iterator<TrackedFuture> fit = entry.getValue().iterator();
 				while (fit.hasNext()) {
-					final Future<?> fut = fit.next();
-					if (fut.isDone() || fut.isCancelled()) {
+					final TrackedFuture tf = fit.next();
+					if (tf.future().isDone() || tf.future().isCancelled()) {
 						fit.remove();
 					}
 				}
@@ -225,22 +229,20 @@ public class ThreadManager {
 			}
 
 			// Cancel the futures we don't need
-			final List<Future<?>> queuedFutures = entry.getValue();
-			for (final Future<?> fut : queuedFutures) {
-				fut.cancel(true);
+			final Set<TrackedFuture> queuedFutures = entry.getValue();
+			for (final TrackedFuture tf : queuedFutures) {
+				tf.future().cancel(true);
+				uiExecutorService.remove(tf.runnable());
 			}
-
-			LOGGER.finer("Cancelled %s futures from %s datasets, now %s tasks".formatted(
-					queuedFutures,
-					t.datasetsAffected().stream().map(IAnalysisDataset::getName).collect(Collectors.joining(", ")),
-					uiQueue.size()));
 
 			// Remove the entire list of cancelled futures
 			it.remove();
 		}
+		// Remove cancelled tasks from the executor
+//		uiExecutorService.purge();
 
 		// Add the new future task
-		futures.add(f);
+		futures.add(new TrackedFuture(t, f));
 		return f;
 	}
 
@@ -250,7 +252,7 @@ public class ThreadManager {
 	 * @param r
 	 * @return
 	 */
-	public synchronized Future<?> submit(Callable<?> r) {
+	public Future<?> submit(Callable<?> r) {
 		return methodExecutorService.submit(makeSubmitableCallable(r));
 	}
 
@@ -259,17 +261,18 @@ public class ThreadManager {
 	 * 
 	 * @param r
 	 */
-	public synchronized void execute(Runnable r) {
+	public void execute(Runnable r) {
 		// if a new update is requested, clear older queued updates
 		if (r instanceof InterfaceUpdater) {
-			final TrackedRunnable t = new TrackedRunnable(r, ThreadPoolType.UI);
-			uiExecutorService.execute(t);
+//			final TrackedRunnable t = new TrackedRunnable(r, ThreadPoolType.UI);
+//			uiExecutorService.execute(t);
+			submitUITask(r);
 		} else {
 			methodExecutorService.execute(new TrackedRunnable(r, ThreadPoolType.METHOD));
 		}
 	}
 
-	private synchronized Callable<?> makeSubmitableCallable(Callable<?> r) {
+	private Callable<?> makeSubmitableCallable(Callable<?> r) {
 		return () -> {
 
 			Object o = null;
@@ -282,6 +285,10 @@ public class ThreadManager {
 			return o;
 
 		};
+	}
+
+	public Map<List<IAnalysisDataset>, Set<TrackedFuture>> getUITasks() {
+		return uiFutures;
 	}
 
 	/**

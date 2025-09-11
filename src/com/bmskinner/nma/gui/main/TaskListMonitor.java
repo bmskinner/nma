@@ -38,8 +38,8 @@ implements Runnable {
 	
 	private static final Logger LOGGER = Logger.getLogger(TaskListMonitor.class.getName());
     
-    private static final int PREFERRED_WIDTH = 50;
-    private static final int PREFERRED_HEIGHT = 20;
+	private static final int PREFERRED_WIDTH = 50;
+	private static final int PREFERRED_HEIGHT = 20;
     
     private static final long SLEEP_TIME = 500L;
 	
@@ -48,7 +48,7 @@ implements Runnable {
 	 */
 	public TaskListMonitor() {
 		super("0", SwingConstants.CENTER);
-		Thread t = new Thread(this);
+		final Thread t = new Thread(this);
 		t.setName("Task list tracking thread");
 		t.start();
 	}
@@ -58,14 +58,29 @@ implements Runnable {
 		do  {
 			try {
 				Thread.sleep(SLEEP_TIME);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				LOGGER.log(Level.SEVERE, "Error in task monitoring thread: %s".formatted(e.getMessage()));
 			}
 			
-			int l = ThreadManager.getInstance().uiQueueLength();
-			int m = ThreadManager.getInstance().methodQueueLength();
-			setText( "%s : %s".formatted(l, m));
+			final int l = ThreadManager.getInstance().uiQueueLength();
+			final int m = ThreadManager.getInstance().methodQueueLength();
+			setText("%s : %s".formatted(l, m));
 			setToolTipText("%s UI updates queued and %s analysis tasks".formatted(l, m));
+
+			// For debugging - track the current state of the task queue
+//			final Iterator<Entry<List<IAnalysisDataset>, Set<TrackedFuture>>> it = ThreadManager.getInstance()
+//					.getUITasks()
+//					.entrySet().iterator();
+//			String text = "";
+//
+//			while (it.hasNext()) {
+//				final Entry<List<IAnalysisDataset>, Set<TrackedFuture>> entry = it.next();
+//				text += "%s uiQueue: %s datasets: %s futures\t".formatted(l, entry.getKey().size(),
+//						entry.getValue().size());
+//			}
+//
+//			setText(text);
+
 		} while(true);
 	}
 

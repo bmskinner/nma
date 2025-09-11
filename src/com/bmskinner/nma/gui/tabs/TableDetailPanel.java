@@ -196,7 +196,7 @@ public abstract class TableDetailPanel extends DetailPanel {
 		}
 
 		@Override
-		protected synchronized TableModel doInBackground() throws Exception {
+		protected TableModel doInBackground() throws Exception {
 
 			try {
 				if (options.hasTarget()) {
@@ -216,7 +216,7 @@ public abstract class TableDetailPanel extends DetailPanel {
 		}
 
 		@Override
-		public synchronized void done() {
+		public void done() {
 			options.getTarget().setCursor(Cursor.getDefaultCursor());
 			setTable(options);
 		}
