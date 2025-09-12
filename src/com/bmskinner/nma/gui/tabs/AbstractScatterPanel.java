@@ -176,7 +176,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 	}
 
 	@Override
-	public synchronized void refreshCache(List<IAnalysisDataset> l) {
+	public void refreshCache(List<IAnalysisDataset> l) {
 		rhoPanel.refreshCache(l);
 		scatterPanel.refreshCache(l);
 	}
@@ -206,7 +206,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		}
 
 		@Override
-		protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+		protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
 			return new ScatterChartFactory(options).createScatterChart(component);
 		}
 
@@ -279,7 +279,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		}
 
 		@Override
-		protected synchronized void updateSingle() {
+		protected void updateSingle() {
 
 			final Measurement statA = (Measurement) statABox.getSelectedItem();
 			final Measurement statB = (Measurement) statBBox.getSelectedItem();
@@ -302,12 +302,12 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		}
 
 		@Override
-		protected synchronized void updateMultiple() {
+		protected void updateMultiple() {
 			updateSingle();
 		}
 
 		@Override
-		protected synchronized void updateNull() {
+		protected void updateNull() {
 
 			chartPanel.setChart(AbstractChartFactory.createEmptyChart());
 			gateButton.setEnabled(false);
@@ -388,7 +388,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		}
 
 		@Override
-		protected synchronized void updateSingle() {
+		protected void updateSingle() {
 
 			final Measurement statA = (Measurement) statABox.getSelectedItem();
 			final Measurement statB = (Measurement) statBBox.getSelectedItem();
@@ -404,22 +404,22 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		}
 
 		@Override
-		protected synchronized void updateMultiple() {
+		protected void updateMultiple() {
 			updateSingle();
 		}
 
 		@Override
-		protected synchronized void updateNull() {
+		protected void updateNull() {
 			rhoTable.setModel(AbstractTableCreator.createBlankTable());
 		}
 
 		@Override
-		public synchronized void setLoading() {
+		public void setLoading() {
 			rhoTable.setModel(AbstractTableCreator.createLoadingTable());
 		}
 
 		@Override
-		protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
+		protected TableModel createPanelTableType(@NonNull TableOptions options) {
 			return new ScatterTableDatasetCreator(options).createSpearmanCorrlationTable(component);
 		}
 

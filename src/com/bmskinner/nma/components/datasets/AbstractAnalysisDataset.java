@@ -145,7 +145,6 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 		for (final Element el : e.getChildren(XMLNames.XML_MERGE_SOURCE)) {
 			mergeSources.add(UUID.fromString(el.getText()));
 		}
-
 	}
 
 	/**

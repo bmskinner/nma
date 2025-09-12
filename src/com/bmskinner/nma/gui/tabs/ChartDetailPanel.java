@@ -2,7 +2,6 @@ package com.bmskinner.nma.gui.tabs;
 
 import java.awt.Cursor;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,7 +13,6 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.InterfaceUpdater;
 import com.bmskinner.nma.core.ThreadManager;
-import com.bmskinner.nma.gui.CancellableRunnable;
 import com.bmskinner.nma.visualisation.ChartCache;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
@@ -71,9 +69,9 @@ public abstract class ChartDetailPanel extends DetailPanel {
 	 */
 	protected synchronized void setChart(@NonNull ChartOptions options) {
 		if (cache.has(options)) {
-			final JFreeChart chart = cache.get(options);
 			if (options.getTarget() != null) {
-				options.getTarget().setChart(chart);
+				options.getTarget().setChart(cache.get(options));
+				options.getTarget().setCursor(Cursor.getDefaultCursor());
 			}
 
 		} else { // No cached chart
@@ -81,8 +79,7 @@ public abstract class ChartDetailPanel extends DetailPanel {
 			// update the target chart panel when done
 			options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			options.getTarget().setChart(AbstractChartFactory.createLoadingChart());
-			final ChartFactoryWorker worker = new ChartFactoryWorker(options);
-			ThreadManager.getInstance().submit(worker);
+			ThreadManager.getInstance().submit(new ChartFactoryWorker(options));
 		}
 	}
 
@@ -95,7 +92,7 @@ public abstract class ChartDetailPanel extends DetailPanel {
 	 *
 	 */
 	protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void>
-			implements CancellableRunnable, InterfaceUpdater {
+			implements InterfaceUpdater {
 
 		private final @NonNull ChartOptions options;
 
@@ -119,7 +116,10 @@ public abstract class ChartDetailPanel extends DetailPanel {
 
 				return chart;
 			} catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error creating chart: %s".formatted(e.getMessage()), e);
+				LOGGER.log(Level.SEVERE, "Error creating chart in %s: %s"
+						.formatted(ChartDetailPanel.this.getClass().getName(), e.getMessage()), e);
+				LOGGER.log(Level.SEVERE, "Chart model error: %s"
+						.formatted(e.getCause().getMessage()), e.getCause());
 				return null;
 			}
 
@@ -128,23 +128,18 @@ public abstract class ChartDetailPanel extends DetailPanel {
 		@Override
 		public void done() {
 
-			try {
-				if (options.hasTarget()) {
-					options.getTarget().setChart(get());
-					options.getTarget().setCursor(Cursor.getDefaultCursor());
-				}
-			} catch (final InterruptedException e) {
-				LOGGER.log(Level.SEVERE, "Interruption to charting", e);
-				Thread.currentThread().interrupt();
-			} catch (final ExecutionException e) {
-				LOGGER.log(Level.SEVERE, "Excecution error charting", e);
-			}
-		}
-
-		@Override
-		public void cancel() {
-			super.cancel(true);
-			Thread.currentThread().interrupt();
+//			try {
+//				if (options.hasTarget()) {
+					setChart(options);
+//					options.getTarget().setChart(cache.get(options));
+//					options.getTarget().setCursor(Cursor.getDefaultCursor());
+//				}
+//			} catch (final InterruptedException e) {
+//				LOGGER.log(Level.SEVERE, "Interruption to charting: %s".formatted(e.getMessage()), e);
+//				Thread.currentThread().interrupt();
+//			} catch (final ExecutionException e) {
+//				LOGGER.log(Level.SEVERE, "Excecution error charting: %s".formatted(e.getMessage()), e);
+//			}
 		}
 
 		@Override

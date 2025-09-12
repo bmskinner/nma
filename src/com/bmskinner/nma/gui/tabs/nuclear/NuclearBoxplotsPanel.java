@@ -21,7 +21,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
 
@@ -50,12 +49,12 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel
 	public NuclearBoxplotsPanel() {
 		super(CellularComponent.NUCLEUS, PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
-		Dimension preferredSize = new Dimension(200, 300);
+		final Dimension preferredSize = new Dimension(200, 300);
 
-		for (Measurement stat : Measurement.getNucleusStats()) {
+		for (final Measurement stat : Measurement.getNucleusStats()) {
 
-			JFreeChart chart = AbstractChartFactory.createEmptyChart();
-			ViolinChartPanel panel = new ViolinChartPanel(chart);
+			final JFreeChart chart = AbstractChartFactory.createEmptyChart();
+			final ViolinChartPanel panel = new ViolinChartPanel(chart);
 			panel.getChartRenderingInfo().setEntityCollection(null);
 			panel.setPreferredSize(preferredSize);
 			chartPanels.put(stat.toString(), panel);
@@ -75,7 +74,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel
 	}
 
 	@Override
-	protected synchronized void updateSingle() {
+	protected void updateSingle() {
 		super.updateSingle();
 		LOGGER.finest("Passing to update multiple in " + this.getClass().getName());
 		updateMultiple();
@@ -83,14 +82,14 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel
 	}
 
 	@Override
-	protected synchronized void updateMultiple() {
+	protected void updateMultiple() {
 		super.updateMultiple();
 
-		for (Measurement stat : Measurement.getNucleusStats()) {
+		for (final Measurement stat : Measurement.getNucleusStats()) {
 
-			ExportableChartPanel panel = chartPanels.get(stat.toString());
+			final ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-			ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+			final ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
 					.addStatistic(stat)
 					.setScale(GlobalOptions.getInstance().getDisplayScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -102,18 +101,18 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel
 	}
 
 	@Override
-	protected synchronized void updateNull() {
+	protected void updateNull() {
 		super.updateNull();
 		LOGGER.finest("Passing to update multiple in " + this.getClass().getName());
 		updateMultiple();
 	}
 
 	@Override
-	public synchronized void setLoading() {
+	public void setLoading() {
 		super.setLoading();
 
-		for (Measurement stat : Measurement.getNucleusStats()) {
-			ExportableChartPanel panel = chartPanels.get(stat.toString());
+		for (final Measurement stat : Measurement.getNucleusStats()) {
+			final ExportableChartPanel panel = chartPanels.get(stat.toString());
 			panel.setChart(AbstractChartFactory.createLoadingChart());
 
 		}

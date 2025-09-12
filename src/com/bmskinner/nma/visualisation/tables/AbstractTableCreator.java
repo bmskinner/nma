@@ -48,7 +48,7 @@ public abstract class AbstractTableCreator extends AbstractDatasetCreator<TableO
 	 */
 	@NonNull
 	public static TableModel createBlankTable() {
-		DefaultTableModel model = new DefaultTableModel();
+		final DefaultTableModel model = new DefaultTableModel();
 		model.addColumn(Labels.NO_DATA_LOADED);
 		return model;
 	}
@@ -60,8 +60,20 @@ public abstract class AbstractTableCreator extends AbstractDatasetCreator<TableO
 	 */
 	@NonNull
 	public static TableModel createLoadingTable() {
-		DefaultTableModel model = new DefaultTableModel();
+		final DefaultTableModel model = new DefaultTableModel();
 		model.addColumn(Labels.LOADING_DATA);
+		return model;
+	}
+
+	/**
+	 * Create an empty table declaring an error occurred in table creation
+	 * 
+	 * @return
+	 */
+	@NonNull
+	public static TableModel createErrorTable() {
+		final DefaultTableModel model = new DefaultTableModel();
+		model.addColumn(Labels.TABLE_ERROR_DATA);
 		return model;
 	}
 

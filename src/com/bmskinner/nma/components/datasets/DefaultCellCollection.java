@@ -29,7 +29,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +39,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -81,6 +82,7 @@ import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateExcept
 import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.Landmark;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
+import com.bmskinner.nma.components.profiles.ProfileCache;
 import com.bmskinner.nma.components.profiles.ProfileException;
 import com.bmskinner.nma.components.profiles.ProfileManager;
 import com.bmskinner.nma.components.profiles.ProfileType;
@@ -606,7 +608,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @throws SegmentUpdateException
 	 * @throws MissingDataException
 	 */
-	private synchronized double[] getNormalisedDifferencesToMedianFromPoint(OrientationMark om)
+	private double[] getNormalisedDifferencesToMedianFromPoint(OrientationMark om)
 			throws SegmentUpdateException, MissingDataException {
 		final IProfile medianProfile = this.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, om, Stats.MEDIAN)
@@ -719,28 +721,28 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public synchronized double getMedian(@NonNull Measurement stat, String component,
+	public double getMedian(@NonNull Measurement stat, String component,
 			MeasurementScale scale)
 			throws MissingDataException, SegmentUpdateException {
 		return getMedianStatistic(stat, component, scale, null);
 	}
 
 	@Override
-	public synchronized double getMedian(@NonNull Measurement stat, String component,
+	public double getMedian(@NonNull Measurement stat, String component,
 			MeasurementScale scale, UUID id)
 			throws MissingDataException, SegmentUpdateException {
 		return getMedianStatistic(stat, component, scale, id);
 	}
 
 	@Override
-	public synchronized double[] getRawValues(@NonNull Measurement stat, String component,
+	public double[] getRawValues(@NonNull Measurement stat, String component,
 			MeasurementScale scale)
 			throws MissingDataException, SegmentUpdateException {
 		return getRawValues(stat, component, scale, null);
 	}
 
 	@Override
-	public synchronized double[] getRawValues(@NonNull Measurement stat, String component,
+	public double[] getRawValues(@NonNull Measurement stat, String component,
 			MeasurementScale scale,
 			UUID id)
 			throws MissingDataException, SegmentUpdateException {
@@ -759,7 +761,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 	}
 
-	private synchronized double getMedianStatistic(@NonNull Measurement stat, String component,
+	private double getMedianStatistic(@NonNull Measurement stat, String component,
 			MeasurementScale scale,
 			UUID id)
 			throws MissingDataException, SegmentUpdateException {
@@ -775,20 +777,20 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public synchronized double getMin(@NonNull Measurement stat, String component,
+	public double getMin(@NonNull Measurement stat, String component,
 			MeasurementScale scale)
 			throws MissingDataException, SegmentUpdateException {
 		return getMinStatistic(stat, component, scale, null);
 	}
 
 	@Override
-	public synchronized double getMin(@NonNull Measurement stat, String component,
+	public double getMin(@NonNull Measurement stat, String component,
 			MeasurementScale scale, UUID id)
 			throws MissingDataException, SegmentUpdateException {
 		return getMinStatistic(stat, component, scale, id);
 	}
 
-	private synchronized double getMinStatistic(@NonNull Measurement stat, String component,
+	private double getMinStatistic(@NonNull Measurement stat, String component,
 			MeasurementScale scale,
 			UUID id)
 			throws MissingDataException, SegmentUpdateException {
@@ -803,20 +805,20 @@ public class DefaultCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public synchronized double getMax(@NonNull Measurement stat, String component,
+	public double getMax(@NonNull Measurement stat, String component,
 			MeasurementScale scale)
 			throws MissingDataException, SegmentUpdateException {
 		return getMaxStatistic(stat, component, scale, null);
 	}
 
 	@Override
-	public synchronized double getMax(@NonNull Measurement stat, String component,
+	public double getMax(@NonNull Measurement stat, String component,
 			MeasurementScale scale, UUID id)
 			throws MissingDataException, SegmentUpdateException {
 		return getMaxStatistic(stat, component, scale, id);
 	}
 
-	private synchronized double getMaxStatistic(@NonNull Measurement stat, String component,
+	private double getMaxStatistic(@NonNull Measurement stat, String component,
 			MeasurementScale scale,
 			UUID id)
 			throws MissingDataException,
@@ -840,7 +842,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @throws MissingMeasurementException
 	 * @throws Exception
 	 */
-	private synchronized double[] getCellStatistics(@NonNull Measurement stat,
+	private double[] getCellStatistics(@NonNull Measurement stat,
 			@NonNull MeasurementScale scale) throws MissingMeasurementException {
 
 		if (!cells.parallelStream().allMatch(c -> c.hasMeasurement(stat)))
@@ -871,7 +873,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @throws SegmentUpdateException
 	 * @throws Exception
 	 */
-	private synchronized double[] getNuclearStatistics(@NonNull Measurement stat,
+	private double[] getNuclearStatistics(@NonNull Measurement stat,
 			@NonNull MeasurementScale scale) throws SegmentUpdateException, MissingDataException {
 
 		double[] result = null;
@@ -899,7 +901,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @throws ProfileException            via the unchecked stream
 	 * @throws MissingDataException        via the unchecked stream
 	 */
-	private synchronized double[] getSegmentStatistics(@NonNull Measurement stat,
+	private double[] getSegmentStatistics(@NonNull Measurement stat,
 			@NonNull MeasurementScale scale,
 			@NonNull UUID id)
 			throws MissingDataException, SegmentUpdateException {
@@ -1024,7 +1026,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @return
 	 */
 	@Override
-	public synchronized int countShared(@NonNull IAnalysisDataset d2) {
+	public int countShared(@NonNull IAnalysisDataset d2) {
 		return countShared(d2.getCollection());
 	}
 
@@ -1035,10 +1037,11 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @return
 	 */
 	@Override
-	public synchronized int countShared(@NonNull ICellCollection d2) {
+	public int countShared(@NonNull ICellCollection d2) {
 
 		if (vennCache.hasCount(d2))
 			return vennCache.getCount(d2);
+
 		final int shared = countSharedNuclei(d2);
 		d2.setSharedCount(this, shared);
 		vennCache.addCount(d2, shared);
@@ -1059,7 +1062,7 @@ public class DefaultCellCollection implements ICellCollection {
 	 * @param d2
 	 * @return
 	 */
-	private synchronized int countSharedNuclei(ICellCollection d2) {
+	private int countSharedNuclei(ICellCollection d2) {
 
 		if (d2 == this)
 			return cells.size();
@@ -1209,10 +1212,10 @@ public class DefaultCellCollection implements ICellCollection {
 	public class DefaultProfileCollection implements IProfileCollection {
 
 		/** The indexes of landmarks in the profiles and border list */
-		private final Map<Landmark, Integer> landmarks = new HashMap<>();
+		private final Map<Landmark, Integer> landmarks = new ConcurrentHashMap<>();
 
 		/** segments in the median profile with RP at zero */
-		private List<IProfileSegment> segments = new ArrayList<>();
+		private List<IProfileSegment> segments = new CopyOnWriteArrayList<>();
 
 		/** cached median profiles for quicker access */
 		private ProfileCache cache = new ProfileCache();
@@ -1318,7 +1321,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public synchronized IProfile getProfile(@NonNull ProfileType type,
+		public IProfile getProfile(@NonNull ProfileType type,
 				@NonNull OrientationMark om, int quartile)
 				throws MissingDataException, SegmentUpdateException {
 			if (!this.hasLandmark(om))
@@ -1331,21 +1334,30 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public synchronized IProfile getProfile(@NonNull ProfileType type,
+		public IProfile getProfile(@NonNull ProfileType type,
 				@NonNull Landmark lm, int quartile)
 				throws MissingDataException, SegmentUpdateException {
 
-			if (!cache.hasProfile(type, quartile, lm)) {
-				final IProfileAggregate agg = createProfileAggregate(type,
-						DefaultCellCollection.this.getMedianArrayLength());
+			if (lm == null || !this.landmarks.containsKey(lm))
+				throw new MissingLandmarkException(
+						"Landmark mark '%s' is not present in cell collection %s".formatted(lm,
+								getName()));
 
-				IProfile p = agg.getQuartile(quartile);
-				final int offset = landmarks.get(lm);
-				p = p.startFrom(offset);
-				cache.addProfile(type, quartile, lm, p);
+			if (cache.hasProfile(type, quartile, lm)) {
+				final IProfile profile = cache.getProfile(type, quartile, lm);
+				if (profile != null)
+					return profile;
+				LOGGER.fine("Profile is null despite having a key in cache! Recalculating.");
 			}
 
-			return cache.getProfile(type, quartile, lm);
+			final IProfileAggregate agg = createProfileAggregate(type,
+					DefaultCellCollection.this.getMedianArrayLength());
+
+			IProfile p = agg.getQuartile(quartile);
+			final int offset = landmarks.get(lm);
+			p = p.startFrom(offset);
+			cache.addProfile(type, quartile, lm, p);
+			return p;
 		}
 
 		@Override
@@ -1379,7 +1391,7 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public synchronized List<UUID> getSegmentIDs() {
+		public List<UUID> getSegmentIDs() {
 			final List<UUID> result = new ArrayList<>();
 			if (segments == null)
 				return result;
@@ -1390,13 +1402,13 @@ public class DefaultCellCollection implements ICellCollection {
 		}
 
 		@Override
-		public synchronized IProfileSegment getSegmentAt(@NonNull OrientationMark tag, int position)
+		public IProfileSegment getSegmentAt(@NonNull OrientationMark tag, int position)
 				throws MissingLandmarkException, SegmentUpdateException {
 			return this.getSegments(tag).get(position);
 		}
 
 		@Override
-		public synchronized List<IProfileSegment> getSegments(@NonNull OrientationMark tag)
+		public List<IProfileSegment> getSegments(@NonNull OrientationMark tag)
 				throws MissingLandmarkException, SegmentUpdateException {
 
 			// this must be negative offset for segments
@@ -1655,145 +1667,6 @@ public class DefaultCellCollection implements ICellCollection {
 
 			final double desiredDistanceFromStart = length * proportion;
 			return (int) desiredDistanceFromStart;
-		}
-
-		/**
-		 * The cache for profiles
-		 * 
-		 * @author Ben Skinner
-		 * @since 1.13.4
-		 *
-		 */
-		private class ProfileCache {
-
-			/**
-			 * The key used to store values in the cache
-			 * 
-			 * @author Ben Skinner
-			 * @since 1.13.4
-			 *
-			 */
-			private class ProfileKey {
-				private final ProfileType type;
-				private final double quartile;
-				private final Landmark tag;
-
-				public ProfileKey(final ProfileType type, final double quartile,
-						final Landmark tag) {
-
-					this.type = type;
-					this.quartile = quartile;
-					this.tag = tag;
-				}
-
-				public boolean has(Landmark t) {
-					return tag.equals(t);
-				}
-
-				@Override
-				public int hashCode() {
-					final int prime = 31;
-					int result = 1;
-					result = prime * result + getOuterType().hashCode();
-					long temp;
-					temp = Double.doubleToLongBits(quartile);
-					result = prime * result + (int) (temp ^ (temp >>> 32));
-					result = prime * result + ((tag == null) ? 0 : tag.hashCode());
-					result = prime * result + ((type == null) ? 0 : type.hashCode());
-					return result;
-				}
-
-				@Override
-				public boolean equals(Object obj) {
-					if (this == obj)
-						return true;
-					if (obj == null)
-						return false;
-					if (getClass() != obj.getClass())
-						return false;
-					final ProfileKey other = (ProfileKey) obj;
-					if (!getOuterType().equals(other.getOuterType()))
-						return false;
-					if (Double.doubleToLongBits(quartile) != Double
-							.doubleToLongBits(other.quartile))
-						return false;
-					if (tag == null) {
-						if (other.tag != null)
-							return false;
-					} else if (!tag.equals(other.tag))
-						return false;
-					if (type != other.type)
-						return false;
-					return true;
-				}
-
-				private DefaultProfileCollection getOuterType() {
-					return DefaultProfileCollection.this;
-				}
-
-			}
-
-			private final Map<ProfileKey, IProfile> map = new HashMap<>();
-
-			public ProfileCache() { // no default data
-			}
-
-			public ProfileCache duplicate() throws SegmentUpdateException {
-				final ProfileCache result = new ProfileCache();
-				for (final ProfileKey k : map.keySet()) {
-					final IProfile p = map.get(k);
-					if (p != null) {
-						result.map.put(k, p.duplicate());
-					}
-				}
-				return result;
-			}
-
-			/**
-			 * Add a profile with the given keys
-			 * 
-			 * @param type     the profile type
-			 * @param quartile the quartile of the dataset
-			 * @param tag      the tag
-			 * @param profile  the profile to save
-			 */
-			public void addProfile(final ProfileType type, final double quartile,
-					final Landmark tag,
-					IProfile profile) {
-				final ProfileKey key = new ProfileKey(type, quartile, tag);
-				map.put(key, profile);
-			}
-
-			public boolean hasProfile(final ProfileType type, final double quartile,
-					final Landmark tag) {
-				final ProfileKey key = new ProfileKey(type, quartile, tag);
-				return map.containsKey(key);
-			}
-
-			public IProfile getProfile(final ProfileType type, final double quartile,
-					final Landmark tag) {
-				final ProfileKey key = new ProfileKey(type, quartile, tag);
-				return map.get(key);
-			}
-
-			/**
-			 * Remove all profiles from the cache
-			 */
-			public void clear() {
-				map.clear();
-			}
-
-			public void remove(final Landmark t) {
-
-				final Iterator<ProfileKey> it = map.keySet().iterator();
-				while (it.hasNext()) {
-					final ProfileKey k = it.next();
-					if (k.has(t)) {
-						it.remove();
-					}
-				}
-
-			}
 		}
 
 	}

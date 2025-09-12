@@ -16,8 +16,6 @@
  ******************************************************************************/
 package com.bmskinner.nma.components.profiles;
 
-import java.io.Serializable;
-
 /**
  * This interface defines landmark points around the periphery of an object
  * 
@@ -25,7 +23,7 @@ import java.io.Serializable;
  * @since 1.13.3
  *
  */
-public interface Landmark extends Comparable<Landmark>, Serializable {
+public interface Landmark extends Comparable<Landmark> {
 
 	/**
 	 * Get the name of the landmark

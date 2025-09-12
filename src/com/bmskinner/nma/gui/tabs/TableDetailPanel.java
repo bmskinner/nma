@@ -16,7 +16,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.core.InterfaceUpdater;
 import com.bmskinner.nma.core.ThreadManager;
-import com.bmskinner.nma.gui.CancellableRunnable;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.visualisation.TableCache;
 import com.bmskinner.nma.visualisation.options.TableOptions;
@@ -72,34 +71,35 @@ public abstract class TableDetailPanel extends DetailPanel {
 	protected synchronized void setTable(TableOptions options) {
 
 		if (cache.has(options)) {
-			final TableModel model = cache.get(options);
-			final JTable target = options.getTarget();
-
-			if (target != null) {
 
 				// Do not invoke on the EDT
 				final Runnable r = () -> {
-					target.setModel(model);
-					setRenderers(options);
-					if (target instanceof final ExportableTable et) {
-						et.updateRowHeights();
-					}
 
-					if (options.getScrollPane() != null) {
-						options.getScrollPane().scrollRectToVisible(getVisibleRect());
+					final TableModel model = cache.get(options);
+					final JTable target = options.getTarget();
+					if (target != null) {
+
+						target.setModel(model);
+						setRenderers(options);
+						if (target instanceof final ExportableTable et) {
+							et.updateRowHeights();
+						}
+
+						if (options.getScrollPane() != null) {
+							options.getScrollPane().scrollRectToVisible(getVisibleRect());
+						}
+
+						target.setCursor(Cursor.getDefaultCursor());
 					}
 				};
 
 				EventQueue.invokeLater(r);
-			}
+
 
 		} else { // No cached chart
 			options.getTarget().setModel(AbstractTableCreator.createLoadingTable());
 			options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			// Make a background worker to generate the chart and
-			// update the target chart panel when done
-			final TableFactoryWorker worker = new TableFactoryWorker(options);
-			ThreadManager.getInstance().submit(worker);
+			ThreadManager.getInstance().submit(new TableFactoryWorker(options));
 		}
 	}
 
@@ -187,7 +187,7 @@ public abstract class TableDetailPanel extends DetailPanel {
 	 *
 	 */
 	protected class TableFactoryWorker extends SwingWorker<TableModel, Void>
-			implements CancellableRunnable, InterfaceUpdater {
+			implements InterfaceUpdater {
 
 		private final TableOptions options;
 
@@ -208,23 +208,18 @@ public abstract class TableDetailPanel extends DetailPanel {
 
 				return model;
 			} catch (final Exception e) {
-				LOGGER.log(Level.WARNING, "Error creating table model");
-				LOGGER.log(Level.SEVERE, "Error creating table model", e);
-				return null;
+				LOGGER.log(Level.SEVERE, "Error creating table model in %s: %s"
+						.formatted(TableDetailPanel.this.getClass().getName(), e.getMessage()), e);
+				LOGGER.log(Level.SEVERE, "Table model error: %s"
+						.formatted(e.getCause().getMessage()), e.getCause());
+				return AbstractTableCreator.createErrorTable();
 			}
 
 		}
 
 		@Override
 		public void done() {
-			options.getTarget().setCursor(Cursor.getDefaultCursor());
 			setTable(options);
-		}
-
-		@Override
-		public void cancel() {
-			LOGGER.fine("Cancelling detail panel table update");
-			this.cancel(true);
 		}
 
 		@Override

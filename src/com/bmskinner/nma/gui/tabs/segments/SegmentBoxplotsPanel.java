@@ -21,8 +21,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -48,7 +48,6 @@ import com.bmskinner.nma.gui.events.ProfilesUpdatedListener;
 import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.BoxplotsTabPanel;
-
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
@@ -63,14 +62,14 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 	private static final String PANEL_TITLE_LBL = "Violin plots";
 	private static final String PANEL_DESC_LBL = "Distributions of measured values with boxplots";
 
-	private Dimension preferredSize = new Dimension(200, 300);
+	private final Dimension preferredSize = new Dimension(200, 300);
 
 	public SegmentBoxplotsPanel() {
 		super(CellularComponent.NUCLEAR_BORDER_SEGMENT, PANEL_TITLE_LBL, PANEL_DESC_LBL);
 
-		JFreeChart chart = AbstractChartFactory.createEmptyChart();
+		final JFreeChart chart = AbstractChartFactory.createEmptyChart();
 
-		ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
+		final ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
 		chartPanel.setPreferredSize(preferredSize);
 		chartPanels.put("null", chartPanel);
 
@@ -89,13 +88,13 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 	}
 
 	@Override
-	protected synchronized void updateSingle() {
+	protected void updateSingle() {
 		updateMultiple();
 
 	}
 
 	@Override
-	protected synchronized void updateMultiple() {
+	protected void updateMultiple() {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
@@ -104,7 +103,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 		// Check that all the datasets have the same number of segments
 		if (IProfileSegment.segmentCountsMatch(getDatasets())) { // make a boxplot for each segment
 
-			ICellCollection collection = activeDataset().getCollection();
+			final ICellCollection collection = activeDataset().getCollection();
 			List<IProfileSegment> segments;
 			try {
 				segments = collection.getProfileCollection().getSegments(OrientationMark.REFERENCE);
@@ -115,15 +114,15 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 			}
 
 			// Get each segment as a boxplot
-			for (IProfileSegment seg : segments) {
-				JFreeChart chart = AbstractChartFactory.createLoadingChart();
-				ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
+			for (final IProfileSegment seg : segments) {
+				final JFreeChart chart = AbstractChartFactory.createLoadingChart();
+				final ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
 				chartPanel.addChartSetEventListener(this);
 				chartPanel.setPreferredSize(preferredSize);
 				chartPanels.put(seg.getName(), chartPanel);
 				mainPanel.add(chartPanel);
 
-				ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+				final ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
 						.addStatistic(Measurement.LENGTH)
 						.setScale(GlobalOptions.getInstance().getDisplayScale())
 						.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -144,11 +143,11 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel
 	}
 
 	@Override
-	protected synchronized void updateNull() {
+	protected void updateNull() {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
-		ChartPanel chartPanel = new ChartPanel(AbstractChartFactory.createEmptyChart());
+		final ChartPanel chartPanel = new ChartPanel(AbstractChartFactory.createEmptyChart());
 		mainPanel.add(chartPanel);
 		mainPanel.revalidate();
 		mainPanel.repaint();

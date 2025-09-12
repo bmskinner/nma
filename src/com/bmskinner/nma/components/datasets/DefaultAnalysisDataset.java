@@ -85,6 +85,19 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 		savePath = new File(e.getChildText(XMLNames.XML_SAVE_FILE)).getAbsoluteFile();
 		cellCollection = new DefaultCellCollection(e.getChild(XMLNames.XML_CELL_COLLECTION), l);
 		cellCollection.addComponentUpdateListener(this);
+
+		try {
+			// Pre-calculate profiles before first request by charts
+			getCollection().getProfileCollection().calculateProfiles();
+
+			for (final IAnalysisDataset child : this.getAllChildDatasets()) {
+				child.getCollection().getProfileCollection().calculateProfiles();
+			}
+
+		} catch (MissingDataException | SegmentUpdateException e1) {
+			LOGGER.log(Level.SEVERE,
+					"Unable to calculate profiles on collection unmarshalling: %s".formatted(e1.getMessage()), e1);
+		}
 	}
 
 	/**

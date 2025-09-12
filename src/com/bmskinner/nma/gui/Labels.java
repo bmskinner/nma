@@ -38,6 +38,7 @@ public class Labels {
 	public static final String INCONSISTENT_SEGMENT_NUMBER = "Segment number is not consistent across datasets";
 	public static final String NO_DATA_LOADED = "No data loaded";
 	public static final String LOADING_DATA = "Loading data...";
+	public static final String TABLE_ERROR_DATA = "Error creating table";
 	public static final String SINGLE_DATASET = "Single dataset selected";
 	public static final String MULTIPLE_DATASETS = "Multiple datasets selected";
 	public static final String NULL_DATASETS = "No datasets selected";

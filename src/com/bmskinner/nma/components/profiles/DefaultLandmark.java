@@ -29,8 +29,6 @@ import org.eclipse.jdt.annotation.NonNull;
  */
 public class DefaultLandmark implements Landmark {
 
-	private static final long serialVersionUID = 1L;
-
 	private final String name;
 
 	/**
@@ -66,7 +64,7 @@ public class DefaultLandmark implements Landmark {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DefaultLandmark other = (DefaultLandmark) obj;
+		final DefaultLandmark other = (DefaultLandmark) obj;
 		if (name == null) {
 			if (other.name != null)
 				return false;

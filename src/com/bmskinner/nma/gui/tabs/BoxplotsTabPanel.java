@@ -93,8 +93,8 @@ public abstract class BoxplotsTabPanel extends ChartDetailPanel implements Actio
 			// add the scroll pane to the tab
 			scrollPane = new JScrollPane(mainPanel);
 
-			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			Dimension preferredFloatingDimension = new Dimension(
+			final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			final Dimension preferredFloatingDimension = new Dimension(
 					(int) (screenSize.getWidth() * 0.25),
 					(int) (screenSize.getHeight() * 0.25));
 			scrollPane.setPreferredSize(preferredFloatingDimension);
@@ -102,22 +102,22 @@ public abstract class BoxplotsTabPanel extends ChartDetailPanel implements Actio
 			this.add(scrollPane, BorderLayout.CENTER);
 
 			this.setEnabled(false);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error creating panel", e);
 		}
 	}
 
 	@Override
-	public synchronized void setLoading() {
+	public void setLoading() {
 		super.setLoading();
-		for (ExportableChartPanel p : chartPanels.values()) {
+		for (final ExportableChartPanel p : chartPanels.values()) {
 			p.setChart(AbstractChartFactory.createLoadingChart());
 		}
 
 	}
 
 	@Override
-	protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+	protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
 		return new ViolinChartFactory(options).createStatisticPlot(component);
 	}
 
