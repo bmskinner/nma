@@ -77,7 +77,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * @param ds the dataset
      * @return
      */
-    public synchronized JFreeChart createSignalColocalisationViolinChart() {
+	public synchronized ExportableLegendChart createSignalColocalisationViolinChart() {
     	if(!options.hasDatasets())
     		return createEmptyChart();
 
@@ -85,8 +85,10 @@ public class ViolinChartFactory extends AbstractChartFactory {
     		final ViolinCategoryDataset ds = new SignalViolinDatasetCreator(options).createSignalColocalisationViolinDataset();
     		final String scaleString = options.getScale().toString().toLowerCase();
 
-    		final JFreeChart chart = createViolinChart(null, null, "Distance between signal pairs (" + scaleString + ")", ds,
-    				false);
+			final ExportableLegendChart chart = createViolinChart(null, null,
+					"Distance between signal pairs (" + scaleString + ")", ds,
+					DEFAULT_CREATE_LEGEND);
+			chart.setExportFileName("Signal colocalisation chart");
 
     		final CategoryPlot plot = chart.getCategoryPlot();
     		final ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
@@ -111,7 +113,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * 
      */
 
-	public static synchronized JFreeChart createViolinChart(String title, String categoryAxisLabel,
+	public static ExportableLegendChart createViolinChart(String title, String categoryAxisLabel,
 			String valueAxisLabel,
             ViolinCategoryDataset dataset, boolean legend) {
 
@@ -122,7 +124,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
         final ViolinRenderer renderer = new ViolinRenderer();
 
         final CategoryPlot plot = new CategoryPlot(dataset, categoryAxis, valueAxis, renderer);
-        return new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
+		return new ExportableLegendChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
     }
 
     /**
@@ -130,7 +132,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * 
      * @return
      */
-    private JFreeChart createCellStatisticPlot() {
+	private ExportableLegendChart createCellStatisticPlot() {
 
         ViolinCategoryDataset ds = null;
         if (!options.hasDatasets())
@@ -143,7 +145,9 @@ public class ViolinChartFactory extends AbstractChartFactory {
 		    return createErrorChart();
 		}
 
-        final JFreeChart chart = createViolinChart(null, null, options.getMeasurement().label(options.getScale()), ds, false);
+		final ExportableLegendChart chart = createViolinChart(null, null,
+				options.getMeasurement().label(options.getScale()), ds, DEFAULT_CREATE_LEGEND);
+		chart.setExportFileName("Cell %s chart".formatted(options.getMeasurement().name()));
 
         final CategoryPlot plot = chart.getCategoryPlot();
         final ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
@@ -172,7 +176,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
 
     }
 
-    private JFreeChart createNucleusStatisticPlot() {
+	private ExportableLegendChart createNucleusStatisticPlot() {
     	
     	if(!options.hasDatasets())
     		return createEmptyChart();
@@ -187,7 +191,10 @@ public class ViolinChartFactory extends AbstractChartFactory {
             }
 
 
-        final JFreeChart chart = createViolinChart(null, null, options.getMeasurement().label(options.getScale()), ds, false);
+			final ExportableLegendChart chart = createViolinChart(null, null,
+					options.getMeasurement().label(options.getScale()),
+					ds, DEFAULT_CREATE_LEGEND);
+			chart.setExportFileName("Nucleus %s chart".formatted(options.getMeasurement().name()));
 
         final CategoryPlot plot = chart.getCategoryPlot();
         final ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
@@ -199,7 +206,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
 
             for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
 
-                renderer.setSeriesVisibleInLegend(series, false);
+				renderer.setSeriesVisibleInLegend(series, true);
                 
                 final Paint color = options.getDatasets().get(series)
                 		.getDatasetColour().orElse(ColourSelecter.getColor(series));
@@ -224,7 +231,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * @return
      * @throws Exception
      */
-    private synchronized JFreeChart createSignalStatisticPlot() {
+	private ExportableLegendChart createSignalStatisticPlot() {
 
         ViolinCategoryDataset ds = null;
         if (!options.hasDatasets())
@@ -237,7 +244,9 @@ public class ViolinChartFactory extends AbstractChartFactory {
 		    return createErrorChart();
 		}
 
-        final JFreeChart chart = createViolinChart(null, null, options.getMeasurement().label(options.getScale()), ds, false);
+		final ExportableLegendChart chart = createViolinChart(null, null,
+				options.getMeasurement().label(options.getScale()), ds, DEFAULT_CREATE_LEGEND);
+		chart.setExportFileName("Signal %s chart".formatted(options.getMeasurement().name()));
 
         final CategoryPlot plot = chart.getCategoryPlot();
 
@@ -284,7 +293,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * @param ds the dataset
      * @return
      */
-    private synchronized JFreeChart createSegmentPlot() {
+	private synchronized ExportableLegendChart createSegmentPlot() {
 
         ViolinCategoryDataset ds = null;
         if (options.hasDatasets()) {
@@ -297,7 +306,9 @@ public class ViolinChartFactory extends AbstractChartFactory {
             }
         }
 
-        final JFreeChart chart = createViolinChart(null, null, options.getMeasurement().label(options.getScale()), ds, false);
+		final ExportableLegendChart chart = createViolinChart(null, null,
+				options.getMeasurement().label(options.getScale()), ds, DEFAULT_CREATE_LEGEND);
+		chart.setExportFileName("Segment length chart");
 
         final CategoryPlot plot = chart.getCategoryPlot();
         final ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();

@@ -421,7 +421,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 
 		// Make the consensus dataset. Use the micron scaling to force the consensus to
 		// fit the plot
-		final ComponentOutlineDataset cd = new ComponentOutlineDataset(n, false,
+		final ComponentOutlineDataset cd = new ComponentOutlineDataset(n, parent.getName(), false,
 				MeasurementScale.MICRONS);
 		chart.getXYPlot().setDataset(ccl.datasetIndex(), cd);
 		final DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();

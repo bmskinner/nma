@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
@@ -93,7 +92,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public static synchronized JFreeChart createEmptyChart() {
+	public static synchronized ExportableLegendChart createEmptyChart() {
 		return createEmptyChart(ProfileType.ANGLE);
 	}
 
@@ -102,11 +101,11 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public static synchronized JFreeChart createEmptyChart(ProfileType type) {
+	public static synchronized ExportableLegendChart createEmptyChart(ProfileType type) {
 		if (type == null)
 			return createEmptyChart();
 
-		final JFreeChart chart = createBaseXYChart();
+		final ExportableLegendChart chart = createBaseXYChart();
 		final XYPlot plot = chart.getXYPlot();
 
 		plot.getDomainAxis().setLabel(POSITION_AXIS_LBL);
@@ -127,7 +126,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public JFreeChart createProfileChart() {
+	public ExportableLegendChart createProfileChart() {
 
 		if (!options.hasDatasets())
 			return createEmptyChart(options.getType());
@@ -151,7 +150,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param limits
 	 * @return
 	 */
-	public JFreeChart createBooleanProfileChart(IProfile p, BooleanProfile limits) {
+	public ExportableLegendChart createBooleanProfileChart(IProfile p, BooleanProfile limits) {
 
 		XYDataset ds;
 		try {
@@ -160,8 +159,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			return createErrorChart();
 		}
 
-		final JFreeChart chart = ChartFactory.createXYLineChart(null, POSITION_AXIS_LBL, "Angle", ds,
-				PlotOrientation.VERTICAL, true, true, false);
+		final ExportableLegendChart chart = new ExportableLegendChart(ChartFactory.createXYLineChart(null, POSITION_AXIS_LBL, "Angle", ds,
+				PlotOrientation.VERTICAL, AbstractChartFactory.DEFAULT_CREATE_LEGEND, true, false));
 
 		final XYPlot plot = chart.getXYPlot();
 
@@ -173,9 +172,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		rend.setDefaultShapesVisible(true);
 		rend.setDefaultShape(ChartComponents.DEFAULT_POINT_SHAPE);
 		rend.setSeriesPaint(0, Color.BLACK);
-		rend.setSeriesVisibleInLegend(0, false);
 		rend.setSeriesPaint(1, Color.LIGHT_GRAY);
-		rend.setSeriesVisibleInLegend(1, false);
 		rend.setSeriesLinesVisible(0, false);
 		rend.setSeriesShape(0, ChartComponents.DEFAULT_POINT_SHAPE);
 		rend.setSeriesLinesVisible(1, false);
@@ -186,7 +183,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 
-	private JFreeChart makeIndividualNucleusProfileChart() {
+	private ExportableLegendChart makeIndividualNucleusProfileChart() {
 		final Nucleus n = options.getCell().getPrimaryNucleus();
 		ProfileChartDataset ds;
 		try {
@@ -195,7 +192,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			LOGGER.log(Level.SEVERE, "Error creating profile chart", e);
 			return createErrorChart();
 		}
-		final JFreeChart chart = makeProfileChart(ds,
+		final ExportableLegendChart chart = makeProfileChart(ds,
 				options.getCell().getPrimaryNucleus().getBorderLength());
 
 		// Add markers
@@ -224,7 +221,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return a chart
 	 */
-	private JFreeChart makeSingleDatasetProfileChart() {
+	private ExportableLegendChart makeSingleDatasetProfileChart() {
 
 		ProfileChartDataset ds = null;
 		final IAnalysisDataset dataset = options.firstDataset();
@@ -243,7 +240,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				: collection.getMedianArrayLength();
 		length = options.isNormalised() ? ds.getMaxDomainValue() : length; // default if normalised
 
-		final JFreeChart chart = makeProfileChart(ds, length);
+		final ExportableLegendChart chart = makeProfileChart(ds, length);
+		chart.setExportFileName(options.getType() + " from " + dataset.getName());
 
 		// mark the reference and orientation points
 
@@ -313,7 +311,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return a chart
 	 */
-	private JFreeChart makeMultiDatasetProfileChart() {
+	private ExportableLegendChart makeMultiDatasetProfileChart() {
 
 		ProfileChartDataset profiles;
 		try {
@@ -331,7 +329,8 @@ public class ProfileChartFactory extends AbstractChartFactory {
 					.orElse(profiles.getMaxDomainValue());
 		}
 
-		final JFreeChart chart = makeProfileChart(profiles, xLength);
+		final ExportableLegendChart chart = makeProfileChart(profiles, xLength);
+		chart.setExportFileName(options.getType() + " from multiple datasets");
 		applyDefaultAxisOptions(chart);
 		return chart;
 	}
@@ -344,9 +343,9 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * @param xLength the maximum of the x-axis
 	 * @return a chart
 	 */
-	protected JFreeChart makeProfileChart(@NonNull ProfileChartDataset ds, int xLength) {
+	protected ExportableLegendChart makeProfileChart(@NonNull ProfileChartDataset ds, int xLength) {
 
-		final JFreeChart chart = createEmptyChart(options.getType());
+		final ExportableLegendChart chart = createEmptyChart(options.getType());
 		final XYPlot plot = chart.getXYPlot();
 		plot.setDataset(0, ds.getLines()); // line charts are always in dataset 0
 
@@ -374,7 +373,6 @@ public class ProfileChartFactory extends AbstractChartFactory {
 
 		// Format the line charts - e.g. the median profiles
 		for (int i = 0; i < ds.getLines().getSeriesCount(); i++) {
-			lineRenderer.setSeriesVisibleInLegend(i, false);
 
 			final String name = ds.getLines().getSeriesKey(i).toString();
 			final int index = ds.getLines().getDatasetIndex(name);
@@ -388,14 +386,14 @@ public class ProfileChartFactory extends AbstractChartFactory {
 						chooseSeriesColour(name, segIndex, options.getSwatch()));
 			} else {
 				// Not a segment line, colour using dataset
-//				Color lineColour = options.getDatasets().get(i).getDatasetColour()
-//						.orElse(ColourSelecter.getColor(i, options.getSwatch()));
-
 				lineRenderer.setSeriesPaint(i,
 						chooseSeriesColour(name, index, options.getSwatch()));
 			}
 
 			lineRenderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
+
+			// Not all series need to be included in the legend
+			lineRenderer.setSeriesVisibleInLegend(i, chooseSeriesVisibleInLegend(name));
 		}
 
 		// Format the range charts - e.g IQRs
@@ -409,7 +407,6 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			plot.setRenderer(i + 1, rangeRenderer);
 			for (int series = 0; series < ds.getRanges(i).getSeriesCount(); series++) {
 				rangeRenderer.setSeriesPaint(series, colour);
-				rangeRenderer.setSeriesVisibleInLegend(series, false);
 
 			}
 		}
@@ -446,6 +443,28 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		if (name.startsWith(ProfileDatasetCreator.PROFILE_SERIES_PREFIX))
 			return ChartComponents.PROFILE_STROKE;
 		return ChartComponents.PROFILE_STROKE;
+	}
+
+	/**
+	 * Choose which series should be displayed in chart legends
+	 * 
+	 * @param name
+	 * @return
+	 */
+	private boolean chooseSeriesVisibleInLegend(final String name) {
+		if (name == null)
+			return false;
+		if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX))
+			return false;
+		if (name.startsWith(ProfileDatasetCreator.MEDIAN_SERIES_PREFIX))
+			return true;
+		if (name.startsWith(ProfileDatasetCreator.NUCLEUS_SERIES_PREFIX))
+			return false;
+		if (name.startsWith(ProfileDatasetCreator.QUARTILE_SERIES_PREFIX))
+			return false;
+		if (name.startsWith(ProfileDatasetCreator.PROFILE_SERIES_PREFIX))
+			return true;
+		return true;
 	}
 
 	/**
@@ -537,7 +556,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public JFreeChart createVariabilityChart() {
+	public ExportableLegendChart createVariabilityChart() {
 
 		if (!options.hasDatasets())
 			return ProfileChartFactory.createEmptyChart(options.getType());
@@ -555,7 +574,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * Create a variabillity chart showing the IQR for a single dataset. Segment
 	 * colours are applied.
 	 */
-	private JFreeChart makeSingleVariabilityChart() {
+	private ExportableLegendChart makeSingleVariabilityChart() {
 		ProfileChartDataset ds;
 		try {
 			ds = new ProfileDatasetCreator(options).createProfileVariabilityDataset();
@@ -563,7 +582,7 @@ public class ProfileChartFactory extends AbstractChartFactory {
 			return createErrorChart();
 		}
 
-		final JFreeChart chart = makeProfileChart(ds, ds.getMaxDomainValue());
+		final ExportableLegendChart chart = makeProfileChart(ds, ds.getMaxDomainValue());
 		final XYPlot plot = chart.getXYPlot();
 		plot.getRangeAxis().setLabel(IQR_AXIS_LBL);
 		plot.getRangeAxis().setAutoRange(true);
@@ -576,11 +595,11 @@ public class ProfileChartFactory extends AbstractChartFactory {
 	 * 
 	 * @throws ChartDatasetCreationException
 	 */
-	private JFreeChart makeMultiVariabilityChart() throws ChartDatasetCreationException {
+	private ExportableLegendChart makeMultiVariabilityChart() throws ChartDatasetCreationException {
 		final ProfileChartDataset ds = new ProfileDatasetCreator(options)
 				.createProfileVariabilityDataset();
 
-		final JFreeChart chart = makeProfileChart(ds, ds.getMaxDomainValue());
+		final ExportableLegendChart chart = makeProfileChart(ds, ds.getMaxDomainValue());
 		final XYPlot plot = chart.getXYPlot();
 
 		plot.getRangeAxis().setAutoRange(true);

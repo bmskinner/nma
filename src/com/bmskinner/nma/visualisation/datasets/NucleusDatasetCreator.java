@@ -73,12 +73,12 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 */
 	public FloatXYDataset createAnnotationRectangleDataset(int w, int h) {
-		FloatXYDataset ds = new FloatXYDataset();
+		final FloatXYDataset ds = new FloatXYDataset();
 
-		float[] xpoints = { 0, 0, w, w };
-		float[] ypoints = { 0, h, 0, h };
+		final float[] xpoints = { 0, 0, w, w };
+		final float[] ypoints = { 0, h, 0, h };
 
-		float[][] data = { xpoints, ypoints };
+		final float[][] data = { xpoints, ypoints };
 		ds.addSeries("Bounds", data, 0);
 		return ds;
 	}
@@ -92,7 +92,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	public XYDataset createBareNucleusOutline(@NonNull IAnalysisDataset dataset)
 			throws ChartDatasetCreationException {
 		try {
-			return new ComponentOutlineDataset(dataset.getCollection().getConsensus(), false,
+			return new ComponentOutlineDataset(dataset.getCollection().getConsensus(),
+					dataset.getName(), false,
 					options.getScale());
 		} catch (MissingLandmarkException | ComponentCreationException e) {
 			throw new ChartDatasetCreationException(e);
@@ -109,12 +110,12 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public XYDataset createSegmentedConsensusOutline(@NonNull ICellCollection collection)
 			throws ChartDatasetCreationException {
-		FloatXYDataset ds = new FloatXYDataset();
+		final FloatXYDataset ds = new FloatXYDataset();
 
 		try {
 
-			Nucleus n = collection.getConsensus();
-			ISegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE,
+			final Nucleus n = collection.getConsensus();
+			final ISegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE,
 					OrientationMark.REFERENCE);
 
 			// At this point, the angle profile and the iqr profile should be in sync
@@ -122,21 +123,21 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			if (angleProfile.hasSegments()) { // only draw if there are segments
 
 				// go through each segment
-				for (IProfileSegment seg : angleProfile.getOrderedSegments()) {
+				for (final IProfileSegment seg : angleProfile.getOrderedSegments()) {
 
 					// draw the segment
-					float[] xpoints = new float[seg.length()];
-					float[] ypoints = new float[seg.length()];
+					final float[] xpoints = new float[seg.length()];
+					final float[] ypoints = new float[seg.length()];
 
-					Iterator<Integer> it = seg.iterator();
+					final Iterator<Integer> it = seg.iterator();
 					int i = 0;
 					while (it.hasNext()) {
-						int index = it.next();
-						IPoint p = n.getBorderPoint(index);
+						final int index = it.next();
+						final IPoint p = n.getBorderPoint(index);
 						xpoints[i] = (float) p.getX();
 						ypoints[i++] = (float) p.getY();
 					}
-					float[][] data = { xpoints, ypoints };
+					final float[][] data = { xpoints, ypoints };
 					ds.addSeries(seg.getName(), data, 0);
 				}
 			}
@@ -161,19 +162,19 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	public XYDataset createNucleusIndexTags(@NonNull Nucleus nucleus)
 			throws ChartDatasetCreationException {
 
-		FloatXYDataset ds = new FloatXYDataset();
+		final FloatXYDataset ds = new FloatXYDataset();
 		try {
-			for (OrientationMark tag : nucleus.getOrientationMarks()) {
+			for (final OrientationMark tag : nucleus.getOrientationMarks()) {
 				IPoint tagPoint;
 
-				int tagIndex = nucleus.getBorderIndex(tag);
+				final int tagIndex = nucleus.getBorderIndex(tag);
 				tagPoint = nucleus.getOriginalBorderPoint(tagIndex);
 
-				float[] xpoints = { (float) (tagPoint.getX() - 0.5),
+				final float[] xpoints = { (float) (tagPoint.getX() - 0.5),
 						(float) (nucleus.getOriginalCentreOfMass().getX() - 0.5) };
-				float[] ypoints = { (float) (tagPoint.getY() - 0.5),
+				final float[] ypoints = { (float) (tagPoint.getY() - 0.5),
 						(float) (nucleus.getOriginalCentreOfMass().getY() - 0.5) };
-				float[][] data = { xpoints, ypoints };
+				final float[][] data = { xpoints, ypoints };
 				ds.addSeries("Tag_" + tag, data, 0);
 			}
 		} catch (UnavailableBorderPointException | MissingLandmarkException e) {
@@ -196,29 +197,31 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			@NonNull IAnalysisDataset dataset)
 			throws ChartDatasetCreationException {
 
-		List<ComponentOutlineDataset> result = new ArrayList<>();
+		final List<ComponentOutlineDataset> result = new ArrayList<>();
 		try {
 
-			Nucleus n = cell.getPrimaryNucleus();
+			final Nucleus n = cell.getPrimaryNucleus();
 
-			for (UUID signalGroup : n.getSignalCollection().getSignalGroupIds()) {
+			for (final UUID signalGroup : n.getSignalCollection().getSignalGroupIds()) {
 
 				if (!n.getSignalCollection().hasSignal(signalGroup)) {
 					continue;
 				}
 
-				Optional<ISignalGroup> group = dataset.getCollection().getSignalGroup(signalGroup);
+				final Optional<ISignalGroup> group = dataset.getCollection().getSignalGroup(signalGroup);
 
-				if (!group.isPresent())
+				if (!group.isPresent()) {
 					continue;
+				}
 
 				if (group.get().isVisible()) {
-					for (INuclearSignal signal : n.getSignalCollection().getSignals(signalGroup)) {
-						result.add(new ComponentOutlineDataset(signal, false, options.getScale()));
+					for (final INuclearSignal signal : n.getSignalCollection().getSignals(signalGroup)) {
+						result.add(new ComponentOutlineDataset(signal, dataset.getName() + "_" + cell.getId(), false,
+								options.getScale()));
 					}
 				}
 			}
-		} catch (ChartDatasetCreationException e) {
+		} catch (final ChartDatasetCreationException e) {
 			LOGGER.log(Level.SEVERE, "Unable to add signal to dataset", e);
 		}
 		return result;
@@ -233,17 +236,17 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	public List<ComponentOutlineDataset> createMultiNucleusOutline()
 			throws ChartDatasetCreationException {
 
-		List<ComponentOutlineDataset> result = new ArrayList<>();
+		final List<ComponentOutlineDataset> result = new ArrayList<>();
 
-		MeasurementScale scale = options.getScale();
+		final MeasurementScale scale = options.getScale();
 
-		for (IAnalysisDataset dataset : options.getDatasets()) {
-			ICellCollection collection = dataset.getCollection();
+		for (final IAnalysisDataset dataset : options.getDatasets()) {
+			final ICellCollection collection = dataset.getCollection();
 
 			if (collection.hasConsensus()) {
 				try {
 					result.add(
-							new ComponentOutlineDataset(collection.getConsensus(), false, scale));
+							new ComponentOutlineDataset(collection.getConsensus(), collection.getName(), false, scale));
 				} catch (ChartDatasetCreationException | MissingLandmarkException
 						| ComponentCreationException e) {
 					throw new ChartDatasetCreationException();
@@ -273,11 +276,11 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 */
 	public KernelEstimator createProbabililtyKernel(double[] values, double binWidth) {
-		KernelEstimator est = new KernelEstimator(binWidth);
+		final KernelEstimator est = new KernelEstimator(binWidth);
 
 		// add the values to a kernel estimator
 		// give each value equal weighting
-		for (double d : values) {
+		for (final double d : values) {
 			est.addValue(d, 1);
 		}
 		return est;
@@ -291,11 +294,11 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 */
 	public KernelEstimator createProbabililtyKernel(List<Number> values, double binWidth) {
-		KernelEstimator est = new KernelEstimator(binWidth);
+		final KernelEstimator est = new KernelEstimator(binWidth);
 		// add the values to a kernel estimator
 		// give each value equal weighting
 
-		for (Number d : values) {
+		for (final Number d : values) {
 			est.addValue(d.doubleValue(), 1);
 		}
 		return est;
@@ -311,21 +314,21 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public NucleusMeshXYDataset createNucleusMeshVertexDataset(Mesh mesh)
 			throws ChartDatasetCreationException {
-		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
+		final NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
-		for (MeshVertex v : mesh.getPeripheralVertices()) {
+		for (final MeshVertex v : mesh.getPeripheralVertices()) {
 
-			double[] yvalues = { v.getPosition().getY() };
-			double[] xvalues = { v.getPosition().getX() };
-			double[][] data = { xvalues, yvalues };
+			final double[] yvalues = { v.getPosition().getY() };
+			final double[] xvalues = { v.getPosition().getX() };
+			final double[][] data = { xvalues, yvalues };
 			ds.addSeries(v.toString(), data);
 			ds.setRatio(v.toString(), 1);
 		}
 
-		for (MeshVertex v : mesh.getInternalVertices()) {
-			double[] yvalues = { v.getPosition().getY() };
-			double[] xvalues = { v.getPosition().getX() };
-			double[][] data = { xvalues, yvalues };
+		for (final MeshVertex v : mesh.getInternalVertices()) {
+			final double[] yvalues = { v.getPosition().getY() };
+			final double[] xvalues = { v.getPosition().getX() };
+			final double[][] data = { xvalues, yvalues };
 			ds.addSeries(v.toString(), data);
 			ds.setRatio(v.toString(), -1);
 		}
@@ -342,17 +345,17 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public NucleusMeshXYDataset createNucleusMeshEdgeDataset(Mesh mesh)
 			throws ChartDatasetCreationException {
-		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
+		final NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
-		for (MeshEdge edge : mesh.getEdges()) {
+		for (final MeshEdge edge : mesh.getEdges()) {
 
-			double[] yvalues = { edge.getV1().getPosition().getY(),
+			final double[] yvalues = { edge.getV1().getPosition().getY(),
 					edge.getV2().getPosition().getY() };
 
-			double[] xvalues = { edge.getV1().getPosition().getX(),
+			final double[] xvalues = { edge.getV1().getPosition().getX(),
 					edge.getV2().getPosition().getX() };
 
-			double[][] data = { xvalues, yvalues };
+			final double[][] data = { xvalues, yvalues };
 			ds.addSeries(edge.toString(), data);
 			ds.setRatio(edge.toString(), edge.getLog2Ratio());
 		}
@@ -368,15 +371,15 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public NucleusMeshXYDataset createNucleusMeshMidpointDataset(Mesh mesh)
 			throws ChartDatasetCreationException {
-		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
+		final NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 
-		for (MeshEdge edge : mesh.getEdges()) {
+		for (final MeshEdge edge : mesh.getEdges()) {
 
-			double[] yvalues = { edge.getMidpoint().getY(), };
+			final double[] yvalues = { edge.getMidpoint().getY(), };
 
-			double[] xvalues = { edge.getMidpoint().getX(), };
+			final double[] xvalues = { edge.getMidpoint().getX(), };
 
-			double[][] data = { xvalues, yvalues };
+			final double[][] data = { xvalues, yvalues };
 			ds.addSeries(edge.toString(), data);
 			ds.setRatio(edge.toString(), edge.getLog2Ratio());
 		}
@@ -385,19 +388,19 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 	public HistogramDataset createNucleusMeshHistogramDataset(Mesh mesh)
 			throws ChartDatasetCreationException {
-		HistogramDataset ds = new HistogramDataset();
+		final HistogramDataset ds = new HistogramDataset();
 
-		int bins = 100;
+		final int bins = 100;
 
-		double max = mesh.getEdges().parallelStream()
+		final double max = mesh.getEdges().parallelStream()
 				.max((e1, e2) -> Double.compare(e1.getLog2Ratio(), e2.getLog2Ratio())).get()
 				.getLog2Ratio();
 
-		double min = mesh.getEdges().parallelStream()
+		final double min = mesh.getEdges().parallelStream()
 				.min((e1, e2) -> Double.compare(e1.getLog2Ratio(), e2.getLog2Ratio())).get()
 				.getLog2Ratio();
 
-		double[] values = mesh.getEdges().parallelStream().mapToDouble(MeshEdge::getLog2Ratio)
+		final double[] values = mesh.getEdges().parallelStream().mapToDouble(MeshEdge::getLog2Ratio)
 				.toArray();
 
 		ds.addSeries("mesh result", values, bins, min, max);
@@ -407,18 +410,18 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 	public XYDataset createBooleanProfileDataset(IProfile p, BooleanProfile limits)
 			throws ChartDatasetCreationException {
-		FloatXYDataset result = new FloatXYDataset();
+		final FloatXYDataset result = new FloatXYDataset();
 
-		float[] xTrueData = new float[limits.countTrue()];
-		float[] yTrueData = new float[limits.countTrue()];
-		float[] xFalseData = new float[limits.countFalse()];
-		float[] yFalseData = new float[limits.countFalse()];
+		final float[] xTrueData = new float[limits.countTrue()];
+		final float[] yTrueData = new float[limits.countTrue()];
+		final float[] xFalseData = new float[limits.countFalse()];
+		final float[] yFalseData = new float[limits.countFalse()];
 
 		// Split true and false values from limits to separate arrays
 		for (int i = 0, t = 0, f = 0; i < p.size(); i++) {
 
-			boolean b = limits.get(i);
-			double value = p.get(i);
+			final boolean b = limits.get(i);
+			final double value = p.get(i);
 			if (b) {
 				xTrueData[t] = i;
 				yTrueData[t++] = (float) value;
@@ -428,8 +431,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			}
 
 		}
-		float[][] trueData = { xTrueData, yTrueData };
-		float[][] falseData = { xFalseData, yFalseData };
+		final float[][] trueData = { xTrueData, yTrueData };
+		final float[][] falseData = { xFalseData, yFalseData };
 
 		result.addSeries("True", trueData, 0);
 

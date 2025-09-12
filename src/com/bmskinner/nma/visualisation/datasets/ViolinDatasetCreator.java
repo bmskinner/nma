@@ -293,7 +293,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 					}
 				}
 
-				final String rowKey = IProfileSegment.SEGMENT_PREFIX + segPosition + "_" + i;
+				final String rowKey = collection.getName();
 				final String colKey = IProfileSegment.SEGMENT_PREFIX + segPosition;
 				dataset.add(list, rowKey, colKey);
 

@@ -48,12 +48,23 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 
 	private final CellularComponent c;
 	private final MeasurementScale scale;
+	private final String name;
 
-	public ComponentOutlineDataset(CellularComponent c, boolean showSegmented,
+	/**
+	 * Create with a component to draw
+	 * 
+	 * @param c             the component
+	 * @param name          the name to use in legends
+	 * @param showSegmented segments drawn if true
+	 * @param scale         the scale to draw at
+	 * @throws ChartDatasetCreationException
+	 */
+	public ComponentOutlineDataset(CellularComponent c, String name, boolean showSegmented,
 			MeasurementScale scale)
 			throws ChartDatasetCreationException {
 		this.c = c;
 		this.scale = scale;
+		this.name = name;
 		if (showSegmented) {
 			createWithSegments();
 		} else {
@@ -63,39 +74,38 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 	}
 
 	private void createWithSegments() throws ChartDatasetCreationException {
-		if (!(c instanceof Taggable)) {
+		if (!(c instanceof final Taggable t)) {
 			createWithoutSegments();
 			return;
 		}
 
-		Taggable t = (Taggable) c;
 		try {
-			List<IProfileSegment> segmentList = t
+			final List<IProfileSegment> segmentList = t
 					.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE)
 					.getSegments();
 
 			if (!segmentList.isEmpty()) { // only draw if there are segments
 
-				for (IProfileSegment seg : segmentList) {
+				for (final IProfileSegment seg : segmentList) {
 
 					// If we make the array the length of the segment,
 					// there will be a gap between the segment end and the
 					// next segment start. Include a position for the next
 					// segment start as well
-					double[] xpoints = new double[seg.length() + 1];
-					double[] ypoints = new double[seg.length() + 1];
+					final double[] xpoints = new double[seg.length() + 1];
+					final double[] ypoints = new double[seg.length() + 1];
 
-					int segmentPosition = seg.getPosition();
+					final int segmentPosition = seg.getPosition();
 
 					for (int j = 0; j <= seg.length(); j++) {
-						int index = seg.getStartIndex() + j;
-						int offsetIndex = t.getIndexRelativeTo(OrientationMark.REFERENCE, index);
+						final int index = seg.getStartIndex() + j;
+						final int offsetIndex = t.getIndexRelativeTo(OrientationMark.REFERENCE, index);
 
 						/*
 						 * Note that the original border point is used here to avoid mismatches with
 						 * the border tags drawn in other methods.
 						 */
-						IPoint p = t.getOriginalBorderPoint(offsetIndex);
+						final IPoint p = t.getOriginalBorderPoint(offsetIndex);
 						double x = p.getX();
 						double y = p.getY();
 
@@ -107,9 +117,9 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 						ypoints[j] = y;
 					}
 
-					double[][] data = { xpoints, ypoints };
+					final double[][] data = { xpoints, ypoints };
 
-					String seriesKey = "Seg_" + segmentPosition + "_" + t.getId();
+					final String seriesKey = "Seg_" + segmentPosition + "_" + t.getId();
 					addSeries(seriesKey, data);
 				}
 			} else {
@@ -121,13 +131,13 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 	}
 
 	private void createWithoutSegments() throws ChartDatasetCreationException {
-		double[] xpoints = new double[c.getBorderLength() + 1];
-		double[] ypoints = new double[c.getBorderLength() + 1];
+		final double[] xpoints = new double[c.getBorderLength() + 1];
+		final double[] ypoints = new double[c.getBorderLength() + 1];
 
 		try {
 
 			for (int i = 0; i < c.getBorderLength(); i++) {
-				IPoint p = c.getBorderPoint(i);
+				final IPoint p = c.getBorderPoint(i);
 				double x = p.getX();
 				double y = p.getY();
 
@@ -144,10 +154,10 @@ public class ComponentOutlineDataset extends DefaultXYDataset {
 			xpoints[c.getBorderLength()] = xpoints[0];
 			ypoints[c.getBorderLength()] = ypoints[0];
 
-		} catch (UnavailableBorderPointException e) {
+		} catch (final UnavailableBorderPointException e) {
 			throw new ChartDatasetCreationException(UNABLE_TO_GET_BORDER_POINT_ERROR, e);
 		}
-		addSeries(c.getId(), new double[][] { xpoints, ypoints });
+		addSeries(name, new double[][] { xpoints, ypoints });
 	}
 
 	public CellularComponent getComponent() {

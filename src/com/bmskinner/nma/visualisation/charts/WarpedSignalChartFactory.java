@@ -35,7 +35,7 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 	}
 
 	public JFreeChart makeSignalWarpChart() {
-		ImageProcessor image = ImageAnnotator.createMergedWarpedSignals(options.getWarpedSignals());
+		final ImageProcessor image = ImageAnnotator.createMergedWarpedSignals(options.getWarpedSignals());
 		return makeSignalWarpChart(image);
 	}
 
@@ -48,31 +48,32 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 	private JFreeChart makeSignalWarpChart(ImageProcessor image) {
 
 		// Create the outline of the nucleus
-		JFreeChart chart = createEmptyChart();
+		final JFreeChart chart = createEmptyChart();
 
 //		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusBareOutlineChart();
 
-		XYPlot plot = chart.getXYPlot();
+		final XYPlot plot = chart.getXYPlot();
 
 		LOGGER.finer("Creating outline datasets");
 
 		// Make outline of the components to draw
-		List<XYDataset> outlineDatasets = new ArrayList<>();
+		final List<XYDataset> outlineDatasets = new ArrayList<>();
 
-		List<CellularComponent> components = new ArrayList<>();
+		final List<CellularComponent> components = new ArrayList<>();
 		if (isCommonTargetSelected()) {
 			components.add(getCommonSelectedTarget());
 		} else {
-			for (IWarpedSignal s : options.getWarpedSignals())
+			for (final IWarpedSignal s : options.getWarpedSignals()) {
 				components.add(s.target());
+			}
 		}
 
 		try {
-			for (CellularComponent c : components) {
-				outlineDatasets.add(new ComponentOutlineDataset(c, false, options.getScale()));
+			for (final CellularComponent c : components) {
+				outlineDatasets.add(new ComponentOutlineDataset(c, c.getId().toString(), false, options.getScale()));
 			}
 			LOGGER.finer(String.format("Image bounds: %s x %s", image.getWidth(), image.getHeight()));
-		} catch (ChartDatasetCreationException e) {
+		} catch (final ChartDatasetCreationException e) {
 			LOGGER.log(Level.SEVERE, "Error creating outline", e);
 			return createErrorChart();
 		}
@@ -81,15 +82,15 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 		// the plot area is larger than the image to be drawn
 		double xChartMin = Double.MAX_VALUE;
 		double yChartMin = Double.MAX_VALUE;
-		for (XYDataset ds : outlineDatasets) {
+		for (final XYDataset ds : outlineDatasets) {
 			xChartMin = Math.min(xChartMin, DatasetUtils.findMinimumDomainValue(ds).doubleValue());
 			yChartMin = Math.min(yChartMin, DatasetUtils.findMinimumRangeValue(ds).doubleValue());
 		}
 
 		// Get the max bounding box size for the consensus nuclei,
 		// to find the offsets for the images created
-		int xOffset = (int) Math.round(-xChartMin);
-		int yOffset = (int) Math.round(-yChartMin);
+		final int xOffset = (int) Math.round(-xChartMin);
+		final int yOffset = (int) Math.round(-yChartMin);
 
 		LOGGER.finer("Adding image as annotation with offset " + xOffset + " - " + yOffset);
 		drawImageAsAnnotation(image, plot, 255, -xOffset, -yOffset, options.isShowBounds());
@@ -125,7 +126,7 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 	 * @return
 	 */
 	private synchronized boolean isCommonTargetSelected() {
-		Nucleus t = options.getWarpedSignals().stream().findFirst().get().target();
+		final Nucleus t = options.getWarpedSignals().stream().findFirst().get().target();
 		return options.getWarpedSignals().stream().allMatch(s -> s.target().getId().equals(t.getId()));
 	}
 }

@@ -39,7 +39,7 @@ public class PixelIntensityChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public JFreeChart createPixelIntensityHistogram() {
+	public ExportableLegendChart createPixelIntensityHistogram() {
 
 		if (!options.hasDatasets())
 			return createEmptyChart();
@@ -66,7 +66,9 @@ public class PixelIntensityChartFactory extends AbstractChartFactory {
 			valueAxis.setDefaultAutoRange(new Range(-10, 10));
 			final CategoryAxis categoryAxis = new CategoryAxis(null);
 			final CategoryPlot plot = new CategoryPlot(ds, categoryAxis, valueAxis, renderer);
-			final JFreeChart chart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, false);
+			final ExportableLegendChart chart = new ExportableLegendChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot,
+					AbstractChartFactory.DEFAULT_CREATE_LEGEND);
+			chart.setExportFileName("Pixel intensity comparison");
 
 			plot.getDomainAxis().setCategoryMargin(0.10);
 

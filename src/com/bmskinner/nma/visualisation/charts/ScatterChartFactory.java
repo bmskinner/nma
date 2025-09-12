@@ -24,7 +24,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
@@ -67,7 +66,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	public JFreeChart createScatterChart(String component) {
+	public ExportableLegendChart createScatterChart(String component) {
 
 		try {
 
@@ -77,9 +76,9 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			if (options.getStats().size() != 2)
 				return createTextAnnotatedEmptyChart("Only one variable selected");
 
-			Measurement firstStat = options.getMeasurement();
+			final Measurement firstStat = options.getMeasurement();
 
-			for (Measurement stat : options.getStats()) {
+			for (final Measurement stat : options.getStats()) {
 				if (!stat.getClass().equals(firstStat.getClass())) {
 					LOGGER.fine("Statistic classes are different");
 					return createTextAnnotatedEmptyChart("Variable classes are different");
@@ -92,7 +91,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			if (CellularComponent.NUCLEAR_SIGNAL.equals(component))
 				return createSignalStatisticScatterChart();
 
-		} catch (ChartDatasetCreationException e) {
+		} catch (final ChartDatasetCreationException e) {
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			return createErrorChart();
 		}
@@ -105,28 +104,28 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public JFreeChart createNucleusStatisticScatterChart() throws ChartDatasetCreationException {
+	public ExportableLegendChart createNucleusStatisticScatterChart() throws ChartDatasetCreationException {
 		try {
-			XYDataset ds = new ScatterChartDatasetCreator(options)
+			final XYDataset ds = new ScatterChartDatasetCreator(options)
 					.createScatterDataset(CellularComponent.NUCLEUS);
 
-			String xLabel = options.getStat(0).label(options.getScale());
-			String yLabel = options.getStat(1).label(options.getScale());
+			final String xLabel = options.getStat(0).label(options.getScale());
+			final String yLabel = options.getStat(1).label(options.getScale());
 
-			JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
+			final ExportableLegendChart chart = createBaseXYChart(xLabel, yLabel, ds);
 
-			XYPlot plot = chart.getXYPlot();
+			final XYPlot plot = chart.getXYPlot();
 
-			NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+			final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
 			yAxis.setAutoRangeIncludesZero(false);
 
-			XYItemRenderer renderer = new ScatterChartRenderer();
+			final XYItemRenderer renderer = new ScatterChartRenderer();
 			plot.setRenderer(renderer);
 
 			applySingleXYDatasetColours(plot);
 
 			return chart;
-		} catch (ChartDatasetCreationException e) {
+		} catch (final ChartDatasetCreationException e) {
 			LOGGER.log(Level.SEVERE, "Error creating scatter dataset", e);
 			return createErrorChart();
 		}
@@ -138,43 +137,43 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	public JFreeChart createSignalStatisticScatterChart() {
+	public ExportableLegendChart createSignalStatisticScatterChart() {
 
 		SignalXYDataset ds;
 		try {
 			ds = (SignalXYDataset) new ScatterChartDatasetCreator(options)
 					.createScatterDataset(CellularComponent.NUCLEAR_SIGNAL);
-		} catch (ChartDatasetCreationException e) {
+		} catch (final ChartDatasetCreationException e) {
 			LOGGER.log(Level.SEVERE, "Error creating scatter dataset", e);
 			return createErrorChart();
 		}
 
-		String xLabel = options.getStat(0).label(options.getScale());
-		String yLabel = options.getStat(1).label(options.getScale());
+		final String xLabel = options.getStat(0).label(options.getScale());
+		final String yLabel = options.getStat(1).label(options.getScale());
 
-		JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
+		final ExportableLegendChart chart = createBaseXYChart(xLabel, yLabel, ds);
 
-		XYPlot plot = chart.getXYPlot();
+		final XYPlot plot = chart.getXYPlot();
 
-		NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+		final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
 		yAxis.setAutoRangeIncludesZero(false);
 
-		XYItemRenderer renderer = new ScatterChartRenderer();
+		final XYItemRenderer renderer = new ScatterChartRenderer();
 
 		plot.setRenderer(renderer);
 
-		int seriesCount = plot.getDataset().getSeriesCount();
+		final int seriesCount = plot.getDataset().getSeriesCount();
 
 		for (int i = 0; i < seriesCount; i++) {
 
-			String seriesKey = ds.getSeriesKey(i).toString();
+			final String seriesKey = ds.getSeriesKey(i).toString();
 			ds.getSignalGroup(seriesKey);
 
-			IAnalysisDataset d = ds.getDataset(seriesKey);
-			UUID id = ds.getSignalId(seriesKey);
-			Optional<ISignalGroup> g = d.getCollection().getSignalGroup(id);
+			final IAnalysisDataset d = ds.getDataset(seriesKey);
+			final UUID id = ds.getSignalId(seriesKey);
+			final Optional<ISignalGroup> g = d.getCollection().getSignalGroup(id);
 			if (g.isPresent()) {
-				Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(i));
+				final Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(i));
 				renderer.setSeriesPaint(i, colour);
 			}
 		}

@@ -207,7 +207,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public JFreeChart makeCellOutlineChart() {
+	public ExportableLegendChart makeCellOutlineChart() {
 
 		if (options.getCell() == null || !options.hasDatasets())
 			return createEmptyChart();
@@ -250,25 +250,25 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 	}
 
-	private JFreeChart makeBareCellOutlineChart() throws ChartCreationException {
+	private ExportableLegendChart makeBareCellOutlineChart() throws ChartCreationException {
 
 		if (!options.hasCell())
 			return ConsensusNucleusChartFactory.createEmptyChart();
 		try {
-			final JFreeChart chart = createBaseXYChart();
+			final ExportableLegendChart chart = createBaseXYChart();
 
 			final List<ComponentOutlineDataset> result = new ArrayList<>();
 
 			final ICell cell = options.getCell();
 
 			if (cell.hasCytoplasm()) {
-				result.add(new ComponentOutlineDataset(cell.getCytoplasm(), false,
+				result.add(new ComponentOutlineDataset(cell.getCytoplasm(), cell.getId().toString(), false,
 						options.getScale()));
 			}
 
 			if (cell.hasNucleus()) {
 				for (final Nucleus n : cell.getNuclei()) {
-					result.add(new ComponentOutlineDataset(n, true, options.getScale()));
+					result.add(new ComponentOutlineDataset(n, n.getId().toString(), true, options.getScale()));
 				}
 			}
 
@@ -308,7 +308,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private JFreeChart makeStandardCellOutlineChart() throws ChartCreationException {
+	private ExportableLegendChart makeStandardCellOutlineChart() throws ChartCreationException {
 
 		if (!options.hasCell())
 			return ConsensusNucleusChartFactory.createEmptyChart();
@@ -331,13 +331,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 			/* Get the cytoplasm outline dataset */
 			if (cell.hasCytoplasm()) {
-				cellDatasets.add(new ComponentOutlineDataset(cell.getCytoplasm(), NOT_SEGMENTED,
+				cellDatasets
+						.add(new ComponentOutlineDataset(cell.getCytoplasm(), cell.getId().toString(), NOT_SEGMENTED,
 						options.getScale()));
 			}
 
 			/* Get the nucleus outline dataset */
 			for (final Nucleus n : cell.getNuclei()) {
-				cellDatasets.add(new ComponentOutlineDataset(n, SEGMENTED, options.getScale()));
+				cellDatasets.add(new ComponentOutlineDataset(n, n.getId().toString(), SEGMENTED, options.getScale()));
 
 				if (options.isShowSignals()
 						&& cell.getPrimaryNucleus().getSignalCollection().hasSignal()) {
@@ -360,9 +361,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	private JFreeChart renderCellDataset(List<ComponentOutlineDataset> cellDatasets) {
+	private ExportableLegendChart renderCellDataset(List<ComponentOutlineDataset> cellDatasets) {
 
-		final JFreeChart chart = createBaseXYChart();
+		final ExportableLegendChart chart = createBaseXYChart();
 		final XYPlot plot = chart.getXYPlot();
 
 		plot.getRangeAxis().setInverted(true);
@@ -481,8 +482,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public JFreeChart createMeshChart(Mesh mesh, double log2Ratio) throws ChartCreationException {
-		final JFreeChart chart = createBaseXYChart();
+	public ExportableLegendChart createMeshChart(Mesh mesh, double log2Ratio) throws ChartCreationException {
+		final ExportableLegendChart chart = createBaseXYChart();
 		final XYPlot plot = chart.getXYPlot();
 
 		int datasetIndex = 0;

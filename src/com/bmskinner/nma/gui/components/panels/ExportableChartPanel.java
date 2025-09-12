@@ -73,6 +73,7 @@ import com.bmskinner.nma.io.ChartDataExtracter;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.utility.FileUtils;
 import com.bmskinner.nma.visualisation.ChartImageConverter;
+import com.bmskinner.nma.visualisation.charts.ExportableLegendChart;
 import com.bmskinner.nma.visualisation.datasets.FloatXYDataset;
 import com.bmskinner.nma.visualisation.datasets.ShellResultDataset;
 
@@ -606,11 +607,13 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	 */
 	private void exportPNG(int w, int h) {
 
+		final ExportableLegendChart chart = (ExportableLegendChart) getChart();
+
 		try {
 			final File file = new DefaultInputSupplier().requestFileSave(
 					FileUtils.commonPathOfDatasets(
 							DatasetListManager.getInstance().getSelectedDatasets()),
-					"Chart export", Io.PNG_FILE_EXTENSION_NODOT);
+					chart.getExportFileName(), Io.PNG_FILE_EXTENSION_NODOT);
 
 			if (file.exists()
 					&& !new DefaultInputSupplier().requestApproval("File exists. Overwrite?",
@@ -618,11 +621,14 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 				return;
 
 			try (OutputStream os = new FileOutputStream(file)) {
-				final BufferedImage bi = ChartImageConverter.createPNG(getChart(), w, h,
+
+
+
+				final BufferedImage bi = ChartImageConverter.createPNG(chart, w, h,
 						DEFAULT_EXPORT_DPI, this.isFixedAspectRatio);
 
 				EncoderUtil.writeBufferedImage(bi, ImageFormat.PNG, os);
-				LOGGER.info("Chart saved as '" + file.getName() + "'");
+				LOGGER.info("Chart saved to '%s'".formatted(file.getName()));
 
 			} catch (final IOException e) {
 				LOGGER.log(Level.SEVERE, "Unable to save chart as png", e);
@@ -655,7 +661,8 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 							"Overwrite existing file?"))
 				return;
 
-			final String svg = ChartImageConverter.createSVG(getChart(), w, h, DEFAULT_EXPORT_DPI,
+			final ExportableLegendChart chart = (ExportableLegendChart) getChart();
+			final String svg = ChartImageConverter.createSVG(chart, w, h, DEFAULT_EXPORT_DPI,
 					this.isFixedAspectRatio);
 
 			writeToSVG(file, svg);

@@ -1235,19 +1235,19 @@ public class VennChartDataset extends DefaultXYDataset {
 		labels.add(cBCDE);
 		labels.add(cABCDE);
 
-		labels.add(new Label(a.xCentre() * 1.1, a.yMax() * 1.1,
+		labels.add(new Label(a.xCentre(), a.yMax() * 1.1,
 				vc.getDataset(VennDatasetPosition.A).getName()));
 
-		labels.add(new Label(b.xMax(), b.yMax(),
+		labels.add(new Label(b.xMax() * 1.1, b.yMax() * 1.1,
 				vc.getDataset(VennDatasetPosition.B).getName()));
 
-		labels.add(new Label(c.xMax(), c.yMin(),
+		labels.add(new Label(c.xMax() * 1.1, c.yMin() * 1.1,
 				vc.getDataset(VennDatasetPosition.C).getName()));
 
-		labels.add(new Label(d.xMin(), d.yMin(),
+		labels.add(new Label(d.xMin() * 1.1, d.yMin() * 1.1,
 				vc.getDataset(VennDatasetPosition.D).getName()));
 
-		labels.add(new Label(e.xMin(), e.yMax(),
+		labels.add(new Label(e.xMin() * 1.1, e.yMax() * 1.1,
 				vc.getDataset(VennDatasetPosition.E).getName()));
 	}
 
@@ -1302,12 +1302,14 @@ public class VennChartDataset extends DefaultXYDataset {
 		// clipping annotated Venn circle outlines. These are points outside the range
 		// of the circles.
 
-		final double xMax = circles.stream().mapToDouble(VennShape::xMax).max().orElse(1) * 1.1;
-		final double xMin = circles.stream().mapToDouble(VennShape::xMin).min().orElse(1) * 1.1; // will
+		final double buffer = 1.3;
+
+		final double xMax = circles.stream().mapToDouble(VennShape::xMax).max().orElse(1) * buffer;
+		final double xMin = circles.stream().mapToDouble(VennShape::xMin).min().orElse(-1) * buffer; // will
 																							// be
 																							// negative
-		final double yMax = circles.stream().mapToDouble(VennShape::yMax).max().orElse(1) * 1.1;
-		final double yMin = circles.stream().mapToDouble(VennShape::yMin).min().orElse(1) * 1.1; // will
+		final double yMax = circles.stream().mapToDouble(VennShape::yMax).max().orElse(1) * buffer;
+		final double yMin = circles.stream().mapToDouble(VennShape::yMin).min().orElse(-1) * buffer; // will
 																							// be
 																							// negative
 		addSeries("Sentinals", new double[][] { { xMin, xMax }, { yMin, yMax } });

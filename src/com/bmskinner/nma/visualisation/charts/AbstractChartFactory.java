@@ -87,7 +87,7 @@ public abstract class AbstractChartFactory {
 	private static final String GENERAL_ERROR_LBL = "Error creating chart";
 
 	protected static final boolean DEFAULT_CREATE_TOOLTIPS = false;
-	protected static final boolean DEFAULT_CREATE_LEGEND = false;
+	protected static final boolean DEFAULT_CREATE_LEGEND = true;
 	protected static final boolean DEFAULT_CREATE_URLS = false;
 
 	/** The options that will be used for chart generation */
@@ -108,7 +108,7 @@ public abstract class AbstractChartFactory {
 	 * @return an empty chart
 	 */
 	@NonNull
-	public static JFreeChart createEmptyChart() {
+	public static ExportableLegendChart createEmptyChart() {
 		final JFreeChart c = createBaseXYChart();
 		final XYPlot plot = c.getXYPlot();
 
@@ -117,7 +117,7 @@ public abstract class AbstractChartFactory {
 
 		plot.getDomainAxis().setVisible(false);
 		plot.getRangeAxis().setVisible(false);
-		return c;
+		return new ExportableLegendChart(c);
 	}
 
 	/**
@@ -126,8 +126,8 @@ public abstract class AbstractChartFactory {
 	 * @param labelText the text to display
 	 * @return a chart with the given message
 	 */
-	protected static JFreeChart createTextAnnotatedEmptyChart(String labelText) {
-		final JFreeChart chart = createEmptyChart();
+	protected static ExportableLegendChart createTextAnnotatedEmptyChart(String labelText) {
+		final ExportableLegendChart chart = createEmptyChart();
 		final XYTextAnnotation annotation = new XYTextAnnotation(labelText, 0, 0);
 		annotation.setPaint(Color.BLACK);
 		chart.getXYPlot().addAnnotation(annotation);
@@ -139,7 +139,7 @@ public abstract class AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public static JFreeChart createLoadingChart() {
+	public static ExportableLegendChart createLoadingChart() {
 		return createTextAnnotatedEmptyChart(CHART_LOADING_LBL);
 	}
 
@@ -149,7 +149,7 @@ public abstract class AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public static JFreeChart createMultipleDatasetEmptyChart() {
+	public static ExportableLegendChart createMultipleDatasetEmptyChart() {
 		return createTextAnnotatedEmptyChart(MULTI_DATASET_ERROR_LBL);
 	}
 
@@ -158,7 +158,7 @@ public abstract class AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	public static JFreeChart createErrorChart() {
+	public static ExportableLegendChart createErrorChart() {
 		return createTextAnnotatedEmptyChart(GENERAL_ERROR_LBL);
 	}
 
@@ -219,11 +219,12 @@ public abstract class AbstractChartFactory {
 	 * @param ds     the charting dataset
 	 * @return a chart with default settings
 	 */
-	protected static JFreeChart createBaseXYChart(final String xLabel, final String yLabel,
+	protected static ExportableLegendChart createBaseXYChart(final String xLabel, final String yLabel,
 			final XYDataset ds) {
-		final JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel, yLabel, ds,
-				PlotOrientation.VERTICAL, false,
-				false, false);
+		final ExportableLegendChart chart = new ExportableLegendChart(
+				ChartFactory.createXYLineChart(null, xLabel, yLabel, ds,
+						PlotOrientation.VERTICAL, DEFAULT_CREATE_LEGEND,
+						DEFAULT_CREATE_TOOLTIPS, DEFAULT_CREATE_URLS));
 
 		final XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
@@ -244,7 +245,7 @@ public abstract class AbstractChartFactory {
 	 * @param yLabel the y axis label
 	 * @return a chart with default settings
 	 */
-	protected static JFreeChart createBaseXYChart(final String xLabel, final String yLabel) {
+	protected static ExportableLegendChart createBaseXYChart(final String xLabel, final String yLabel) {
 		return createBaseXYChart(xLabel, yLabel, null);
 	}
 
@@ -254,7 +255,7 @@ public abstract class AbstractChartFactory {
 	 * 
 	 * @return
 	 */
-	protected static JFreeChart createBaseXYChart() {
+	protected static ExportableLegendChart createBaseXYChart() {
 		return createBaseXYChart(null, null, null);
 	}
 
@@ -400,7 +401,7 @@ public abstract class AbstractChartFactory {
 	 * @param ip
 	 * @return
 	 */
-	protected JFreeChart drawImageAsAnnotation(ImageProcessor ip) {
+	protected ExportableLegendChart drawImageAsAnnotation(ImageProcessor ip) {
 		return drawImageAsAnnotation(ip, 255);
 	}
 
@@ -412,11 +413,12 @@ public abstract class AbstractChartFactory {
 	 * @param alpha
 	 * @return
 	 */
-	protected JFreeChart drawImageAsAnnotation(ImageProcessor ip, int alpha) {
+	protected ExportableLegendChart drawImageAsAnnotation(ImageProcessor ip, int alpha) {
 
-		final JFreeChart chart = ChartFactory.createXYLineChart(null, null, null, null,
+		final ExportableLegendChart chart = new ExportableLegendChart(
+				ChartFactory.createXYLineChart(null, null, null, null,
 				PlotOrientation.VERTICAL, true, true,
-				false);
+						false));
 
 		final XYPlot plot = chart.getXYPlot();
 		drawImageAsAnnotation(ip, plot, alpha);

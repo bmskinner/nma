@@ -1,5 +1,6 @@
 package com.bmskinner.nma.visualisation;
 
+import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -8,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
@@ -17,12 +19,12 @@ import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
-import org.jfree.chart.JFreeChart;
 import org.jfree.data.Range;
 import org.jfree.svg.SVGGraphics2D;
 import org.jfree.svg.SVGUnits;
 
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
+import com.bmskinner.nma.visualisation.charts.ExportableLegendChart;
 
 /**
  * Given a chart, produce an image suitable for a report or export
@@ -62,7 +64,7 @@ public class ChartImageConverter {
 	 * @throws TranscoderException
 	 * @throws IOException
 	 */
-	public static BufferedImage createPNG(JFreeChart chart, int wmm, int hmm, int dpi,
+	public static BufferedImage createPNG(ExportableLegendChart chart, int wmm, int hmm, int dpi,
 			boolean isFixedAspect)
 			throws TranscoderException, IOException {
 
@@ -113,36 +115,50 @@ public class ChartImageConverter {
 	 * @param dpi   the resolution of the output image
 	 * @return
 	 */
-	public static String createSVG(JFreeChart chart, int wmm, int hmm, int dpi,
+	public static String createSVG(ExportableLegendChart input, int wmm, int hmm, int dpi,
 			boolean isFixedAspect) {
 
-		if (isFixedAspect) {
-			chart = fixAspect(chart, wmm, hmm);
-		}
-
-		// Get the DPI of the display
-		int screenDpi = DEFAULT_SCREEN_DPI;
+		ExportableLegendChart chart;
 		try {
-			screenDpi = Toolkit.getDefaultToolkit().getScreenResolution();
-		} catch (final HeadlessException e) {
-			// no monitors present to report, just use the default
-			screenDpi = DEFAULT_SCREEN_DPI;
+			chart = (ExportableLegendChart) input.clone();
+			chart.setLegendVisible(true);
+
+			if (isFixedAspect) {
+				chart = fixAspect(chart, wmm, hmm);
+			}
+
+			// Remove grey background
+			chart.setBackgroundPaint(Color.WHITE);
+//			chart.getPlot().setOutlineVisible(false);
+
+			// Get the DPI of the display
+			int screenDpi = DEFAULT_SCREEN_DPI;
+			try {
+				screenDpi = Toolkit.getDefaultToolkit().getScreenResolution();
+			} catch (final HeadlessException e) {
+				// no monitors present to report, just use the default
+				screenDpi = DEFAULT_SCREEN_DPI;
+			}
+
+			final double dpiScale = (double) screenDpi / dpi;
+
+			final int wpx = mmToPixels(wmm, dpi);
+			final int hpx = mmToPixels(hmm, dpi);
+
+			// Adjust for scaling of chart elements
+			final int w = (int) (wpx * dpiScale);
+			final int h = (int) (hpx * dpiScale);
+
+			final SVGGraphics2D g2 = new SVGGraphics2D(w, h, SVGUnits.PX);
+			final Rectangle r = new Rectangle(0, 0, w, h);
+			chart.draw(g2, r);
+			return g2.getSVGDocument();
+		} catch (final CloneNotSupportedException e) {
+			LOGGER.log(Level.SEVERE, "Unable to clone the input chart: %s".formatted(e.getMessage()), e);
 		}
-
-		final double dpiScale = (double) screenDpi / dpi;
-
-		final int wpx = mmToPixels(wmm, dpi);
-		final int hpx = mmToPixels(hmm, dpi);
-
-		// Adjust for scaling of chart elements
-		final int w = (int) (wpx * dpiScale);
-		final int h = (int) (hpx * dpiScale);
-
-		final SVGGraphics2D g2 = new SVGGraphics2D(w, h, SVGUnits.PX);
-		final Rectangle r = new Rectangle(0, 0, w, h);
-		chart.draw(g2, r);
-		return g2.getSVGDocument();
+		return null;
 	}
+
 
 	/**
 	 * Given a chart with the desired output dimensions, change the axis ranges such
@@ -154,14 +170,23 @@ public class ChartImageConverter {
 	 * @param hmm   the output height
 	 * @return
 	 */
-	private static JFreeChart fixAspect(JFreeChart c, int wmm, int hmm) {
+	private static ExportableLegendChart fixAspect(ExportableLegendChart c, int wmm, int hmm) {
 		try {
 
 			// Clone the original chart. Note that the chart may have axes wider than the
 			// data range in order that aspect is preserved. For an output figure with new
 			// dimensions, the chart ranges may need to be changed. For example, single cell
 			// outline images.
-			final JFreeChart chart = (JFreeChart) c.clone();
+
+			final ExportableLegendChart chart = (ExportableLegendChart) c.clone();
+
+			// Also note that the chart may have a legend taking up vertical space
+			// We can't calculate an exact height for the legend, so if there is a visible
+			// legend, remove 10% of the chart height. This will get progressively less
+			// accurate as the size of the legend grows
+			if (c.getLegend() != null) {
+				hmm *= 0.9;
+			}
 
 			final double desiredAspect = (double) wmm / hmm;
 

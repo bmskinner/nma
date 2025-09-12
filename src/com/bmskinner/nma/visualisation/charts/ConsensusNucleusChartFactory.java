@@ -74,8 +74,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return an empty chart
 	 */
-	public static JFreeChart createEmptyChart() {
-		JFreeChart chart = AbstractChartFactory.createEmptyChart();
+	public static ExportableLegendChart createEmptyChart() {
+		final ExportableLegendChart chart = AbstractChartFactory.createEmptyChart();
 		chart.getXYPlot().addRangeMarker(ChartComponents.CONSENSUS_ZERO_MARKER, Layer.BACKGROUND);
 		chart.getXYPlot().addDomainMarker(ChartComponents.CONSENSUS_ZERO_MARKER, Layer.BACKGROUND);
 		return chart;
@@ -97,13 +97,14 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param ds the dataset
 	 * @return a chart
 	 */
-	private JFreeChart makeConsensusChart(XYDataset ds) {
-		JFreeChart chart = null;
+	private ExportableLegendChart makeConsensusChart(XYDataset ds) {
+		ExportableLegendChart chart = null;
 		if (ds == null) {
 			chart = createEmptyChart();
 		} else {
-			chart = ChartFactory.createXYLineChart(null, null, null, ds, PlotOrientation.VERTICAL,
-					DEFAULT_CREATE_LEGEND, DEFAULT_CREATE_TOOLTIPS, DEFAULT_CREATE_URLS);
+			chart = new ExportableLegendChart(
+					ChartFactory.createXYLineChart(null, null, null, ds, PlotOrientation.VERTICAL,
+							DEFAULT_CREATE_LEGEND, DEFAULT_CREATE_TOOLTIPS, DEFAULT_CREATE_URLS));
 		}
 		formatConsensusChart(chart);
 		return chart;
@@ -113,13 +114,13 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * Create the consensus chart for the given options.
 	 * 
 	 */
-	public JFreeChart makeConsensusChart() {
+	public ExportableLegendChart makeConsensusChart() {
 
 		if (!options.hasDatasets())
 			return createEmptyChart();
 
 		if (options.isMultipleDatasets()) {
-			boolean oneHasConsensus = options.getDatasets().stream()
+			final boolean oneHasConsensus = options.getDatasets().stream()
 					.anyMatch(d -> d.getCollection().hasConsensus());
 			if (oneHasConsensus)
 				return makeMultipleConsensusChart();
@@ -129,7 +130,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		// Single dataset mesh chart
 		if (options.isShowMesh()) {
 			try {
-				Mesh mesh = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
+				final Mesh mesh = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
 						options.getMeshSize());
 				return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
 			} catch (ChartCreationException | MeshCreationException | MissingLandmarkException
@@ -159,22 +160,22 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		chart.getXYPlot().addRangeMarker(ChartComponents.CONSENSUS_ZERO_MARKER, Layer.BACKGROUND);
 		chart.getXYPlot().addDomainMarker(ChartComponents.CONSENSUS_ZERO_MARKER, Layer.BACKGROUND);
 
-		int range = 50;
+		final int range = 50;
 		chart.getXYPlot().getDomainAxis().setRange(-range, range);
 		chart.getXYPlot().getRangeAxis().setRange(-range, range);
 	}
 
 	/**
-	 * Create a consenusus chart for the given nucleus collection. This chart draws
+	 * Create a consenusus chart for the given cellular component. This chart draws
 	 * the nucleus border in black. There are no IQRs or segments.
 	 * 
 	 * @return the consensus chart
 	 */
-	public JFreeChart makeNucleusBareOutlineChart() {
+	public ExportableLegendChart makeNucleusBareOutlineChart() {
 		CellularComponent component = options.hasComponent() ? options.getComponent().get(0) : null;
 
 		if (component == null) {
-			IAnalysisDataset dataset = options.firstDataset();
+			final IAnalysisDataset dataset = options.firstDataset();
 
 			if (!dataset.getCollection().hasConsensus())
 				return createTextAnnotatedEmptyChart(MULTIPLE_DATASETS_NO_CONSENSUS_ERROR);
@@ -190,22 +191,22 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		XYDataset ds;
 		try {
 
-			ds = new ComponentOutlineDataset(component, false, options.getScale());
+			ds = new ComponentOutlineDataset(component, component.getId().toString(), false, options.getScale());
 
-		} catch (ChartDatasetCreationException e) {
+		} catch (final ChartDatasetCreationException e) {
 			LOGGER.log(Level.SEVERE, "Error creating outline", e);
 			return createErrorChart();
 		}
-		JFreeChart chart = makeConsensusChart(ds);
+		final ExportableLegendChart chart = makeConsensusChart(ds);
 
-		double max = getConsensusChartRange(component);
+		final double max = getConsensusChartRange(component);
 
-		XYPlot plot = chart.getXYPlot();
+		final XYPlot plot = chart.getXYPlot();
 
 		plot.getDomainAxis().setRange(-max, max);
 		plot.getRangeAxis().setRange(-max, max);
 
-		int seriesCount = plot.getSeriesCount();
+		final int seriesCount = plot.getSeriesCount();
 
 		for (int i = 0; i < seriesCount; i++) {
 			plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
@@ -216,19 +217,19 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	}
 
 	/**
-	 * Create a consenusus chart for the given nucleus collection. This chart draws
+	 * Create a consenusus chart for the given cellular component. This chart draws
 	 * the nucleus border in black. There are no IQRs or segments. The OP is drawn
 	 * as a blue square in series 1 of dataset 0. If you don't want this, use
 	 * {@link ConsensusNucleusChartFactory#makeNucleusBareOutlineChart}
 	 * 
 	 * @return the consensus chart
 	 */
-	public JFreeChart makeNucleusOutlineChart() {
+	public ExportableLegendChart makeNucleusOutlineChart() {
 
 		CellularComponent component = options.hasComponent() ? options.getComponent().get(0) : null;
 
 		if (component == null) {
-			IAnalysisDataset dataset = options.firstDataset();
+			final IAnalysisDataset dataset = options.firstDataset();
 
 			if (!dataset.getCollection().hasConsensus())
 				return createTextAnnotatedEmptyChart(MULTIPLE_DATASETS_NO_CONSENSUS_ERROR);
@@ -243,33 +244,33 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 		XYDataset ds;
 		try {
-			ds = new ComponentOutlineDataset(component, false, options.getScale());
-		} catch (ChartDatasetCreationException e) {
+			ds = new ComponentOutlineDataset(component, options.firstDataset().getName(), false, options.getScale());
+		} catch (final ChartDatasetCreationException e) {
 			LOGGER.log(Level.SEVERE,
 					"Error creating annotated nucleus outline: " + e.getMessage(), e);
 			return createErrorChart();
 		}
-		JFreeChart chart = makeConsensusChart(ds);
+		final ExportableLegendChart chart = makeConsensusChart(ds);
 
-		double max = getConsensusChartRange(component);
+		final double max = getConsensusChartRange(component);
 
-		XYPlot plot = chart.getXYPlot();
+		final XYPlot plot = chart.getXYPlot();
 
 		plot.getDomainAxis().setRange(-max, max);
 		plot.getRangeAxis().setRange(-max, max);
 
-		XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
+		final XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
 		rend.setSeriesLinesVisible(0, true);
 		rend.setSeriesShapesVisible(0, false);
 
 		rend.setSeriesLinesVisible(1, false);
 		rend.setSeriesShapesVisible(1, true);
 
-		rend.setSeriesVisibleInLegend(0, Boolean.FALSE);
+		rend.setSeriesVisibleInLegend(0, false);
 		rend.setSeriesStroke(0, new BasicStroke(3));
 		rend.setSeriesPaint(0, Color.BLACK);
 
-		rend.setSeriesVisibleInLegend(1, Boolean.FALSE);
+		rend.setSeriesVisibleInLegend(1, false);
 		rend.setSeriesPaint(1, Color.BLUE);
 		plot.setRenderer(rend);
 		return chart;
@@ -283,8 +284,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return the maximum range value
 	 */
 	private double getConsensusChartRange(CellularComponent component) {
-		double maxX = Math.max(Math.abs(component.getMinX()), Math.abs(component.getMaxX()));
-		double maxY = Math.max(Math.abs(component.getMinY()), Math.abs(component.getMaxY()));
+		final double maxX = Math.max(Math.abs(component.getMinX()), Math.abs(component.getMaxX()));
+		final double maxY = Math.max(Math.abs(component.getMinY()), Math.abs(component.getMaxY()));
 
 		// ensure that the scales for each axis are the same
 		double max = Math.max(maxX, maxY);
@@ -307,9 +308,9 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			throws MissingLandmarkException, ComponentCreationException {
 
 		double max = 1;
-		for (IAnalysisDataset dataset : options.getDatasets()) {
+		for (final IAnalysisDataset dataset : options.getDatasets()) {
 			if (dataset.getCollection().hasConsensus()) {
-				double datasetMax = getConsensusChartRange(dataset.getCollection().getConsensus());
+				final double datasetMax = getConsensusChartRange(dataset.getCollection().getConsensus());
 				max = datasetMax > max ? datasetMax : max;
 			}
 		}
@@ -322,17 +323,19 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param dataset the dataset to draw
 	 * @return a chart
 	 */
-	private JFreeChart makeSegmentedConsensusChart(@NonNull IAnalysisDataset dataset) {
+	private ExportableLegendChart makeSegmentedConsensusChart(@NonNull IAnalysisDataset dataset) {
 
-		ICellCollection collection = dataset.getCollection();
+		final ICellCollection collection = dataset.getCollection();
 		try {
-			XYDataset ds = new NucleusDatasetCreator(options)
+			final XYDataset ds = new NucleusDatasetCreator(options)
 					.createSegmentedConsensusOutline(collection);
 
-			JFreeChart chart = makeConsensusChart(ds);
-			double max = getConsensusChartRange(dataset.getCollection().getConsensus());
+			final ExportableLegendChart chart = makeConsensusChart(ds);
+			chart.setExportFileName("Consensus nucleus for %s".formatted(dataset.getName()));
 
-			XYPlot plot = chart.getXYPlot();
+			final double max = getConsensusChartRange(dataset.getCollection().getConsensus());
+
+			final XYPlot plot = chart.getXYPlot();
 			plot.setDataset(0, ds);
 			plot.getDomainAxis().setRange(-max, max);
 			plot.getRangeAxis().setRange(-max, max);
@@ -348,29 +351,29 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 	}
 
-	public JFreeChart makeEditableConsensusChart() {
+	public ExportableLegendChart makeEditableConsensusChart() {
 		if (!hasConsensusNucleus())
 			return createEmptyChart();
 
 		if (options.isMultipleDatasets())
 			return createEmptyChart();
 
-		JFreeChart c = makeSegmentedConsensusChart(options.firstDataset());
+		final ExportableLegendChart c = makeSegmentedConsensusChart(options.firstDataset());
 
 		try {
 
 			// Add landmark locations
-			DefaultXYDataset landmarkData = new DefaultXYDataset();
+			final DefaultXYDataset landmarkData = new DefaultXYDataset();
 
-			Nucleus n = options.firstDataset().getCollection().getConsensus();
+			final Nucleus n = options.firstDataset().getCollection().getConsensus();
 
-			for (OrientationMark om : n.getOrientationMarks()) {
+			for (final OrientationMark om : n.getOrientationMarks()) {
 
 				// Point at the landmark coordinate
-				double[][] data = new double[2][1];
+				final double[][] data = new double[2][1];
 				data[0][0] = n.getBorderPoint(om).getX();
 				data[1][0] = n.getBorderPoint(om).getY();
-				Landmark l = n.getLandmark(om);
+				final Landmark l = n.getLandmark(om);
 				landmarkData.addSeries(l.toString(), data);
 
 				// Line from the landmark to outside
@@ -380,7 +383,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			c.getXYPlot().setDataset(1, landmarkData);
 
 			// Set the renderer for landmarks
-			XYLineAndShapeRenderer lmRend = new XYLineAndShapeRenderer();
+			final XYLineAndShapeRenderer lmRend = new XYLineAndShapeRenderer();
 			for (int lmSeries = 0; lmSeries < landmarkData.getSeriesCount(); lmSeries++) {
 				lmRend.setSeriesLinesVisible(lmSeries, false);
 				lmRend.setSeriesShapesVisible(lmSeries, true);
@@ -392,7 +395,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 			c.getXYPlot().setRenderer(1, lmRend);
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.fine("Unable to annotate landmarks: " + e.getMessage());
 		}
 
@@ -407,16 +410,16 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 */
 	private void formatConsensusChartSeries(XYPlot plot) {
 
-		XYDataset ds = plot.getDataset();
+		final XYDataset ds = plot.getDataset();
 
 		for (int i = 0; i < plot.getSeriesCount(); i++) {
 			plot.getRenderer().setSeriesVisibleInLegend(i, false);
-			String name = (String) ds.getSeriesKey(i);
+			final String name = (String) ds.getSeriesKey(i);
 
 			// colour the segments
 			if (name.startsWith(AbstractDatasetCreator.SEGMENT_SERIES_PREFIX)) {
-				int segIndex = AbstractChartFactory.getIndexFromLabel(name);
-				Paint colour = ColourSelecter.getColor(segIndex);
+				final int segIndex = AbstractChartFactory.getIndexFromLabel(name);
+				final Paint colour = ColourSelecter.getColor(segIndex);
 				plot.getRenderer().setSeriesPaint(i, colour);
 				plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 			}
@@ -434,35 +437,37 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * 
 	 * @return a chart
 	 */
-	private JFreeChart makeMultipleConsensusChart() {
+	private ExportableLegendChart makeMultipleConsensusChart() {
 		// multiple nuclei
 		try {
-			List<ComponentOutlineDataset> ls = new NucleusDatasetCreator(options)
+			final List<ComponentOutlineDataset> ls = new NucleusDatasetCreator(options)
 					.createMultiNucleusOutline();
 
-			JFreeChart chart = makeConsensusChart(ls.get(0));
+			final ExportableLegendChart chart = makeConsensusChart(ls.get(0));
+			chart.setExportFileName("Consensus nuclei for multiple datasets");
+
 			for (int i = 1; i < ls.size(); i++) {
 				chart.getXYPlot().setDataset(i, ls.get(i));
 			}
 
 			formatConsensusChart(chart);
 
-			XYPlot plot = chart.getXYPlot();
+			final XYPlot plot = chart.getXYPlot();
 
-			double max = getConsensusChartRange();
+			final double max = getConsensusChartRange();
 
 			plot.getDomainAxis().setRange(-max, max);
 			plot.getRangeAxis().setRange(-max, max);
 
 			for (int d = 0; d < ls.size(); d++) {
-				XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
-				Color colour = options.getDatasets().get(d).getDatasetColour()
+				final XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
+				final Color colour = options.getDatasets().get(d).getDatasetColour()
 						.orElse(ColourSelecter.getColor(d));
 				for (int i = 0; i < plot.getSeriesCount(); i++) {
 
 					rend.setSeriesLinesVisible(i, true);
 					rend.setSeriesShapesVisible(i, false);
-					rend.setSeriesVisibleInLegend(i, false);
+//					rend.setSeriesVisibleInLegend(i, false);
 					rend.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 					rend.setSeriesPaint(i, colour);
 					plot.setRenderer(d, rend);
@@ -472,10 +477,10 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 				if (options.isFillConsensus()) {
 					if (options.getDatasets().get(d).getCollection().hasConsensus()) {
 
-						Shape s = options.getDatasets().get(d).getCollection().getConsensus()
+						final Shape s = options.getDatasets().get(d).getCollection().getConsensus()
 								.toShape(options.getScale());
 
-						Color transparent = ColourSelecter.makeTransparent(colour, 128);
+						final Color transparent = ColourSelecter.makeTransparent(colour, 128);
 
 						plot.addAnnotation(
 								new XYShapeAnnotation(s, ChartComponents.MARKER_STROKE, null,
