@@ -197,6 +197,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 			add(chartPanel, BorderLayout.CENTER);
 			uiController.addScaleUpdatedListener(this);
+			uiController.addSwatchUpdatedListener(this);
 
 		}
 
@@ -256,7 +257,8 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 							options.getPredicate(d.getCollection()));
 
 					// Put them into a virtual collection
-					final IAnalysisDataset virt = new VirtualDataset(d, "Filtered_" + statA + "_" + statB,
+					final IAnalysisDataset virt = new VirtualDataset(d,
+							d.getName() + "_filtered_" + statA + "_" + statB,
 							null,
 							filtered);
 
@@ -358,6 +360,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 
 			this.setLayout(new BorderLayout());
 			add(createPanel(), BorderLayout.CENTER);
+			uiController.addDatasetUpdatedListener(this);
 		}
 
 		private JPanel createPanel() {

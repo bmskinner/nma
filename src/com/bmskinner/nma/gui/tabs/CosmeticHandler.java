@@ -110,8 +110,11 @@ public class CosmeticHandler {
 		try {
 			final Color newColor = parent.getInputSupplier().requestColor("Choose dataset colour",
 					(Color) oldColour);
-			dataset.setDatasetColour(newColor);
-			UIController.getInstance().fireDatasetColourUpdated(dataset);
+
+			if (!newColor.equals(oldColour)) {
+				dataset.setDatasetColour(newColor);
+				UIController.getInstance().fireDatasetColourUpdated(dataset);
+			}
 
 		} catch (final RequestCancelledException e) {
 			// User cancelled, no action
@@ -125,9 +128,13 @@ public class CosmeticHandler {
 	 */
 	public void renameDataset(@NonNull IAnalysisDataset dataset) {
 		try {
+			final String oldName = dataset.getName();
 			final String newName = parent.getInputSupplier().requestString(CHOOSE_A_NEW_NAME_LBL,
 					dataset.getName());
-			dataset.setName(newName);
+			if (!newName.equals(oldName)) {
+				dataset.setName(newName);
+				UIController.getInstance().fireDatasetUpdated(dataset);
+			}
 		} catch (final RequestCancelledException e) {
 			// User cancelled, no action
 		}

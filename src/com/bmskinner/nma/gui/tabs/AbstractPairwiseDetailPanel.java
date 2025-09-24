@@ -42,6 +42,7 @@ public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
 
 	protected AbstractPairwiseDetailPanel() {
 		this(PANEL_TITLE_LBL, PANEL_TITLE_LBL);
+		uiController.addDatasetUpdatedListener(this);
 	}
 
 	protected AbstractPairwiseDetailPanel(@NonNull final String title) {
@@ -64,8 +65,8 @@ public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
 	@Override
 	public synchronized void setLoading() {
 		super.setLoading();
-		for (Component c : this.getComponents()) {
-			if (c instanceof JTable jt) {
+		for (final Component c : this.getComponents()) {
+			if (c instanceof final JTable jt) {
 				jt.setModel(AbstractTableCreator.createLoadingTable());
 			}
 		}
@@ -78,10 +79,10 @@ public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
 	 * @return
 	 */
 	protected JPanel createInfoPanel() {
-		JPanel infoPanel = new JPanel();
+		final JPanel infoPanel = new JPanel();
 		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 
-		String infoString = """
+		final String infoString = """
 				Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank sum test)
 				Above the diagonal: Mann-Whitney U statistics
 				Below the diagonal: p-values
@@ -97,12 +98,12 @@ public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
 	 * @return
 	 */
 	protected JPanel createTablePanel() {
-		JPanel panel = new JPanel();
+		final JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-		Dimension minSize = new Dimension(10, 10);
-		Dimension prefSize = new Dimension(10, 10);
-		Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
+		final Dimension minSize = new Dimension(10, 10);
+		final Dimension prefSize = new Dimension(10, 10);
+		final Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
 		panel.add(new Box.Filler(minSize, prefSize, maxSize));
 		return panel;
 	}
@@ -116,9 +117,9 @@ public abstract class AbstractPairwiseDetailPanel extends TableDetailPanel {
 	 * @param label the label for the table
 	 */
 	protected void addWilconxonTable(JPanel panel, JTable table, String label) {
-		Dimension minSize = new Dimension(10, 10);
-		Dimension prefSize = new Dimension(10, 10);
-		Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
+		final Dimension minSize = new Dimension(10, 10);
+		final Dimension prefSize = new Dimension(10, 10);
+		final Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
 		panel.add(new Box.Filler(minSize, prefSize, maxSize));
 		panel.add(new JLabel(label));
 		panel.add(table);

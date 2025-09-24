@@ -38,6 +38,7 @@ public class NuclearScatterChartPanel extends AbstractScatterPanel
 
 		uiController.addScaleUpdatedListener(this);
 		uiController.addSwatchUpdatedListener(this);
+		uiController.addDatasetUpdatedListener(this);
 	}
 
 	@Override
