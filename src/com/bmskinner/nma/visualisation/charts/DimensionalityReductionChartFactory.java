@@ -55,7 +55,7 @@ import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 import ij.process.ImageProcessor;
 
-public class DimensionalityChartFactory extends AbstractChartFactory {
+public class DimensionalityReductionChartFactory extends AbstractChartFactory {
 
 	/**
 	 * Number of images to be loaded per batch
@@ -63,14 +63,14 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	private static final int BATCH_SIZE = 50;
 
 	private static final Logger LOGGER = Logger
-			.getLogger(DimensionalityChartFactory.class.getName());
+			.getLogger(DimensionalityReductionChartFactory.class.getName());
 
 	/**
 	 * Create with options describing the chart to be built
 	 * 
 	 * @param o
 	 */
-	public DimensionalityChartFactory(@NonNull ChartOptions o) {
+	public DimensionalityReductionChartFactory(@NonNull ChartOptions o) {
 		super(o);
 	}
 
@@ -86,7 +86,7 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 	 * @param colourGroup the cluster group for cell point colours
 	 * @return
 	 */
-	public static JFreeChart createDimensionalityReductionChart(@NonNull IAnalysisDataset d,
+	public static ExportableLegendChart createDimensionalityReductionChart(@NonNull IAnalysisDataset d,
 			@NonNull ColourByType type, @NonNull IClusterGroup plotGroup, @Nullable IClusterGroup colourGroup) {
 
 		try {
@@ -101,7 +101,8 @@ public class DimensionalityChartFactory extends AbstractChartFactory {
 			final String xLabel = prefix + "1";
 			final String yLabel = prefix + "2";
 
-			final JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
+			final ExportableLegendChart chart = createBaseXYChart(xLabel, yLabel, ds);
+			chart.setExportFileName(method.name() + "_from_" + d.getName() + "_" + plotGroup.getName());
 
 			final XYPlot plot = chart.getXYPlot();
 

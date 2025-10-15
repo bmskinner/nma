@@ -65,6 +65,7 @@ import com.bmskinner.nma.gui.RotationMode;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.io.ImageImporter;
 import com.bmskinner.nma.visualisation.ChartComponents;
+import com.bmskinner.nma.visualisation.datasets.AbstractDatasetCreator.SignalNameKey;
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.ComponentOutlineDataset;
 import com.bmskinner.nma.visualisation.datasets.NuclearSignalXYDataset;
@@ -82,8 +83,6 @@ import ij.process.ImageProcessor;
  *
  */
 public class OutlineChartFactory extends AbstractChartFactory {
-
-	private static final String ERROR_CREATING_MESH_MSG = "Error creating mesh";
 
 	private static final Logger LOGGER = Logger.getLogger(OutlineChartFactory.class.getName());
 
@@ -155,8 +154,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				final Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
 				rend.setSeriesShape(series, circle);
 
-				final String name = (String) signalCoMs.getSeriesKey(series);
-				final UUID seriesGroup = getSignalGroupFromLabel(name);
+				final SignalNameKey name = (SignalNameKey) signalCoMs.getSeriesKey(series);
+				final UUID seriesGroup = name.signalGroupId();
 
 				final Optional<ISignalGroup> g = options.firstDataset().getCollection()
 						.getSignalGroup(seriesGroup);
@@ -635,7 +634,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param maxRatio
 	 * @return
 	 */
-	private Color getGradientColour(double ratio, double maxRatio) {
+	private static Color getGradientColour(double ratio, double maxRatio) {
 
 		final double log2Min = -maxRatio;
 		final double log2Max = maxRatio;

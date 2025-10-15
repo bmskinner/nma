@@ -61,31 +61,33 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 			currentEntity = null;
 			return;
 		}
-		XYItemEntity entity = (XYItemEntity) event.getEntity();
+		final XYItemEntity entity = (XYItemEntity) event.getEntity();
 
 		if (entity == currentEntity) // no unnecessary updates needed
 			return;
 
 		currentEntity = entity;
 
-		if (!(entity.getDataset() instanceof ComponentXYDataset)) // only use datasets of the
-																	// desired class
+		// only use datasets of the desired class
+		if (!(entity.getDataset() instanceof ComponentXYDataset))
 			return;
 
-		ComponentXYDataset<? extends CellularComponent> ds = (ComponentXYDataset<? extends CellularComponent>) entity
+		final ComponentXYDataset<? extends CellularComponent> ds = (ComponentXYDataset<? extends CellularComponent>) entity
 				.getDataset();
 
-		String key = ds.getSeriesKey(entity.getSeriesIndex()).toString();
-		CellularComponent n = ds.getComponent(key, entity.getItem());
+		final String key = ds.getSeriesKey(entity.getSeriesIndex()).toString();
+		final CellularComponent n = ds.getComponent(key, entity.getItem());
+
+		// May not be an object at this location
 		if (n == null)
 			return;
 
 		// Draw at mouse position
-		int screenX = event.getTrigger().getX();
-		int screenY = event.getTrigger().getY();
+		final int screenX = event.getTrigger().getX();
+		final int screenY = event.getTrigger().getY();
 
-		if (n instanceof Nucleus nuc) {
-			if (ds instanceof NuclearSignalXYDataset ns) {
+		if (n instanceof final Nucleus nuc) {
+			if (ds instanceof final NuclearSignalXYDataset ns) {
 				drawSignal(nuc, ns.getSignal(key, entity.getItem()), screenX, screenY);
 			} else {
 				drawNucleus(nuc, screenX, screenY);
@@ -96,29 +98,29 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 	}
 
 	private void drawSignal(Nucleus n, INuclearSignal ns, int x, int y) {
-		String labelText = n.getNameAndNumber();
+		final String labelText = n.getNameAndNumber();
 
-		Color nucleusColour = Color.WHITE;
-		Color signalColour = Color.ORANGE;
+		final Color nucleusColour = Color.WHITE;
+		final Color signalColour = Color.ORANGE;
 
 		ImageProcessor ip = ImageImporter.importFullImageTo24bitGreyscale(n);
 
-		ImageAnnotator an = new ImageAnnotator(ip).drawBorder(n, nucleusColour).drawBorder(ns,
+		final ImageAnnotator an = new ImageAnnotator(ip).drawBorder(n, nucleusColour).drawBorder(ns,
 				signalColour);
 		an.crop(n);
 		an.resizeKeepingAspect(150, 150);
 		ip = an.toProcessor();
 
-		Graphics2D g2 = (Graphics2D) chartPanel.getGraphics();
+		final Graphics2D g2 = (Graphics2D) chartPanel.getGraphics();
 
 		// ensure the image is positioned within the bounds of the chart panel
-		int topStart = y + ip.getHeight() > chartPanel.getHeight() ? y - ip.getHeight() : y;
-		int leftStart = x + ip.getWidth() > chartPanel.getWidth() ? x - ip.getWidth() : x;
+		final int topStart = y + ip.getHeight() > chartPanel.getHeight() ? y - ip.getHeight() : y;
+		final int leftStart = x + ip.getWidth() > chartPanel.getWidth() ? x - ip.getWidth() : x;
 
 		g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
-		Color c = g2.getColor();
+		final Color c = g2.getColor();
 
-		Color textColour = Color.WHITE;
+		final Color textColour = Color.WHITE;
 		g2.setColor(textColour);
 		g2.drawString(labelText, leftStart + 4, topStart + ip.getHeight() - 4);
 		g2.setColor(Color.DARK_GRAY);
@@ -128,26 +130,26 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 	}
 
 	private void drawNucleus(Nucleus n, int x, int y) {
-		String labelText = n.getNameAndNumber();
+		final String labelText = n.getNameAndNumber();
 
-		Color annotationColour = Color.ORANGE;
+		final Color annotationColour = Color.ORANGE;
 		ImageProcessor ip = ImageImporter.importFullImageTo24bitGreyscale(n);
 
-		ImageAnnotator an = new ImageAnnotator(ip).drawBorder(n, annotationColour);
+		final ImageAnnotator an = new ImageAnnotator(ip).drawBorder(n, annotationColour);
 		an.crop(n);
 		an.resizeKeepingAspect(150, 150);
 		ip = an.toProcessor();
 
-		Graphics2D g2 = (Graphics2D) chartPanel.getGraphics();
+		final Graphics2D g2 = (Graphics2D) chartPanel.getGraphics();
 
 		// ensure the image is positioned within the bounds of the chart panel
-		int topStart = y + ip.getHeight() > chartPanel.getHeight() ? y - ip.getHeight() : y;
-		int leftStart = x + ip.getWidth() > chartPanel.getWidth() ? x - ip.getWidth() : x;
+		final int topStart = y + ip.getHeight() > chartPanel.getHeight() ? y - ip.getHeight() : y;
+		final int leftStart = x + ip.getWidth() > chartPanel.getWidth() ? x - ip.getWidth() : x;
 
 		g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
-		Color c = g2.getColor();
+		final Color c = g2.getColor();
 
-		Color textColour = Color.ORANGE;
+		final Color textColour = Color.ORANGE;
 		g2.setColor(textColour);
 		g2.drawString(labelText, leftStart + 4, topStart + ip.getHeight() - 4);
 		g2.setColor(Color.DARK_GRAY);

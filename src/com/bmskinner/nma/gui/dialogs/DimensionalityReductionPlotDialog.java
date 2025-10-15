@@ -22,7 +22,7 @@ import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.components.ImageThumbnailGenerator;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
-import com.bmskinner.nma.visualisation.charts.DimensionalityChartFactory;
+import com.bmskinner.nma.visualisation.charts.DimensionalityReductionChartFactory;
 
 /**
  * Display tSNE results. This is a temporary class for testing. It can display
@@ -156,7 +156,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 	private void updateChart(ColourByType type) {
 		final Runnable r = () -> {
 
-			final JFreeChart chart = DimensionalityChartFactory.createDimensionalityReductionChart(dataset, type, group,
+			final JFreeChart chart = DimensionalityReductionChartFactory.createDimensionalityReductionChart(dataset, type, group,
 					group);
 
 			final XYPlot plot = chart.getXYPlot();
@@ -174,7 +174,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 			chartPanel.setChart(chart);
 
 			if (showImagesBox.isSelected()) {
-				DimensionalityChartFactory.addAnnotatedNucleusImages(dataset,
+				DimensionalityReductionChartFactory.addAnnotatedNucleusImages(dataset,
 						group,
 						type,
 						chart, ((Double) imageSpinner.getValue()).intValue());
@@ -188,7 +188,7 @@ public class DimensionalityReductionPlotDialog extends MessagingDialog {
 
 	private void createChart(ColourByType type, IClusterGroup colourGroup) {
 		chartPanel.setChart(
-				DimensionalityChartFactory.createDimensionalityReductionChart(dataset, type, group,
+				DimensionalityReductionChartFactory.createDimensionalityReductionChart(dataset, type, group,
 						colourGroup));
 	}
 

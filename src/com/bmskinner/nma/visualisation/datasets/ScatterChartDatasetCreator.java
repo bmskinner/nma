@@ -155,7 +155,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 			}
 
 			final double[][] data = { xpoints, ypoints };
-			ds.addSeries(c.getName(), data);
+			final Comparable<?> seriesKey = new DatasetNameKey(datasets.get(i));
+			ds.addSeries(seriesKey, data);
 
 		}
 
@@ -210,8 +211,11 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 
 				final double[][] data = { xpoints, ypoints };
 
-				final String seriesKey = c.getName() + "_" + gp.getGroupName();
+				final Comparable<?> seriesKey = new SignalNameKey(gp, id);
 				ds.addSeries(seriesKey, data);
+
+//				final String seriesKey = c.getName() + "_" + gp.getGroupName();
+//				ds.addSeries(seriesKey, data);
 				ds.addDataset(datasets.get(i), seriesKey);
 				ds.addSignalGroup(gp, seriesKey);
 				ds.addSignalId(id, seriesKey);
@@ -268,7 +272,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 				final List<Nucleus> nuclei = new ArrayList<>(mergeSource.getCollection().getNuclei());
 				final double[][] data = createDimensionalityReductionValues(nuclei,
 						measurement, 0, 1);
-				ds.addSeries(mergeSource.getName(), data, nuclei);
+				final Comparable<?> seriesKey = new DatasetNameKey(mergeSource);
+				ds.addSeries(seriesKey, data, nuclei);
 			}
 			return ds;
 		}
@@ -280,7 +285,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 				final List<Nucleus> nuclei = new ArrayList<>(childDataset.getCollection().getNuclei());
 				final double[][] data = createDimensionalityReductionValues(nuclei,
 						measurement, 0, 1);
-				ds.addSeries(childDataset.getName(), data, nuclei);
+				final Comparable<?> seriesKey = new DatasetNameKey(childDataset);
+				ds.addSeries(seriesKey, data, nuclei);
 			}
 			return ds;
 		}

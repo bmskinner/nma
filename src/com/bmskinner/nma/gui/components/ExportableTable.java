@@ -39,10 +39,12 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.Io.Exporter;
+import com.bmskinner.nma.utility.FileUtils;
 
 /**
  * An extension to a JTable that allows the table contents to be exported to
@@ -68,7 +70,7 @@ public class ExportableTable extends JTable {
 		setComponentPopupMenu(new TablePopupMenu());
 		this.isGlobalEditable = isGlobalEditable;
 
-		ColumnListener cl = new ColumnListener() {
+		final ColumnListener cl = new ColumnListener() {
 
 			@Override
 			public void columnMoved(int oldLocation, int newLocation) {
@@ -127,17 +129,17 @@ public class ExportableTable extends JTable {
 			for (int col = 0; col < getColumnCount(); col++) {
 
 				// Find the component at the given cell
-				TableCellRenderer tcr = getCellRenderer(row, col);
+				final TableCellRenderer tcr = getCellRenderer(row, col);
 
-				Component c = tcr.getTableCellRendererComponent(this,
+				final Component c = tcr.getTableCellRendererComponent(this,
 						this.getValueAt(row, col), false, false, row, col);
 
-				if (c instanceof JTextArea jta) {
-					int lineCount = jta.getLineCount() + 1;
-					Font f = c.getFont();
-					FontMetrics fm = c.getFontMetrics(f);
-					int fheight = fm.getHeight();
-					int rowHeight = lineCount * fheight;
+				if (c instanceof final JTextArea jta) {
+					final int lineCount = jta.getLineCount() + 1;
+					final Font f = c.getFont();
+					final FontMetrics fm = c.getFontMetrics(f);
+					final int fheight = fm.getHeight();
+					final int rowHeight = lineCount * fheight;
 					h = Math.max(h, rowHeight);
 				}
 			}
@@ -165,11 +167,11 @@ public class ExportableTable extends JTable {
 		@Override
 		public void mousePressed(MouseEvent e) {
 			// capture start of resize
-			if (e.getSource()instanceof JTableHeader header) {
-				TableColumn tc = header.getResizingColumn();
+			if (e.getSource()instanceof final JTableHeader header) {
+				final TableColumn tc = header.getResizingColumn();
 				if (tc != null) {
 					resizing = true;
-					JTable table = header.getTable();
+					final JTable table = header.getTable();
 					resizingColumn = table.convertColumnIndexToView(tc.getModelIndex());
 					oldWidth = tc.getPreferredWidth();
 				} else {
@@ -191,10 +193,10 @@ public class ExportableTable extends JTable {
 
 			// column resized
 			if (resizing) {
-				if (e.getSource()instanceof JTableHeader header) {
-					TableColumn tc = header.getColumnModel().getColumn(resizingColumn);
+				if (e.getSource()instanceof final JTableHeader header) {
+					final TableColumn tc = header.getColumnModel().getColumn(resizingColumn);
 					if (tc != null) {
-						int newWidth = tc.getPreferredWidth();
+						final int newWidth = tc.getPreferredWidth();
 						if (newWidth != oldWidth) {
 							columnResized(resizingColumn, newWidth);
 						}
@@ -256,10 +258,10 @@ public class ExportableTable extends JTable {
 		}
 
 		private void createButtons() {
-			JMenuItem exportItem = new JMenuItem(EXPORT_LBL);
+			final JMenuItem exportItem = new JMenuItem(EXPORT_LBL);
 			exportItem.addActionListener(e -> export());
 
-			JMenuItem copyItem = new JMenuItem(COPY_LBL);
+			final JMenuItem copyItem = new JMenuItem(COPY_LBL);
 			copyItem.addActionListener(e -> copy());
 
 			add(copyItem);
@@ -269,26 +271,27 @@ public class ExportableTable extends JTable {
 		private void export() {
 
 			try {
-				File saveFile = new DefaultInputSupplier().requestFileSave(null, "Table export",
+				final File saveFile = new DefaultInputSupplier().requestFileSave(FileUtils.commonPathOfDatasets(
+						DatasetListManager.getInstance().getSelectedDatasets()), "Table export",
 						"txt");
-				String string = makeExportString();
+				final String string = makeExportString();
 				Exporter.writeString(string, saveFile);
 
-			} catch (RequestCancelledException e) {
+			} catch (final RequestCancelledException e) {
 				// User cancelled
 			}
 		}
 
 		private void copy() {
-			String string = makeExportString();
-			StringSelection stringSelection = new StringSelection(string);
-			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			final String string = makeExportString();
+			final StringSelection stringSelection = new StringSelection(string);
+			final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 			clipboard.setContents(stringSelection, null);
 		}
 
 		private String makeExportString() {
-			StringBuilder builder = new StringBuilder();
-			TableModel model = getModel();
+			final StringBuilder builder = new StringBuilder();
+			final TableModel model = getModel();
 			for (int col = 0; col < model.getColumnCount(); col++) {
 				builder.append(model.getColumnName(col) + Io.TAB);
 			}

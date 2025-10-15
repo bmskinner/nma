@@ -16,6 +16,14 @@ public class ArrayUtils {
 		// only uses static methods
 	}
 	
+	public static List<Number> toNumberList(double[] arr) {
+		final List<Number> result = new ArrayList<>();
+		for (final double d : arr) {
+			result.add(d);
+		}
+		return result;
+	}
+
 	/**
 	 * Box the given doubles and add to a mutable list
 	 * 
@@ -30,6 +38,12 @@ public class ArrayUtils {
 		return result;
 	}
 
+	/**
+	 * Convert a list of doubles to an array
+	 * 
+	 * @param l
+	 * @return
+	 */
 	public static double[] toArray(List<Double> l) {
 		final double[] result = new double[l.size()];
 		for (int i = 0; i < l.size(); i++) {

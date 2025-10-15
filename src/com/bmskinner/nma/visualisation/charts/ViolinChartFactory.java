@@ -33,6 +33,7 @@ import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.gui.components.ColourSelecter;
+import com.bmskinner.nma.visualisation.datasets.AbstractDatasetCreator.SignalNameKey;
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.SignalViolinDatasetCreator;
 import com.bmskinner.nma.visualisation.datasets.ViolinCategoryDataset;
@@ -267,8 +268,8 @@ public class ViolinChartFactory extends AbstractChartFactory {
 
             for (int row = 0; row < ds.getRowCount(); row++) {
 
-                final String name = (String) ds.getRowKey(row);
-                final UUID signalGroup = getSignalGroupFromLabel(name);
+				final SignalNameKey snk = (SignalNameKey) ds.getRowKey(row);
+				final UUID signalGroup = snk.signalGroupId();
                 
                 final Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
                 if(g.isPresent()){
