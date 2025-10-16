@@ -16,25 +16,14 @@
  ******************************************************************************/
 package com.bmskinner.nma.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 
 /**
  * Manages the threading and task queue. Analysis methods and UI updates are
@@ -59,12 +48,6 @@ public class ThreadManager {
 
 	/** A queue for UI update tasks */
 	private final BlockingQueue<Runnable> uiQueue = new LinkedBlockingQueue<>(1024);
-
-	/**
-	 * Store the UI update futures for a selected dataset order. Use to cancel
-	 * unneeded tasks when selections change
-	 **/
-	private final Map<List<IAnalysisDataset>, Set<TrackedFuture>> uiFutures = new ConcurrentHashMap<>();
 
 	/** Thread pool for method update tasks */
 	private final ThreadPoolExecutor methodExecutorService;
@@ -186,8 +169,7 @@ public class ThreadManager {
 	public Future<?> submit(Runnable r) {
 		if (r instanceof InterfaceUpdater)
 			return submitUITask(r);
-
-		return methodExecutorService.submit(new TrackedRunnable(r, ThreadPoolType.METHOD));
+		return methodExecutorService.submit(r);
 	}
 
 	/**
@@ -199,53 +181,7 @@ public class ThreadManager {
 	 * @return
 	 */
 	private synchronized Future<?> submitUITask(Runnable r) {
-		final TrackedRunnable t = new TrackedRunnable(r, ThreadPoolType.UI);
-		// Add the future to a list associated with a dataset order
-		final Future<?> f = uiExecutorService.submit(t);
-
-		if (t.datasetsAffected().isEmpty())
-			return f;
-
-		final Set<TrackedFuture> futures = uiFutures.computeIfAbsent(t.datasetsAffected(),
-				k -> Collections.synchronizedSet(new HashSet<TrackedFuture>()));
-
-		// Remove any futures from the executor service that have different datasets
-		final Iterator<Entry<List<IAnalysisDataset>, Set<TrackedFuture>>> it = uiFutures.entrySet().iterator();
-
-		while (it.hasNext()) {
-			final Entry<List<IAnalysisDataset>, Set<TrackedFuture>> entry = it.next();
-
-			// If a queued future has the same dataset order as the current update, keep
-			// it
-			if (entry.getKey().equals(t.datasetsAffected())) {
-				
-				// Remove any completed futures that are no longer needed
-				final Iterator<TrackedFuture> fit = entry.getValue().iterator();
-				while (fit.hasNext()) {
-					final TrackedFuture tf = fit.next();
-					if (tf.future().isDone() || tf.future().isCancelled()) {
-						fit.remove();
-					}
-				}
-				continue;
-			}
-
-			// Cancel the futures we don't need
-			final Set<TrackedFuture> queuedFutures = entry.getValue();
-			for (final TrackedFuture tf : queuedFutures) {
-				tf.future().cancel(true);
-				uiExecutorService.remove(tf.runnable());
-			}
-
-			// Remove the entire list of cancelled futures
-			it.remove();
-		}
-		// Remove cancelled tasks from the executor
-//		uiExecutorService.purge();
-
-		// Add the new future task
-		futures.add(new TrackedFuture(t, f));
-		return f;
+		return uiExecutorService.submit(r);
 	}
 
 	/**
@@ -271,44 +207,5 @@ public class ThreadManager {
 			return o;
 
 		};
-	}
-
-	public Map<List<IAnalysisDataset>, Set<TrackedFuture>> getUITasks() {
-		return uiFutures;
-	}
-
-	/**
-	 * Wrap a Runnable in another Runnable that allows access to the original
-	 * Runnable for checking the class, and tracks datasets affected by UI update
-	 * runnables.
-	 * 
-	 * @author Ben Skinner
-	 * @since 1.14.0
-	 *
-	 */
-	private class TrackedRunnable implements Runnable {
-		private final Runnable r;
-		private final ThreadPoolType t;
-		private final List<IAnalysisDataset> affectedDatasets;
-
-		public TrackedRunnable(Runnable r, ThreadPoolType t) {
-			this.t = t;
-			this.r = r;
-
-			if (r instanceof final InterfaceUpdater i) {
-				affectedDatasets = i.datasetsAffected();
-			} else {
-				affectedDatasets = new ArrayList<>();
-			}
-		}
-
-		@Override
-		public void run() {
-			r.run();
-		}
-
-		public List<IAnalysisDataset> datasetsAffected() {
-			return affectedDatasets;
-		}
 	}
 }
