@@ -55,6 +55,7 @@ import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.components.panels.WrappedLabel;
+import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
 import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
 import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
@@ -182,7 +183,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 	}
 
 	private class AbstractScatterChartPanel extends ChartDetailPanel
-			implements ScaleUpdatedListener, SwatchUpdatedListener {
+			implements ScaleUpdatedListener, SwatchUpdatedListener, NuclearSignalUpdatedListener {
 
 		protected ExportableChartPanel chartPanel; // hold the charts
 
@@ -198,6 +199,7 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 			add(chartPanel, BorderLayout.CENTER);
 			uiController.addScaleUpdatedListener(this);
 			uiController.addSwatchUpdatedListener(this);
+			uiController.addNuclearSignalUpdatedListener(this);
 
 		}
 
@@ -345,6 +347,16 @@ public abstract class AbstractScatterPanel extends DetailPanel {
 		@Override
 		public void scaleUpdated() {
 			update();
+		}
+
+		@Override
+		public void nuclearSignalUpdated(List<IAnalysisDataset> datasets) {
+			refreshCache(datasets);
+		}
+
+		@Override
+		public void nuclearSignalUpdated(IAnalysisDataset dataset) {
+			refreshCache(dataset);
 		}
 	}
 

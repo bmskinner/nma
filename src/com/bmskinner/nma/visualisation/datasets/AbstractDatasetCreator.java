@@ -96,7 +96,10 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> {
 
 		@Override
 		public boolean equals(Object obj) {
-			return Objects.equal(this, obj);
+			if (obj instanceof final DatasetNameKey k)
+				return dataset.equals(k.dataset);
+
+			return false;
 		}
 
 		@Override
@@ -129,7 +132,10 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> {
 
 		@Override
 		public boolean equals(Object obj) {
-			return Objects.equal(this, obj);
+			if (obj instanceof final MeasurementNameKey k)
+				return m.equals(k.m);
+
+			return false;
 		}
 
 		@Override
@@ -161,12 +167,15 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> {
 
 		@Override
 		public boolean equals(Object obj) {
-			return Objects.equal(this, obj);
+			if (obj instanceof final SignalNameKey k)
+				return sg.equals(k.sg) && signalGroupId.equals(k.signalGroupId);
+
+			return false;
 		}
 
 		@Override
 		public int hashCode() {
-			return sg.hashCode();
+			return Objects.hashCode(sg, signalGroupId);
 		}
 
 		@Override
@@ -191,7 +200,10 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> {
 
 		@Override
 		public boolean equals(Object obj) {
-			return Objects.equal(this, obj);
+			if (obj instanceof final SegmentNameKey k)
+				return segmentPosition == k.segmentPosition;
+
+			return false;
 		}
 
 		@Override

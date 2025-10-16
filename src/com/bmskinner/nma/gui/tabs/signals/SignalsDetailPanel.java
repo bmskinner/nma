@@ -57,7 +57,7 @@ public class SignalsDetailPanel extends DetailPanel {
 			final DetailPanel countsPanel = new SignalCountsPanel();
 			final DetailPanel boxplotPanel = new SignalsBoxplotPanel();
 			final DetailPanel shellsPanel = new SignalShellsPanel();
-			final DetailPanel detectionSettingsPanel = new SignalsAnalysisPanel();
+			final DetailPanel detectionSettingsPanel = new SignalsDetectionSettingsPanel();
 			final DetailPanel signalScatterChartPanel = new SignalScatterChartPanel();
 			final DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
 			final DetailPanel warpingPanel = new SignalWarpingMainPanel();
