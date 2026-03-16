@@ -55,7 +55,8 @@ public class UpdateChecker {
 			}
 
 		} catch (IOException | JsonSyntaxException e) {
-			LOGGER.fine("Unable to fetch latest version from website; using current version");
+			LOGGER.fine("Unable to fetch latest version from %s; using current version"
+					.formatted(GlobalOptions.getInstance().getString(GlobalOptions.DEFAULT_UPDATE_URL_KEY)));
 		}
 		return latestVersion;
 	}
