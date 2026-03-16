@@ -405,7 +405,7 @@ public class ImageImporter implements Importer {
 		final String potentialErrorMessage = IJ.getErrorMessage();
 		if (null != potentialErrorMessage)
 			throw new ImageImportException(
-					"Error importing image file " + f.getName() + ": " + potentialErrorMessage);
+					"Error importing image file '%s': %s".formatted(f.getName(), potentialErrorMessage));
 
 		final ImageStack stack = convertToStack(image);
 		image.close();

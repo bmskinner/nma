@@ -90,11 +90,11 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		this.channel = options.getInt(HashOptions.CHANNEL);
 
 		// Create a signal group in the dataset
-		ISignalGroup group = new DefaultSignalGroup(
+		final ISignalGroup group = new DefaultSignalGroup(
 				options.getString(HashOptions.SIGNAL_GROUP_NAME),
 				options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 		// Set the default colour for the signal group
-		Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
+		final Color colour = ColourSelecter.getSignalColour(options.getInt(HashOptions.CHANNEL));
 		group.setGroupColour(colour);
 
 		dataset.getCollection().addSignalGroup(group);
@@ -109,7 +109,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	@Override
 	public IAnalysisResult call() throws Exception {
 		run();
-		Optional<IAnalysisDataset> signalChild = Optional.ofNullable(makeSignalChildDataset());
+		final Optional<IAnalysisDataset> signalChild = Optional.ofNullable(makeSignalChildDataset());
 		if (signalChild.isEmpty())
 			return new DefaultAnalysisResult(dataset);
 		return new DefaultAnalysisResult(signalChild.get());
@@ -119,9 +119,9 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
 		LOGGER.fine(() -> "Beginning signal detection in channel %d".formatted(channel));
 
-		int originalMinThreshold = options.getInt(HashOptions.THRESHOLD);
+		final int originalMinThreshold = options.getInt(HashOptions.THRESHOLD);
 
-		SignalFinder finder = new SignalFinder(
+		final SignalFinder finder = new SignalFinder(
 				dataset.getAnalysisOptions()
 						.orElseThrow(MissingOptionException::new),
 				options,
@@ -135,8 +135,9 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 		// reset the min threshold for each cell
 		options.setInt(HashOptions.THRESHOLD, originalMinThreshold);
 
-		for (Nucleus n : c.getNuclei())
+		for (final Nucleus n : c.getNuclei()) {
 			detectInNucleus(n, finder);
+		}
 
 		fireProgressEvent();
 	}
@@ -144,28 +145,28 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	private void detectInNucleus(Nucleus n, SignalFinder finder) {
 
 		LOGGER.finer(
-				"Looking for signals associated with nucleus " + n.getSourceFileName() + "-"
-						+ n.getNucleusNumber());
+				"Looking for signals associated with nucleus %s-%s".formatted(n.getSourceFileName(),
+						n.getNucleusNumber()));
 
 		// get the image in the folder with the same name as the
 		// nucleus source image
-		File imageFile = new File(folder, n.getSourceFileName());
-		LOGGER.finer("Source file: " + imageFile.getAbsolutePath());
+		final File imageFile = new File(folder, n.getSourceFileName());
+		LOGGER.finer("Expected signal image file: '%s'".formatted(imageFile.getAbsolutePath()));
 
 		try {
 
 			// Get all the signals in the image
-			List<INuclearSignal> signals = finder.findInFile(imageFile);
+			final List<INuclearSignal> signals = finder.findInFile(imageFile);
 
 			// Restrict to signals in the current nucleus of interest
-			List<INuclearSignal> signalsInNucleus = signals.stream()
+			final List<INuclearSignal> signalsInNucleus = signals.stream()
 					.filter(s -> n.containsOriginalPoint(s.getOriginalCentreOfMass()))
 					.collect(Collectors.toList());
 
 			// No need to add a group to a nucleus if there were no signals
 			if (!signalsInNucleus.isEmpty()) {
 
-				ISignalCollection signalCollection = n.getSignalCollection();
+				final ISignalCollection signalCollection = n.getSignalCollection();
 				signalCollection.addSignalGroup(signalsInNucleus,
 						options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 
@@ -176,8 +177,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 			}
 		} catch (ImageImportException | UnavailableBorderPointException | MissingLandmarkException
 				| ComponentCreationException e) {
-			LOGGER.warning("Cannot open " + imageFile.getAbsolutePath());
-			LOGGER.log(Level.SEVERE, "Cannot load image", e);
+			LOGGER.log(Level.SEVERE, "Cannot open '%s'".formatted(imageFile.getAbsolutePath()), e);
 		}
 	}
 
@@ -192,22 +192,22 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	private IAnalysisDataset makeSignalChildDataset()
 			throws MissingDataException, SegmentUpdateException {
 
-		Optional<ISignalGroup> og = dataset.getCollection()
+		final Optional<ISignalGroup> og = dataset.getCollection()
 				.getSignalGroup(options.getUUID(HashOptions.SIGNAL_GROUP_ID));
 
 		if (!og.isPresent())
 			return null;
 
-		ISignalGroup group = og.get();
+		final ISignalGroup group = og.get();
 		group.setVisible(true);
 
-		List<ICell> collection = dataset.getCollection().getSignalManager()
+		final List<ICell> collection = dataset.getCollection().getSignalManager()
 				.getCellsWithNuclearSignals(options.getUUID(HashOptions.SIGNAL_GROUP_ID), true);
 
 		if (collection.isEmpty())
 			return null;
 
-		VirtualDataset subDataset = new VirtualDataset(dataset,
+		final VirtualDataset subDataset = new VirtualDataset(dataset,
 				og.get().getGroupName() + "_with_signals", UUID.randomUUID());
 		subDataset.addAll(collection);
 

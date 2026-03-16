@@ -94,16 +94,16 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 	@Override
 	public List<INuclearSignal> findInFolder(@NonNull File folder) throws ImageImportException {
 
-		List<INuclearSignal> list = new ArrayList<>();
+		final List<INuclearSignal> list = new ArrayList<>();
 
 		if (folder.listFiles() == null)
 			return list;
 
-		for (File f : folder.listFiles()) {
+		for (final File f : folder.listFiles()) {
 			if (ImageImporter.isFileImportable(f)) {
 				try {
 					list.addAll(findInFile(f));
-				} catch (ImageImportException e) {
+				} catch (final ImageImportException e) {
 					LOGGER.log(Level.SEVERE, "Error searching image", e);
 				}
 			}
@@ -134,28 +134,28 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 	private List<INuclearSignal> detectPreview(@NonNull File imageFile)
 			throws ImageImportException {
 
-		List<INuclearSignal> list = new ArrayList<>();
+		final List<INuclearSignal> list = new ArrayList<>();
 
 		// Import the image processor
 		// Note we are checking stack size to avoid exceptions in the preview windows
 		// when the image does n
-		ImageStack stack = ImageImporter.importToStack(imageFile);
-		int stackNumber = ImageImporter.rgbToStack(signalOptions.getInt(HashOptions.CHANNEL));
+		final ImageStack stack = ImageImporter.importToStack(imageFile);
+		final int stackNumber = ImageImporter.rgbToStack(signalOptions.getInt(HashOptions.CHANNEL));
 		// Ignore incorrect channel selections
 		if (stack.getSize() < stackNumber) {
 			LOGGER.finer("Channel not present in image");
 			return list;
 		}
-		ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
+		final ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
 
 		// Convert to an RGB processor for annotation
-		ImageProcessor ip = new ImageConverter(greyProcessor).convertToRGBGreyscale().invert()
+		final ImageProcessor ip = new ImageConverter(greyProcessor).convertToRGBGreyscale().invert()
 				.toProcessor();
 
-		ImageProcessor ap = ip.duplicate();
+		final ImageProcessor ap = ip.duplicate();
 
-		ImageAnnotator in = new ImageAnnotator(ip);
-		ImageAnnotator an = new ImageAnnotator(ap);
+		final ImageAnnotator in = new ImageAnnotator(ip);
+		final ImageAnnotator an = new ImageAnnotator(ap);
 
 		// The given image file may not be the same image that the nucleus was
 		// detected in.
@@ -163,24 +163,24 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 		// This requires that the signal file name is identical to the dapi file
 		// name
 
-		String imageName = imageFile.getName();
-		File dapiFolder = options.getNucleusDetectionFolder().get();
+		final String imageName = imageFile.getName();
+		final File dapiFolder = options.getNucleusDetectionFolder().get();
 
-		File dapiFile = new File(dapiFolder, imageName);
+		final File dapiFile = new File(dapiFolder, imageName);
 
-		Set<Nucleus> nuclei = collection.getNuclei(dapiFile);
+		final Set<Nucleus> nuclei = collection.getNuclei(dapiFile);
 
 		int i = 0;
-		for (Nucleus n : nuclei) {
+		for (final Nucleus n : nuclei) {
 			try {
 
-				List<INuclearSignal> temp = new ArrayList<>();
-				int threshold = thresholdChooser.chooseThreshold(greyProcessor, n, signalOptions);
+				final List<INuclearSignal> temp = new ArrayList<>();
+				final int threshold = thresholdChooser.chooseThreshold(greyProcessor, n, signalOptions);
 
 				ImageProcessor gp = greyProcessor.duplicate();
 				gp.threshold(threshold);
 				if (hasDetectionListeners() && i == 0) {
-					ImageProcessor gpp = gp.duplicate();
+					final ImageProcessor gpp = gp.duplicate();
 					gpp.invert();
 					fireDetectionEvent(gpp, "Thresholded");
 				}
@@ -190,7 +190,7 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 							signalOptions.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
 
 					if (hasDetectionListeners() && i == 0) {
-						ImageProcessor gpp = gp.duplicate();
+						final ImageProcessor gpp = gp.duplicate();
 						gpp.invert();
 						fireDetectionEvent(gpp, "Gap closed");
 					}
@@ -199,20 +199,20 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 				if (signalOptions.getBoolean(HashOptions.IS_USE_WATERSHED)) {
 					gp = ImageFilterer.watershed(gp);
 					if (hasDetectionListeners()) {
-						ImageProcessor gpp = gp.duplicate();
+						final ImageProcessor gpp = gp.duplicate();
 						gpp.invert();
 						fireDetectionEvent(gpp, "Watershed");
 					}
 				}
 
-				Detector d = new Detector();
-				Map<Roi, IPoint> rois = d.getAllRois(gp);
+				final Detector d = new Detector();
+				final Map<Roi, IPoint> rois = d.getAllRois(gp);
 
-				for (Entry<Roi, IPoint> entry : rois.entrySet()) {
+				for (final Entry<Roi, IPoint> entry : rois.entrySet()) {
 
 					if (n.containsOriginalPoint(entry.getValue())) {
 
-						INuclearSignal s = factory.newBuilder()
+						final INuclearSignal s = factory.newBuilder()
 								.fromRoi(entry.getKey())
 								.withFile(imageFile)
 								.withChannel(signalOptions.getInt(HashOptions.CHANNEL))
@@ -230,14 +230,14 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 					drawSignals(n, temp, an, true);
 				}
 
-				for (INuclearSignal s : temp) {
+				for (final INuclearSignal s : temp) {
 					if (isValid(s, n)) {
 						list.add(s);
 					}
 				}
 				i++;
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error in signal detector", e);
 			}
 		}
@@ -255,10 +255,10 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 	private List<INuclearSignal> detectPipeline(@NonNull File imageFile)
 			throws ImageImportException {
 
-		List<INuclearSignal> list = new ArrayList<>();
+		final List<INuclearSignal> list = new ArrayList<>();
 
 		// Import the image processor
-		ImageProcessor greyProcessor = ImageImporter
+		final ImageProcessor greyProcessor = ImageImporter
 				.importImage(imageFile, signalOptions.getInt(HashOptions.CHANNEL));
 
 		// The given image file may not be the same image that the nucleus was
@@ -267,19 +267,19 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 		// This requires that the signal file name is identical to the dapi file
 		// name
 
-		String imageName = imageFile.getName();
-		File dapiFolder = options.getNucleusDetectionFolder().get();
+		final String imageName = imageFile.getName();
+		final File dapiFolder = options.getNucleusDetectionFolder().get();
 
-		File dapiFile = new File(dapiFolder, imageName);
+		final File dapiFile = new File(dapiFolder, imageName);
 
 		// Get the nuclei corresponding to the DAPI image
-		Set<Nucleus> nuclei = collection.getNuclei(dapiFile);
+		final Set<Nucleus> nuclei = collection.getNuclei(dapiFile);
 
-		for (Nucleus n : nuclei) {
+		for (final Nucleus n : nuclei) {
 			try {
 
 				// Since thresholding can be unique for each nucleus, we duplicate the processor
-				int threshold = thresholdChooser.chooseThreshold(greyProcessor, n, signalOptions);
+				final int threshold = thresholdChooser.chooseThreshold(greyProcessor, n, signalOptions);
 
 				ImageProcessor ip = greyProcessor.duplicate();
 				ip.threshold(threshold);
@@ -289,12 +289,12 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 							signalOptions.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
 				}
 
-				Detector d = new Detector();
-				Map<Roi, IPoint> rois = d.getValidRois(ip, signalOptions, n);
+				final Detector d = new Detector();
+				final Map<Roi, IPoint> rois = d.getValidRois(ip, signalOptions, n);
 
-				for (Entry<Roi, IPoint> entry : rois.entrySet()) {
+				for (final Entry<Roi, IPoint> entry : rois.entrySet()) {
 
-					INuclearSignal s = factory.newBuilder()
+					final INuclearSignal s = factory.newBuilder()
 							.fromRoi(entry.getKey())
 							.withFile(imageFile)
 							.withChannel(signalOptions.getInt(HashOptions.CHANNEL))
@@ -305,8 +305,8 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 
 				}
 
-			} catch (Exception e) {
-				LOGGER.log(Level.SEVERE, "Error in detector", e);
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, "Error in nucleus signal detector: %s".formatted(e.getMessage()), e);
 			}
 		}
 		return list;
@@ -325,8 +325,8 @@ public class SignalFinder extends AbstractFinder<INuclearSignal> {
 			boolean annotateStats) {
 
 		an.drawBorder(n, Color.BLUE);
-		for (INuclearSignal s : list) {
-			Color color = isValid(s, n) ? Color.ORANGE : Color.RED;
+		for (final INuclearSignal s : list) {
+			final Color color = isValid(s, n) ? Color.ORANGE : Color.RED;
 			an.drawBorder(s, color);
 			if (annotateStats) {
 				an.annotateSignalStats(n, s, Color.YELLOW, Color.BLUE);
