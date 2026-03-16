@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -47,20 +46,20 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 	private static final Logger LOGGER = Logger.getLogger(CellsListPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Cell list";
-	private JTree tree;
+	private final JTree tree;
 
 	public CellsListPanel(CellViewModel model) {
 		super(model, PANEL_TITLE_LBL);
 		this.setLayout(new BorderLayout());
 
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
-		TreeModel treeModel = new DefaultTreeModel(root);
+		final DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
+		final TreeModel treeModel = new DefaultTreeModel(root);
 		tree = new JTree(treeModel);
 		tree.addTreeSelectionListener(this);
 
 		tree.setEnabled(false);
-		JScrollPane scrollPane = new JScrollPane(tree);
-		Dimension size = new Dimension(120, 200);
+		final JScrollPane scrollPane = new JScrollPane(tree);
+		final Dimension size = new Dimension(120, 200);
 		scrollPane.setMinimumSize(size);
 		scrollPane.setPreferredSize(size);
 
@@ -74,22 +73,22 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 	 */
 	@Override
 	protected void updateSingle() {
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
+		final DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
 
 		createNodes(root, activeDataset());
 		tree.setEnabled(true);
 
-		TreeModel model = new DefaultTreeModel(root);
+		final TreeModel model = new DefaultTreeModel(root);
 
 		tree.removeTreeSelectionListener(this);
 		tree.setModel(model);
 
 		// If a cell is still active in view, select it in the list
 		if (this.getCellModel().hasCell()) {
-			DefaultMutableTreeNode node = getNode(this.getCellModel().getCell());
+			final DefaultMutableTreeNode node = getNode(this.getCellModel().getCell());
 
 			if (node != null) {
-				TreePath path = new TreePath(node.getPath());
+				final TreePath path = new TreePath(node.getPath());
 
 				tree.setSelectionPath(path);
 			}
@@ -106,11 +105,11 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 
 	@Override
 	protected void updateNull() {
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
+		final DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
 
 		tree.setEnabled(false);
 
-		TreeModel model = new DefaultTreeModel(root);
+		final TreeModel model = new DefaultTreeModel(root);
 
 		tree.removeTreeSelectionListener(this);
 		tree.setModel(model);
@@ -127,13 +126,13 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 		if (dataset == null)
 			return;
 
-		List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
+		final List<ICell> cells = new ArrayList<>(dataset.getCollection().getCells());
 		Collections.sort(cells);
 
-		for (ICell cell : cells) {
+		for (final ICell cell : cells) {
 
-			String name = cell.getNuclei().get(0).getNameAndNumber();
-			UUID id = cell.getId();
+			final String name = cell.getNuclei().get(0).getNameAndNumber();
+			final UUID id = cell.getId();
 
 			root.add(new DefaultMutableTreeNode(new NodeData(name, id)));
 		}
@@ -141,14 +140,13 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 	}
 
 	private DefaultMutableTreeNode getNode(ICell cell) {
-		DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
+		final DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
 
 		for (int i = 0; i < root.getChildCount() - 1; i++) {
-			DefaultMutableTreeNode n = (DefaultMutableTreeNode) root.getChildAt(i);
-			NodeData data = (NodeData) n.getUserObject();
-			if (data.getID().equals(cell.getId())) {
+			final DefaultMutableTreeNode n = (DefaultMutableTreeNode) root.getChildAt(i);
+			final NodeData data = (NodeData) n.getUserObject();
+			if (data.getID().equals(cell.getId()))
 				return n;
-			}
 		}
 		return null;
 	}
@@ -163,7 +161,7 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 			this.name = name;
 			this.id = id;
 			if (!name.equals("Cells")) {
-				String[] array = name.split("\\.\\w+-"); // remove file
+				final String[] array = name.split("\\.\\w+-"); // remove file
 															// extension and dash,
 															// leaving filename and
 															// nucleus number
@@ -171,7 +169,7 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 
 				try {
 					nucleusNumber = Integer.valueOf(array[1]);
-				} catch (NumberFormatException e) {
+				} catch (final NumberFormatException e) {
 					// Not the expected format of xxxx.tif-01
 					// Maybe single nucleus images - xxxx.tif-01-uuid
 					// Try parsing it out
@@ -191,10 +189,9 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 
 		@Override
 		public String toString() {
-			if (name.equals("Cells")) {
+			if (name.equals("Cells"))
 				return name;
-			}
-			NumberFormat df = DecimalFormat.getInstance();
+			final NumberFormat df = DecimalFormat.getInstance();
 			df.setMaximumFractionDigits(0);
 			df.setMinimumIntegerDigits(2);
 			return imageName + "-" + df.format(nucleusNumber);
@@ -204,24 +201,20 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
 
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) arg0.getPath().getLastPathComponent();
-		NodeData data = (NodeData) node.getUserObject();
-
-		UUID cellID = data.getID();
+		final DefaultMutableTreeNode node = (DefaultMutableTreeNode) arg0.getPath().getLastPathComponent();
+		final NodeData data = (NodeData) node.getUserObject();
 
 		if (this.isSingleDataset()) {
 			try {
 
-				if (cellID != null) { // only null for root
-					this.getCellModel().setCell(activeDataset().getCollection().getCell(cellID));
-
-				} else {
+				if (null == data.id) { // only null for root
 					this.getCellModel().setCell(null);
+				} else {
+					this.getCellModel().setCell(activeDataset().getCollection().getCell(data.id));
 				}
 
-			} catch (Exception e1) {
-				LOGGER.log(Level.WARNING, "Error fetching cell");
-				LOGGER.log(Level.SEVERE, "Error fetching cell", e1);
+			} catch (final Exception e1) {
+				LOGGER.log(Level.SEVERE, "Error fetching cell %s: %s".formatted(data.name, e1.getMessage()), e1);
 			}
 		}
 

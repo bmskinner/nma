@@ -115,9 +115,8 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 		}
 
 		if (imageFolders.isEmpty())
-			throw new AnalysisPipelineException("Image folder "
-					+ rootFolder.getAbsolutePath() +
-					" contains no importable images");
+			throw new AnalysisPipelineException(
+					"Image folder '%s' contains no importable images".formatted(rootFolder.getAbsolutePath()));
 
 	}
 
@@ -128,10 +127,12 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 	 * @param folder the folder to test
 	 */
 	private void addImageSubfolders(File folder) {
-		for (File f : folder.listFiles()) {
+		for (final File f : folder.listFiles()) {
 			if (f.isDirectory()) {
-				if (Importer.containsImportableImageFiles(f))
+				if (Importer.containsImportableImageFiles(f)) {
+					LOGGER.info("Detected image file '%s'".formatted(f.getAbsolutePath()));
 					imageFolders.add(f);
+				}
 				addImageSubfolders(f);
 			}
 		}
@@ -164,17 +165,18 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 		if (!rootFolder.exists())
 			throw new IllegalArgumentException("Detection folder does not exist");
 
-		IAnalysisOptions options = XMLReader.readAnalysisOptions(xmlFile);
+		final IAnalysisOptions options = XMLReader.readAnalysisOptions(xmlFile);
 
-		if (outputFolder == null)
+		if (outputFolder == null) {
 			outputFolder = createOutputFolder(options);
+		}
 
-		LOGGER.fine("Output to " + outputFolder.getAbsolutePath());
+		LOGGER.finer("Output to '%s'".formatted(outputFolder.getAbsolutePath()));
 
 		// Analyse each folder
-		for (File imageFolder : imageFolders) {
+		for (final File imageFolder : imageFolders) {
 			if (options.hasDetectionOptions(CellularComponent.NUCLEUS)) {
-				List<IAnalysisDataset> datasets = createNucleusDetectionMethod(options,
+				final List<IAnalysisDataset> datasets = createNucleusDetectionMethod(options,
 						imageFolder);
 				createRefoldingMethod(datasets);
 				createSignalDetectionMethods(datasets, options, imageFolder);
@@ -182,8 +184,9 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 				createDimensionalityReductionMethods(datasets, options);
 				createClusteringMethods(datasets, options);
 
-				for (IAnalysisDataset dataset : datasets)
+				for (final IAnalysisDataset dataset : datasets) {
 					methodsToRun.add(new DatasetExportMethod(dataset, dataset.getSavePath()));
+				}
 
 				allDatasets.addAll(datasets);
 			}
@@ -194,9 +197,9 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 	private List<IAnalysisDataset> createNucleusDetectionMethod(@NonNull IAnalysisOptions options,
 			File imageFolder) throws Exception {
 		options.setDetectionFolder(CellularComponent.NUCLEUS, imageFolder);
-		List<IAnalysisDataset> datasets = new NucleusDetectionMethod(outputFolder, options).call()
+		final List<IAnalysisDataset> datasets = new NucleusDetectionMethod(outputFolder, options).call()
 				.getDatasets();
-		for (IAnalysisDataset dataset : datasets) {
+		for (final IAnalysisDataset dataset : datasets) {
 			methodsToRun.add(new DefaultDatasetProfilingMethod(dataset));
 			methodsToRun.add(new DatasetSegmentationMethod(dataset,
 					MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH));
@@ -212,7 +215,7 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 	 * @throws Exception
 	 */
 	private void createRefoldingMethod(List<IAnalysisDataset> datasets) {
-		for (IAnalysisDataset dataset : datasets) {
+		for (final IAnalysisDataset dataset : datasets) {
 			if (dataset.getCollection().getRuleSetCollection()
 					.equals(RuleSetCollection.roundRuleSetCollection())) {
 				createAveragingMethod(datasets);
@@ -223,12 +226,14 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 	}
 
 	private void createAveragingMethod(List<IAnalysisDataset> datasets) {
-		for (IAnalysisDataset dataset : datasets) {
-			if (!dataset.getCollection().hasConsensus())
+		for (final IAnalysisDataset dataset : datasets) {
+			if (!dataset.getCollection().hasConsensus()) {
 				methodsToRun.add(new ConsensusAveragingMethod(dataset));
-			for (IAnalysisDataset d : dataset.getAllChildDatasets())
-				if (!d.getCollection().hasConsensus())
+			}
+			for (final IAnalysisDataset d : dataset.getAllChildDatasets())
+				if (!d.getCollection().hasConsensus()) {
 					methodsToRun.add(new ConsensusAveragingMethod(d));
+				}
 		}
 	}
 
@@ -242,22 +247,23 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 	private void createSignalDetectionMethods(List<IAnalysisDataset> datasets,
 			@NonNull IAnalysisOptions options, File imageFolder) throws MissingOptionException {
 
-		for (IAnalysisDataset dataset : datasets) {
+		for (final IAnalysisDataset dataset : datasets) {
 			// Add signals
 			boolean checkShell = true;
 			HashOptions shellOptions = null;
 
-			IAnalysisOptions datasetOptions = dataset.getAnalysisOptions().get();
+			final IAnalysisOptions datasetOptions = dataset.getAnalysisOptions().get();
 
-			for (UUID signalGroupId : options.getNuclearSignalGroups()) {
+			for (final UUID signalGroupId : options.getNuclearSignalGroups()) {
 
-				HashOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId)
+				final HashOptions signalOptions = datasetOptions.getNuclearSignalOptions(signalGroupId)
 						.orElseThrow(MissingOptionException::new);
 
 				methodsToRun.add(new SignalDetectionMethod(dataset, signalOptions, imageFolder));
 				if (checkShell) {
-					if (signalOptions.hasBoolean(HashOptions.SHELL_COUNT_INT))
+					if (signalOptions.hasBoolean(HashOptions.SHELL_COUNT_INT)) {
 						shellOptions = signalOptions;
+					}
 					checkShell = false;
 				}
 			}
@@ -280,27 +286,27 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 	private void createDimensionalityReductionMethods(List<IAnalysisDataset> datasets,
 			@NonNull IAnalysisOptions options) {
 		// Get all the sub-options starting with the cluster options key
-		List<HashOptions> clusterOptions = options.getSecondaryOptionKeys().stream()
+		final List<HashOptions> clusterOptions = options.getSecondaryOptionKeys().stream()
 				.filter(s -> s.startsWith(HashOptions.CLUSTER_SUB_OPTIONS_KEY))
 				.map(s -> options.getSecondaryOptions(s).orElseThrow())
 				.collect(Collectors.toList());
 
-		for (HashOptions ops : clusterOptions) {
+		for (final HashOptions ops : clusterOptions) {
 
 			if (ops.getBoolean(HashOptions.CLUSTER_USE_PCA_KEY)) {
-				for (IAnalysisDataset dataset : datasets) {
+				for (final IAnalysisDataset dataset : datasets) {
 					methodsToRun.add(new PrincipalComponentAnalysis(dataset, ops));
 				}
 			}
 
 			if (ops.getBoolean(HashOptions.CLUSTER_USE_TSNE_KEY)) {
-				for (IAnalysisDataset dataset : datasets) {
+				for (final IAnalysisDataset dataset : datasets) {
 					methodsToRun.add(new TsneMethod(dataset, ops));
 				}
 			}
 
 			if (ops.getBoolean(HashOptions.CLUSTER_USE_UMAP_KEY)) {
-				for (IAnalysisDataset dataset : datasets) {
+				for (final IAnalysisDataset dataset : datasets) {
 					methodsToRun.add(new UMAPMethod(dataset, ops));
 				}
 			}
@@ -312,14 +318,14 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 			@NonNull IAnalysisOptions options) throws Exception {
 
 		// Get all the sub-options starting with the cluster options key
-		List<HashOptions> clusterOptions = options.getSecondaryOptionKeys().stream()
+		final List<HashOptions> clusterOptions = options.getSecondaryOptionKeys().stream()
 				.filter(s -> s.startsWith(HashOptions.CLUSTER_SUB_OPTIONS_KEY))
 				.map(s -> options.getSecondaryOptions(s).orElseThrow())
 				.collect(Collectors.toList());
 
-		for (HashOptions ops : clusterOptions) {
+		for (final HashOptions ops : clusterOptions) {
 			LOGGER.fine("Adding clustering option");
-			for (IAnalysisDataset dataset : datasets) {
+			for (final IAnalysisDataset dataset : datasets) {
 				methodsToRun.add(new NucleusClusteringMethod(dataset, ops));
 			}
 		}
@@ -327,14 +333,14 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 
 	private File createOutputFolder(@NonNull IAnalysisOptions options) {
 		LOGGER.fine("Making output folder name");
-		Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
-		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
-		String outputFolderName = anTime.format(DateTimeFormatter.ofPattern(DATE_FORMAT));
+		final Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
+		final LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
+		final String outputFolderName = anTime.format(DateTimeFormatter.ofPattern(DATE_FORMAT));
 		return new File(rootFolder, outputFolderName);
 	}
 
 	private void run(@NonNull List<IAnalysisMethod> methods) throws Exception {
-		for (IAnalysisMethod method : methods) {
+		for (final IAnalysisMethod method : methods) {
 			method.addProgressListener(this);
 			method.call();
 			method.removeProgressListener(this);

@@ -117,7 +117,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
 	protected void run() throws MissingOptionException {
 
-		LOGGER.fine(() -> "Beginning signal detection in channel %d".formatted(channel));
+		LOGGER.fine("Beginning signal detection in channel %d".formatted(channel));
 
 		final int originalMinThreshold = options.getInt(HashOptions.THRESHOLD);
 
