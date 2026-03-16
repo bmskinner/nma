@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -56,9 +55,9 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @return
 	 */
 	public static boolean areVertical(@NonNull IPoint topPoint, @NonNull IPoint bottomPoint) {
-		double err = bottomPoint.getX() - topPoint.getX();
-		boolean xEqual = (Math.abs(err) < 0.0001);
-		boolean yAbove = topPoint.getY() > bottomPoint.getY();
+		final double err = bottomPoint.getX() - topPoint.getX();
+		final boolean xEqual = (Math.abs(err) < 0.0001);
+		final boolean yAbove = topPoint.getY() > bottomPoint.getY();
 		return xEqual & yAbove;
 	}
 
@@ -69,7 +68,7 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @return
 	 */
 	private static List<Field> getInheritedPrivateFields(Class<?> type) {
-		List<Field> result = new ArrayList<>();
+		final List<Field> result = new ArrayList<>();
 
 		Class<?> i = type;
 		while (i != null && i != Object.class) {
@@ -88,8 +87,8 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 * @return
 	 */
 	protected static Field getInheritedField(Class<?> type, String name) {
-		List<Field> fields = getInheritedPrivateFields(type);
-		for (Field f : fields)
+		final List<Field> fields = getInheritedPrivateFields(type);
+		for (final Field f : fields)
 			if (f.getName().equals(name)) {
 				f.setAccessible(true);
 				return f;
@@ -114,61 +113,80 @@ public abstract class ComponentTester extends FloatArrayTester {
 			Set<String> fieldsToSkip, boolean includeEqualsTest)
 			throws Exception {
 
-		for (Field f : getInheritedPrivateFields(dup.getClass())) {
+		for (final Field f : getInheritedPrivateFields(dup.getClass())) {
 
-			if (f.getName().equals("this$0")) // skip self recursion
+			if (f.getName().equals("this$0")) { // skip self recursion
 				fieldsToSkip.add(f.getName());
+			}
 
-			if (f.getName().equals("parentDataset")) // skip dataset recursion
+			if (f.getName().equals("parentDataset")) { // skip dataset recursion
 				fieldsToSkip.add(f.getName());
+			}
 
-			if (f.getName().equals("listeners")) // skip event listener recursion
+			if (f.getName().equals("listeners")) { // skip event listener recursion
 				fieldsToSkip.add(f.getName());
+			}
 
-			if (fieldsToSkip.contains(f.getName()))
+			if (fieldsToSkip.contains(f.getName())) {
 				continue;
+			}
 
-			if (Modifier.isStatic(f.getModifiers())) // ignore static fields
+			if (Modifier.isStatic(f.getModifiers())) { // ignore static fields
 				continue;
+			}
 
-			if (Modifier.isTransient(f.getModifiers())) // ignore transient fields
+			if (Modifier.isTransient(f.getModifiers())) { // ignore transient fields
 				continue;
+			}
 
 			f.setAccessible(true);
 			// Skip classes we don't need to compare for equality testing
 
-			if (f.getType().equals(SoftReference.class))
+			if (f.getType().equals(SoftReference.class)) {
 				continue;
-			if (f.getType().equals(WeakReference.class))
+			}
+			if (f.getType().equals(WeakReference.class)) {
 				continue;
-			if (f.getType().equals(Class.forName(
-					"com.bmskinner.nma.components.datasets.DefaultCellCollection$DefaultProfileCollection$ProfileCache")))
+			}
+			if (f.getType().getName().equals(
+					"com.bmskinner.nma.components.profiles.ProfileCache")) {
 				continue;
-			if (f.getType().equals(Class.forName(
-					"com.bmskinner.nma.components.datasets.VirtualDataset$DefaultProfileCollection$ProfileCache")))
+			}
+			if (f.getType().getName().equals(
+					"com.bmskinner.nma.components.datasets.DefaultCellCollection$DefaultProfileCollection$ProfileCache")) {
 				continue;
-			if (f.getType()
-					.equals(Class.forName("com.bmskinner.nma.components.measure.MeasurementCache")))
+			}
+			if (f.getType().getName().equals(
+					"com.bmskinner.nma.components.datasets.VirtualDataset$DefaultProfileCollection$ProfileCache")) {
 				continue;
-			if (f.getType().equals(Class.forName("com.bmskinner.nma.components.measure.VennCache")))
+			}
+			if (f.getType().getName()
+					.equals("com.bmskinner.nma.components.measure.MeasurementCache")) {
 				continue;
-			if (f.getType()
-					.equals(Class.forName("com.bmskinner.nma.components.signals.SignalManager")))
+			}
+			if (f.getType().getName().equals("com.bmskinner.nma.components.measure.VennCache")) {
 				continue;
-			if (f.getType()
-					.equals(Class.forName("com.bmskinner.nma.components.profiles.ProfileManager")))
+			}
+			if (f.getType().getName()
+					.equals("com.bmskinner.nma.components.signals.SignalManager")) {
 				continue;
+			}
+			if (f.getType().getName()
+					.equals("com.bmskinner.nma.components.profiles.ProfileManager")) {
+				continue;
+			}
 
-			Object oValue = f.get(original);
-			Object dValue = f.get(dup);
+			final Object oValue = f.get(original);
+			final Object dValue = f.get(dup);
 
 			// Avoid self referential recursion
-			if (original == oValue)
+			if (original == oValue) {
 				continue;
+			}
 
 			if (oValue != null && dValue != null) {
 
-				Class<?> oClass = oValue.getClass();
+				final Class<?> oClass = oValue.getClass();
 				if (SPECIAL_CLASSES.contains(oClass)) {
 
 					if (oClass.equals(Map.class) || oClass.equals(ConcurrentHashMap.class)
@@ -187,41 +205,39 @@ public abstract class ComponentTester extends FloatArrayTester {
 								fieldsToSkip, includeEqualsTest);
 					}
 
-				} else {
-
-					// Don't try to compare classes I didn't write
-					// and don't try to unpack enums. In these cases, just
-					// do a direct equality test
-					if (f.getType().getName().startsWith("com.bmskinner.nma")
-							&& !f.getType().isEnum()) {
-						try {
-							testDuplicatesByField(msg + "->" + f.getName(), oValue, dValue,
-									fieldsToSkip, includeEqualsTest);
-						} catch (StackOverflowError e) {
-							String msg2 = "Field '" + f.getName() + "' of type "
-									+ f.getType().getName() + " and class "
-									+ oClass.getName() + " had a stack overflow on value: " + oValue
-									+ " Expected: "
-									+ original + " Found: " + dup;
-							fail(msg + " " + msg2);
-						}
-					} else {
-						String msg2 = "Field '" + f.getName() + "' of type " + f.getType().getName()
-								+ " and class "
-								+ oClass.getName() + " does not match in original object "
-								+ original.getClass().getSimpleName() + ": " + "Expected: "
-								+ original + "Found: "
-								+ dup;
-						assertThat(msg + " " + msg2, dValue, equalTo(oValue));
+				} else // Don't try to compare classes I didn't write
+				// and don't try to unpack enums. In these cases, just
+				// do a direct equality test
+				if (f.getType().getName().startsWith("com.bmskinner.nma")
+						&& !f.getType().isEnum()) {
+					try {
+						testDuplicatesByField(msg + "->" + f.getName(), oValue, dValue,
+								fieldsToSkip, includeEqualsTest);
+					} catch (final StackOverflowError e) {
+						final String msg2 = "Field '" + f.getName() + "' of type "
+								+ f.getType().getName() + " and class "
+								+ oClass.getName() + " had a stack overflow on value: " + oValue
+								+ " Expected: "
+								+ original + " Found: " + dup;
+						fail(msg + " " + msg2);
 					}
+				} else {
+					final String msg2 = "Field '" + f.getName() + "' of type " + f.getType().getName()
+							+ " and class "
+							+ oClass.getName() + " does not match in original object "
+							+ original.getClass().getSimpleName() + ": " + "Expected: "
+							+ original + "Found: "
+							+ dup;
+					assertThat(msg + " " + msg2, dValue, equalTo(oValue));
 				}
 			}
 
 		}
 
-		if (includeEqualsTest)
+		if (includeEqualsTest) {
 			assertEquals(msg + " Equals method in " + original.getClass().getSimpleName(), original,
 					dup);
+		}
 	}
 
 	// Issue with arrays in hashmaps: Object.hashcode()
@@ -234,16 +250,17 @@ public abstract class ComponentTester extends FloatArrayTester {
 				+ "'; original: " + o
 				+ " duplicate: " + d, o.size(), d.size());
 
-		List<Class<?>> arrayClasses = List.of(byte[].class, float[].class, long[].class,
+		final List<Class<?>> arrayClasses = List.of(byte[].class, float[].class, long[].class,
 				int[].class,
 				double[].class);
 
-		for (Object e : o.keySet()) {
-			Object v0 = o.get(e);
-			Object v1 = d.get(e);
+		for (final Object e : o.keySet()) {
+			final Object v0 = o.get(e);
+			final Object v1 = d.get(e);
 
-			if (v0 == null || v1 == null)
+			if (v0 == null || v1 == null) {
 				continue;
+			}
 
 			if (arrayClasses.contains(v0.getClass())) {
 				long oHash = 0;
@@ -287,9 +304,10 @@ public abstract class ComponentTester extends FloatArrayTester {
 		assertTrue(msg + " Hashsets should not both be null", o != null && d != null);
 		assertEquals(msg + " Hashsets should contain same number of elements", o.size(), d.size());
 
-		for (Object v0 : o) {
-			if (v0 == null)
+		for (final Object v0 : o) {
+			if (v0 == null) {
 				continue;
+			}
 			assertTrue(msg + " Field '" + f.getName() + "' should contain element " + v0.toString()
 					+ " but does not; set is: " + d, d.contains(v0));
 		}
@@ -328,9 +346,10 @@ public abstract class ComponentTester extends FloatArrayTester {
 			}
 		}
 
-		if (includeEqualsTest)
+		if (includeEqualsTest) {
 			assertTrue(msg + " Field '" + f.getName() + "' all elements should be shared in list",
 					o.containsAll(d));
+		}
 	}
 
 	/**
@@ -344,13 +363,13 @@ public abstract class ComponentTester extends FloatArrayTester {
 	 */
 	public static void testDuplicatesByField(String msg, Object original, Object dup)
 			throws Exception {
-		Set<String> fieldsToSkip = new HashSet<>();
+		final Set<String> fieldsToSkip = new HashSet<>();
 		testDuplicatesByField(msg, original, dup, fieldsToSkip, true);
 	}
 
 	public static boolean shapesEqual(Shape s, Shape d) {
-		List<double[]> sr = convertShape(s);
-		List<double[]> tr = convertShape(d);
+		final List<double[]> sr = convertShape(s);
+		final List<double[]> tr = convertShape(d);
 
 		assertEquals("Shape lengths should match", sr.size(), tr.size());
 
@@ -362,11 +381,11 @@ public abstract class ComponentTester extends FloatArrayTester {
 	}
 
 	private static List<double[]> convertShape(Shape s) {
-		PathIterator it = s.getPathIterator(null);
-		List<double[]> result = new ArrayList<>();
+		final PathIterator it = s.getPathIterator(null);
+		final List<double[]> result = new ArrayList<>();
 		while (!it.isDone()) {
-			double[] vals = new double[6];
-			int t = it.currentSegment(vals);
+			final double[] vals = new double[6];
+			final int t = it.currentSegment(vals);
 			vals[5] = t;
 			result.add(vals);
 			it.next();
