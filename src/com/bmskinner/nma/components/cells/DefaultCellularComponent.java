@@ -156,7 +156,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 *                     image
 	 */
 	protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source,
-			int channel) {
+			int channel) throws ComponentCreationException {
 
 		// If we have no UUID given, can we create a deterministic UUID from the roi and
 		// CoM?
@@ -177,7 +177,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @param id           the id of the component. Only use when deserialising!
 	 */
 	protected DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source,
-			int channel, @Nullable UUID id) {
+			int channel, @Nullable UUID id) throws ComponentCreationException {
 
 		// Sanity check: is the CoM inside the roi
 		if (!doesRoiMatchCom(roi, centreOfMass))
@@ -200,7 +200,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		this.xpoints = Arrays.copyOfRange(polygon.xpoints, 0, polygon.npoints);
 		this.ypoints = Arrays.copyOfRange(polygon.ypoints, 0, polygon.npoints);
 
+		try {
 		makeBorderList();
+		} catch (final Exception e) {
+			LOGGER.fine("Unable to create an object: %s".formatted(e.getMessage()));
+			throw new ComponentCreationException(e);
+		}
 	}
 
 	/**

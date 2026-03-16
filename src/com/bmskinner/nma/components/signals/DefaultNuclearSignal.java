@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.components.XMLNames;
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.cells.DefaultCellularComponent;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.io.XmlSerializable;
@@ -42,12 +43,12 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 	private int closestNuclearBorderPoint;
 
 	public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f,
-			int channel, @NonNull UUID id) {
+			int channel, @NonNull UUID id) throws ComponentCreationException {
 		super(roi, centreOfMass, f, channel, id);
 	}
 
 	public DefaultNuclearSignal(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f,
-			int channel) {
+			int channel) throws ComponentCreationException {
 		super(roi, centreOfMass, f, channel);
 	}
 
@@ -90,7 +91,7 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 
 	@Override
 	@NonNull public Element toXmlElement() {
-		Element e = super.toXmlElement().setName(XMLNames.XML_SIGNAL);
+		final Element e = super.toXmlElement().setName(XMLNames.XML_SIGNAL);
 		e.addContent(
 				new Element(XMLNames.XML_SIGNAL_CLOSEST_BORDER)
 						.setText(String.valueOf(closestNuclearBorderPoint)));
@@ -113,7 +114,7 @@ public class DefaultNuclearSignal extends DefaultCellularComponent implements IN
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DefaultNuclearSignal other = (DefaultNuclearSignal) obj;
+		final DefaultNuclearSignal other = (DefaultNuclearSignal) obj;
 		return closestNuclearBorderPoint == other.closestNuclearBorderPoint;
 	}
 }

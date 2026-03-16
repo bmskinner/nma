@@ -21,6 +21,7 @@ package com.bmskinner.nma.samples.dummy;
 
 import java.io.File;
 
+import com.bmskinner.nma.components.cells.ComponentCreationException;
 import com.bmskinner.nma.components.generic.FloatPoint;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.signals.DefaultNuclearSignal;
@@ -77,7 +78,7 @@ public class DummyNuclearSignal extends DefaultNuclearSignal {
 	public static final double PERIMETER = 347.02;
 	public static final double MIN_DIAMETER = 53.14;
 
-	public DummyNuclearSignal() {
+	public DummyNuclearSignal() throws ComponentCreationException {
 		super(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL);
 	}
 

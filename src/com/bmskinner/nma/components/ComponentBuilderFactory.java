@@ -145,22 +145,24 @@ public class ComponentBuilderFactory {
 			}
 
 			public Nucleus build() throws ComponentCreationException {
-				Rectangle bounds = roi.getBounds();
+				final Rectangle bounds = roi.getBounds();
 
-				if (original == null)
+				if (original == null) {
 					original = new int[] { (int) roi.getXBase(), (int) roi.getYBase(),
 							(int) bounds.getWidth(),
 							(int) bounds.getHeight() };
+				}
 
-				if (id == null)
+				if (id == null) {
 					id = UUID.randomUUID();
+				}
 
-				int number = nucleusCount++;
+				final int number = nucleusCount++;
 
-				Nucleus n = new DefaultNucleus(roi, com, file, channel, number, rsc);
+				final Nucleus n = new DefaultNucleus(roi, com, file, channel, number, rsc);
 
 				if (isOffset) {
-					IPoint offsetCoM = new FloatPoint(com.getX() - (int) roi.getXBase(),
+					final IPoint offsetCoM = new FloatPoint(com.getX() - (int) roi.getXBase(),
 							com.getY() - (int) roi.getYBase());
 					n.moveCentreOfMass(offsetCoM);
 				}
@@ -198,11 +200,11 @@ public class ComponentBuilderFactory {
 			}
 
 			private Roi toRoi(List<IPoint> list) {
-				float[] xpoints = new float[list.size()];
-				float[] ypoints = new float[list.size()];
+				final float[] xpoints = new float[list.size()];
+				final float[] ypoints = new float[list.size()];
 
 				for (int i = 0; i < list.size(); i++) {
-					IPoint p = list.get(i);
+					final IPoint p = list.get(i);
 					xpoints[i] = (float) p.getX();
 					ypoints[i] = (float) p.getY();
 				}
@@ -211,8 +213,8 @@ public class ComponentBuilderFactory {
 				// during object creation may disrupt the border. Ensure the spacing
 				// is corrected to something larger. This is the reverse of the
 				// smoothing carried out in component creation.
-				Roi r = new PolygonRoi(xpoints, ypoints, Roi.POLYGON);
-				FloatPolygon smoothed = r.getInterpolatedPolygon(2, false);
+				final Roi r = new PolygonRoi(xpoints, ypoints, Roi.POLYGON);
+				final FloatPolygon smoothed = r.getInterpolatedPolygon(2, false);
 				return new PolygonRoi(smoothed.xpoints, smoothed.ypoints, Roi.POLYGON);
 			}
 
@@ -290,11 +292,12 @@ public class ComponentBuilderFactory {
 				return this;
 			}
 
-			public INuclearSignal build() {
-				if (id == null)
+			public INuclearSignal build() throws ComponentCreationException {
+				if (id == null) {
 					id = UUID.randomUUID();
+				}
 
-				INuclearSignal s = new DefaultNuclearSignal(roi, com, file, channel, id);
+				final INuclearSignal s = new DefaultNuclearSignal(roi, com, file, channel, id);
 
 				s.setScale(scale);
 

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertArrayEquals;
 
 import java.io.File;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import org.junit.Test;
 
@@ -21,7 +20,6 @@ import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.components.signals.DefaultNuclearSignal;
 import com.bmskinner.nma.components.signals.INuclearSignal;
-
 
 import ij.gui.OvalRoi;
 import ij.gui.PolygonRoi;
@@ -102,10 +100,10 @@ public class TestComponentFactory {
 
 		for (int i = 0; i < (w + h) * 2; i++) {
 
-			int x = i <= w ? i : i <= w + h ? w : i <= w + h + w ? w + h + w - i : 0;
+			final int x = i <= w ? i : i <= w + h ? w : i <= w + h + w ? w + h + w - i : 0;
 			xpoints[i] = x + xBase;
 
-			int y = i <= w ? 0 : i <= w + h ? i - w : i <= w + h + w ? h : (w + h + w + h - i);
+			final int y = i <= w ? 0 : i <= w + h ? i - w : i <= w + h + w ? h : (w + h + w + h - i);
 			ypoints[i] = y + yBase;
 		}
 
@@ -113,11 +111,11 @@ public class TestComponentFactory {
 		xpoints = offsetArray(xpoints, fixedStartOffset);
 		ypoints = offsetArray(ypoints, fixedStartOffset);
 
-		Roi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
-		IPoint com = new FloatPoint(xBase + (w / 2), yBase + (h / 2));
+		final Roi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+		final IPoint com = new FloatPoint(xBase + (w / 2), yBase + (h / 2));
 
-		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
-		Nucleus n = createNucleus(roi, com, f, 0, 0, rsc);
+		final File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
+		final Nucleus n = createNucleus(roi, com, f, 0, 0, rsc);
 		n.rotate(rotation);
 
 		// Note - the roi interpolation will smooth corners
@@ -133,8 +131,8 @@ public class TestComponentFactory {
 			throw new ComponentCreationException(
 					"Offset cannot be less than zero or more than perimeter: " + fixedStartOffset);
 
-		Roi r = new OvalRoi(xBase, yBase, w, h);
-		FloatPolygon smoothed = r.getInterpolatedPolygon(2, false);
+		final Roi r = new OvalRoi(xBase, yBase, w, h);
+		final FloatPolygon smoothed = r.getInterpolatedPolygon(2, false);
 		float[] xpoints = smoothed.xpoints;
 		float[] ypoints = smoothed.ypoints;
 
@@ -142,12 +140,12 @@ public class TestComponentFactory {
 		xpoints = offsetArray(xpoints, fixedStartOffset);
 		ypoints = offsetArray(ypoints, fixedStartOffset);
 
-		Roi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
-		IPoint com = new FloatPoint(xBase + (w / 2), yBase + (h / 2));
+		final Roi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+		final IPoint com = new FloatPoint(xBase + (w / 2), yBase + (h / 2));
 
-		File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
+		final File f = new File(TestDatasetBuilder.TEST_DATASET_IMAGE_FOLDER);
 
-		Nucleus n = createNucleus(roi, com, f, 0, 0, rsc);
+		final Nucleus n = createNucleus(roi, com, f, 0, 0, rsc);
 		n.rotate(rotation);
 
 //		LOGGER.fine("Initialising new nucleus");
@@ -160,7 +158,7 @@ public class TestComponentFactory {
 
 	private static Nucleus createNucleus(Roi roi, IPoint com, File f, int channel, int number,
 			RuleSetCollection rsc) throws ComponentCreationException {
-		Nucleus n = new DefaultNucleus(roi, com, f, 0, 0, rsc);
+		final Nucleus n = new DefaultNucleus(roi, com, f, 0, 0, rsc);
 		return n;
 	}
 
@@ -175,30 +173,30 @@ public class TestComponentFactory {
 	 * @return
 	 */
 	public static INuclearSignal createSignal(CellularComponent c, double maxProportion,
-			int channel) {
-		Roi templateRoi = c.toOriginalRoi();
+			int channel) throws ComponentCreationException {
+		final Roi templateRoi = c.toOriginalRoi();
 
-		int w = (int) (templateRoi.getFloatWidth() * maxProportion);
-		int h = (int) (templateRoi.getFloatHeight() * maxProportion);
+		final int w = (int) (templateRoi.getFloatWidth() * maxProportion);
+		final int h = (int) (templateRoi.getFloatHeight() * maxProportion);
 
-		int[] xpoints = new int[(w + h) * 2];
-		int[] ypoints = new int[(w + h) * 2];
-		int xBase = (int) templateRoi.getXBase();
-		int yBase = (int) templateRoi.getYBase();
+		final int[] xpoints = new int[(w + h) * 2];
+		final int[] ypoints = new int[(w + h) * 2];
+		final int xBase = (int) templateRoi.getXBase();
+		final int yBase = (int) templateRoi.getYBase();
 
 		for (int i = 0; i < (w + h) * 2; i++) {
 
-			int x = i <= w ? i : i <= w + h ? w : i <= w + h + w ? w + h + w - i : 0;
+			final int x = i <= w ? i : i <= w + h ? w : i <= w + h + w ? w + h + w - i : 0;
 			xpoints[i] = x + xBase;
 
-			int y = i <= w ? 0 : i <= w + h ? i - w : i <= w + h + w ? h : (w + h + w + h - i);
+			final int y = i <= w ? 0 : i <= w + h ? i - w : i <= w + h + w ? h : (w + h + w + h - i);
 			ypoints[i] = y + yBase;
 		}
 
-		Roi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
-		IPoint com = new FloatPoint(xBase + (w / 2), yBase + (h / 2));
+		final Roi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+		final IPoint com = new FloatPoint(xBase + (w / 2), yBase + (h / 2));
 
-		File f = new File("empty file");
+		final File f = new File("empty file");
 
 		return new DefaultNuclearSignal(roi, com, f, channel);
 	}
@@ -211,7 +209,7 @@ public class TestComponentFactory {
 	 * @return
 	 */
 	private static int[] offsetArray(int[] array, int offset) {
-		int[] result = new int[array.length];
+		final int[] result = new int[array.length];
 		System.arraycopy(array, offset, result, 0, array.length - offset);
 		System.arraycopy(array, 0, result, array.length - offset, offset);
 		return result;
@@ -225,7 +223,7 @@ public class TestComponentFactory {
 	 * @return
 	 */
 	private static float[] offsetArray(float[] array, int offset) {
-		float[] result = new float[array.length];
+		final float[] result = new float[array.length];
 		System.arraycopy(array, offset, result, 0, array.length - offset);
 		System.arraycopy(array, 0, result, array.length - offset, offset);
 		return result;
@@ -233,31 +231,31 @@ public class TestComponentFactory {
 
 	@Test
 	public void testOffsettingWithZeroOffset() {
-		int[] arr = { 1, 2, 3, 4, 5 };
-		int offset = 0;
-		int[] exp = { 1, 2, 3, 4, 5 };
+		final int[] arr = { 1, 2, 3, 4, 5 };
+		final int offset = 0;
+		final int[] exp = { 1, 2, 3, 4, 5 };
 
-		int[] res = offsetArray(arr, offset);
+		final int[] res = offsetArray(arr, offset);
 		assertArrayEquals(exp, res);
 	}
 
 	@Test
 	public void testOffsettingWithSingleOffset() {
-		int[] arr = { 1, 2, 3, 4, 5 };
-		int offset = 1;
-		int[] exp = { 2, 3, 4, 5, 1 };
+		final int[] arr = { 1, 2, 3, 4, 5 };
+		final int offset = 1;
+		final int[] exp = { 2, 3, 4, 5, 1 };
 
-		int[] res = offsetArray(arr, offset);
+		final int[] res = offsetArray(arr, offset);
 		assertArrayEquals(exp, res);
 	}
 
 	@Test
 	public void testOffsettingWithArrayLengthOffset() {
-		int[] arr = { 1, 2, 3, 4, 5 };
-		int offset = arr.length;
-		int[] exp = { 1, 2, 3, 4, 5 };
+		final int[] arr = { 1, 2, 3, 4, 5 };
+		final int offset = arr.length;
+		final int[] exp = { 1, 2, 3, 4, 5 };
 
-		int[] res = offsetArray(arr, offset);
+		final int[] res = offsetArray(arr, offset);
 		assertArrayEquals(exp, res);
 	}
 
@@ -272,7 +270,7 @@ public class TestComponentFactory {
 
 	@Test
 	public void testCellCreatedWithVariableBorderOffset() throws ComponentCreationException {
-		int max = (TestDatasetBuilder.DEFAULT_BASE_WIDTH + TestDatasetBuilder.DEFAULT_BASE_HEIGHT)
+		final int max = (TestDatasetBuilder.DEFAULT_BASE_WIDTH + TestDatasetBuilder.DEFAULT_BASE_HEIGHT)
 				* 2;
 
 		for (int offset = 0; offset < max; offset++) {

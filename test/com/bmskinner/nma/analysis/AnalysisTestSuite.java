@@ -5,6 +5,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import com.bmskinner.nma.analysis.classification.AnalysisClassificationTestSuite;
+import com.bmskinner.nma.analysis.detection.AnalysisDetectionTestSuite;
 import com.bmskinner.nma.analysis.image.AnalysisImageTestSuite;
 import com.bmskinner.nma.analysis.mesh.AnalysisMeshTestSuite;
 import com.bmskinner.nma.analysis.nucleus.AnalysisNucleusTestSuite;
@@ -20,6 +21,7 @@ import com.bmskinner.nma.analysis.signals.AnalysisSignalsTestSuite;
 @RunWith(Suite.class)
 @SuiteClasses({ 
 	AnalysisClassificationTestSuite.class,
+		AnalysisDetectionTestSuite.class,
 	AnalysisImageTestSuite.class,
 	AnalysisMeshTestSuite.class,
 	AnalysisNucleusTestSuite.class,

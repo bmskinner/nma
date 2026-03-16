@@ -95,6 +95,10 @@ public class TextFileNucleusFinder extends CellFinder {
 	 * @param y         the y coordinate of the point
 	 */
 	record CoordinateLine(String object, String imageName, float x, float y) {
+
+		public String objectName() {
+			return imageName + object;
+		}
 	}
 
 	private final NucleusBuilderFactory factory;
@@ -185,7 +189,7 @@ public class TextFileNucleusFinder extends CellFinder {
 			throw new ImageImportException(e);
 		} catch (final NumberFormatException e) {
 			LOGGER.severe(
-					"When reading x and y coordinates, unable to parse a string as a number. %s. Check input file columns are in the correct order."
+					"When reading x and y coordinates, unable to parse a string as a number; check input file columns are in the correct order: %s"
 							.formatted(e.getMessage()));
 			throw new ImageImportException("Unable to read object coordinates from file", e);
 		} catch (final Exception e) {
@@ -193,13 +197,17 @@ public class TextFileNucleusFinder extends CellFinder {
 			throw new ImageImportException("Unable to read object coordinates from file", e);
 		}
 
+		LOGGER.fine(
+				"Read %s coordinate lines from file %s".formatted(coordinates.size(), textFile.getAbsolutePath()));
+
 		final List<Nucleus> nuclei = coordinates.stream()
-				.collect(Collectors.groupingBy(CoordinateLine::object, Collectors.toList())).values().stream()
+				.collect(Collectors.groupingBy(CoordinateLine::objectName, Collectors.toList())).values().stream()
 				.map(l -> {
 					try {
 						return makeNucleus(l);
 					} catch (ComponentCreationException | IllegalArgumentException e) {
-						LOGGER.fine("Could not make a nucleus: %s".formatted(e.getMessage()));
+						LOGGER.fine("Could not create a nucleus: %s".formatted(l.size(),
+								e.getMessage()));
 					}
 					return null;
 				}).toList();

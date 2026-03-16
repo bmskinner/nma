@@ -35,7 +35,7 @@ import ij.gui.Roi;
 public class DefaultCytoplasm extends DefaultCellularComponent implements ICytoplasm {
 
 	public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel,
-			@NonNull UUID id) {
+			@NonNull UUID id) throws ComponentCreationException {
 		super(roi, centreOfMass, f, channel, id);
 	}
 
@@ -48,8 +48,10 @@ public class DefaultCytoplasm extends DefaultCellularComponent implements ICytop
 	 * @param channel
 	 * @param position
 	 * @param centreOfMass
+	 * @throws ComponentCreationException
 	 */
-	public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel) {
+	public DefaultCytoplasm(@NonNull Roi roi, @NonNull IPoint centreOfMass, File f, int channel)
+			throws ComponentCreationException {
 		super(roi, centreOfMass, f, channel);
 	}
 
