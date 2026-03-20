@@ -65,10 +65,10 @@ public class ChartImageConverter {
 	 * @throws IOException
 	 */
 	public static BufferedImage createPNG(ExportableLegendChart chart, int wmm, int hmm, int dpi,
-			boolean isFixedAspect)
+			boolean isFixedAspect, boolean isLegendVisible)
 			throws TranscoderException, IOException {
 
-		final String svg = ChartImageConverter.createSVG(chart, wmm, hmm, dpi, isFixedAspect);
+		final String svg = ChartImageConverter.createSVG(chart, wmm, hmm, dpi, isFixedAspect, isLegendVisible);
 
 		return ChartImageConverter.convertSVGToPNG(svg, wmm, dpi);
 	}
@@ -116,12 +116,12 @@ public class ChartImageConverter {
 	 * @return
 	 */
 	public static String createSVG(ExportableLegendChart input, int wmm, int hmm, int dpi,
-			boolean isFixedAspect) {
+			boolean isFixedAspect, boolean isLegendVisible) {
 
 		ExportableLegendChart chart;
 		try {
 			chart = (ExportableLegendChart) input.clone();
-			chart.setLegendVisible(true);
+			chart.setLegendVisible(isLegendVisible);
 
 			if (isFixedAspect) {
 				chart = fixAspect(chart, wmm, hmm);

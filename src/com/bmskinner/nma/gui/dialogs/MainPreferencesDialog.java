@@ -71,6 +71,7 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
     
     private static final String SHOW_DEBUG_UI_LBL = "Show debug UI";
     private static final String USE_ANTIALIASING_LBL = "Antialiasing in charts";
+	private static final String EXPORT_LEGENDS_LBL = "Include legend in saved charts";
     private static final String DEFAULT_RULESET_LBL = "Ruleset";
     private static final String DEFAULT_IMAGE_SCALE_LBL = "Image scale";
     private static final String DEFAULT_COLOUR_SWATCH_LBL = "Colour palette";
@@ -151,6 +152,11 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
         consensusBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY, 
         		consensusBox.isSelected()));
         
+		final JCheckBox exportLegendBox = new JCheckBox((String) null,
+				currentOptions.getBoolean(GlobalOptions.INCLUDE_LEGEND_IN_IMAGES_KEY));
+		exportLegendBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.INCLUDE_LEGEND_IN_IMAGES_KEY,
+				exportLegendBox.isSelected()));
+
 		final JCheckBox memoryBox = new JCheckBox("(if less than half system memory available)",
 				currentOptions.getBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION));
         memoryBox.addActionListener(e -> currentOptions.setBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION, 
@@ -231,6 +237,9 @@ public class MainPreferencesDialog extends SettingsDialog implements ActionListe
         displayLabels.add(new JLabel(DEFAULT_FILL_CONSENSUS_LBL));
         displayFields.add(consensusBox);
         
+		displayLabels.add(new JLabel(EXPORT_LEGENDS_LBL));
+		displayFields.add(exportLegendBox);
+
         displayLabels.add(new JLabel(DEFAULT_COLOUR_SWATCH_LBL));
         displayFields.add(paletteBox);
         

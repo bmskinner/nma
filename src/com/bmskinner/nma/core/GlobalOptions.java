@@ -48,6 +48,9 @@ public class GlobalOptions extends DefaultOptions {
 	public static final String DEFAULT_USE_ANTIALIASING_KEY = "USE_ANTIALIASING";
 	public static final String REFOLD_OVERRIDE_KEY = "REFOLD_OVERRIDE";
 
+	/** Should the legend be included in charts when saved via Save As PNG/SVG */
+	public static final String INCLUDE_LEGEND_IN_IMAGES_KEY = "IS_EXPORT_LEGEND_IN_IMAGES";
+
 	// Should violin plots be shown instead of boxplots
 	public static final String IS_VIOLIN_KEY = "IS_VIOLIN";
 	public static final String IS_USE_ANTIALIASING = "USE_ANTIALIASING";
@@ -95,9 +98,8 @@ public class GlobalOptions extends DefaultOptions {
 	 */
 	public static GlobalOptions getInstance() {
 
-		if (instance != null) {
+		if (instance != null)
 			return instance;
-		}
 		synchronized (lockObject) {
 			if (instance == null) {
 				instance = new GlobalOptions();
@@ -116,6 +118,7 @@ public class GlobalOptions extends DefaultOptions {
 		setBoolean(IS_VIOLIN_KEY, true);
 		setBoolean(DEFAULT_FILL_CONSENSUS_KEY, true);
 		setBoolean(IS_USE_ANTIALIASING, true);
+		setBoolean(INCLUDE_LEGEND_IN_IMAGES_KEY, true);
 		setDouble(DEFAULT_IMAGE_SCALE_KEY, DEFAULT_SCALE);
 		this.defaultDir = new File(System.getProperty("user.home"));
 		setBoolean(REFOLD_OVERRIDE_KEY, false);
@@ -187,9 +190,8 @@ public class GlobalOptions extends DefaultOptions {
 	 * @return
 	 */
 	public synchronized File getDefaultDir() {
-		if (defaultDir.exists()) {
+		if (defaultDir.exists())
 			return defaultDir;
-		}
 		return new File(System.getProperty("user.home"));
 	}
 
@@ -215,7 +217,7 @@ public class GlobalOptions extends DefaultOptions {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		GlobalOptions other = (GlobalOptions) obj;
+		final GlobalOptions other = (GlobalOptions) obj;
 		if (defaultDir == null) {
 			if (other.defaultDir != null)
 				return false;
@@ -230,7 +232,7 @@ public class GlobalOptions extends DefaultOptions {
 	
 	@Override
 	public GlobalOptions duplicate() {
-		GlobalOptions other = new GlobalOptions();
+		final GlobalOptions other = new GlobalOptions();
 		other.set(this);
 		other.defaultDir = this.defaultDir;
 		other.scale = scale;

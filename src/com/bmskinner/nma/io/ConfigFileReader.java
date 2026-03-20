@@ -53,12 +53,12 @@ public class ConfigFileReader {
 	 */
 	public static void readConfigFile() {
 		try {
-			File ini = Io.getConfigFile();
+			final File ini = Io.getConfigFile();
 			LOGGER.config("Configuration file read from: %s".formatted(ini.getAbsolutePath()));
 
 			if (ini.exists()) {
 				// Read the properties
-				Properties properties = new Properties();
+				final Properties properties = new Properties();
 				properties.load(new FileInputStream(ini));
 				assignGlobalOptions(properties);
 			} else {
@@ -66,14 +66,14 @@ public class ConfigFileReader {
 				writeGlobalOptionsToConfigFile();
 			}
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Error reading config ini file", e);
 		}
 
 	}
 	
 	public static void writeGlobalOptionsToConfigFile() throws FileNotFoundException, IOException {
-		Properties properties = createPropertiesFromGlobalOptions();
+		final Properties properties = createPropertiesFromGlobalOptions();
 		properties.store(new FileOutputStream(Io.getConfigFile()), null);
 	}
 	
@@ -86,7 +86,7 @@ public class ConfigFileReader {
 
 	public static RulesetEntry[] getAvailableRulesets() {
 		LOGGER.finer("Reading available rulesets from disk");
-		File[] files = Io.getRulesetDir()
+		final File[] files = Io.getRulesetDir()
 				.listFiles((d, s) -> s.toLowerCase().endsWith(Io.XML_FILE_EXTENSION));
 
 		return Arrays.stream(files)
@@ -105,9 +105,9 @@ public class ConfigFileReader {
 	}
 	
 	private static Properties createPropertiesFromGlobalOptions() {
-		Properties properties = new Properties();
+		final Properties properties = new Properties();
 
-		GlobalOptions op = GlobalOptions.getInstance();
+		final GlobalOptions op = GlobalOptions.getInstance();
 
 		properties.setProperty(GlobalOptions.DEFAULT_DIR_KEY, op.getDefaultDir().getAbsolutePath());
 		properties.setProperty(GlobalOptions.DEFAULT_RULESET_KEY,
@@ -120,6 +120,9 @@ public class ConfigFileReader {
 				String.valueOf(op.isFillConsensus()));
 		properties.setProperty(GlobalOptions.DEFAULT_USE_ANTIALIASING_KEY,
 				String.valueOf(op.isAntiAlias()));
+		properties.setProperty(GlobalOptions.INCLUDE_LEGEND_IN_IMAGES_KEY,
+				String.valueOf(op.getBoolean(GlobalOptions.INCLUDE_LEGEND_IN_IMAGES_KEY)));
+
 		properties.setProperty(GlobalOptions.DEFAULT_SWATCH_KEY,
 				String.valueOf(op.getSwatch().name()));
 		properties.setProperty(GlobalOptions.REFOLD_OVERRIDE_KEY,
@@ -142,58 +145,77 @@ public class ConfigFileReader {
 
 	private static void assignGlobalOptions(Properties properties) {
 
-		GlobalOptions op = GlobalOptions.getInstance();
+		final GlobalOptions op = GlobalOptions.getInstance();
 
-		for (String key : properties.stringPropertyNames()) {
+		for (final String key : properties.stringPropertyNames()) {
 
-			String value = properties.getProperty(key);
+			final String value = properties.getProperty(key);
 
 			LOGGER.config(() -> "Assigning global option %s: %s".formatted(key, value));
 
-			if (GlobalOptions.DEFAULT_DIR_KEY.equals(key))
+			if (GlobalOptions.DEFAULT_DIR_KEY.equals(key)) {
 				op.setDefaultDir(new File(value));
+			}
 
-			if (GlobalOptions.DEFAULT_RULESET_KEY.equals(key))
+			if (GlobalOptions.DEFAULT_RULESET_KEY.equals(key)) {
 				op.setString(GlobalOptions.DEFAULT_RULESET_KEY, value);
+			}
 
-			if (GlobalOptions.DEFAULT_IMAGE_SCALE_KEY.equals(key))
+			if (GlobalOptions.DEFAULT_IMAGE_SCALE_KEY.equals(key)) {
 				op.setImageScale(Double.valueOf(value));
+			}
 
-			if (GlobalOptions.DEFAULT_DISPLAY_SCALE_KEY.equals(key))
+			if (GlobalOptions.DEFAULT_DISPLAY_SCALE_KEY.equals(key)) {
 				op.setDisplayScale(MeasurementScale.valueOf(value));
+			}
 
-			if (GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY.equals(key))
+			if (GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY.equals(key)) {
 				op.setFillConsensus(Boolean.valueOf(value));
+			}
 
-			if (GlobalOptions.DEFAULT_USE_ANTIALIASING_KEY.equals(key))
+			if (GlobalOptions.DEFAULT_USE_ANTIALIASING_KEY.equals(key)) {
 				op.setAntiAlias(Boolean.valueOf(value));
+			}
 
-			if (GlobalOptions.DEFAULT_SWATCH_KEY.equals(key))
+			if (GlobalOptions.INCLUDE_LEGEND_IN_IMAGES_KEY.equals(key)) {
+				op.setAntiAlias(Boolean.valueOf(value));
+			}
+
+			if (GlobalOptions.DEFAULT_SWATCH_KEY.equals(key)) {
 				op.setSwatch(ColourSwatch.valueOf(value));
+			}
 
-			if (GlobalOptions.REFOLD_OVERRIDE_KEY.equals(key))
+			if (GlobalOptions.REFOLD_OVERRIDE_KEY.equals(key)) {
 				op.setBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY, Boolean.valueOf(value));
+			}
 
-			if (GlobalOptions.IS_DEBUG_INTERFACE_KEY.equals(key))
+			if (GlobalOptions.IS_DEBUG_INTERFACE_KEY.equals(key)) {
 				op.setBoolean(GlobalOptions.IS_DEBUG_INTERFACE_KEY, Boolean.valueOf(value));
+			}
 
-			if (GlobalOptions.IS_GLCM_INTERFACE_KEY.equals(key))
+			if (GlobalOptions.IS_GLCM_INTERFACE_KEY.equals(key)) {
 				op.setBoolean(GlobalOptions.IS_GLCM_INTERFACE_KEY, Boolean.valueOf(value));
+			}
 
-			if (GlobalOptions.NUM_IMAGEJ_THREADS_KEY.equals(key))
+			if (GlobalOptions.NUM_IMAGEJ_THREADS_KEY.equals(key)) {
 				op.setInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY, Integer.valueOf(value));
+			}
 
-			if (GlobalOptions.ALLOW_UPDATE_CHECK_KEY.equals(key))
+			if (GlobalOptions.ALLOW_UPDATE_CHECK_KEY.equals(key)) {
 				op.setBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY, Boolean.valueOf(value));
+			}
 
-			if (GlobalOptions.IS_SINGLE_THREADED_DETECTION.equals(key))
+			if (GlobalOptions.IS_SINGLE_THREADED_DETECTION.equals(key)) {
 				op.setBoolean(GlobalOptions.IS_SINGLE_THREADED_DETECTION, Boolean.valueOf(value));
+			}
 			
-			if (GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION.equals(key))
+			if (GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION.equals(key)) {
 				op.setBoolean(GlobalOptions.WARN_LOW_JVM_MEMORY_FRACTION, Boolean.valueOf(value));
+			}
 
-			if (GlobalOptions.DEFAULT_UPDATE_URL_KEY.equals(key))
+			if (GlobalOptions.DEFAULT_UPDATE_URL_KEY.equals(key)) {
 				op.setString(GlobalOptions.DEFAULT_UPDATE_URL_KEY, value);
+			}
 
 		}
 	}
