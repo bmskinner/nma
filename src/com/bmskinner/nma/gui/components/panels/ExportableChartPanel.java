@@ -630,7 +630,9 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 						GlobalOptions.getInstance().getBoolean(GlobalOptions.INCLUDE_LEGEND_IN_IMAGES_KEY));
 
 				EncoderUtil.writeBufferedImage(bi, ImageFormat.PNG, os);
-				LOGGER.info("Chart saved to '%s'".formatted(file.getName()));
+				LOGGER.info(
+						"Chart saved to '%s'. You can toggle inclusion of the chart legend in View > Preferences."
+								.formatted(file.getName()));
 
 			} catch (final IOException e) {
 				LOGGER.log(Level.SEVERE, "Unable to save chart as png", e);
@@ -669,7 +671,9 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 					GlobalOptions.getInstance().getBoolean(GlobalOptions.INCLUDE_LEGEND_IN_IMAGES_KEY));
 
 			writeToSVG(file, svg);
-			LOGGER.info("Chart saved as '" + file.getName() + "'");
+			LOGGER.info(
+					"Chart saved to '%s'. You can toggle inclusion of the chart legend in View > Preferences."
+							.formatted(file.getName()));
 
 		} catch (final RequestCancelledException e) {
 			// User cancelled, no action
