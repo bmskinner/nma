@@ -104,7 +104,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		} else {
 			chart = new ExportableLegendChart(
 					ChartFactory.createXYLineChart(null, null, null, ds, PlotOrientation.VERTICAL,
-							DEFAULT_CREATE_LEGEND, DEFAULT_CREATE_TOOLTIPS, DEFAULT_CREATE_URLS));
+							DEFAULT_CREATE_LEGEND, DEFAULT_CREATE_TOOLTIPS, DEFAULT_CREATE_URLS),
+					"Consensus chart");
 		}
 		formatConsensusChart(chart);
 		return chart;

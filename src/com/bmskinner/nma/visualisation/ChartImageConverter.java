@@ -65,10 +65,10 @@ public class ChartImageConverter {
 	 * @throws IOException
 	 */
 	public static BufferedImage createPNG(ExportableLegendChart chart, int wmm, int hmm, int dpi,
-			boolean isFixedAspect)
+			boolean isFixedAspect, boolean isLegendVisible)
 			throws TranscoderException, IOException {
 
-		final String svg = ChartImageConverter.createSVG(chart, wmm, hmm, dpi, isFixedAspect);
+		final String svg = ChartImageConverter.createSVG(chart, wmm, hmm, dpi, isFixedAspect, isLegendVisible);
 
 		return ChartImageConverter.convertSVGToPNG(svg, wmm, dpi);
 	}
@@ -116,12 +116,12 @@ public class ChartImageConverter {
 	 * @return
 	 */
 	public static String createSVG(ExportableLegendChart input, int wmm, int hmm, int dpi,
-			boolean isFixedAspect) {
+			boolean isFixedAspect, boolean isLegendVisible) {
 
 		ExportableLegendChart chart;
 		try {
 			chart = (ExportableLegendChart) input.clone();
-			chart.setLegendVisible(true);
+			chart.setLegendVisible(isLegendVisible);
 
 			if (isFixedAspect) {
 				chart = fixAspect(chart, wmm, hmm);
@@ -152,6 +152,7 @@ public class ChartImageConverter {
 			final SVGGraphics2D g2 = new SVGGraphics2D(w, h, SVGUnits.PX);
 			final Rectangle r = new Rectangle(0, 0, w, h);
 			chart.draw(g2, r);
+
 			return g2.getSVGDocument();
 		} catch (final CloneNotSupportedException e) {
 			LOGGER.log(Level.SEVERE, "Unable to clone the input chart: %s".formatted(e.getMessage()), e);
@@ -182,10 +183,40 @@ public class ChartImageConverter {
 
 			// Also note that the chart may have a legend taking up vertical space
 			// We can't calculate an exact height for the legend, so if there is a visible
-			// legend, remove 10% of the chart height. This will get progressively less
-			// accurate as the size of the legend grows
+			// legend, reduce the desired chart height by ~12% per legend row.
 			if (c.getLegend() != null) {
-				hmm *= 0.9;
+
+				// How many lines of legend will we have?
+				// Somewhere between 0 and nLegendItems, depending on the length of the legend
+				// item text and the width of the chart. Export resolution, is ~1.7mm per
+				// character.
+				final int nLegendItems = chart.getXYPlot().getLegendItems().getItemCount();
+
+				// A 300dpi image will have ~1.7mm per character.
+				final int maxCharsPerRow = (int) Math.floor(wmm / 1.7d);
+				int nLegendRows = nLegendItems > 0 ? 1 : 0;
+				int charsInRow = 0;
+
+				for (int i = 0; i < nLegendItems; i++) {
+					// How many letters per legend item?
+					final int nChars = chart.getXYPlot().getLegendItems().get(i).getLabel().length();
+					if (charsInRow + nChars <= maxCharsPerRow) {
+						charsInRow += nChars;
+					} else { // start a new row
+						charsInRow = nChars;
+						nLegendRows++;
+					}
+				}
+				LOGGER.finer(
+						"Creating image %smm by %smm and %s legend items in ~%s legend rows, predicting %s characters per row"
+								.formatted(wmm, hmm,
+										nLegendItems, nLegendRows, maxCharsPerRow));
+
+				// Reduce the chart plot height by 10% for each legend row
+				final double reduction = 1 - (nLegendRows * 0.12);
+
+				hmm *= reduction;
+
 			}
 
 			final double desiredAspect = (double) wmm / hmm;

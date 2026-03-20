@@ -27,6 +27,7 @@ Scale | Choose the display units for charts and tables. `Pixels` is the default 
 Colour palette | Set the colour palette to use for colouring datasets and drawing segments in profiles. These palettes are:       `Regular` - a set of bright exciting colours; `No colour` - all colours are black; `Accessible` - a set of colours chosen to be distinguishable in three major types of color blindness: deutranopia, protanopia and tritanopia 
 Fill consensus | Fill consensus nuclei with a semi-transparent version of the dataset colour, rather than just showing an outline
 Task monitor | Toggle the task queue and memory displays. The task queue shows the tasks waiting to be performed, separated into UI tasks (e.g. drawing charts) / analysis tasks (e.g. detecting nuclei). The second shows the amount of memory being used by the program. Free memory is green. Memory reserved by the Java Virtual Machine is orange, and memory actually in use is red. The percentage displays the memory actually in use (the red section). Hover the mouse over the monitor to see the total available memory (or look at the configuration settings recorded in the log file on startup).
+Preferences | Open the preferences dialog window to view and modify program settings. The settings are saved in the configuration file in the `.nma` directory in the user home directory.
 
 ### Dataset {#dataset-menu}
 

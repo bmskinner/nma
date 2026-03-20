@@ -21,11 +21,13 @@ import java.util.List;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.gui.events.NuclearSignalUpdatedListener;
+import com.bmskinner.nma.gui.events.ScaleUpdatedListener;
+import com.bmskinner.nma.gui.events.SwatchUpdatedListener;
 import com.bmskinner.nma.gui.tabs.AbstractScatterPanel;
 
 @SuppressWarnings("serial")
 public class SignalScatterChartPanel extends AbstractScatterPanel
-		implements NuclearSignalUpdatedListener {
+		implements NuclearSignalUpdatedListener, SwatchUpdatedListener, ScaleUpdatedListener {
 
 	private static final String PANEL_TITLE_LBL = "Scatter";
 	private static final String PANEL_DESC_LBL = "Relationships between measured parameters";
@@ -33,6 +35,8 @@ public class SignalScatterChartPanel extends AbstractScatterPanel
 	public SignalScatterChartPanel() {
 		super(CellularComponent.NUCLEAR_SIGNAL, PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		uiController.addNuclearSignalUpdatedListener(this);
+		uiController.addSwatchUpdatedListener(this);
+		uiController.addDatasetUpdatedListener(this);
 	}
 
 	@Override
@@ -44,4 +48,30 @@ public class SignalScatterChartPanel extends AbstractScatterPanel
 	public void nuclearSignalUpdated(IAnalysisDataset dataset) {
 		refreshCache(dataset);
 	}
+
+	@Override
+	public void scaleUpdated(List<IAnalysisDataset> datasets) {
+		refreshCache(datasets);
+	}
+
+	@Override
+	public void scaleUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
+	}
+
+	@Override
+	public void scaleUpdated() {
+		update(getDatasets());
+	}
+
+	@Override
+	public void globalPaletteUpdated() {
+		update(getDatasets());
+	}
+
+	@Override
+	public void colourUpdated(IAnalysisDataset dataset) {
+		refreshCache(dataset);
+	}
 }
+

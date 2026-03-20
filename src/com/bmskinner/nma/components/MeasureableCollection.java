@@ -22,9 +22,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
-import com.bmskinner.nma.components.measure.MissingMeasurementException;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
-import com.bmskinner.nma.components.profiles.ProfileException;
 
 /**
  * Describes the methods for retrieving aggregate stats from collections of
@@ -40,19 +38,21 @@ public interface MeasureableCollection {
 	 * Clear the measurement, forcing the measurement to be recalculated on next
 	 * request
 	 * 
-	 * @param stat      the measurement to recalculate
-	 * @param component the cellular component to fetch from
+	 * @param measurement the measurement to recalculate e.g. Measurement.AREA
+	 * @param component   the cellular component to fetch from e.g.
+	 *                    CellularComponent.NUCLEUS
 	 */
-	void clear(@NonNull Measurement stat, @NonNull String component);
+	void clear(@NonNull Measurement measurement, @NonNull String component);
 
 	/**
 	 * Force the given measurement to be recalculated
 	 * 
-	 * @param stat      the measurement to recalculate
-	 * @param component the cellular component to fetch from
-	 * @param id        the sub-component id
+	 * @param measurement the measurement to recalculate e.g. Measurement.AREA
+	 * @param component   the cellular component to fetch from e.g.
+	 *                    CellularComponent.NUCLEUS
+	 * @param id          the sub-component id
 	 */
-	void clear(@NonNull Measurement stat, @NonNull String component, @NonNull UUID id);
+	void clear(@NonNull Measurement measurement, @NonNull String component, @NonNull UUID id);
 
 	/**
 	 * Force the measurements at the given scale to be recalculated. Use when the
@@ -65,122 +65,134 @@ public interface MeasureableCollection {
 	/**
 	 * Get the median value of the given measurement in the collection
 	 * 
-	 * @param stat      the measurement to fetch
-	 * @param component the cellular component to fetch from
-	 * 
-	 * @return the median value
-	 * @throws MissingMeasurementException
-	 * @throws MissingDataException
-	 * @throws ProfileException
+	 * @param measurement the measurement value to be fetched e.g. Measurement.AREA
+	 * @param component   the cellular component that the measurement belongs to
+	 *                    e.g. CellularComponent.NUCLEUS
+	 * @param scale       the scale at which the values should be presented
+	 * @param id          the id of the component if relevant (used for signals and
+	 *                    segments)
+	 * @return the minimum value
+	 * @throws MissingDataException   if no data is present for the given
+	 *                                measurement
+	 * @throws SegmentUpdateException if a segment calculation fails
 	 */
-	double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale)
+	double getMedian(@NonNull Measurement measurement, String component, MeasurementScale scale)
 			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the median value for a value with an ID - i.e. a nuclear signal or a
 	 * segment
 	 * 
-	 * @param stat      the measurement to fetch
-	 * @param component the cellular component to fetch from
-	 * @param scale     the scale to convert values to
-	 * @param id        the id of the component to fetch
-	 * @return the median value
-	 * @throws MissingMeasurementException
-	 * @throws MissingDataException
-	 * @throws ProfileException
+	 * @param measurement the measurement value to be fetched e.g. Measurement.AREA
+	 * @param component   the cellular component that the measurement belongs to
+	 *                    e.g. CellularComponent.NUCLEUS
+	 * @param scale       the scale at which the values should be presented
+	 * @param id          the id of the component if relevant (used for signals and
+	 *                    segments)
+	 * @return the minimum value
+	 * @throws MissingDataException   if no data is present for the given
+	 *                                measurement
+	 * @throws SegmentUpdateException if a segment calculation fails
 	 */
-	double getMedian(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id)
+	double getMedian(@NonNull Measurement measurement, String component, MeasurementScale scale, UUID id)
 			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the minimum value of the given measurement in the collection
 	 * 
-	 * @param stat
-	 * @param component
-	 * @param scale
-	 * @param id
-	 * @return the minimum
-	 * @throws MissingMeasurementException
-	 * @throws MissingDataException
-	 * @throws ProfileException
+	 * @param measurement the measurement value to be fetched e.g. Measurement.AREA
+	 * @param component   the cellular component that the measurement belongs to
+	 *                    e.g. CellularComponent.NUCLEUS
+	 * @param scale       the scale at which the values should be presented
+	 * @return the minimum value
+	 * @throws MissingDataException   if no data is present for the given
+	 *                                measurement
+	 * @throws SegmentUpdateException if a segment calculation fails
 	 */
-	double getMin(@NonNull Measurement stat, String component, MeasurementScale scale)
+	double getMin(@NonNull Measurement measurement, String component, MeasurementScale scale)
 			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the minimum value of the given measurement in the collection
 	 * 
-	 * @param stat
-	 * @param component
-	 * @param scale
-	 * @param id
-	 * @return the minimum
-	 * @throws MissingMeasurementException
-	 * @throws MissingDataException
-	 * @throws ProfileException
+	 * @param measurement the measurement value to be fetched e.g. Measurement.AREA
+	 * @param component   the cellular component that the measurement belongs to
+	 *                    e.g. CellularComponent.NUCLEUS
+	 * @param scale       the scale at which the values should be presented
+	 * @param id          the id of the component if relevant (used for signals and
+	 *                    segments)
+	 * @return the minimum value
+	 * @throws MissingDataException   if no data is present for the given
+	 *                                measurement
+	 * @throws SegmentUpdateException if a segment calculation fails
 	 */
-	double getMin(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id)
+	double getMin(@NonNull Measurement measurement, String component, MeasurementScale scale, UUID id)
 			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the maximum value of the given measurement in the collection
 	 * 
-	 * @param stat
-	 * @param component
-	 * @param scale
-	 * @param id
-	 * @return the maxumum
-	 * @throws MissingMeasurementException
-	 * @throws MissingDataException
-	 * @throws ProfileException
+	 * @param measurement the measurement value to be fetched e.g. Measurement.AREA
+	 * @param component   the cellular component that the measurement belongs to
+	 *                    e.g. CellularComponent.NUCLEUS
+	 * @param scale       the scale at which the values should be presented
+	 * @return the maximum value
+	 * @throws MissingDataException   if no data is present for the given
+	 *                                measurement
+	 * @throws SegmentUpdateException if a segment calculation fails
 	 */
-	double getMax(@NonNull Measurement stat, String component, MeasurementScale scale)
+	double getMax(@NonNull Measurement measurement, String component, MeasurementScale scale)
 			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the maximum value of the given measurement in the collection
 	 * 
-	 * @param stat
-	 * @param component
-	 * @param scale
-	 * @param id
-	 * @return the maxumum
-	 * @throws MissingMeasurementException
-	 * @throws MissingDataException
-	 * @throws ProfileException
+	 * @param measurement the measurement value to be fetched e.g. Measurement.AREA
+	 * @param component   the cellular component that the measurement belongs to
+	 *                    e.g. CellularComponent.NUCLEUS
+	 * @param scale       the scale at which the values should be presented
+	 * @param id          the id of the component if relevant (used for signals and
+	 *                    segments)
+	 * @return the maximum value
+	 * @throws MissingDataException   if no data is present for the given
+	 *                                measurement
+	 * @throws SegmentUpdateException if a segment calculation fails
 	 */
-	double getMax(@NonNull Measurement stat, String component, MeasurementScale scale, UUID id)
+	double getMax(@NonNull Measurement measurement, String component, MeasurementScale scale, UUID id)
 			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the raw values for the given measurement for each object in the
 	 * collection
 	 * 
-	 * @param stat      the statistic to fetch
-	 * @param component the cellular component to fetch from
-	 * @param scale     the scale to convert values to
+	 * @param measurement the measurement value to be fetched e.g. Measurement.AREA
+	 * @param component   the cellular component that the measurement belongs to
+	 *                    e.g. CellularComponent.NUCLEUS
+	 * @param scale       the scale at which the values should be presented
 	 * @return the values in the collection
-	 * @throws MissingMeasurementException
-	 * @throws MissingDataException
-	 * @throws ProfileException
+	 * @throws MissingDataException   if no data is present for the given
+	 *                                measurement
+	 * @throws SegmentUpdateException if a segment calculation fails
 	 */
-	double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale)
+	double[] getRawValues(@NonNull Measurement measurement, String component, MeasurementScale scale)
 			throws MissingDataException, SegmentUpdateException;
 
 	/**
 	 * Get the raw values for the given measurement for each object in the
-	 * collection with an ID - i.e. a nuclear signal or a segment
+	 * collection
 	 * 
-	 * @param stat      the statistic to fetch
-	 * @param component the cellular component to fetch from
-	 * @param scale     the scale to convert values to
-	 * @param id        the id of the compenent to fetch
+	 * @param measurement the measurement value to be fetched e.g. Measurement.AREA
+	 * @param component   the cellular component that the measurement belongs to
+	 *                    e.g. CellularComponent.NUCLEUS
+	 * @param scale       the scale at which the values should be presented
+	 * @param id          the id of the component if relevant (used for signals and
+	 *                    segments)
 	 * @return the values in the collection
-	 * @throws MissingMeasurementException
-	 * @throws MissingDataException
-	 * @throws SegmentUpdateException
+	 * @throws MissingDataException   if no data is present for the given
+	 *                                measurement
+	 * @throws SegmentUpdateException if a segment calculation fails
 	 */
-	double[] getRawValues(@NonNull Measurement stat, String component, MeasurementScale scale,
+	double[] getRawValues(@NonNull Measurement measurement, String component, MeasurementScale scale,
 			UUID id)
 			throws MissingDataException, SegmentUpdateException;
 

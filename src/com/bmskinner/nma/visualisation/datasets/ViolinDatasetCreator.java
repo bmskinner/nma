@@ -19,7 +19,6 @@ package com.bmskinner.nma.visualisation.datasets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -34,11 +33,10 @@ import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.profiles.IProfileSegment;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
-import com.bmskinner.nma.components.profiles.ISegmentedProfile;
 import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.signals.ISignalGroup;
-import com.bmskinner.nma.stats.Stats;
+import com.bmskinner.nma.utility.ArrayUtils;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 
 /**
@@ -115,16 +113,13 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 		for (int i = 0; i < datasets.size(); i++) {
 			final ICellCollection c = datasets.get(i).getCollection();
 
-			final String rowKey = c.getName() + "_" + i;
-			final String colKey = stat.toString();
+			final Comparable<?> rowKey = new DatasetNameKey(datasets.get(i));
+			final Comparable<?> colKey = new MeasurementNameKey(stat);
 
 			// Add the boxplot values
 
 			final double[] stats = c.getRawValues(stat, CellularComponent.WHOLE_CELL, scale);
-			final List<Number> list = new ArrayList<>();
-			for (final double d : stats) {
-				list.add(d);
-			}
+			final List<Number> list = ArrayUtils.toNumberList(stats);
 
 			ds.add(list, rowKey, colKey);
 		}
@@ -152,18 +147,13 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 		final MeasurementScale scale = options.getScale();
 		final ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
-		for (int i = 0; i < datasets.size(); i++) {
-			final ICellCollection c = datasets.get(i).getCollection();
-
-			final String rowKey = c.getName() + "_" + i;
-			final String colKey = stat.toString();
+		for (final IAnalysisDataset d : datasets) {
+			final Comparable<?> rowKey = new DatasetNameKey(d);
+			final Comparable<?> colKey = new MeasurementNameKey(stat);
 
 			// Add the boxplot values
-			final double[] stats = c.getRawValues(stat, CellularComponent.NUCLEUS, scale);
-			final List<Number> list = new ArrayList<>();
-			for (final double d : stats) {
-				list.add(d);
-			}
+			final double[] stats = d.getCollection().getRawValues(stat, CellularComponent.NUCLEUS, scale);
+			final List<Number> list = ArrayUtils.toNumberList(stats);
 
 			ds.add(list, rowKey, colKey);
 		}
@@ -198,9 +188,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 					double[] values = collection.getSignalManager().getSignalStatistics(stat, scale,
 							signalGroup);
 
-					final String rowKey = CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup + "_"
-							+ group.getGroupName();
-					final String colKey = collection.getName() + "_" + collection.getId();
+					final Comparable<?> rowKey = new SignalNameKey(group, signalGroup);
+					final Comparable<?> colKey = new DatasetNameKey(d);
 					/*
 					 * For charting, use offset angles, otherwise the boxplots will fail on wrapped
 					 * signals
@@ -209,10 +198,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 						values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
 					}
 
-					final List<Number> list = new ArrayList<>();
-					for (final double value : values) {
-						list.add(value);
-					}
+					final List<Number> list = ArrayUtils.toNumberList(values);
 					if (!list.isEmpty()) {
 						ds.add(list, rowKey, colKey);
 					}
@@ -231,19 +217,13 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	private synchronized ViolinCategoryDataset createSegmentStatisticDataset()
 			throws ChartDatasetCreationException {
 
-		LOGGER.finest("Making segment statistic dataset");
-
 		final Measurement stat = options.getMeasurement();
 
 		if (stat.equals(Measurement.LENGTH))
 			return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition());
 
-		if (stat.equals(Measurement.DISPLACEMENT))
-			return createSegmentDisplacementDataset(options.getDatasets(),
-					options.getSegPosition());
-
-		return null;
-
+		throw new ChartDatasetCreationException(
+				"Unable to create a segment dataset for measurement type '%s'".formatted(stat));
 	}
 
 	/**
@@ -292,9 +272,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 								"Error fetching segment for nucleus " + n.getNameAndNumber(), e);
 					}
 				}
-
-				final String rowKey = collection.getName();
-				final String colKey = IProfileSegment.SEGMENT_PREFIX + segPosition;
+				final Comparable<?> rowKey = new DatasetNameKey(datasets.get(i));
+				final Comparable<?> colKey = new SegmentNameKey(segPosition);
 				dataset.add(list, rowKey, colKey);
 
 			} catch (final SegmentUpdateException e) {
@@ -305,64 +284,6 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
 		}
 
-		return dataset;
-	}
-
-	/**
-	 * Get the displacements of the given segment in the collections
-	 * 
-	 * @param collections
-	 * @param segName
-	 * @return
-	 * @throws ChartDatasetCreationException
-	 * @throws Exception
-	 */
-	private ViolinCategoryDataset createSegmentDisplacementDataset(
-			List<IAnalysisDataset> collections, int segPosition)
-			throws ChartDatasetCreationException {
-
-		final ViolinCategoryDataset dataset = new ViolinCategoryDataset();
-
-		for (int i = 0; i < collections.size(); i++) {
-
-			final ICellCollection collection = collections.get(i).getCollection();
-
-			IProfileSegment medianSeg;
-			try {
-				medianSeg = collection.getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE,
-								Stats.MEDIAN)
-						.getSegments().get(options.getSegPosition());
-			} catch (MissingDataException | SegmentUpdateException e) {
-				LOGGER.log(Level.SEVERE, "Unable to get segmented median profile", e);
-				throw new ChartDatasetCreationException("Cannot get median profile");
-			}
-
-			final List<Number> list = new ArrayList<>(0);
-
-			for (final Nucleus n : collection.getNuclei()) {
-
-				try {
-
-					final ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE,
-							OrientationMark.REFERENCE);
-
-					final IProfileSegment seg = profile.getSegment(medianSeg.getID());
-
-					final double displacement = profile.getDisplacement(seg);
-					list.add(displacement);
-				} catch (MissingDataException | SegmentUpdateException e) {
-					LOGGER.log(Level.SEVERE, "Error getting segmented profile", e);
-					throw new ChartDatasetCreationException("Cannot get segmented profile", e);
-				}
-
-			}
-
-			final String rowKey = IProfileSegment.SEGMENT_PREFIX + segPosition + "_" + i;
-			final String colKey = IProfileSegment.SEGMENT_PREFIX + segPosition;
-
-			dataset.add(list, rowKey, colKey);
-		}
 		return dataset;
 	}
 }

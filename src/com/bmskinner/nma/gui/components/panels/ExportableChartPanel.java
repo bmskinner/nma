@@ -66,6 +66,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
 
 import com.bmskinner.nma.core.DatasetListManager;
+import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
@@ -625,10 +626,13 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 
 				final BufferedImage bi = ChartImageConverter.createPNG(chart, w, h,
-						DEFAULT_EXPORT_DPI, this.isFixedAspectRatio);
+						DEFAULT_EXPORT_DPI, this.isFixedAspectRatio,
+						GlobalOptions.getInstance().getBoolean(GlobalOptions.INCLUDE_LEGEND_IN_IMAGES_KEY));
 
 				EncoderUtil.writeBufferedImage(bi, ImageFormat.PNG, os);
-				LOGGER.info("Chart saved to '%s'".formatted(file.getName()));
+				LOGGER.info(
+						"Chart saved to '%s'. You can toggle inclusion of the chart legend in View > Preferences."
+								.formatted(file.getName()));
 
 			} catch (final IOException e) {
 				LOGGER.log(Level.SEVERE, "Unable to save chart as png", e);
@@ -663,10 +667,13 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 
 			final ExportableLegendChart chart = (ExportableLegendChart) getChart();
 			final String svg = ChartImageConverter.createSVG(chart, w, h, DEFAULT_EXPORT_DPI,
-					this.isFixedAspectRatio);
+					this.isFixedAspectRatio,
+					GlobalOptions.getInstance().getBoolean(GlobalOptions.INCLUDE_LEGEND_IN_IMAGES_KEY));
 
 			writeToSVG(file, svg);
-			LOGGER.info("Chart saved as '" + file.getName() + "'");
+			LOGGER.info(
+					"Chart saved to '%s'. You can toggle inclusion of the chart legend in View > Preferences."
+							.formatted(file.getName()));
 
 		} catch (final RequestCancelledException e) {
 			// User cancelled, no action

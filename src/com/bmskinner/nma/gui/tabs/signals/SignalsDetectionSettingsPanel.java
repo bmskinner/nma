@@ -41,16 +41,16 @@ import com.bmskinner.nma.visualisation.tables.NuclearSignalDetectionTableModel;
 import com.bmskinner.nma.visualisation.tables.NuclearSignalTableCreator;
 
 @SuppressWarnings("serial")
-public class SignalsAnalysisPanel extends TableDetailPanel implements NuclearSignalUpdatedListener {
+public class SignalsDetectionSettingsPanel extends TableDetailPanel implements NuclearSignalUpdatedListener {
 
-	private static final Logger LOGGER = Logger.getLogger(SignalsAnalysisPanel.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SignalsDetectionSettingsPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Detection settings";
 	private static final String PANEL_DESC_LBL = "Settings used to detect signals";
 
 	private ExportableTable table; // table for analysis parameters
 
-	public SignalsAnalysisPanel() {
+	public SignalsDetectionSettingsPanel() {
 		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		this.setLayout(new BorderLayout());
 		uiController.addNuclearSignalUpdatedListener(this);

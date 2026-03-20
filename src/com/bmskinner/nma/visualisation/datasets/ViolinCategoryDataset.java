@@ -42,8 +42,8 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 
 	private static final int STEP_COUNT = 100;
 
-	private KeyedObjects2D pdfData;
-	private KeyedObjects2D ranges; // hold the min and max for each set of
+	private final KeyedObjects2D pdfData;
+	private final KeyedObjects2D ranges; // hold the min and max for each set of
 									// values for pdf step calculation
 	private double maxPdfValue = Double.NaN;
 
@@ -79,7 +79,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 	 * @return
 	 */
 	public boolean hasProbabilities(@NonNull Comparable<?> r, @NonNull Comparable<?> c) {
-		double[] values = (double[]) pdfData.getObject(r, c);
+		final double[] values = (double[]) pdfData.getObject(r, c);
 		return values != null && values.length > 1;
 	}
 
@@ -94,7 +94,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 		if (pdfData == null)
 			return false;
 
-		double[] values = (double[]) pdfData.getObject(r, c);
+		final double[] values = (double[]) pdfData.getObject(r, c);
 		return values != null && values.length > 1;
 	}
 
@@ -106,12 +106,13 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 	public boolean hasProbabilities() {
 
 		int total = 0;
-		for (Object c : ranges.getColumnKeys()) {
-			for (Object r : ranges.getRowKeys()) {
-				double[] values = (double[]) pdfData.getObject((Comparable<?>) r,
+		for (final Object c : ranges.getColumnKeys()) {
+			for (final Object r : ranges.getRowKeys()) {
+				final double[] values = (double[]) pdfData.getObject((Comparable<?>) r,
 						(Comparable<?>) c);
-				if (values != null)
+				if (values != null) {
 					total += values.length;
+				}
 			}
 		}
 		return total > 1;
@@ -139,14 +140,14 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 		double min = Double.MAX_VALUE;
 		double max = -Double.MAX_VALUE;
 
-		for (Object c : ranges.getColumnKeys()) {
+		for (final Object c : ranges.getColumnKeys()) {
 
-			Comparable<?> cc = (Comparable<?>) c;
+			final Comparable<?> cc = (Comparable<?>) c;
 
-			for (Object r : ranges.getRowKeys()) {
-				Comparable<?> rr = (Comparable<?>) r;
+			for (final Object r : ranges.getRowKeys()) {
+				final Comparable<?> rr = (Comparable<?>) r;
 
-				Range range = (Range) ranges.getObject(rr, cc);
+				final Range range = (Range) ranges.getObject(rr, cc);
 				if (range != null && hasProbabilities(rr, cc)) {
 					if (range.getLowerBound() < min) {
 						min = range.getLowerBound();
@@ -164,7 +165,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 		if (min == Double.MAX_VALUE || max == -Double.MAX_VALUE)
 			return null;
 
-		double range = max - min;
+		final double range = max - min;
 		return new Range(min - (range / 10), max + (range / 10)); // add 10% to
 																	// each end
 																	// for space
@@ -196,9 +197,9 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 		maxPdfValue = -Double.MAX_VALUE;
 		for (int c = 0; c < pdfData.getColumnCount(); c++) {
 			for (int r = 0; r < pdfData.getRowCount(); r++) {
-				double[] arr = (double[]) pdfData.getObject(r, c);
+				final double[] arr = (double[]) pdfData.getObject(r, c);
 				if (arr != null) {
-					double d = DoubleStream.of(arr).max().orElse(Double.NaN);
+					final double d = DoubleStream.of(arr).max().orElse(Double.NaN);
 					maxPdfValue = d > maxPdfValue ? d : maxPdfValue;
 				}
 			}
@@ -226,7 +227,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 	 * @return
 	 */
 	public double getMax(Comparable<?> rowKey, Comparable<?> columnKey) {
-		Range r = (Range) ranges.getObject(rowKey, columnKey);
+		final Range r = (Range) ranges.getObject(rowKey, columnKey);
 		if (r == null)
 			return 0;
 		return r.getUpperBound();
@@ -244,7 +245,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 			return 0;
 		if (row >= ranges.getRowCount())
 			return 0;
-		Range r = (Range) ranges.getObject(row, column);
+		final Range r = (Range) ranges.getObject(row, column);
 		if (r == null)
 			return 0;
 		return r.getUpperBound();
@@ -252,7 +253,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 
 	public double getMin(Comparable<?> rowKey, Comparable<?> columnKey) {
 
-		Range r = (Range) ranges.getObject(rowKey, columnKey);
+		final Range r = (Range) ranges.getObject(rowKey, columnKey);
 		if (r == null)
 			return 0;
 		return r.getLowerBound();
@@ -263,7 +264,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 			return 0;
 		if (row >= ranges.getRowCount())
 			return 0;
-		Range r = (Range) ranges.getObject(row, column);
+		final Range r = (Range) ranges.getObject(row, column);
 		if (r == null)
 			return 0;
 		return r.getLowerBound();
@@ -287,7 +288,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 
 	@Override
 	public Range getRangeBounds(boolean includeInterval) {
-		Range r = super.getRangeBounds(includeInterval);
+		final Range r = super.getRangeBounds(includeInterval);
 		return Range.combine(r, getProbabiltyRange());
 	}
 
@@ -317,44 +318,44 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 			throw new IllegalArgumentException("Null 'columnKey' argument.");
 
 		if (list.isEmpty()) {
-			Range r = new Range(0, 0);
+			final Range r = new Range(0, 0);
 			addProbabilityRange(r, rowKey, colKey);
 			addProbabilities(new double[] {}, rowKey, colKey);
 			return;
 		}
 
 		if (list.size() == 1) {
-			Range r = new Range(0, 0);
+			final Range r = new Range(0, 0);
 			addProbabilityRange(r, rowKey, colKey);
 			addProbabilities(new double[] {}, rowKey, colKey); // empty array makes hasProbabilities
 																// // false
 			return;
 		}
 
-		double[] pdfValues = new double[STEP_COUNT + 1];
+		final double[] pdfValues = new double[STEP_COUNT + 1];
 
-		double total = list.stream().mapToDouble(Number::doubleValue).sum();
-		double min = list.stream().mapToDouble(Number::doubleValue).min().orElse(0);
-		double max = list.stream().mapToDouble(Number::doubleValue).max().orElse(0);
+		final double total = list.stream().mapToDouble(Number::doubleValue).sum();
+		final double min = list.stream().mapToDouble(Number::doubleValue).min().orElse(0);
+		final double max = list.stream().mapToDouble(Number::doubleValue).max().orElse(0);
 
 		// If all values are the same, min==max, and there will be a step error
 		// calculating values between them for pdf
 		if (list.size() > 2 && total > 0 && min < max) { // don't bother with a dataset of a single
 															// cell, or if the stat is not present
 
-			double stepSize = (max - min) / STEP_COUNT;
+			final double stepSize = (max - min) / STEP_COUNT;
 
-			KernelEstimator est = createProbabililtyKernel(list, 0.001);
+			final KernelEstimator est = createProbabililtyKernel(list, 0.001);
 
 			for (int i = 0; i < STEP_COUNT; i++) {
-				double v = min + (stepSize * i);
+				final double v = min + (stepSize * i);
 				pdfValues[i] = est.getProbability(v);
 			}
 			// ensure last value in the array is at yMax; allows the renderer to have a flat
 			// top
 			pdfValues[STEP_COUNT] = est.getProbability(max);
 
-			Range r = new Range(min, max);
+			final Range r = new Range(min, max);
 			addProbabilityRange(r, rowKey, colKey);
 		}
 		addProbabilities(pdfValues, rowKey, colKey);
@@ -369,8 +370,8 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 	 * @return
 	 */
 	public static KernelEstimator createProbabililtyKernel(List<Number> values, double binWidth) {
-		KernelEstimator est = new KernelEstimator(binWidth);
-		for (Number d : values) {
+		final KernelEstimator est = new KernelEstimator(binWidth);
+		for (final Number d : values) {
 			est.addValue(d.doubleValue(), 1);
 		}
 		return est;

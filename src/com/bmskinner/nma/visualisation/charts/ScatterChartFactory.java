@@ -165,9 +165,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		final int seriesCount = plot.getDataset().getSeriesCount();
 
 		for (int i = 0; i < seriesCount; i++) {
-
-			final String seriesKey = ds.getSeriesKey(i).toString();
-			ds.getSignalGroup(seriesKey);
+			final Comparable<?> seriesKey = ds.getSeriesKey(i);
 
 			final IAnalysisDataset d = ds.getDataset(seriesKey);
 			final UUID id = ds.getSignalId(seriesKey);

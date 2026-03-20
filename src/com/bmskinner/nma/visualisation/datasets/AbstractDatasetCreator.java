@@ -16,10 +16,16 @@
  ******************************************************************************/
 package com.bmskinner.nma.visualisation.datasets;
 
+import java.util.UUID;
+
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nma.components.datasets.IAnalysisDataset;
+import com.bmskinner.nma.components.measure.Measurement;
+import com.bmskinner.nma.components.signals.ISignalGroup;
 import com.bmskinner.nma.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nma.visualisation.options.DisplayOptions;
+import com.google.api.client.repackaged.com.google.common.base.Objects;
 
 /**
  * Base class for chart dataset creators
@@ -70,5 +76,145 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> {
 	 */
 	protected AbstractDatasetCreator(@NonNull final E options) {
 		this.options = options;
+	}
+
+	/**
+	 * Keys for storing dataset related information in chart datasets. Used as an
+	 * alternative to String keys for better parsing of data for legends
+	 * 
+	 */
+	public record DatasetNameKey(IAnalysisDataset dataset) implements Comparable {
+		@Override
+		public int compareTo(Object o) {
+			final String s = dataset.getName() + dataset.getId();
+			if (o instanceof final DatasetNameKey k) {
+				final String sk = k.dataset.getName() + k.dataset.getId();
+				return s.compareTo(sk);
+			}
+			return s.compareTo(o.toString());
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof final DatasetNameKey k)
+				return dataset.equals(k.dataset);
+
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return dataset.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return dataset.getName();
+		}
+
+	}
+
+	/**
+	 * Keys for storing dataset related information in chart datasets. Used as an
+	 * alternative to String keys for better parsing of data for legends
+	 * 
+	 */
+	public record MeasurementNameKey(Measurement m) implements Comparable {
+		@Override
+		public int compareTo(Object o) {
+			final String s = m.toString();
+			if (o instanceof final MeasurementNameKey k) {
+				final String sk = k.toString();
+				return s.compareTo(sk);
+			}
+			return s.compareTo(o.toString());
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof final MeasurementNameKey k)
+				return m.equals(k.m);
+
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return m.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return m.toString();
+		}
+	}
+
+	/**
+	 * Keys for storing dataset related information in chart datasets. Used as an
+	 * alternative to String keys for better parsing of data for legends
+	 * 
+	 */
+	public record SignalNameKey(ISignalGroup sg, UUID signalGroupId) implements Comparable {
+		@Override
+		public int compareTo(Object o) {
+			final String s = sg.toString() + "_" + signalGroupId.toString();
+			if (o instanceof final SignalNameKey k) {
+				final String sk = k.sg().toString() + "_" + k.signalGroupId().toString();
+				return s.compareTo(sk);
+			}
+			return s.compareTo(o.toString());
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof final SignalNameKey k)
+				return sg.equals(k.sg) && signalGroupId.equals(k.signalGroupId);
+
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hashCode(sg, signalGroupId);
+		}
+
+		@Override
+		public String toString() {
+			return sg.getGroupName();
+		}
+
+	}
+
+	/**
+	 * Keys for storing dataset related information in chart datasets. Used as an
+	 * alternative to String keys for better parsing of data for legends
+	 * 
+	 */
+	public record SegmentNameKey(int segmentPosition) implements Comparable {
+		@Override
+		public int compareTo(Object o) {
+			if (o instanceof final SegmentNameKey k)
+				return Integer.compare(segmentPosition, k.segmentPosition());
+			return this.toString().compareTo(o.toString());
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof final SegmentNameKey k)
+				return segmentPosition == k.segmentPosition;
+
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return Integer.hashCode(segmentPosition);
+		}
+
+		@Override
+		public String toString() {
+			return "Segment " + segmentPosition;
+		}
+
 	}
 }
