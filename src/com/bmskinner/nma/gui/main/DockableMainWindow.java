@@ -29,7 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
 
-import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.LogPanel;
 import com.bmskinner.nma.gui.events.UserActionController;
@@ -49,6 +48,7 @@ import com.bmskinner.nma.gui.tabs.profiles.NucleusProfilesPanel;
 import com.bmskinner.nma.gui.tabs.segments.SegmentsDetailPanel;
 import com.bmskinner.nma.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nma.io.UpdateChecker;
+import com.bmskinner.nma.io.UpdateChecker.UpdateVerbosity;
 import com.bmskinner.nma.logging.LogPanelFormatter;
 import com.bmskinner.nma.logging.LogPanelHandler;
 import com.javadocking.DockingManager;
@@ -89,11 +89,10 @@ public class DockableMainWindow extends AbstractMainWindow {
 		this.setJMenuBar(new MainWindowMenuBar(this));
 
 		// Run update check if allowed in config
+		// Place here to ensure the UI is available to display a message if an update is
+		// present
 		if (GlobalOptions.getInstance().getBoolean(GlobalOptions.ALLOW_UPDATE_CHECK_KEY)) {
-			final Version latestVersion = UpdateChecker.fetchLatestVersionOnRemote();
-			if (latestVersion.isNewerThan(Version.currentVersion())) {
-				LOGGER.info(() -> "New version %s available".formatted(latestVersion));
-			}
+			UpdateChecker.runUpdateCheck(UpdateVerbosity.QUIET);
 		} else {
 			LOGGER.fine(
 					"Skipping update check because config setting CHECK_FOR_UPDATES is false");

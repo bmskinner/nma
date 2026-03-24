@@ -73,6 +73,7 @@ import com.bmskinner.nma.gui.events.UserActionController;
 import com.bmskinner.nma.gui.events.UserActionEvent;
 import com.bmskinner.nma.io.Io;
 import com.bmskinner.nma.io.UpdateChecker;
+import com.bmskinner.nma.io.UpdateChecker.UpdateVerbosity;
 import com.bmskinner.nma.utility.FileUtils;
 
 import ij.plugin.BrowserLauncher;
@@ -413,19 +414,7 @@ public class MainWindowMenuBar extends JMenuBar implements DatasetSelectionUpdat
 
 		final JMenuItem checkItem = new JMenuItem(CHECK_FOR_UPDATES_ITEM_LBL);
 		checkItem.addActionListener(e -> {
-			final Runnable r = () -> {
-				final Version v = UpdateChecker.fetchLatestVersionOnRemote();
-				if (v.isNewerThan(Version.currentVersion())) {
-					JOptionPane.showMessageDialog(this, "A new version - " + v + " - is available!",
-							"Update found!",
-							JOptionPane.INFORMATION_MESSAGE);
-				} else {
-					JOptionPane.showMessageDialog(this,
-							"You have the latest version: " + Version.currentVersion(),
-							"No updates", JOptionPane.INFORMATION_MESSAGE);
-				}
-			};
-			ThreadManager.getInstance().submit(r);
+				UpdateChecker.runUpdateCheck(UpdateVerbosity.LOUD);
 		});
 
 		menu.add(checkItem);

@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import com.bmskinner.nma.components.Version;
 import com.bmskinner.nma.core.GlobalOptions;
+import com.bmskinner.nma.core.ThreadManager;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
@@ -28,6 +29,42 @@ public class UpdateChecker {
 	private static final String VERSION_PATTERN = "(\\d+\\.\\d+\\.\\d+)";
 
 	private UpdateChecker() {
+	}
+
+	/**
+	 * Control how much information is written to the logging panel when an update
+	 * check is run. The default is to be quiet - i.e. only alert if there is an
+	 * update available.
+	 * 
+	 */
+	public static enum UpdateVerbosity {
+		/** Only log important information. Normal launch behaviour */
+		QUIET,
+
+		/** Log all information. When update check manually requested */
+		LOUD
+	}
+
+	/**
+	 * Check for updates in a background thread and report outcome to logger.
+	 * 
+	 */
+	public static void runUpdateCheck(UpdateVerbosity verbosity) {
+		final Runnable updateCheckRunnable = () -> {
+			if (verbosity.equals(UpdateVerbosity.LOUD)) {
+				LOGGER.info("Checking for updates at %s".formatted(GlobalOptions.getInstance().getString(GlobalOptions.DEFAULT_UPDATE_URL_KEY)));
+			}
+			final Version latestVersion = UpdateChecker.fetchLatestVersionOnRemote();
+			LOGGER.fine("Checked for updates, latest version at remote is %s".formatted(latestVersion));
+			if (latestVersion.isNewerThan(Version.currentVersion())) {
+				LOGGER.info("New version %s available".formatted(latestVersion));
+			} else if(verbosity.equals(UpdateVerbosity.LOUD)) {
+				LOGGER.info("Running %s. No newer version found; latest version at remote is %s. "
+						.formatted(Version.currentVersion(), latestVersion));
+				
+			}
+		};
+		ThreadManager.getInstance().submit(updateCheckRunnable);
 	}
 
 	/**
