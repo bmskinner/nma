@@ -343,9 +343,9 @@ public class VirtualDataset extends AbstractAnalysisDataset
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		boolean b = false;
+		boolean b = true;
 		for (final Object o : c) {
-			b |= contains(o);
+			b &= contains(o);
 		}
 		return b;
 	}
