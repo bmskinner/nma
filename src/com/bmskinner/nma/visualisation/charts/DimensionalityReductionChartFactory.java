@@ -408,6 +408,8 @@ public class DimensionalityReductionChartFactory extends AbstractChartFactory {
 		// Place the consensus somewhere sensible. Scale here has been chosen to reflect
 		// the ranges of the plot; this should avoid making the consensus too small or
 		// too large for the chart
+		// TODO: we may have an issue here when the consensus has just been calculated
+		// above - consensus is being drawn too large
 		final Nucleus n = ccl.dataset().getCollection().getConsensus();
 		n.setScale(scale);
 

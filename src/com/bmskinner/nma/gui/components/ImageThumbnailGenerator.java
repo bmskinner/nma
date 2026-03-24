@@ -3,6 +3,7 @@ package com.bmskinner.nma.gui.components;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -37,6 +38,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 
 	private final ChartPanel chartPanel;
 	private XYItemEntity currentEntity = null; // allow chart to repaint whenever entity changes
+	private Rectangle prevEntityDrawBounds = null;
 
 	/**
 	 * Create a thumbnail generator for the given chart panel. Specify if the
@@ -57,8 +59,8 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 	public void chartMouseMoved(ChartMouseEvent event) { // display thumbnail of nucleus
 
 		if (!(event.getEntity() instanceof XYItemEntity)) {
-			chartPanel.repaint(); // clear the chart
 			currentEntity = null;
+			chartPanel.repaint(); // clear the chart
 			return;
 		}
 		final XYItemEntity entity = (XYItemEntity) event.getEntity();
@@ -66,6 +68,12 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		if (entity == currentEntity) // no unnecessary updates needed
 			return;
 
+		// We have a new entity. Repaint the previous draw bounds if different
+		// Paint now, not using repaint so we do not get out of order painting with the
+		// new annotation
+		if (prevEntityDrawBounds != null & entity != null) {
+			chartPanel.paintImmediately(prevEntityDrawBounds);
+		}
 		currentEntity = entity;
 
 		// only use datasets of the desired class
@@ -82,9 +90,11 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		if (n == null)
 			return;
 
-		// Draw at mouse position
-		final int screenX = event.getTrigger().getX();
-		final int screenY = event.getTrigger().getY();
+		// Find the screen coordinates of the XYpoint. We want to draw the
+		// annotation from the centre of the point, no matter where the mouse touched
+		// it.
+		final int screenX = entity.getArea().getBounds().x - (entity.getArea().getBounds().width / 2);
+		final int screenY = entity.getArea().getBounds().y - (entity.getArea().getBounds().height / 2);
 
 		if (n instanceof final Nucleus nuc) {
 			if (ds instanceof final NuclearSignalXYDataset ns) {
@@ -116,6 +126,7 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		// ensure the image is positioned within the bounds of the chart panel
 		final int topStart = y + ip.getHeight() > chartPanel.getHeight() ? y - ip.getHeight() : y;
 		final int leftStart = x + ip.getWidth() > chartPanel.getWidth() ? x - ip.getWidth() : x;
+		prevEntityDrawBounds = new Rectangle(leftStart - 10, topStart - 10, ip.getWidth() + 20, ip.getHeight() + 20);
 
 		g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
 		final Color c = g2.getColor();
@@ -145,6 +156,8 @@ public class ImageThumbnailGenerator implements ChartMouseListener {
 		// ensure the image is positioned within the bounds of the chart panel
 		final int topStart = y + ip.getHeight() > chartPanel.getHeight() ? y - ip.getHeight() : y;
 		final int leftStart = x + ip.getWidth() > chartPanel.getWidth() ? x - ip.getWidth() : x;
+
+		prevEntityDrawBounds = new Rectangle(leftStart - 10, topStart - 10, ip.getWidth() + 20, ip.getHeight() + 20);
 
 		g2.drawImage(ip.createImage(), leftStart, topStart, ip.getWidth(), ip.getHeight(), null);
 		final Color c = g2.getColor();

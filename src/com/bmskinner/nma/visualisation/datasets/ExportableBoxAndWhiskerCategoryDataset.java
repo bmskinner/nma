@@ -18,7 +18,8 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 public class ExportableBoxAndWhiskerCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset {
 
 	/**
-	 * The raw chart data, stored under the row and column keys
+	 * The raw chart data, stored under the row and column keys. Needed because the
+	 * default implementation only stores summary values.
 	 */
 	private transient Map<Comparable<?>, Map<Comparable<?>, List<?>>> rawData = new HashMap<>();
 
@@ -29,10 +30,17 @@ public class ExportableBoxAndWhiskerCategoryDataset extends DefaultBoxAndWhisker
 	@Override
 	public void add(List list, Comparable rowKey, Comparable columnKey) {
 		super.add(list, rowKey, columnKey);
-		rawData.computeIfAbsent(rowKey, (k) -> new HashMap<Comparable<?>, List<?>>());
+		rawData.computeIfAbsent(rowKey, k -> new HashMap<Comparable<?>, List<?>>());
 		rawData.get(rowKey).put(columnKey, list);
 	}
 
+	/**
+	 * Get the raw data underlying this chart dataset
+	 * 
+	 * @param rowKey
+	 * @param columnKey
+	 * @return
+	 */
 	public List<?> getRawData(Comparable<?> rowKey, Comparable<?> columnKey) {
 		if (rawData.get(rowKey) == null)
 			return new ArrayList<>();

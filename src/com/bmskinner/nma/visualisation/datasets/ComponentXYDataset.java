@@ -2,6 +2,7 @@ package com.bmskinner.nma.visualisation.datasets;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.jfree.data.xy.DefaultXYDataset;
 
@@ -14,7 +15,9 @@ import org.jfree.data.xy.DefaultXYDataset;
  */
 public class ComponentXYDataset<T> extends DefaultXYDataset {
 	
-	private List<List<T>> componentList = new ArrayList<>();
+	private static final Logger LOGGER = Logger.getLogger(ComponentXYDataset.class.getName());
+
+	private final List<List<T>> componentList = new ArrayList<>();
 	
 	public ComponentXYDataset() {
 		super();
@@ -38,8 +41,17 @@ public class ComponentXYDataset<T> extends DefaultXYDataset {
 	 * @return
 	 */
 	public T getComponent(Comparable<?> seriesKey, int item) {
-		int seriesIndex = indexOf(seriesKey);
-		return componentList.get(seriesIndex).get(item);
+		int seriesIndex = -1;
+		final String keyString = seriesKey.toString();
+
+		for (int i = 0; i < this.getSeriesCount(); i++) {
+			// Force a string comparison, not the inbuilt indexOf. The input seriesKey may
+			// be a Comparables or a String already which can cause issues with indexOf.
+			if (this.getSeriesKey(i).toString().equals(keyString)) {
+				seriesIndex = i;
+			}
+		}
+		return seriesIndex == -1 ? null : componentList.get(seriesIndex).get(item);
 	}
 
 }
