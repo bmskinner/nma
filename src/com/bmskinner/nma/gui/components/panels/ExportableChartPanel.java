@@ -17,6 +17,7 @@
 package com.bmskinner.nma.gui.components.panels;
 
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -68,6 +69,7 @@ import org.jfree.data.xy.XYZDataset;
 import com.bmskinner.nma.core.DatasetListManager;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.core.InputSupplier.RequestCancelledException;
+import com.bmskinner.nma.core.ThreadManager;
 import com.bmskinner.nma.gui.DefaultInputSupplier;
 import com.bmskinner.nma.gui.events.ChartSetEventListener;
 import com.bmskinner.nma.io.ChartDataExtracter;
@@ -608,42 +610,49 @@ public class ExportableChartPanel extends ChartPanel implements ChartSetEventLis
 	 */
 	private void exportPNG(int w, int h) {
 
-		final ExportableLegendChart chart = (ExportableLegendChart) getChart();
+		// Run export in a background thread
+		final Runnable exportChartRunnable = () -> {
 
-		try {
-			final File file = new DefaultInputSupplier().requestFileSave(
-					FileUtils.commonPathOfDatasets(
-							DatasetListManager.getInstance().getSelectedDatasets()),
-					chart.getExportFileName(), Io.PNG_FILE_EXTENSION_NODOT);
+			try {
 
-			if (file.exists()
-					&& !new DefaultInputSupplier().requestApproval("File exists. Overwrite?",
-							"Overwrite existing file?"))
-				return;
+				final ExportableLegendChart chart = (ExportableLegendChart) getChart();
+				this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				final File file = new DefaultInputSupplier().requestFileSave(
+						FileUtils.commonPathOfDatasets(
+								DatasetListManager.getInstance().getSelectedDatasets()),
+						chart.getExportFileName(), Io.PNG_FILE_EXTENSION_NODOT);
 
-			try (OutputStream os = new FileOutputStream(file)) {
+				if (file.exists()
+						&& !new DefaultInputSupplier().requestApproval("File exists. Overwrite?",
+								"Overwrite existing file?"))
+					return;
+
+				try (OutputStream os = new FileOutputStream(file)) {
+
+					final BufferedImage bi = ChartImageConverter.createPNG(chart, w, h,
+							DEFAULT_EXPORT_DPI, this.isFixedAspectRatio,
+							GlobalOptions.getInstance().getBoolean(GlobalOptions.INCLUDE_LEGEND_IN_IMAGES_KEY));
+
+					EncoderUtil.writeBufferedImage(bi, ImageFormat.PNG, os);
+					LOGGER.info(
+							"Chart saved to '%s'. You can toggle inclusion of the chart legend in View > Preferences."
+									.formatted(file.getName()));
 
 
+				} catch (final IOException e) {
+					LOGGER.log(Level.SEVERE, "Unable to save chart as png", e);
+				} catch (final TranscoderException e) {
+					LOGGER.log(Level.SEVERE, "Unable to transcode chart to png", e);
+				} finally {
+					this.setCursor(Cursor.getDefaultCursor());
+				}
 
-				final BufferedImage bi = ChartImageConverter.createPNG(chart, w, h,
-						DEFAULT_EXPORT_DPI, this.isFixedAspectRatio,
-						GlobalOptions.getInstance().getBoolean(GlobalOptions.INCLUDE_LEGEND_IN_IMAGES_KEY));
-
-				EncoderUtil.writeBufferedImage(bi, ImageFormat.PNG, os);
-				LOGGER.info(
-						"Chart saved to '%s'. You can toggle inclusion of the chart legend in View > Preferences."
-								.formatted(file.getName()));
-
-			} catch (final IOException e) {
-				LOGGER.log(Level.SEVERE, "Unable to save chart as png", e);
-			} catch (final TranscoderException e) {
-				LOGGER.log(Level.SEVERE, "Unable to transcode chart to png", e);
+			} catch (final RequestCancelledException e) {
+				// User cancelled, no action
 			}
+		};
 
-		} catch (final RequestCancelledException e) {
-			// User cancelled, no action
-		}
-
+		ThreadManager.getInstance().submit(exportChartRunnable);
 	}
 
 	/**

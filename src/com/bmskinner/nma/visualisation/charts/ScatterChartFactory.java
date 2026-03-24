@@ -112,7 +112,9 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			final String xLabel = options.getStat(0).label(options.getScale());
 			final String yLabel = options.getStat(1).label(options.getScale());
 
+
 			final ExportableLegendChart chart = createBaseXYChart(xLabel, yLabel, ds);
+			chart.setExportFileName("Scatter chart of %s versus %s".formatted(options.getStat(0), options.getStat(1)));
 
 			final XYPlot plot = chart.getXYPlot();
 
@@ -152,6 +154,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		final String yLabel = options.getStat(1).label(options.getScale());
 
 		final ExportableLegendChart chart = createBaseXYChart(xLabel, yLabel, ds);
+		chart.setExportFileName("Scatter chart of %s versus %s".formatted(options.getStat(0), options.getStat(1)));
 
 		final XYPlot plot = chart.getXYPlot();
 
