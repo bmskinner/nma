@@ -498,6 +498,9 @@ public class DatasetEditingPanel extends ChartDetailPanel
 	@Override
 	public void chartMouseClicked(ChartMouseEvent event) {
 
+		if (null == activeDataset())
+			return;
+
 		if (!activeDataset().getCollection().hasConsensus())
 			return;
 
