@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -34,6 +35,8 @@ import ij.IJ;
  *
  */
 public class BooleanProfile implements Serializable, Iterable<Integer> {
+
+	private static final Logger LOGGER = Logger.getLogger(BooleanProfile.class.getName());
 
     private static final long serialVersionUID = 1L;
     final protected boolean[] array;
@@ -52,6 +55,13 @@ public class BooleanProfile implements Serializable, Iterable<Integer> {
         }
     }
 
+	/**
+	 * Create a profile of the given length. Set all indexes to the given boolean
+	 * value.
+	 * 
+	 * @param length
+	 * @param b
+	 */
     public BooleanProfile(final int length, final boolean b) {
         this.array = new boolean[length];
         for (int i = 0; i < this.array.length; i++) {
@@ -133,13 +143,12 @@ public class BooleanProfile implements Serializable, Iterable<Integer> {
         boolean result = false;
 
         try {
-            if (index >= array.length) {
-                throw new Exception("Requested value " + index + " is beyond profile end");
-            }
+            if (index >= array.length)
+				throw new Exception("Requested index %s is beyond profile bounds".formatted(index));
             result = this.array[index];
-        } catch (Exception e) {
+        } catch (final Exception e) {
             IJ.log("Cannot get value from profile: " + e.getMessage());
-            for (StackTraceElement el : e.getStackTrace()) {
+            for (final StackTraceElement el : e.getStackTrace()) {
                 IJ.log(el.toString());
             }
         }
@@ -164,7 +173,7 @@ public class BooleanProfile implements Serializable, Iterable<Integer> {
      * @throws Exception on error
      */
     public BooleanProfile offset(int j) throws Exception {
-        boolean[] newArray = new boolean[this.size()];
+        final boolean[] newArray = new boolean[this.size()];
         for (int i = 0; i < this.size(); i++) {
             newArray[i] = this.array[CellularComponent.wrapIndex(i + j, array.length)];
         }
@@ -182,7 +191,7 @@ public class BooleanProfile implements Serializable, Iterable<Integer> {
         if (this.size() != profile.size())
             throw new IllegalArgumentException("Profile sizes do not match");
 
-        boolean[] result = new boolean[this.size()];
+        final boolean[] result = new boolean[this.size()];
 
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i] || profile.get(i);
@@ -201,7 +210,7 @@ public class BooleanProfile implements Serializable, Iterable<Integer> {
         if (array.length != profile.size())
             throw new IllegalArgumentException("Profile sizes do not match");
         
-        boolean[] result = new boolean[array.length];
+        final boolean[] result = new boolean[array.length];
 
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i] && profile.get(i);
@@ -215,7 +224,7 @@ public class BooleanProfile implements Serializable, Iterable<Integer> {
      * @return a new profile
      */
     public BooleanProfile invert() {
-        boolean[] result = new boolean[this.size()];
+        final boolean[] result = new boolean[this.size()];
 
         for (int i = 0; i < array.length; i++) {
             result[i] = !array[i];
@@ -229,9 +238,10 @@ public class BooleanProfile implements Serializable, Iterable<Integer> {
      */
     public int countTrue(){
         int i=0;
-        for(boolean b : array){
-            if(b)
-                i++;
+        for(final boolean b : array){
+            if(b) {
+				i++;
+			}
         }
         return i;
     }
@@ -244,6 +254,76 @@ public class BooleanProfile implements Serializable, Iterable<Integer> {
         return array.length - countTrue();
     }
     
+	/**
+	 * Dilate this profile in a sliding window.
+	 * 
+	 * @param windowSize the width of the dilation. Should be odd. e.g. Use 3 to
+	 *                   dilate one index either side of a given index.
+	 * @return
+	 */
+	public BooleanProfile dilate(int windowSize) {
+		if (windowSize < 3)
+			throw new IllegalArgumentException(
+					"Window size for boolean profile dilation must be at least 3 (%s provided)".formatted(windowSize));
+
+		// Convert window size to a range centred on 0
+		final int distance = windowSize / 2;
+		LOGGER.finest("Window size is %s, distance is %s".formatted(windowSize, distance));
+
+		BooleanProfile result = new BooleanProfile(this);
+
+		for (int i = 0; i < this.size(); i++) {
+			
+			final BooleanProfile temp = new BooleanProfile(this);
+
+			for (int j = i - distance; j <= i + distance; j++) {
+				final int testIndex = temp.wrap(j);
+				temp.set(temp.wrap(testIndex), temp.get(i) | temp.get(temp.wrap(testIndex)));
+			}
+
+			result = result.or(temp);
+		}
+
+		return result;
+
+	}
+
+	public BooleanProfile erode(int windowSize) {
+		if (windowSize < 3)
+			throw new IllegalArgumentException(
+					"Window size for boolean profile erosion must be at least 3 (%s provided)".formatted(windowSize));
+
+		// Convert window size to a range centred on 0
+		final int distance = windowSize / 2;
+		LOGGER.finest("Window size is %s, distance is %s".formatted(windowSize, distance));
+
+		BooleanProfile result = new BooleanProfile(this);
+
+		for (int i = 0; i < this.size(); i++) {
+
+			final BooleanProfile temp = new BooleanProfile(this);
+
+			for (int j = i - distance; j <= i + distance; j++) {
+				final int testIndex = temp.wrap(j);
+				LOGGER.finest("i %s, j %s".formatted(i, testIndex));
+				temp.set(temp.wrap(testIndex), temp.get(i) & temp.get(temp.wrap(testIndex)));
+			}
+
+			result = result.and(temp);
+		}
+
+		return result;
+
+	}
+
+	public int wrap(int index) {
+		if (index < 0)
+			return wrap(size() + index);
+		if (index < size())
+			return index;
+		return index % size();
+	}
+
 	@Override
 	public Iterator<Integer> iterator() {
 		return IntStream.range(0, array.length).iterator();
@@ -254,7 +334,27 @@ public class BooleanProfile implements Serializable, Iterable<Integer> {
     	return Arrays.toString(array);
     }
 
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(array);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final BooleanProfile other = (BooleanProfile) obj;
+		return Arrays.equals(array, other.array);
+	}
+
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
     }
 
