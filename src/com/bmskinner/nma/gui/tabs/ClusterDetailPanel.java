@@ -43,6 +43,7 @@ import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.renderers.JTextAreaCellRenderer;
 import com.bmskinner.nma.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nma.gui.dialogs.DimensionalityReductionPlotDialog;
+import com.bmskinner.nma.gui.dialogs.HammingClusterPlotDialog;
 import com.bmskinner.nma.gui.events.ClusterGroupsUpdatedListener;
 import com.bmskinner.nma.gui.events.UIController;
 import com.bmskinner.nma.visualisation.options.TableOptions;
@@ -115,7 +116,8 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 			@Override
 			public TableCellRenderer getCellRenderer(int row, int column) {
 				if ((this.getValueAt(row, 0).equals(Labels.Clusters.TREE)
-						|| this.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT))
+						|| this.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)
+						|| this.getValueAt(row, 0).equals(Labels.Clusters.HAMMING_PLOT))
 						&& column > 0
 						&& !(getValueAt(row, column).equals(Labels.NA)))
 					return buttonRenderer;
@@ -137,15 +139,24 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 				final IClusterGroup group = model.getClusterGroup(table.convertColumnIndexToModel(col));
 				final IAnalysisDataset d = model.getDataset(table.convertColumnIndexToModel(col));
 
+				// Newick tree from hierarchical clustering
 				if (table.getValueAt(row, 0).equals(Labels.Clusters.TREE)
 						&& !table.getValueAt(row, col).equals(Labels.NA)) {
 					final Runnable r = () -> new ClusterTreeDialog(d, group);
 					ThreadManager.getInstance().submit(r);
 				}
 
+				// Dimensionality reduction plots
 				if (table.getValueAt(row, 0).equals(Labels.Clusters.CLUSTER_DIM_PLOT)
 						&& !table.getValueAt(row, col).equals(Labels.NA)) {
 					final Runnable r = () -> new DimensionalityReductionPlotDialog(d, group);
+					ThreadManager.getInstance().submit(r);
+				}
+
+				// Hamming clusters visualisation
+				if (table.getValueAt(row, 0).equals(Labels.Clusters.HAMMING_PLOT)
+						&& !table.getValueAt(row, col).equals(Labels.NA)) {
+					final Runnable r = () -> new HammingClusterPlotDialog(d, group);
 					ThreadManager.getInstance().submit(r);
 				}
 

@@ -119,6 +119,10 @@ public abstract class AbstractAnalysisDataset implements IAnalysisDataset {
 			clusterGroups.add(new DefaultClusterGroup(el));
 		}
 
+		for (final Element el : e.getChildren(XMLNames.XML_HAMMING_CLUSTER_GROUP)) {
+			clusterGroups.add(new HammingClusterGroup(el));
+		}
+
 		if (e.getChild(XMLNames.XML_ANALYSIS_OPTIONS) != null) {
 			analysisOptions = new DefaultAnalysisOptions(e.getChild(XMLNames.XML_ANALYSIS_OPTIONS));
 		}

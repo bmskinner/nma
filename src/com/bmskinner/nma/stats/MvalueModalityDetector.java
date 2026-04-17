@@ -25,16 +25,17 @@ import java.util.stream.IntStream;
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.profiles.BooleanProfile;
 import com.bmskinner.nma.components.profiles.IProfile;
-import com.bmskinner.nma.stats.ModalityTest.BinnedData.Bin;
+import com.bmskinner.nma.stats.MvalueModalityDetector.BinnedData.Bin;
 
 /**
  * Test a set of values for multimodality and return the values of the modes.
- * This uses the mvalue approach.
+ * This uses the mvalue approach by Brendan Gregg as described in
+ * http://www.brendangregg.com/FrequencyTrails/modes.html
  *
  */
-public class ModalityTest implements SignificanceTest {
+public class MvalueModalityDetector implements SignificanceTest {
 
-	private static final Logger LOGGER = Logger.getLogger(ModalityTest.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(MvalueModalityDetector.class.getName());
     private BinnedData binData;
 
     public static final int DEFAULT_SMOOTHING_WINDOW = 3;
@@ -139,7 +140,7 @@ public class ModalityTest implements SignificanceTest {
 	 * @param the  maximum bin width to test
 	 * @param the  step size between bin widths
 	 */
-    public ModalityTest(double[] data, double minBinWidth, double maxBinWidth, double stepSize) {
+    public MvalueModalityDetector(double[] data, double minBinWidth, double maxBinWidth, double stepSize) {
         final double[] cleanedData = trimOutliers(data);
         // http://www.brendangregg.com/FrequencyTrails/modes.html
 
@@ -181,6 +182,22 @@ public class ModalityTest implements SignificanceTest {
 
     }
 
+	/**
+	 * Fetch the mvalue for this data. The mvalue sums the absolute difference in
+	 * elevation in the frequency plot, normalised for the height of the plot. A
+	 * unimodal distribution has an mvalue of 2: 1 for the rise to the peak, and
+	 * another 1 for the fall back to zero. A bimodal distribution has an mvalue of
+	 * 4.Since the height is normalised to the highest peak, minor modes do not
+	 * necessarily have the same height as the major mode, which results in
+	 * fractional values for the mvalue. For example, consider a bimodal
+	 * distribution with a minor mode that has half the probability of the major
+	 * mode. The minor mode should have half the height of the major node, and an
+	 * mvalue should be 3. The mvalue indicates the product of the size (volume) and
+	 * number of modes.
+	 * 
+	 * @return the mvalue. Values >2.4 are of interest.
+	 * @see http://www.brendangregg.com/FrequencyTrails/modes.html
+	 */
     public double getMValue() {
         return binData.mValue;
     }

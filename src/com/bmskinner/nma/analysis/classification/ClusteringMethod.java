@@ -22,6 +22,15 @@ public enum ClusteringMethod {
 		return this.name;
 	}
 
+	public static ClusteringMethod from(String s) {
+		for (final ClusteringMethod c : ClusteringMethod.values()) {
+			if (c.name.toUpperCase().equals(s.toUpperCase()))
+				return c;
+		}
+		throw new IllegalArgumentException("There is no clustering method named %s".formatted(s));
+
+	}
+
 	/**
 	 * If the given options contains a clustering method key, get the value
 	 * 
@@ -29,6 +38,6 @@ public enum ClusteringMethod {
 	 * @return
 	 */
 	public static ClusteringMethod from(HashOptions o) {
-		return ClusteringMethod.valueOf(o.getString(HashOptions.CLUSTER_METHOD_KEY).toUpperCase());
+		return ClusteringMethod.from(o.getString(HashOptions.CLUSTER_METHOD_KEY));
 	}
 }

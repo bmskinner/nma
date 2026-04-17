@@ -225,4 +225,15 @@ public class XMLNames {
 	public static final String XML_WARPED_SIGNAL_BYTES = "Bytes";
 	public static final String XML_WARPED_SIGNAL_BASE64 = "Base64";
 
+	// From hamming clusters
+	public static final String XML_HAMMING_CLUSTER_GROUP = "HammingClusterGroup";
+	public static final String XML_PROFILE_BARCODE_REGION = "ProfileBarcodingRegion";
+	public static final String XML_PROFILE_TYPE = "profileType";
+	public static final String XML_NUCLEUS_BARCODE = "NucleusBarcode";
+	public static final String XML_BARCODE = "Barcode";
+	public static final String XML_BARCODE_ELEMENT = "BarcodeElement";
+	public static final String XML_START_INDEX = "startIndex";
+	public static final String XML_END_INDEX = "endIndex";
+	public static final String XML_CLUSTER_NUMBER = "clusterNumber";
+
 }
