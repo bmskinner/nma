@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -214,7 +215,13 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 
 		};
 
-		ThreadManager.getInstance().submitUIUpdate(treeUpdateRunnable);
+		try {
+			ThreadManager.getInstance().submitUIUpdate(treeUpdateRunnable);
+		} catch (final RejectedExecutionException e) {
+			// probably the dataset does not exist any more. Do not spam error messages
+			// though.
+		}
+
 	}
 
 	@Override
@@ -383,7 +390,14 @@ public class ImagesTabPanel extends DetailPanel implements FilePathUpdatedListen
 				}
 			};
 
-			ThreadManager.getInstance().submitUIUpdate(r);
+			try {
+				ThreadManager.getInstance().submitUIUpdate(r);
+			} catch (final RejectedExecutionException ex) {
+				// probably the dataset does not exist any more. Do not spam error messages
+				// though.
+			}
+
+
 		}
 
 	}

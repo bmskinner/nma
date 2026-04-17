@@ -346,7 +346,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	}
 
 	@Override
-	public void deleteClusterGroup(@NonNull final IClusterGroup group) {
+	public synchronized void deleteClusterGroup(@NonNull final IClusterGroup group) {
 
 		if (hasClusterGroup(group)) {
 			final UUID[] groupIds = group.getUUIDs().toArray(new UUID[0]);
@@ -371,7 +371,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	}
 
 	@Override
-	public void deleteClusterGroups() {
+	public synchronized void deleteClusterGroups() {
 		LOGGER.fine("Deleting all cluster groups in " + getName());
 		// Use arrays to avoid concurrent modifications to cluster groups
 		final Object[] ids = clusterGroups.parallelStream().map(IClusterGroup::getId).toArray();
@@ -389,7 +389,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	}
 
 	@Override
-	public void deleteChild(@NonNull UUID id) {
+	public synchronized void deleteChild(@NonNull UUID id) {
 		if (this.hasDirectChild(id)) {
 			this.removeChildCollection(id);
 		}
