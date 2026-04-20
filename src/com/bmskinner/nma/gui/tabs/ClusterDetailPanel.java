@@ -21,6 +21,7 @@ import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -62,6 +63,8 @@ import com.bmskinner.nma.visualisation.tables.ClusterGroupTableModel;
  */
 @SuppressWarnings("serial")
 public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroupsUpdatedListener {
+
+	private static final Logger LOGGER = Logger.getLogger(ClusterDetailPanel.class.getName());
 
 	private static final String PANEL_TITLE_LBL = "Clusters";
 	private static final String PANEL_DESC_LBL = "Show clustering parameters and display cluster outputs";
@@ -156,6 +159,7 @@ public class ClusterDetailPanel extends TableDetailPanel implements ClusterGroup
 				// Hamming clusters visualisation
 				if (table.getValueAt(row, 0).equals(Labels.Clusters.HAMMING_PLOT)
 						&& !table.getValueAt(row, col).equals(Labels.NA)) {
+					LOGGER.fine("Creating Hamming dialog");
 					final Runnable r = () -> new HammingClusterPlotDialog(d, group);
 					ThreadManager.getInstance().submit(r);
 				}

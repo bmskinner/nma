@@ -29,6 +29,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
+import org.jfree.chart.annotations.XYBoxAnnotation;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -423,6 +424,21 @@ public abstract class AbstractChartFactory {
 		final XYPlot plot = chart.getXYPlot();
 		drawImageAsAnnotation(ip, plot, alpha);
 		return chart;
+	}
+
+	/**
+	 * Add a rectangle annotation to the given plot
+	 * 
+	 * @param plot
+	 * @param xmin
+	 * @param xmax
+	 * @param ymin
+	 * @param ymax
+	 */
+	protected void drawRectangleAnnotation(XYPlot plot, double xmin, double xmax, double ymin, double ymax) {
+
+		final XYAnnotation ann = new XYBoxAnnotation(xmin, ymin, xmax, ymax);
+		plot.addAnnotation(ann);
 	}
 
 	private static ImageProcessor importAndCropImage(@NonNull ICell cell,
