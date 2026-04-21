@@ -1,6 +1,7 @@
 package com.bmskinner.nma.analysis.classification;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -155,7 +156,7 @@ public class NonunimodalRegionClusteringMethod {
 	 * Store the Weka instances data with the map of nucleus to specific instance
 	 * 
 	 */
-	public record InstancesData(Instances instances, List<NucleusInstance> nucleusInstances) {
+	public record InstancesData(Instances instances, List<CellInstance> cellInstances) {
 
 	}
 
@@ -163,7 +164,7 @@ public class NonunimodalRegionClusteringMethod {
 	 * Store a nucleus with the clustering instance
 	 * 
 	 */
-	public record NucleusInstance(Nucleus nucleus, Instance instance) {
+	public record CellInstance(ICell cell, Instance instance) {
 
 	}
 	
@@ -279,6 +280,8 @@ public class NonunimodalRegionClusteringMethod {
 			BooleanProfile multimodalIndexes = new BooleanProfile(dataset.getCollection().getMedianArrayLength(),
 					false);
 
+			final double[] mvalues = new double[dataset.getCollection().getMedianArrayLength()];
+
 			for (int i = 0; i < dataset.getCollection().getMedianArrayLength(); i++) {
 				
 				double minValue = Double.MAX_VALUE;
@@ -306,21 +309,17 @@ public class NonunimodalRegionClusteringMethod {
 				
 				
 				// Perform modality test on profile values
-				// TODO: dynamic values for each profile type based on range
+				// Dynamic values for each profile type based on range
 				final double range = maxValue - minValue;
 				final double minbinWidth = range / 20;
 				final double maxbinWidth = range / 10;
 				final double stepSize = range / 40;
 
-//				final double minbinWidth = 5;
-//				final double maxbinWidth = 10;
-//				final double stepSize = 1;
-				
-
 
 				final MvalueModalityDetector mt = new MvalueModalityDetector(profileValues, minbinWidth, maxbinWidth, stepSize);
 				final double mvalue = mt.getMValue();
 				
+				mvalues[i] = mvalue;
 				LOGGER.finer("Index %s: mValue %s, bins %s - %s, step %s".formatted(i, mvalue, minbinWidth, maxbinWidth,
 						stepSize));
 
@@ -330,6 +329,8 @@ public class NonunimodalRegionClusteringMethod {
 				}
 
 			}
+
+			LOGGER.fine(Arrays.toString(mvalues));
 
 			// Gap fill adjacent indexes to make contiguous regions
 			multimodalIndexes = multimodalIndexes
@@ -379,7 +380,7 @@ public class NonunimodalRegionClusteringMethod {
 		LOGGER.fine("Clustering dataset on barcoding regions");
 		// For each of the index ranges in the regions provided, cluster the cells.
 		// Assign each cell to a cluster.
-		Map<Nucleus, List<BarcodeElement>> nucleusBarcodes = new HashMap<>();
+		Map<ICell, List<BarcodeElement>> cellBarcodes = new HashMap<>();
 		
 		for (final ProfileBarcodingRegion pbr : regions) {
 
@@ -390,23 +391,23 @@ public class NonunimodalRegionClusteringMethod {
 			final InstancesData instanceData = makeInstances(pbr, attributes, dataset);
 			
 
-			nucleusBarcodes = assignClusters(pbr, instanceData, dataset, nucleusBarcodes);
+			cellBarcodes = assignClusters(pbr, instanceData, dataset, cellBarcodes);
 		}
 
 		// Aggregate the barcode elements into cell barcodes
-		final Map<Nucleus, Barcode> barcodes = new HashMap<>();
-		for (final Entry<Nucleus, List<BarcodeElement>> entry : nucleusBarcodes.entrySet()) {
+		final Map<ICell, Barcode> barcodes = new HashMap<>();
+		for (final Entry<ICell, List<BarcodeElement>> entry : cellBarcodes.entrySet()) {
 			barcodes.put(entry.getKey(), new Barcode(entry.getValue()));
 		}
 
-		for (final Entry<Nucleus, Barcode> entry : barcodes.entrySet()) {
+		for (final Entry<ICell, Barcode> entry : barcodes.entrySet()) {
 			LOGGER.finer("Nucleus %s has barcode %s".formatted(entry.getKey().getId(), entry.getValue()));
 		}
 
 		// Invert this data - count nuclei per barcode
-		final Map<Barcode, Set<Nucleus>> barcodeMap = new HashMap<>();
-		for (final Entry<Nucleus, Barcode> entry : barcodes.entrySet()) {
-			barcodeMap.computeIfAbsent(entry.getValue(), n -> new HashSet<Nucleus>()).add(entry.getKey());
+		final Map<Barcode, Set<ICell>> barcodeMap = new HashMap<>();
+		for (final Entry<ICell, Barcode> entry : barcodes.entrySet()) {
+			barcodeMap.computeIfAbsent(entry.getValue(), n -> new HashSet<ICell>()).add(entry.getKey());
 
 		}
 
@@ -430,32 +431,29 @@ public class NonunimodalRegionClusteringMethod {
 			entry.getValue().add(entry.getKey());
 		}
 
-		final HammingClusterGroup clusterGroup = createClusterGroup(amalgamatedClusters, barcodes, dataset);
-
-
-		clusterGroup.setBarcodingRegions(regions);
-
 		final Map<UUID, Barcode> nucleusIDsToBarcodes = barcodes.entrySet().stream()
 				.collect(Collectors.toMap(e -> e.getKey().getId(), Map.Entry::getValue));
 
-		clusterGroup.setNucleusBarcodes(nucleusIDsToBarcodes);
+		final HammingClusterGroup clusterGroup = createClusterGroup(amalgamatedClusters, barcodes, dataset, regions,
+				nucleusIDsToBarcodes);
 
 	}
 
 	private HammingClusterGroup createClusterGroup(Map<Barcode, Set<Barcode>> amalgamatedClusters,
-			Map<Nucleus, Barcode> barcodes,
-			IAnalysisDataset dataset) throws MissingDataException, SegmentUpdateException {
+			Map<ICell, Barcode> barcodes,
+			IAnalysisDataset dataset, Set<ProfileBarcodingRegion> regions, Map<UUID, Barcode> nucleusIDsToBarcodes)
+			throws MissingDataException, SegmentUpdateException {
+
 		// Create a group to store the clustered cells
-		
 		final HashOptions clusterOptions = new DefaultOptions();
 		clusterOptions.setInt(HashOptions.CLUSTER_EM_ITERATIONS_KEY, 100);
 		clusterOptions.setString(HashOptions.CLUSTER_METHOD_KEY, ClusteringMethod.EM.toString());
-		
+
 		final HammingClusterGroup group = new HammingClusterGroup(
 				"Hamming cluster", clusterOptions,
-				"", UUID.randomUUID());
-		
-		final List<ICell> datasetCells = dataset.getCollection().getCells();
+				UUID.randomUUID(), regions, nucleusIDsToBarcodes);
+
+//		final List<ICell> datasetCells = dataset.getCollection().getCells();
 
 		// Make the child datasets for each cluster
 		// Make dataset clusters from the amalgamation
@@ -466,26 +464,25 @@ public class NonunimodalRegionClusteringMethod {
 			
 			for(final Barcode bar : entry.getValue()) {
 				
-				LOGGER.finer("Looking for nuclei in barcode %s".formatted(bar));
+//				final Set<ICell> nucleiInBarcode = new HashSet<>();
+				for (final Entry<ICell, Barcode> cellMap : barcodes.entrySet()) {
 
-				final Set<Nucleus> nucleiInBarcode = new HashSet<>();
-				for (final Entry<Nucleus, Barcode> nucleusMap : barcodes.entrySet()) {
-
-					if (nucleusMap.getValue().equals(bar)) {
-						nucleiInBarcode.add(nucleusMap.getKey());
+					if (cellMap.getValue().equals(bar)) {
+						cellsToAdd.add(cellMap.getKey());
 					}
 				}
 				
-				for(final ICell c : datasetCells) {
-					
-					for(final Nucleus n : nucleiInBarcode) {
-						if (c.getNuclei().contains(n)) {
-							cellsToAdd.add(c);
-					}
-					}
-				}
+//				for(final ICell c : datasetCells) {
+//					
+//					for(final Nucleus n : nucleiInBarcode) {
+//						if (c.getNuclei().contains(n)) {
+//							cellsToAdd.add(c);
+//					}
+//					}
+//				}
 			}
-			
+
+
 			final IAnalysisDataset v = new VirtualDataset(dataset,
 					"%s_cluster_%s".formatted(group.getName(), entry.getKey()),
 					null, cellsToAdd);
@@ -502,17 +499,20 @@ public class NonunimodalRegionClusteringMethod {
 		}
 
 		dataset.addClusterGroup(group);
+
+		group.makeVirtualClusterDatasets(dataset);
+
 		return group;
 
 	}
 
-	private Map<Barcode, Set<Barcode>> runHammingAmalgamation(Map<Barcode, Set<Nucleus>> barcodeMap) {
+	private Map<Barcode, Set<Barcode>> runHammingAmalgamation(Map<Barcode, Set<ICell>> barcodeMap) {
 
 		// Display summary counts
 		int largestClusterSize = 0;
 		Barcode largestCluster = null;
 		LOGGER.fine("Detected %s barcodes in total".formatted(barcodeMap.keySet().size()));
-		for (final Entry<Barcode, Set<Nucleus>> entry : barcodeMap.entrySet()) {
+		for (final Entry<Barcode, Set<ICell>> entry : barcodeMap.entrySet()) {
 //			LOGGER.fine("Barcode %s has %s nuclei".formatted(entry.getKey(), entry.getValue().size()));
 
 			if (entry.getValue().size() > largestClusterSize) {
@@ -526,7 +526,7 @@ public class NonunimodalRegionClusteringMethod {
 		// Hamming amalgamation of nearby variants
 		// Find the largest cluster, amalgamate barcodes with only 1 distance
 		final Set<Barcode> amalgamatedBarcodes = new HashSet<>();
-		for (final Entry<Barcode, Set<Nucleus>> entry : barcodeMap.entrySet()) {
+		for (final Entry<Barcode, Set<ICell>> entry : barcodeMap.entrySet()) {
 			final int hammingDistance = largestCluster.hammingDistance(entry.getKey());
 			LOGGER.finer("Barcode %s has distance %s to barcode %s".formatted(largestCluster, hammingDistance,
 					entry.getKey()));
@@ -592,7 +592,7 @@ public class NonunimodalRegionClusteringMethod {
 			SegmentUpdateException {
 		LOGGER.finer("Creating clusterable instances");
 
-		final List<NucleusInstance> instanceList = new ArrayList<>();
+		final List<CellInstance> instanceList = new ArrayList<>();
 
 		// Weka clustering uses a table in which columns are attributes and rows are
 		// instances
@@ -600,25 +600,27 @@ public class NonunimodalRegionClusteringMethod {
 		final Instances instances = new Instances(dataset.getName(), attributes, dataset.getCollection().size());
 
 		for (final ICell c : dataset.getCollection()) {
-			for (final Nucleus n : c.getNuclei()) {
-				final Instance inst = new SparseInstance(attributes.size());
+			final Nucleus n = c.getPrimaryNucleus();
 
-				final IProfile p = n.getProfile(pbr.type(), OrientationMark.REFERENCE);
+			final Instance inst = new SparseInstance(attributes.size());
 
-				int attIndex = 0;
-				final Iterator<Integer> it = pbr.iterator();
-				while (it.hasNext()) {
-					final int i = it.next();
-					final Attribute att = attributes.get(attIndex);
-					inst.setValue(att, p.get(i));
-					attIndex++;
-					LOGGER.finer("Created instance for %s with value %s".formatted(att.toString(), p.get(i)));
-				}
+			final IProfile p = n.getProfile(pbr.type(), OrientationMark.REFERENCE)
+					.interpolate(dataset.getCollection().getMaxProfileLength());
 
-				instanceList.add(new NucleusInstance(n, inst));
-				instances.add(inst);
-				inst.setDataset(instances);
+			int attIndex = 0;
+			final Iterator<Integer> it = pbr.iterator();
+			while (it.hasNext()) {
+				final int i = it.next();
+				final Attribute att = attributes.get(attIndex);
+				inst.setValue(att, p.get(i));
+				attIndex++;
+				LOGGER.finer("Created instance for %s with value %s".formatted(att.toString(), p.get(i)));
 			}
+
+			instanceList.add(new CellInstance(c, inst));
+			instances.add(inst);
+			inst.setDataset(instances);
+
 		}
 		return new InstancesData(instances, instanceList);
 	}
@@ -630,29 +632,28 @@ public class NonunimodalRegionClusteringMethod {
 	 * @param clusterer the clusterer to use
 	 * @throws Exception
 	 */
-	private Map<Nucleus, List<BarcodeElement>> assignClusters(ProfileBarcodingRegion pbr, InstancesData instanceData,
-			IAnalysisDataset dataset, Map<Nucleus, List<BarcodeElement>> nucleusBarcodes)
+	private Map<ICell, List<BarcodeElement>> assignClusters(ProfileBarcodingRegion pbr, InstancesData instanceData,
+			IAnalysisDataset dataset, Map<ICell, List<BarcodeElement>> cellBarcodes)
 			throws Exception {
-
-
 
 		// create the clusterer to run on the Instances
 		final EM clusterer = new EM();
 		clusterer.setSeed(RNG_SEED);
-		clusterer.setOptions(new String[] { "-I", "100" });
+		clusterer.setMaxIterations(100);
+		clusterer.setNumClusters(-1);
 		clusterer.buildClusterer(instanceData.instances());
 
 		final int numberOfClusters = clusterer.numberOfClusters();
 
 		LOGGER.fine("%s has %s clusters".formatted(pbr, numberOfClusters));
 		
-		for (final NucleusInstance ni : instanceData.nucleusInstances) {
+		for (final CellInstance ni : instanceData.cellInstances) {
 			final int clusterNumber = clusterer.clusterInstance(ni.instance);
 			final BarcodeElement barcode = new BarcodeElement(pbr, clusterNumber);
-			nucleusBarcodes.computeIfAbsent(ni.nucleus, n -> new ArrayList<BarcodeElement>()).add(barcode);
-			LOGGER.finer("Nucleus %s in region %s is cluster %s".formatted(ni.nucleus.getId(), pbr, clusterNumber));
+			cellBarcodes.computeIfAbsent(ni.cell, n -> new ArrayList<BarcodeElement>()).add(barcode);
+			LOGGER.finer("Nucleus %s in region %s is cluster %s".formatted(ni.cell.getId(), pbr, clusterNumber));
 
 		}
-		return nucleusBarcodes;
+		return cellBarcodes;
 	}
 }

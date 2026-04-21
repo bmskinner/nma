@@ -7,8 +7,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -24,9 +22,9 @@ import org.jfree.chart.annotations.XYBoxAnnotation;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.ui.Layer;
 
-import com.bmskinner.nma.analysis.classification.NonunimodalRegionClusteringMethod.BarcodeElement;
 import com.bmskinner.nma.analysis.classification.NonunimodalRegionClusteringMethod.ProfileBarcodingRegion;
 import com.bmskinner.nma.components.cells.ComponentCreationException;
+import com.bmskinner.nma.components.cells.ICell;
 import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.cells.UnavailableBorderPointException;
 import com.bmskinner.nma.components.datasets.HammingClusterGroup;
@@ -35,14 +33,13 @@ import com.bmskinner.nma.components.datasets.IClusterGroup;
 import com.bmskinner.nma.components.generic.IPoint;
 import com.bmskinner.nma.components.profiles.IProfile;
 import com.bmskinner.nma.components.profiles.MissingLandmarkException;
-import com.bmskinner.nma.components.profiles.ProfileType;
 import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.core.GlobalOptions;
 import com.bmskinner.nma.gui.components.ColourSelecter;
 import com.bmskinner.nma.gui.components.ExportableTable;
 import com.bmskinner.nma.gui.components.panels.ExportableChartPanel;
 import com.bmskinner.nma.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import com.bmskinner.nma.gui.components.panels.ProfileTypeOptionsPanel;
+import com.bmskinner.nma.stats.Stats;
 import com.bmskinner.nma.visualisation.ChartComponents;
 import com.bmskinner.nma.visualisation.charts.AbstractChartFactory;
 import com.bmskinner.nma.visualisation.charts.ConsensusNucleusChartFactory;
@@ -50,6 +47,7 @@ import com.bmskinner.nma.visualisation.charts.ExportableLegendChart;
 import com.bmskinner.nma.visualisation.charts.ProfileChartFactory;
 import com.bmskinner.nma.visualisation.options.ChartOptions;
 import com.bmskinner.nma.visualisation.options.ChartOptionsBuilder;
+import com.bmskinner.nma.visualisation.tables.AbstractTableCreator;
 
 /**
  * Visualise Hamming clusters. We need to show the regions of profiles that were
@@ -60,12 +58,12 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 
 	private static final Logger LOGGER = Logger.getLogger(HammingClusterPlotDialog.class.getName());
 
+	private static final Color VERY_LIGHT_GREY = new Color(210, 210, 210);
+
 	private final IAnalysisDataset dataset;
 	private final HammingClusterGroup group;
 
 	private final JPanel mainPanel = new JPanel();
-
-	final ProfileTypeOptionsPanel profileTypeSelectionPanel = new ProfileTypeOptionsPanel();
 
 	private final ExportableChartPanel profileFullChartPanel = new ExportableChartPanel(
 			AbstractChartFactory.createEmptyChart());
@@ -76,6 +74,12 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 	private final ExportableChartPanel consensusChartPanel = new ExportableChartPanel(
 			AbstractChartFactory.createEmptyChart());
 
+	private final ExportableChartPanel clusterMedianProfileChartPanel = new ExportableChartPanel(
+			AbstractChartFactory.createEmptyChart());
+
+	private final ExportableTable regionClusterTable = new ExportableTable(
+			AbstractTableCreator.createBlankTable());
+
 
 	public HammingClusterPlotDialog(final @NonNull IAnalysisDataset dataset,
 			final @NonNull IClusterGroup group) {
@@ -84,6 +88,8 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 		if (!(group instanceof final HammingClusterGroup))
 			throw new IllegalArgumentException("Cannot display cluster group as a hamming group");
 		this.group = (HammingClusterGroup) group;
+
+		this.group.makeVirtualClusterDatasets(dataset);
 
 		updateTitle();
 		final GridBagConstraints c = new GridBagConstraints();
@@ -168,9 +174,6 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 	private JPanel createHeader() {
 
 		final JPanel panel = new JPanel(new FlowLayout());
-		profileTypeSelectionPanel.addActionListener(e -> updateGlobalCharts());
-		profileTypeSelectionPanel.setEnabled(true);
-		panel.add(profileTypeSelectionPanel);
 		return panel;
 	}
 
@@ -186,15 +189,8 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 		final List<ProfileBarcodingRegion> pbrs = group.getBarcodingRegions().stream()
 				.sorted((p, q) -> Integer.compare(p.startIndex(), q.startIndex())).collect(Collectors.toList());
 		for (final ProfileBarcodingRegion pbr : pbrs) {
-
-			// Find the number of clusters in this region
-			final Map<Integer, Long> clusterCounts = group.getNucleusBarcodes().values().stream()
-					.flatMap(e -> e.elements().stream().filter(b -> b.pbr().equals(pbr)))
-					.map(BarcodeElement::cluster)
-					.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-
 			model.addRow(new Object[] { pbr, pbr.type(), pbr.startIndex(), pbr.endIndex(), pbr.length(),
-					clusterCounts.size() });
+					group.getNumberOfClusters(pbr) });
 		}
 
 		final JTable table = new ExportableTable(model);
@@ -202,15 +198,19 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 		table.setRowSelectionAllowed(true);
 		table.setColumnSelectionAllowed(false);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
+		table.setRowHeight(20);
 
 		table.getSelectionModel().addListSelectionListener(e -> {
 			if (e.getValueIsAdjusting())
 				return;
 			final ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 			final ProfileBarcodingRegion pbr = (ProfileBarcodingRegion) table.getValueAt(lsm.getMaxSelectionIndex(), 0);
-			LOGGER.fine("Updating region chart at index %s to %s".formatted(lsm.getMaxSelectionIndex(), pbr));
-			updateRegionCharts(pbr);
+			LOGGER.finer("Updating region chart at index %s to %s".formatted(lsm.getMaxSelectionIndex(), pbr));
+			updateRegionProfileChart(pbr);
+			updateGlobalProfileChart(pbr);
+			updateConsensusChart(pbr);
+			updateRegionClusterTable(pbr);
+
 		});
 
 		final JPanel tablePanel = new JPanel(new BorderLayout());
@@ -218,14 +218,53 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 		tablePanel.add(table.getTableHeader(), BorderLayout.NORTH);
 
 		final JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout());
-		panel.add(tablePanel, BorderLayout.CENTER);
+		panel.setLayout(new GridBagLayout());
+		final GridBagConstraints c = new GridBagConstraints();
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.BOTH; // fill both axes of container
+		c.weightx = 1.0; // maximum weighting
+		c.weighty = 1.0;
+		c.gridx = 0;
+		c.gridy = 0;
+
+		panel.add(tablePanel, c);
+		c.gridy = 1;
+		panel.add(createRegionClusterTablePanel(), c);
 		return panel;
 	}
 
-	private void updateRegionCharts(ProfileBarcodingRegion pbr) {
+	private JPanel createRegionClusterTablePanel() {
+
+		regionClusterTable.setEnabled(false);
+		regionClusterTable.setRowHeight(20);
+		final JPanel tablePanel = new JPanel(new BorderLayout());
+		tablePanel.add(new JScrollPane(regionClusterTable), BorderLayout.CENTER);
+		tablePanel.add(regionClusterTable.getTableHeader(), BorderLayout.NORTH);
+		return tablePanel;
+	}
+
+	private void updateRegionClusterTable(ProfileBarcodingRegion pbr) {
+
+//		regionClusterTable;
+		final DefaultTableModel model = new DefaultTableModel(
+				new Object[] { "Cluster", "N cells" }, 0);
+
+		for (int i = 0; i < group.getNumberOfClusters(pbr); i++) {
+			final IAnalysisDataset d = group.getRegionDataset(pbr, i);
+			model.addRow(new Object[] { i, d.size() });
+		}
+
+		regionClusterTable.setModel(model);
+		regionClusterTable.revalidate();
+
+	}
+
+
+	private void updateRegionProfileChart(ProfileBarcodingRegion pbr) {
 		if (pbr == null)
 			return;
+
+		updateConsensusChart(pbr);
 
 		// Update the profile chart
 		final ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(dataset)
@@ -239,36 +278,65 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 		// Start with a basic profile chart
 		final ExportableLegendChart elc = new ProfileChartFactory(profileOptions).createProfileChart();
 
+		double minRange = Double.MAX_VALUE;
+		double maxRange = -Double.MAX_VALUE;
+
 		try {
 
-		for (final Nucleus n : dataset.getCollection().getNuclei()) {
+			for (int clusterNumber = 0; clusterNumber < group.getNumberOfClusters(pbr); clusterNumber++) {
+				final IAnalysisDataset clusterDataset = group.getRegionDataset(pbr, clusterNumber);
 
-			// Get the barcode for this nucleus and find teh cluster it belongs to
-			final BarcodeElement el = group.getNucleusBarcodes().get(n.getId()).elements().stream()
-					.filter(e -> e.pbr().equals(pbr)).findFirst().get();
+				final Color clusterColour = ColourSelecter.getColor(clusterNumber);
 
-			final Color clusterColour = ColourSelecter.getColor(el.cluster());
+				// Draw the cluster median profile
+				final IProfile medianProfile = clusterDataset.getCollection().getProfileCollection().getProfile(
+						pbr.type(), OrientationMark.REFERENCE,
+						Stats.MEDIAN).interpolate(dataset.getCollection().getMedianArrayLength());
+				;
+				for (int i = pbr.startIndex() - 1; i < pbr.endIndex() + 2; i++) {
+					final double value = medianProfile.get(i);
+					final double nextValue = medianProfile.get(i + 1);
+					final double domain = ((double) (i)) / dataset.getCollection().getMedianArrayLength() * 100;
+					final double nextDomain = ((double) (i + 1)) / dataset.getCollection().getMedianArrayLength()
+							* 100;
+					elc.getXYPlot().getRenderer().addAnnotation(new XYLineAnnotation(domain, value,
+							nextDomain, nextValue, ChartComponents.LANDMARK_STROKE, clusterColour.darker()),
+							Layer.FOREGROUND);
+				}
 
-			// Draw an annotation of the nucleus profile
-			final IProfile np = n.getProfile(pbr.type())
-					.interpolate(dataset.getCollection().getMedianArrayLength());
-			
-			for (int i = pbr.startIndex() - 1; i < pbr.endIndex() + 2; i++) {
-				final double value = np.get(i);
-				final double nextValue = np.get(i + 1);
-				final double domain = ((double) (i)) / dataset.getCollection().getMedianArrayLength() * 100;
-				final double nextDomain = ((double) (i + 1)) / dataset.getCollection().getMedianArrayLength() * 100;
-				elc.getXYPlot().getRenderer().addAnnotation(new XYLineAnnotation(domain, value,
-						nextDomain, nextValue, ChartComponents.PROFILE_STROKE, clusterColour),
-						Layer.BACKGROUND);
+				// Then draw each cell profile
+				for (final ICell cell : clusterDataset.getCollection()) {
+
+					final Nucleus n = cell.getPrimaryNucleus();
+					// Draw an annotation of the nucleus profile for this region only
+					final IProfile np = n.getProfile(pbr.type())
+							.interpolate(dataset.getCollection().getMedianArrayLength());
+
+					for (int i = pbr.startIndex() - 1; i < pbr.endIndex() + 2; i++) {
+						final double value = np.get(i);
+						final double nextValue = np.get(i + 1);
+						final double domain = ((double) (i)) / dataset.getCollection().getMedianArrayLength() * 100;
+						final double nextDomain = ((double) (i + 1)) / dataset.getCollection().getMedianArrayLength()
+								* 100;
+						elc.getXYPlot().getRenderer().addAnnotation(new XYLineAnnotation(domain, value,
+								nextDomain, nextValue, ChartComponents.PROFILE_STROKE, clusterColour),
+								Layer.BACKGROUND);
+
+						// Ensure y range updates - annotations do not get autoscaled
+						if (value < minRange) {
+							minRange = value;
+						}
+						if (value > maxRange) {
+							maxRange = value;
+						}
+					}
+				}
+
 			}
-			
 
-
+		} catch (final Exception e) {
+			LOGGER.log(Level.FINE, "Unable to draw nucleus profile: %s".formatted(e.getMessage()), e);
 		}
-	} catch (final Exception e) {
-		LOGGER.log(Level.FINE, "Unable to draw nucleus profile: %s".formatted(e.getMessage()), e);
-	}
 
 		profileRegionChartPanel.setChart(elc);
 
@@ -277,13 +345,18 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 		final double normIndexStart = (pbr.startIndex() - 1) / medianProfileLength * 100;
 		final double normIndexEnd = (pbr.endIndex() + 1) / medianProfileLength * 100;
 
+		final double yRange = maxRange - minRange;
 		elc.getXYPlot().getDomainAxis().setRange(normIndexStart, normIndexEnd);
+		elc.getXYPlot().getRangeAxis().setRange(minRange - (yRange * 0.05), maxRange + (yRange * 0.05));
+
+		// Create a chart showing the median profile of the nuclei in each cluster at
+		// this region
+
+//		clusterMedianProfileChartPanel
 
 	}
 
-	private void updateGlobalCharts() {
-
-		final ProfileType profileType = profileTypeSelectionPanel.getSelected();
+	private void updateGlobalProfileChart(ProfileBarcodingRegion pbr) {
 
 		// Update the profile chart
 		final ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(dataset)
@@ -292,22 +365,24 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 				.setShowAnnotations(false)
 				.setShowProfiles(false)
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setProfileType(profileType).build();
+				.setProfileType(pbr.type()).build();
 
 		// Start with a basic profile chart
 		final ExportableLegendChart elc = new ProfileChartFactory(profileOptions).createProfileChart();
 
 		// Add rectangle annotations for the ranges covering regions of interest
-		for (final ProfileBarcodingRegion pbr : group.getBarcodingRegions()) {
-			LOGGER.finer("Adding %s".formatted(pbr));
+		for (final ProfileBarcodingRegion pbr2 : group.getBarcodingRegions()) {
 
-			final Color lineColour = pbr.type().equals(profileType) ? Color.GRAY : Color.LIGHT_GRAY;
-			elc.getXYPlot().getRenderer().addAnnotation(new XYBoxAnnotation(pbr.startIndex(), 0,
-					pbr.endIndex(), 360, ChartComponents.PROFILE_STROKE, lineColour, lineColour),
+			final Color lineColour = pbr2.equals(pbr) ? Color.GRAY : VERY_LIGHT_GREY;
+			elc.getXYPlot().getRenderer().addAnnotation(new XYBoxAnnotation(pbr2.startIndex(), 0,
+					pbr2.endIndex(), 360, ChartComponents.PROFILE_STROKE, lineColour, lineColour),
 					Layer.BACKGROUND);
 		}
 
 		profileFullChartPanel.setChart(elc);
+	}
+
+	private void updateConsensusChart(ProfileBarcodingRegion pbr) {
 
 		// Update the consensus chart
 		final ChartOptions consensusOptions = new ChartOptionsBuilder().setDatasets(dataset)
@@ -330,32 +405,30 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 			final Nucleus n = dataset.getCollection().getConsensus();
 
 			// Add rectangle annotations for the ranges covering regions of interest
-			for (final ProfileBarcodingRegion pbr : group.getBarcodingRegions()) {
-				LOGGER.finer("Adding %s".formatted(pbr));
-				final Color lineColour = pbr.type().equals(profileType) ? Color.GRAY : Color.LIGHT_GRAY;
+			for (final ProfileBarcodingRegion pbr2 : group.getBarcodingRegions()) {
+				final Color lineColour = pbr2.equals(pbr) ? Color.GRAY : VERY_LIGHT_GREY;
 
-//				if (pbr.type().equals(profileType)) {
-
-					final IPoint start = n.getBorderPoint(pbr.startIndex());
-					final IPoint end = n.getBorderPoint(pbr.endIndex());
+				final IPoint start = n.getBorderPoint(pbr2.startIndex());
+				final IPoint end = n.getBorderPoint(pbr2.endIndex());
 
 					consensusChart.getXYPlot().getRenderer()
 							.addAnnotation(new XYLineAnnotation(start.getX(), start.getY(),
 									end.getX(), end.getY(), ChartComponents.LANDMARK_STROKE, lineColour),
 							Layer.BACKGROUND);
-//				}
 			}
 			consensusChartPanel.setChart(consensusChart);
 		} catch (MissingLandmarkException | ComponentCreationException | UnavailableBorderPointException e) {
 			LOGGER.log(Level.SEVERE, "Unable to create consensus: %s".formatted(e.getMessage()), e);
 		}
 
+
+
 	}
 
 	private JPanel createProfileRegionPanel() {
 		profileRegionChartPanel.setPannable(false);
 
-		updateRegionCharts(null);
+		updateRegionProfileChart(null);
 
 		final JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
@@ -372,15 +445,12 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 		panel.add(consensusChartPanel, BorderLayout.CENTER);
 
 		panel.setPreferredSize(new Dimension(300, 200));
-		updateGlobalCharts();
 		return panel;
 	}
 
 	private JPanel createFullProfileChartPanel() {
 
 		profileFullChartPanel.setPannable(false);
-
-		updateGlobalCharts();
 		
 		final JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());

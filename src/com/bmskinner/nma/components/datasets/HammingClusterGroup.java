@@ -2,18 +2,26 @@ package com.bmskinner.nma.components.datasets;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jdom2.Element;
 
 import com.bmskinner.nma.analysis.classification.NonunimodalRegionClusteringMethod.Barcode;
+import com.bmskinner.nma.analysis.classification.NonunimodalRegionClusteringMethod.BarcodeElement;
 import com.bmskinner.nma.analysis.classification.NonunimodalRegionClusteringMethod.ProfileBarcodingRegion;
+import com.bmskinner.nma.components.MissingDataException;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 
 /**
  * Store data for clusters produced by Hamming amalgamation.
@@ -21,9 +29,27 @@ import com.bmskinner.nma.components.options.HashOptions;
  */
 public class HammingClusterGroup extends DefaultClusterGroup {
 
+	private static final Logger LOGGER = Logger.getLogger(HammingClusterGroup.class.getName());
+
+	// Store the visible clusters - based on hamming amalgamation of barcodes
+
 	private Set<ProfileBarcodingRegion> barcodingRegions;
 
-	private Map<UUID, Barcode> nucleusBarcodes;
+	private Map<UUID, Barcode> cellBarcodes;
+
+	// Also store the intermediate clusters for each region
+
+	/**
+	 * Total clusters per region
+	 */
+	transient private Map<ProfileBarcodingRegion, Integer> clusterNumbers = new HashMap<>();
+
+	/**
+	 * Store a transient mapping of the nuclei in each PBR cluster to calculate
+	 * profile medians
+	 * 
+	 */
+	transient private Map<ProfileBarcodingRegion, Map<Integer, IAnalysisDataset>> clusterDatasets = new HashMap<>();
 
 	/**
 	 * Create a new cluster group
@@ -32,8 +58,11 @@ public class HammingClusterGroup extends DefaultClusterGroup {
 	 * @param options the options used to create the cluster
 	 */
 	public HammingClusterGroup(@NonNull String name, @NonNull HashOptions options,
-			@NonNull UUID id) {
+			@NonNull UUID id, @NonNull Set<ProfileBarcodingRegion> barcodingRegions,
+			@NonNull Map<UUID, Barcode> cellBarcodes) {
 		super(name, options, id);
+		this.barcodingRegions = barcodingRegions;
+		this.cellBarcodes = cellBarcodes;
 	}
 
 	public HammingClusterGroup(@NonNull Element e) {
@@ -45,13 +74,13 @@ public class HammingClusterGroup extends DefaultClusterGroup {
 			barcodingRegions.add(new ProfileBarcodingRegion(el));
 		}
 
-		nucleusBarcodes = new HashMap<>();
+		cellBarcodes = new HashMap<>();
 
 		for (final Element el : e.getChildren(XMLNames.XML_BARCODE)) {
 			
 			final UUID nucleusId = UUID.fromString(el.getAttributeValue(XMLNames.XML_ID));
 
-			nucleusBarcodes.put(nucleusId,
+			cellBarcodes.put(nucleusId,
 					new Barcode(el, barcodingRegions));
 			
 		}
@@ -60,18 +89,9 @@ public class HammingClusterGroup extends DefaultClusterGroup {
 
 	private HammingClusterGroup(HammingClusterGroup g) {
 		super(g);
-	}
-
-	/**
-	 * Create a new cluster group with a tree
-	 * 
-	 * @param name    the group name (informal)
-	 * @param options the options used to create the cluster
-	 * @param tree    the Newick tree for the cluster as a String
-	 */
-	public HammingClusterGroup(@NonNull String name, @NonNull HashOptions options,
-			@NonNull String tree, @NonNull UUID id) {
-		super(name, options, tree, id);
+		barcodingRegions = g.barcodingRegions;
+		cellBarcodes = g.cellBarcodes;
+		clusterDatasets = g.clusterDatasets;
 	}
 
 	/**
@@ -81,6 +101,11 @@ public class HammingClusterGroup extends DefaultClusterGroup {
 	 */
 	public HammingClusterGroup(@NonNull IClusterGroup template) {
 		super(template);
+		if (template instanceof final HammingClusterGroup g) {
+			this.barcodingRegions = g.barcodingRegions;
+			this.cellBarcodes = g.cellBarcodes;
+			this.clusterDatasets = g.clusterDatasets;
+		}
 	}
 
 	public void setBarcodingRegions(Set<ProfileBarcodingRegion> regions) {
@@ -91,12 +116,72 @@ public class HammingClusterGroup extends DefaultClusterGroup {
 		return barcodingRegions;
 	}
 
-	public Map<UUID, Barcode> getNucleusBarcodes() {
-		return nucleusBarcodes;
+	public Map<UUID, Barcode> getCellBarcodes() {
+		return cellBarcodes;
 	}
 
-	public void setNucleusBarcodes(Map<UUID, Barcode> nucleusBarcodes) {
-		this.nucleusBarcodes = nucleusBarcodes;
+	public void setCellBarcodes(Map<UUID, Barcode> cellBarcodes) {
+		this.cellBarcodes = cellBarcodes;
+	}
+
+	/**
+	 * Create appropriate cluster datasets for each region
+	 * 
+	 * @param parent the dataset the nuclei came from
+	 */
+	public void makeVirtualClusterDatasets(IAnalysisDataset parent) {
+
+
+		for (final ProfileBarcodingRegion pbr : barcodingRegions) {
+
+			LOGGER.fine("Making virtual datasets for %s".formatted(pbr));
+
+			// Find the number of clusters in this region
+			final Map<Integer, Long> clusterCounts = cellBarcodes.values().stream()
+					.flatMap(e -> e.elements().stream().filter(b -> b.pbr().equals(pbr)))
+					.map(BarcodeElement::cluster)
+					.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+			clusterNumbers.put(pbr, clusterCounts.size());
+
+			// Now extract the nuclei for each cluster and assign to a virtual dataset
+			for (int i = 0; i < clusterCounts.size(); i++) {
+
+				final IAnalysisDataset clusterDataset = new VirtualDataset(parent, pbr.regionId() + "_" + i);
+
+				for (final Entry<UUID, Barcode> entry : cellBarcodes.entrySet()) {
+					final List<BarcodeElement> pbrElements = entry.getValue().elements().stream()
+							.filter(e -> e.pbr().equals(pbr)).collect(Collectors.toList());
+					for (final BarcodeElement be : pbrElements) {
+						if (be.cluster().equals(i)) {
+							clusterDataset.getCollection().add(parent.getCollection().getCell(entry.getKey()));
+						}
+
+					}
+				}
+
+				try {
+					clusterDataset.getCollection().getProfileCollection().calculateProfiles();
+
+					clusterDatasets.computeIfAbsent(pbr, k -> new HashMap<>()).put(i, clusterDataset);
+
+				} catch (MissingDataException | SegmentUpdateException e1) {
+					LOGGER.log(Level.SEVERE,
+							"Unable to create profiles in virtual dataset for Hamming group: %s"
+									.formatted(e1.getMessage(), e1));
+				}
+			}
+
+
+		}
+	}
+
+	public int getNumberOfClusters(ProfileBarcodingRegion pbr) {
+		return clusterNumbers.get(pbr);
+	}
+
+	public IAnalysisDataset getRegionDataset(ProfileBarcodingRegion pbr, int cluster) {
+		return clusterDatasets.get(pbr).get(cluster);
 	}
 
 	@Override
@@ -108,7 +193,7 @@ public class HammingClusterGroup extends DefaultClusterGroup {
 			e.addContent(pbr.toXmlElement());
 		}
 		
-		for (final Entry<UUID, Barcode> entry : nucleusBarcodes.entrySet()) {
+		for (final Entry<UUID, Barcode> entry : cellBarcodes.entrySet()) {
 			final Element nucleusEntry = entry.getValue().toXmlElement();
 			nucleusEntry.setAttribute(XMLNames.XML_ID, entry.getKey().toString());
 			e.addContent(nucleusEntry);
