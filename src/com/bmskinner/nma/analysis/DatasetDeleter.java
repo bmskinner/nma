@@ -55,7 +55,7 @@ public class DatasetDeleter extends MultipleDatasetAnalysisMethod {
 	private static final String TITLE_LBL = "Close dataset?";
 	private static final String WARNING_LBL = "<html>'%s' has changed since last save.<br>Save before closing?</html>";
 
-	private InputSupplier is = new DefaultInputSupplier();
+	private final InputSupplier is = new DefaultInputSupplier();
 
 	public DatasetDeleter(@NonNull IAnalysisDataset dataset) {
 		super(dataset);
@@ -72,18 +72,18 @@ public class DatasetDeleter extends MultipleDatasetAnalysisMethod {
 			return new DefaultAnalysisResult(datasets);
 
 		try {
-			CountDownLatch l = new CountDownLatch(1);
+			final CountDownLatch l = new CountDownLatch(1);
 			saveRootDatasets(datasets, l);
 
-			Deque<UUID> list = unique(datasets);
+			final Deque<UUID> list = unique(datasets);
 
 			deleteDatasetsInList(list);
 			DatasetListManager.getInstance().refreshClusters();
 			UIController.getInstance().fireDatasetDeleted(datasets);
 
-		} catch (Exception e) {
-			LOGGER.warning("Error deleting dataset");
-			LOGGER.log(Level.SEVERE, "Error deleting dataset", e);
+		} catch (final Exception e) {
+			LOGGER.log(Level.SEVERE, "Error deleting dataset: %s %s".formatted(e.getClass().getName(), e.getMessage()),
+					e);
 		}
 		return new DefaultAnalysisResult(datasets);
 	}
@@ -91,28 +91,29 @@ public class DatasetDeleter extends MultipleDatasetAnalysisMethod {
 	private void saveRootDatasets(List<IAnalysisDataset> datasets, CountDownLatch c)
 			throws InterruptedException {
 
-		for (IAnalysisDataset d : datasets) {
+		for (final IAnalysisDataset d : datasets) {
 			if (d.isRoot() && DatasetListManager.getInstance().hashCodeChanged(d)) {
 
 				try {
-					String[] buttonLabels = { DISPOSE_LBL, SAVE_LBL };
-					int option = is.requestOptionAllVisible(buttonLabels,
+					final String[] buttonLabels = { DISPOSE_LBL, SAVE_LBL };
+					final int option = is.requestOptionAllVisible(buttonLabels,
 							String.format(WARNING_LBL, d.getName()),
 							TITLE_LBL);
-					if (option == 0) // don't save
+					if (option == 0) { // don't save
 						continue;
+					}
 
-					CountDownLatch l = new CountDownLatch(1);
-					Runnable task = new ExportDatasetAction(d,
+					final CountDownLatch l = new CountDownLatch(1);
+					final Runnable task = new ExportDatasetAction(d,
 							UserActionController.getInstance().getProgressBarAcceptor(), l, false);
 					ThreadManager.getInstance().submit(task);
-					LOGGER.fine("Waiting for " + d.getName());
+					LOGGER.fine("Waiting for %s".formatted(d.getName()));
 					l.await();
-					LOGGER.fine("Finished saving " + d.getName());
-				} catch (RequestCancelledException e) {
+					LOGGER.fine("Finished saving %s".formatted(d.getName()));
+				} catch (final RequestCancelledException e) {
 					// No action needed
-				} catch (InterruptedException e) {
-					LOGGER.log(Level.SEVERE, "Error deleting dataset", e);
+				} catch (final InterruptedException e) {
+					LOGGER.log(Level.SEVERE, "Error saving dataset: %s".formatted(e.getMessage()), e);
 				}
 
 			}
@@ -126,14 +127,14 @@ public class DatasetDeleter extends MultipleDatasetAnalysisMethod {
 	 * 
 	 * @param ids the dataset IDs to delete
 	 */
-	private void deleteDatasetsInList(Deque<UUID> ids) {
+	private synchronized void deleteDatasetsInList(Deque<UUID> ids) {
 
 		if (ids.isEmpty())
 			return;
 
-		UUID id = ids.removeFirst();
+		final UUID id = ids.removeFirst();
 
-		IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
+		final IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
 
 		if (d.hasChildren()) {
 			LOGGER.finer("Dataset " + d.getName() + " still has children");
@@ -150,18 +151,19 @@ public class DatasetDeleter extends MultipleDatasetAnalysisMethod {
 	 * 
 	 * @param d
 	 */
-	private void deleteDataset(IAnalysisDataset d) {
+	private synchronized void deleteDataset(IAnalysisDataset d) {
 
-		UUID id = d.getId();
+		final UUID id = d.getId();
 		// remove the dataset from its parents
-		for (IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()) {
+		for (final IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()) {
 			if (parent.hasDirectChild(id)) {
 				parent.deleteChild(id);
 			}
 		}
 
-		if (d.isRoot())
+		if (d.isRoot()) {
 			DatasetListManager.getInstance().removeDataset(d);
+		}
 	}
 
 	/**
@@ -171,19 +173,17 @@ public class DatasetDeleter extends MultipleDatasetAnalysisMethod {
 	 * @return
 	 */
 	private Deque<UUID> unique(List<IAnalysisDataset> list) {
-		Set<UUID> set = new HashSet<>();
-		for (IAnalysisDataset d : list) {
+		final Set<UUID> set = new HashSet<>();
+		for (final IAnalysisDataset d : list) {
 			set.add(d.getId());
 
 			if (d.hasChildren()) {
 				// add all the children of a dataset
-				for (UUID childID : d.getAllChildUUIDs()) {
-					set.add(childID);
-				}
+				set.addAll(d.getAllChildUUIDs());
 			}
 		}
 
-		Deque<UUID> result = new ArrayDeque<>();
+		final Deque<UUID> result = new ArrayDeque<>();
 		result.addAll(set);
 
 		return result;

@@ -2,6 +2,7 @@ package com.bmskinner.nma.gui.tabs;
 
 import java.awt.Cursor;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,7 +80,13 @@ public abstract class ChartDetailPanel extends DetailPanel {
 			// update the target chart panel when done
 			options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			options.getTarget().setChart(AbstractChartFactory.createLoadingChart());
-			ThreadManager.getInstance().submit(new ChartFactoryWorker(options));
+
+			try {
+				ThreadManager.getInstance().submit(new ChartFactoryWorker(options));
+			} catch (final RejectedExecutionException e) {
+				// probably the dataset does not exist any more. Do not spam error messages
+				// though.
+			}
 		}
 	}
 

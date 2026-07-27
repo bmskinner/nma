@@ -20,6 +20,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -257,7 +258,12 @@ public abstract class DetailPanel extends JPanel
 			final List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
 			updateDetail(list);
 		};
-		ThreadManager.getInstance().submitUIUpdate(r);
+		try {
+			ThreadManager.getInstance().submitUIUpdate(r);
+		} catch (final RejectedExecutionException ex) {
+			// probably the dataset does not exist any more. Do not spam error messages
+			// though.
+		}
 
 	}
 
@@ -268,7 +274,13 @@ public abstract class DetailPanel extends JPanel
 			setUpdating(true);
 			updateDetail(list);
 		};
-		ThreadManager.getInstance().submitUIUpdate(r);
+
+		try {
+			ThreadManager.getInstance().submitUIUpdate(r);
+		} catch (final RejectedExecutionException ex) {
+			// probably the dataset does not exist any more. Do not spam error messages
+			// though.
+		}
 	}
 
 	/**
@@ -380,7 +392,13 @@ public abstract class DetailPanel extends JPanel
 			clearCache();
 			update(getDatasets());
 		};
-		ThreadManager.getInstance().submitUIUpdate(r);
+
+		try {
+			ThreadManager.getInstance().submitUIUpdate(r);
+		} catch (final RejectedExecutionException ex) {
+			// probably the dataset does not exist any more. Do not spam error messages
+			// though.
+		}
 	}
 
 	/**
@@ -399,7 +417,13 @@ public abstract class DetailPanel extends JPanel
 				update(getDatasets());
 			}
 		};
-		ThreadManager.getInstance().submitUIUpdate(r);
+
+		try {
+			ThreadManager.getInstance().submitUIUpdate(r);
+		} catch (final RejectedExecutionException e) {
+			// probably the dataset does not exist any more. Do not spam error messages
+			// though.
+		}
 	}
 
 	/**
@@ -418,7 +442,13 @@ public abstract class DetailPanel extends JPanel
 				update(getDatasets());
 			}
 		};
-		ThreadManager.getInstance().submitUIUpdate(r);
+
+		try {
+			ThreadManager.getInstance().submitUIUpdate(r);
+		} catch (final RejectedExecutionException ex) {
+			// probably the dataset does not exist any more. Do not spam error messages
+			// though.
+		}
 	}
 
 	/*

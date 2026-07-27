@@ -3,6 +3,7 @@ package com.bmskinner.nma.gui.tabs;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -77,7 +78,7 @@ public abstract class TableDetailPanel extends DetailPanel {
 
 					final TableModel model = cache.get(options);
 					final JTable target = options.getTarget();
-					if (target != null) {
+					if (target != null && model != null) {
 
 						target.setModel(model);
 						setRenderers(options);
@@ -99,7 +100,14 @@ public abstract class TableDetailPanel extends DetailPanel {
 		} else { // No cached chart
 			options.getTarget().setModel(AbstractTableCreator.createLoadingTable());
 			options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			ThreadManager.getInstance().submit(new TableFactoryWorker(options));
+
+			try {
+				ThreadManager.getInstance().submit(new TableFactoryWorker(options));
+			} catch (final RejectedExecutionException e) {
+				// probably the dataset does not exist any more. Do not spam error messages
+				// though.
+			}
+
 		}
 	}
 
