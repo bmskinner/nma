@@ -11,7 +11,9 @@ import org.junit.runners.Suite.SuiteClasses;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ NucleusClusteringMethodTest.class,
+@SuiteClasses({
+		ClusteringMethodTest.class,
+		NucleusClusteringMethodTest.class,
 		NonUnimodalRegionClusteringMethodTest.class,
 	PrincipalComponentAnalysisTest.class,
 	TsneMethodTest.class})

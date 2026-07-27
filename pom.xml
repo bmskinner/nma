@@ -533,6 +533,12 @@
 			<id>scijava.public</id>
 			<url>https://maven.scijava.org/content/repositories/public/</url>
 		</repository>
+		
+		<!-- Repository for JDistLib -->
+		<repository>
+			<id>clojars.org</id>
+			<url>https://repo.clojars.org/</url>
+		</repository>
 
 	</repositories>
 
@@ -720,6 +726,13 @@
 					<artifactId>java.xml</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		
+		<!-- Used for dip testing -->
+		<dependency>
+		    <groupId>jdistlib</groupId>
+		    <artifactId>jdistlib</artifactId>
+		    <version>0.5.1</version>
 		</dependency>
 
 

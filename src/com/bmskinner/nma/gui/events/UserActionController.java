@@ -64,6 +64,7 @@ import com.bmskinner.nma.gui.actions.NewAnalysisAction;
 import com.bmskinner.nma.gui.actions.RelocateFromFileAction;
 import com.bmskinner.nma.gui.actions.ReplaceSourceImageDirectoryAction;
 import com.bmskinner.nma.gui.actions.RunGLCMAction;
+import com.bmskinner.nma.gui.actions.RunHammingAmalgamationAction;
 import com.bmskinner.nma.gui.actions.RunProfilingAction;
 import com.bmskinner.nma.gui.actions.RunSegmentationAction;
 import com.bmskinner.nma.gui.actions.SegmentMergeAction;
@@ -319,6 +320,9 @@ public class UserActionController implements UserActionEventListener, ConsensusU
 
 		if (UserActionEvent.CLUSTER_FROM_FILE.equals(event.type()))
 			return new ClusterFileAssignmentAction(event.getDatasets().get(0), acceptor);
+
+		if (UserActionEvent.CLUSTER_VIA_HAMMING_AMALGAMATION.equals(event.type()))
+			return new RunHammingAmalgamationAction(event.getDatasets().get(0), acceptor);
 
 		if (event.type().equals(UserActionEvent.RECALCULATE_MEDIAN))
 			return () -> {

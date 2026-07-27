@@ -80,6 +80,9 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 	private final ExportableTable regionClusterTable = new ExportableTable(
 			AbstractTableCreator.createBlankTable());
 
+	private final ExportableChartPanel clusterConsensusChartPanel = new ExportableChartPanel(
+			AbstractChartFactory.createEmptyChart());
+
 
 	public HammingClusterPlotDialog(final @NonNull IAnalysisDataset dataset,
 			final @NonNull IClusterGroup group) {
@@ -210,6 +213,7 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 			updateGlobalProfileChart(pbr);
 			updateConsensusChart(pbr);
 			updateRegionClusterTable(pbr);
+			updateClusterConsensusChart(pbr);
 
 		});
 
@@ -230,8 +234,13 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 		panel.add(tablePanel, c);
 		c.gridy = 1;
 		panel.add(createRegionClusterTablePanel(), c);
+		c.gridy = 2;
+		panel.add(createClusterConsensusPanel(), c);
+
 		return panel;
 	}
+
+
 
 	private JPanel createRegionClusterTablePanel() {
 
@@ -259,12 +268,60 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 
 	}
 
+	private void updateClusterConsensusChart(ProfileBarcodingRegion pbr) {
+		if (pbr == null)
+			return;
+
+		final ChartOptions consensusOptions = new ChartOptionsBuilder()
+				.setDatasets(group.getRegionDatasets(pbr))
+				.setScale(GlobalOptions.getInstance().getDisplayScale())
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
+				.setShowMesh(false)
+				.setShowMeshVertices(false)
+				.setShowMeshEdges(false)
+				.setShowMeshFaces(false)
+				.setStraightenMesh(false)
+				.setShowAnnotations(false)
+				.setFillConsensus(false)
+				.setShowXAxis(false)
+				.setShowYAxis(false).build();
+
+		final ExportableLegendChart consensusChart = new ConsensusNucleusChartFactory(consensusOptions)
+				.makeConsensusChart();
+
+		try {
+
+			final Color lineColour = Color.GRAY;
+			for (final IAnalysisDataset clusterDataset : group.getRegionDatasets(pbr)) {
+				final Nucleus n = clusterDataset.getCollection().getConsensus();
+
+				// Add rectangle annotations for the ranges covering regions of interest
+				final int startPctIndex = (int) (((double) pbr.startIndex())
+						/ dataset.getCollection().getMedianArrayLength() * n.getBorderLength());
+				final int endPctIndex = (int) (((double) pbr.endIndex())
+						/ dataset.getCollection().getMedianArrayLength() * n.getBorderLength());
+
+				final IPoint start = n.getBorderPoint(startPctIndex);
+				final IPoint end = n.getBorderPoint(endPctIndex);
+
+				consensusChart.getXYPlot().getRenderer()
+						.addAnnotation(new XYLineAnnotation(start.getX(), start.getY(),
+								end.getX(), end.getY(), ChartComponents.LANDMARK_STROKE, lineColour),
+								Layer.BACKGROUND);
+
+
+			}
+		} catch (MissingLandmarkException | ComponentCreationException | UnavailableBorderPointException e) {
+			LOGGER.log(Level.SEVERE, "Unable to create consensus: %s".formatted(e.getMessage()), e);
+		}
+
+		clusterConsensusChartPanel.setChart(consensusChart);
+	}
+
 
 	private void updateRegionProfileChart(ProfileBarcodingRegion pbr) {
 		if (pbr == null)
 			return;
-
-		updateConsensusChart(pbr);
 
 		// Update the profile chart
 		final ChartOptions profileOptions = new ChartOptionsBuilder().setDatasets(dataset)
@@ -348,12 +405,6 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 		final double yRange = maxRange - minRange;
 		elc.getXYPlot().getDomainAxis().setRange(normIndexStart, normIndexEnd);
 		elc.getXYPlot().getRangeAxis().setRange(minRange - (yRange * 0.05), maxRange + (yRange * 0.05));
-
-		// Create a chart showing the median profile of the nuclei in each cluster at
-		// this region
-
-//		clusterMedianProfileChartPanel
-
 	}
 
 	private void updateGlobalProfileChart(ProfileBarcodingRegion pbr) {
@@ -435,6 +486,15 @@ public class HammingClusterPlotDialog extends MessagingDialog {
 		panel.add(profileRegionChartPanel, BorderLayout.CENTER);
 		return panel;
 
+	}
+
+	private JPanel createClusterConsensusPanel() {
+
+		clusterConsensusChartPanel.setFixedAspectRatio(true);
+
+		final JPanel panel = new JPanel(new BorderLayout());
+		panel.add(clusterConsensusChartPanel, BorderLayout.CENTER);
+		return panel;
 	}
 
 	private JPanel createConsensusPanel() {

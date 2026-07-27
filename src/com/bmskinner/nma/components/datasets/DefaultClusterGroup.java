@@ -65,13 +65,15 @@ public class DefaultClusterGroup implements IClusterGroup {
 		id = UUID.fromString(e.getAttributeValue(XMLNames.XML_ID));
 		name = e.getAttributeValue(XMLNames.XML_NAME);
 
-		if (e.getChild(XMLNames.XML_NEWICK) != null)
+		if (e.getChild(XMLNames.XML_NEWICK) != null) {
 			newickTree = e.getChildText(XMLNames.XML_NEWICK);
+		}
 
 		options = new DefaultOptions(e.getChild((XMLNames.XML_OPTIONS)));
 
-		for (Element el : e.getChildren(XMLNames.XML_DATASET_ID))
+		for (final Element el : e.getChildren(XMLNames.XML_DATASET_ID)) {
 			ids.add(UUID.fromString(el.getText()));
+		}
 
 	}
 
@@ -79,8 +81,11 @@ public class DefaultClusterGroup implements IClusterGroup {
 		ids.addAll(g.ids);
 		options = g.options.duplicate();
 		name = new String(g.name);
-		newickTree = new String(g.newickTree);
-		id = g.id;
+
+		if (null != g.newickTree) {
+			newickTree = new String(g.newickTree);
+		}
+		id = UUID.fromString(g.id.toString());
 	}
 
 	/**
@@ -117,17 +122,19 @@ public class DefaultClusterGroup implements IClusterGroup {
 
 	@Override
 	@NonNull public Element toXmlElement() {
-		Element e = new Element(XMLNames.XML_CLUSTER_GROUP)
+		final Element e = new Element(XMLNames.XML_CLUSTER_GROUP)
 				.setAttribute(XMLNames.XML_ID, id.toString())
 				.setAttribute(XMLNames.XML_NAME, name);
 
 		e.addContent(options.toXmlElement());
 
-		if (newickTree != null)
+		if (newickTree != null) {
 			e.addContent(new Element(XMLNames.XML_NEWICK).setText(newickTree));
+		}
 
-		for (UUID i : ids)
+		for (final UUID i : ids) {
 			e.addContent(new Element(XMLNames.XML_DATASET_ID).setText(i.toString()));
+		}
 
 		return e;
 	}
@@ -215,7 +222,7 @@ public class DefaultClusterGroup implements IClusterGroup {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DefaultClusterGroup other = (DefaultClusterGroup) obj;
+		final DefaultClusterGroup other = (DefaultClusterGroup) obj;
 		return Objects.equals(id, other.id) && Objects.equals(ids, other.ids)
 				&& Objects.equals(name, other.name)
 				&& Objects.equals(newickTree, other.newickTree)
@@ -225,8 +232,9 @@ public class DefaultClusterGroup implements IClusterGroup {
 	private void readObject(java.io.ObjectInputStream in)
 			throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
-		if (id == null)
+		if (id == null) {
 			id = UUID.randomUUID();
+		}
 	}
 
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {

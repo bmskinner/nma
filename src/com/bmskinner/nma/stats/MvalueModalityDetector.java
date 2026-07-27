@@ -154,8 +154,13 @@ public class MvalueModalityDetector implements SignificanceTest {
         // Goto 3, and repeat until largest bin size tried.
         // Use the largest mvalue found.
         double binWidth = minBinWidth;
-
         double mValue = 0;
+
+		// Ensure we have some data present
+		this.binData = calculateBins(cleanedData, minBinWidth);
+		final int intialSum = sumDifferencesInBins(this.binData);
+		final int intialLargestBinCount = getLargestBinCount(this.binData);
+		this.binData.mValue = calculateMValue(intialSum, intialLargestBinCount);
 
         while (binWidth <= maxBinWidth) {
 
@@ -177,8 +182,6 @@ public class MvalueModalityDetector implements SignificanceTest {
             binWidth += stepSize;
 
         }
-
-		LOGGER.finer("Finally: M value is %s".formatted(binData.mValue));
 
     }
 

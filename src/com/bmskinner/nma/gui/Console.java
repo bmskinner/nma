@@ -36,12 +36,12 @@ public class Console extends JPanel implements ActionListener {
 
 	private static final Logger LOGGER = Logger.getLogger(Console.class.getName());
 
-	private JTextField console = new JTextField();
+	private final JTextField console = new JTextField();
 
 	private final LogPanel logPanel;
 
 	private int historyIndex = -1;
-	private List<String> history = new LinkedList<>();
+	private final List<String> history = new LinkedList<>();
 
 	private static final String NEXT_HISTORY_ACTION = "Next";
 	private static final String PREV_HISTORY_ACTION = "Prev";
@@ -60,6 +60,7 @@ public class Console extends JPanel implements ActionListener {
 	private static final String HASH_CMD = "hash";
 	private static final String EDGE_CMD = "edge";
 	private static final String REMAP_CMD = "remap";
+	private static final String HAMMING_CMD = "hamming";
 
 	private final List<Command> runnableCommands = new ArrayList<>();
 
@@ -72,7 +73,7 @@ public class Console extends JPanel implements ActionListener {
 		this.logPanel = logPanel;
 		setLayout(new BorderLayout());
 		makeCommandList();
-		Font font = new Font("Monospaced", Font.PLAIN, 13);
+		final Font font = new Font("Monospaced", Font.PLAIN, 13);
 		console.setFont(font);
 		add(console, BorderLayout.CENTER);
 		setVisible(false);
@@ -125,8 +126,9 @@ public class Console extends JPanel implements ActionListener {
 				"show this help message",
 				() -> {
 					logPanel.println("Available commands:");
-					for (Command s : runnableCommands)
+					for (final Command s : runnableCommands) {
 						logPanel.println(s.name + " - " + s.desc);
+					}
 				}));
 
 		runnableCommands.add(new Command(EDGE_CMD,
@@ -140,8 +142,9 @@ public class Console extends JPanel implements ActionListener {
 				"show the previous commands",
 				() -> {
 					LOGGER.info("History: ");
-					for (String s : history)
+					for (final String s : history) {
 						LOGGER.info("\t" + s);
+					}
 				}));
 
 		runnableCommands.add(new Command(HISTOGRAM_CMD,
@@ -205,6 +208,13 @@ public class Console extends JPanel implements ActionListener {
 								UserActionEvent.IMPORT_KEYPOINTS,
 								DatasetListManager.getInstance().getSelectedDatasets()))));
 
+		runnableCommands.add(new Command(HAMMING_CMD,
+				"run Hamming amalgamation on selected dataset",
+				() -> UserActionController.getInstance()
+						.userActionEventReceived(new UserActionEvent(this,
+								UserActionEvent.CLUSTER_VIA_HAMMING_AMALGAMATION,
+								DatasetListManager.getInstance().getSelectedDatasets()))));
+
 	}
 
 	/**
@@ -213,13 +223,14 @@ public class Console extends JPanel implements ActionListener {
 	 * @param command
 	 */
 	private void runCommand(String command) {
-		Optional<Command> f = runnableCommands.stream().filter(c -> c.name.equals(command))
+		final Optional<Command> f = runnableCommands.stream().filter(c -> c.name.equals(command))
 				.findFirst();
 
-		if (f.isPresent())
+		if (f.isPresent()) {
 			f.get().func.run();
-		else
+		} else {
 			LOGGER.info(() -> String.format("Command '%s' not recognised", command));
+		}
 	}
 
 	/*
@@ -238,8 +249,8 @@ public class Console extends JPanel implements ActionListener {
 
 	private void listDatasets() {
 		int i = 0;
-		for (IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
-			String type = d.getCollection().isReal() ? "Real" : "Virtual";
+		for (final IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
+			final String type = d.getCollection().isReal() ? "Real" : "Virtual";
 			LOGGER.info(i + "\t" + d.getName() + "\t" + type);
 			i++;
 		}
@@ -251,17 +262,17 @@ public class Console extends JPanel implements ActionListener {
 
 	private void validateDatasets(boolean isDetail) {
 
-		DatasetValidator v = new DatasetValidator();
-		for (IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
+		final DatasetValidator v = new DatasetValidator();
+		for (final IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()) {
 			LOGGER.info("Validating " + d.getName() + "...");
 			if (!v.validate(d)) {
 
 				if (isDetail) {
-					for (String s : v.getErrors()) {
+					for (final String s : v.getErrors()) {
 						LOGGER.warning(s);
 					}
 				} else {
-					for (String s : v.getSummary()) {
+					for (final String s : v.getSummary()) {
 						LOGGER.warning(s);
 					}
 					LOGGER.warning("Use 'check detail' for full list of errors");

@@ -125,6 +125,7 @@ public class UserActionEvent extends EventObject {
 	public static final String CLUSTER_AUTOMATICALLY = "Cluster automatically";
 	public static final String CLUSTER_MANUALLY = "Manual cluster";
 	public static final String CLUSTER_FROM_FILE = "AddClusterFromFileAction";
+	public static final String CLUSTER_VIA_HAMMING_AMALGAMATION = "AddClusterFromHammingAmalgamation";
 
 	public static final String SAVE = "Save selected";
 	public static final String SAVE_AS = "Save as new file";
@@ -142,7 +143,7 @@ public class UserActionEvent extends EventObject {
 	public static final String PRINT_DATASET_HASH_CMD = "Print dataset hashes";
 
 	private static final long serialVersionUID = 1L;
-	private String message;
+	private final String message;
 
 	private final List<IAnalysisDataset> datasets = new ArrayList<>();
 
@@ -195,8 +196,9 @@ public class UserActionEvent extends EventObject {
 			IAnalysisDataset second) {
 		super(source);
 		this.message = message;
-		if (datasets != null)
+		if (datasets != null) {
 			this.datasets.addAll(datasets);
+		}
 		this.secondaryDataset = second;
 	}
 

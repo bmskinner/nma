@@ -340,7 +340,7 @@ public class TestImageDatasetCreator {
 	/**
 	 * Create and run an analysis
 	 * 
-	 * @param folder       the output folder for save files
+	 * @param outputFolder the output folder for save files
 	 * @param op           the analysis options
 	 * @param makeClusters should clusters be created
 	 * @return a dataset with the results of the analysis
@@ -353,11 +353,13 @@ public class TestImageDatasetCreator {
 		if (!inputFolder.exists())
 			throw new IllegalArgumentException(
 					"Input folder does not exist: " + inputFolder.getAbsolutePath());
-
+		LOGGER.fine("Detecting cells");
 		final IAnalysisDataset d = new NucleusDetectionMethod(outputFolder.getAbsoluteFile(), op).call()
 				.getFirstDataset();
 
 		final HashOptions clusterOptions = OptionsFactory.makeDefaultClusteringOptions().build();
+
+		LOGGER.fine("Profiling and segmenting");
 
 		new DefaultDatasetProfilingMethod(d)
 				.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))

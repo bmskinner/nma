@@ -291,6 +291,22 @@ public interface IProfile extends Iterable<Integer>, XmlSerializable {
 	BooleanProfile getLocalMaxima(int windowSize, double threshold);
 
 	/**
+	 * Test if each index is less than the given value.
+	 * 
+	 * @param value the value to test
+	 * @return the test as a boolean profile
+	 */
+	BooleanProfile isLessThan(double value);
+
+	/**
+	 * Test if each index is greater than the given value.
+	 * 
+	 * @param value the value to test
+	 * @return the test as a boolean profile
+	 */
+	BooleanProfile isGreaterThan(double value);
+
+	/**
 	 * Get the windowSize points around a point of interest.
 	 * 
 	 * For example, requesting getWindow(5, 2) would return the indexes up to 2 away

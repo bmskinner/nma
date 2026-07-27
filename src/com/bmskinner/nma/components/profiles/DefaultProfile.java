@@ -26,6 +26,7 @@ import org.jdom2.Element;
 import com.bmskinner.nma.analysis.profiles.NoDetectedIndexException;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.cells.CellularComponent;
+import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 import com.bmskinner.nma.io.XmlSerializable;
 
@@ -550,6 +551,26 @@ public class DefaultProfile implements IProfile {
 			}
 		}
 		return new BooleanProfile(values);
+	}
+	
+	
+
+	@Override
+	public BooleanProfile isLessThan(double value) {
+		boolean[] result = new boolean[array.length];
+		for (int j = 0; j < array.length; j++) {
+			result[j] = array[j] < value;
+		}
+		return new BooleanProfile(result);
+	}
+
+	@Override
+	public BooleanProfile isGreaterThan(double value) {
+		boolean[] result = new boolean[array.length];
+		for (int j = 0; j < array.length; j++) {
+			result[j] = array[j] > value;
+		}
+		return new BooleanProfile(result);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package com.bmskinner.nma.analysis.classification;
 
+import java.util.logging.Logger;
+
 import com.bmskinner.nma.components.options.HashOptions;
 
 /**
@@ -10,6 +12,8 @@ public enum ClusteringMethod {
 	HIERARCHICAL("Hierarchical"),
 	IMPORTED("Imported"),
 	MANUAL("Manual");
+
+	private static final Logger LOGGER = Logger.getLogger(ClusteringMethod.class.getName());
 
 	private final String name;
 
@@ -25,6 +29,10 @@ public enum ClusteringMethod {
 	public static ClusteringMethod from(String s) {
 		for (final ClusteringMethod c : ClusteringMethod.values()) {
 			if (c.name.toUpperCase().equals(s.toUpperCase()))
+				return c;
+			// Handle instances of "EM" instead of "Expectation maximisation" in older
+			// versions
+			if (c.name().toUpperCase().equals(s.toUpperCase()))
 				return c;
 		}
 		throw new IllegalArgumentException("There is no clustering method named %s".formatted(s));

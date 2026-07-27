@@ -1,5 +1,6 @@
 package com.bmskinner.nma.components.datasets;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,10 +19,9 @@ import org.jdom2.Element;
 import com.bmskinner.nma.analysis.classification.NonunimodalRegionClusteringMethod.Barcode;
 import com.bmskinner.nma.analysis.classification.NonunimodalRegionClusteringMethod.BarcodeElement;
 import com.bmskinner.nma.analysis.classification.NonunimodalRegionClusteringMethod.ProfileBarcodingRegion;
-import com.bmskinner.nma.components.MissingDataException;
+import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.components.XMLNames;
 import com.bmskinner.nma.components.options.HashOptions;
-import com.bmskinner.nma.components.profiles.IProfileSegment.SegmentUpdateException;
 
 /**
  * Store data for clusters produced by Hamming amalgamation.
@@ -163,11 +163,13 @@ public class HammingClusterGroup extends DefaultClusterGroup {
 				try {
 					clusterDataset.getCollection().getProfileCollection().calculateProfiles();
 
+					new ConsensusAveragingMethod(clusterDataset).call();
+
 					clusterDatasets.computeIfAbsent(pbr, k -> new HashMap<>()).put(i, clusterDataset);
 
-				} catch (MissingDataException | SegmentUpdateException e1) {
+				} catch (final Exception e1) {
 					LOGGER.log(Level.SEVERE,
-							"Unable to create profiles in virtual dataset for Hamming group: %s"
+							"Unable to create profiles or consensus in virtual dataset for Hamming group: %s"
 									.formatted(e1.getMessage(), e1));
 				}
 			}
@@ -178,6 +180,12 @@ public class HammingClusterGroup extends DefaultClusterGroup {
 
 	public int getNumberOfClusters(ProfileBarcodingRegion pbr) {
 		return clusterNumbers.get(pbr);
+	}
+
+	public List<IAnalysisDataset> getRegionDatasets(ProfileBarcodingRegion pbr) {
+		final List<IAnalysisDataset> result = new ArrayList<>();
+		result.addAll(clusterDatasets.get(pbr).values());
+		return result;
 	}
 
 	public IAnalysisDataset getRegionDataset(ProfileBarcodingRegion pbr, int cluster) {
