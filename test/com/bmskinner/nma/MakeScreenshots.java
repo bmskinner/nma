@@ -3,7 +3,6 @@ package com.bmskinner.nma;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -24,17 +23,19 @@ import com.bmskinner.nma.logging.ConsoleHandler;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-		TestImageDatasetCreator.class,
-		Screenshotter.class
+		TestResources.class, // ensure directory structure is created
+		TestImageDatasetCreator.class, // ensure sample datasets are present
+		Screenshotter.class // take the screenshots
 })
 public class MakeScreenshots {
 
 	static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	static {
-		for (Handler h : LOGGER.getHandlers())
+		for (final Handler h : LOGGER.getHandlers()) {
 			LOGGER.removeHandler(h);
-		Handler h = new ConsoleHandler(new ConsoleFormatter());
+		}
+		final Handler h = new ConsoleHandler(new ConsoleFormatter());
 		LOGGER.setLevel(Level.FINE);
 		h.setLevel(Level.FINE);
 		LOGGER.addHandler(h);
