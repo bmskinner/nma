@@ -402,7 +402,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 					final ISignalCollection sc = options.getCell().getPrimaryNucleus()
 							.getSignalCollection();
-					final UUID signalId = (UUID) ds.getSeriesKey(series);
+
+					final UUID signalId = ds.getComponent().getId();
 					final Optional<UUID> signalGroup = sc.getSignalGroupIds().stream()
 							.filter(sg -> sc.getSignals(sg).stream()
 									.anyMatch(s -> s.getId().equals(signalId)))
