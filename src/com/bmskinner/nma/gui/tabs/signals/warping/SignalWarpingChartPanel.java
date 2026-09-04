@@ -3,7 +3,6 @@ package com.bmskinner.nma.gui.tabs.signals.warping;
 import java.awt.BorderLayout;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
@@ -24,13 +23,13 @@ public class SignalWarpingChartPanel extends ChartDetailPanel
 
 	private static final Logger LOGGER = Logger.getLogger(SignalWarpingChartPanel.class.getName());
 
-	private ConsensusNucleusChartPanel chartPanel;
+	private final ConsensusNucleusChartPanel chartPanel;
 
 	public SignalWarpingChartPanel() {
 
 		setLayout(new BorderLayout());
 
-		JFreeChart chart = OutlineChartFactory.createEmptyChart();
+		final JFreeChart chart = OutlineChartFactory.createEmptyChart();
 		chartPanel = new ConsensusNucleusChartPanel(chart);
 		add(chartPanel, BorderLayout.CENTER);
 	}
@@ -79,7 +78,7 @@ public class SignalWarpingChartPanel extends ChartDetailPanel
 		if (images.isEmpty()) {
 			chartPanel.setChart(AbstractChartFactory.createEmptyChart());
 		} else {
-			ChartOptions options = new ChartOptionsBuilder()
+			final ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setShowXAxis(false)
 					.setShowYAxis(false)
@@ -97,7 +96,7 @@ public class SignalWarpingChartPanel extends ChartDetailPanel
 		if (images.isEmpty()) {
 			chartPanel.setChart(AbstractChartFactory.createEmptyChart());
 		} else {
-			ChartOptions options = new ChartOptionsBuilder()
+			final ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setShowXAxis(false)
 					.setShowYAxis(false)

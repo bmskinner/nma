@@ -10,7 +10,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -64,7 +63,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 	private final JLabel ssimLabel = new JLabel("");
 	private final JButton ssimBtn = new JButton("Full MS-SSIM*");
 
-	private List<WarpedSignalSelectionChangeListener> listeners = new ArrayList<>();
+	private final List<WarpedSignalSelectionChangeListener> listeners = new ArrayList<>();
 
 	public SignalWarpingTablePanel() {
 
@@ -76,8 +75,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 				// Render true/false column as checkbox
 				if (column >= 3 && column <= 5)
 					return Boolean.class;
-				else
-					return super.getColumnClass(column);
+				return super.getColumnClass(column);
 			}
 		};
 
@@ -86,29 +84,29 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 		table.setColumnSelectionAllowed(false);
 		table.setAutoCreateRowSorter(true);
 
-		ListSelectionModel rowModel = table.getSelectionModel();
+		final ListSelectionModel rowModel = table.getSelectionModel();
 		rowModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		rowModel.addListSelectionListener(e -> {
 			if (e.getValueIsAdjusting())
 				return;
 			ssimLabel.setText("");
-			int[] selectedRow = table.getSelectedRows();
-			if (table.getModel()instanceof SignalWarpingTableModel model) {
-				List<IWarpedSignal> images = new ArrayList<>();
-				for (int i : selectedRow) {
+			final int[] selectedRow = table.getSelectedRows();
+			if (table.getModel()instanceof final SignalWarpingTableModel model) {
+				final List<IWarpedSignal> images = new ArrayList<>();
+				for (final int i : selectedRow) {
 					images.add(model.getWarpedSignal(i));
 				}
 				fireWarpedSignalSelectionChanged(images);
 
 				if (selectedRow.length == 2) {
-					IWarpedSignal w0 = model.getWarpedSignal(selectedRow[0]);
-					IWarpedSignal w1 = model.getWarpedSignal(selectedRow[1]);
+					final IWarpedSignal w0 = model.getWarpedSignal(selectedRow[0]);
+					final IWarpedSignal w1 = model.getWarpedSignal(selectedRow[1]);
 
 					// Only compare images with the same target
 					if (w0.target().getId().equals(w1.target().getId())) {
-						MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
-						MSSIMScore values = msi.calculateMSSIM(w0.toImage(), w1.toImage());
+						final MultiScaleStructuralSimilarityIndex msi = new MultiScaleStructuralSimilarityIndex();
+						final MSSIMScore values = msi.calculateMSSIM(w0.toImage(), w1.toImage());
 						ssimLabel.setText("MS-SSIM*: " + values.toString());
 					} else {
 						ssimLabel.setText("");
@@ -117,7 +115,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 			}
 
 			if (selectedRow.length == 1) {
-				IWarpedSignal w = getSelectedImages(selectedRow).get(0);
+				final IWarpedSignal w = getSelectedImages(selectedRow).get(0);
 				isPseudocolourBox.setEnabled(true);
 				thresholdSlider.setEnabled(true);
 				isPseudocolourBox.setSelected(w.isPseudoColour());
@@ -139,19 +137,19 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 			@Override
 			public void mouseClicked(MouseEvent e) {
 
-				if (table.getModel()instanceof SignalWarpingTableModel model) {
-					int row = table.rowAtPoint(e.getPoint());
-					int col = table.columnAtPoint(e.getPoint());
+				if (table.getModel()instanceof final SignalWarpingTableModel model) {
+					final int row = table.rowAtPoint(e.getPoint());
+					final int col = table.columnAtPoint(e.getPoint());
 
 					// Change signal group colour
 					if (e.getClickCount() == DOUBLE_CLICK && col == 7) {
 						try {
-							Color oldColor = model.getWarpedSignal(row).colour();
-							Color newColor = getInputSupplier().requestColor(Labels.Signals.CHOOSE_SIGNAL_COLOUR,
+							final Color oldColor = model.getWarpedSignal(row).colour();
+							final Color newColor = getInputSupplier().requestColor(Labels.Signals.CHOOSE_SIGNAL_COLOUR,
 									oldColor);
 							model.getWarpedSignal(row).setColour(newColor);
 							updateTableAndFireVisChange(new int[] { row });
-						} catch (RequestCancelledException e1) {
+						} catch (final RequestCancelledException e1) {
 							// No action, user cancelled
 						}
 					}
@@ -159,7 +157,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 			}
 		});
 
-		JScrollPane scrollPane = new JScrollPane(table);
+		final JScrollPane scrollPane = new JScrollPane(table);
 
 		add(createHeader(), BorderLayout.NORTH);
 		add(scrollPane, BorderLayout.CENTER);
@@ -173,7 +171,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 	}
 
 	private JPanel createHeader() {
-		JPanel panel = new JPanel();
+		final JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		panel.add(createDisplaySettingsPanel());
 		panel.add(Box.createHorizontalStrut(10));
@@ -184,15 +182,15 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 	}
 
 	private JPanel createDisplaySettingsPanel() {
-		JPanel panel = new JPanel();
+		final JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
 		isPseudocolourBox = new JCheckBox(PSEUDOCOLOUR_LBL, true);
 		isPseudocolourBox.setToolTipText(PSEUDOCOLOUR_TOOLTIP);
 		isPseudocolourBox.addActionListener(e -> {
 
-			List<IWarpedSignal> ws = getSelectedImages(table.getSelectedRows());
-			for (IWarpedSignal w : ws) {
+			final List<IWarpedSignal> ws = getSelectedImages(table.getSelectedRows());
+			for (final IWarpedSignal w : ws) {
 				w.setPseudoColour(isPseudocolourBox.isSelected());
 			}
 			fireWarpedSignalVisualisationChanged(ws);
@@ -206,8 +204,8 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 		thresholdSlider.setValue(0);
 		thresholdSlider.addChangeListener(e -> {
 
-			List<IWarpedSignal> ws = getSelectedImages(table.getSelectedRows());
-			for (IWarpedSignal w : ws) {
+			final List<IWarpedSignal> ws = getSelectedImages(table.getSelectedRows());
+			for (final IWarpedSignal w : ws) {
 				w.setDisplayThreshold(255 - thresholdSlider.getValue());
 			}
 			fireWarpedSignalVisualisationChanged(ws);
@@ -219,7 +217,7 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 	}
 
 	private JPanel createMSSSIMPanel() {
-		JPanel panel = new JPanel();
+		final JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
 		exportButton = new JButton(EXPORT_LBL);
@@ -243,10 +241,11 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 	}
 
 	private List<IWarpedSignal> getSelectedImages(int[] rows) {
-		List<IWarpedSignal> result = new ArrayList<>();
-		if (table.getModel()instanceof SignalWarpingTableModel m) {
-			for (int i : rows)
+		final List<IWarpedSignal> result = new ArrayList<>();
+		if (table.getModel()instanceof final SignalWarpingTableModel m) {
+			for (final int i : rows) {
 				result.add(m.getWarpedSignal(i));
+			}
 		}
 		return result;
 	}
@@ -303,13 +302,15 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 	}
 
 	private void fireWarpedSignalSelectionChanged(List<IWarpedSignal> images) {
-		for (WarpedSignalSelectionChangeListener l : listeners)
+		for (final WarpedSignalSelectionChangeListener l : listeners) {
 			l.warpedSignalSelectionChanged(images);
+		}
 	}
 
 	private void fireWarpedSignalVisualisationChanged(List<IWarpedSignal> images) {
-		for (WarpedSignalSelectionChangeListener l : listeners)
+		for (final WarpedSignalSelectionChangeListener l : listeners) {
 			l.warpedSignalVisualisationChanged(images);
+		}
 	}
 
 	/**
@@ -323,8 +324,8 @@ public class SignalWarpingTablePanel extends TableDetailPanel implements Nuclear
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
-			Component l = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			Color colour = (Color) value;
+			final Component l = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			final Color colour = (Color) value;
 			l.setBackground(colour);
 			l.setForeground(colour);
 			return l;

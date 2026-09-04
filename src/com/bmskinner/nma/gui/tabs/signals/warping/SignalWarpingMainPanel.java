@@ -3,7 +3,6 @@ package com.bmskinner.nma.gui.tabs.signals.warping;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -19,7 +18,7 @@ public class SignalWarpingMainPanel extends DetailPanel {
 	public SignalWarpingMainPanel() {
 		super(PANEL_TITLE_LBL, PANEL_DESC_LBL);
 		setLayout(new GridBagLayout());
-		GridBagConstraints constraints = new GridBagConstraints();
+		final GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.gridx = 0;
 		constraints.gridy = 0;
@@ -28,7 +27,7 @@ public class SignalWarpingMainPanel extends DetailPanel {
 		constraints.weightx = 1;
 		constraints.weighty = 1;
 		constraints.anchor = GridBagConstraints.CENTER;
-		SignalWarpingTablePanel tp = new SignalWarpingTablePanel();
+		final SignalWarpingTablePanel tp = new SignalWarpingTablePanel();
 		add(tp, constraints);
 
 		constraints.fill = GridBagConstraints.BOTH;
@@ -40,11 +39,12 @@ public class SignalWarpingMainPanel extends DetailPanel {
 		constraints.weighty = 1;
 		constraints.anchor = GridBagConstraints.CENTER;
 
-		SignalWarpingChartPanel cp = new SignalWarpingChartPanel();
+		final SignalWarpingChartPanel cp = new SignalWarpingChartPanel();
 
 		tp.addWarpedSignalSelectionChangeListener(cp);
 
 		add(cp, constraints);
 
 	}
+
 }

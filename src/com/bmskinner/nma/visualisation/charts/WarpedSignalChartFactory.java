@@ -14,6 +14,7 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nma.components.cells.CellularComponent;
 import com.bmskinner.nma.components.cells.Nucleus;
+import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.signals.IWarpedSignal;
 import com.bmskinner.nma.visualisation.datasets.ChartDatasetCreationException;
 import com.bmskinner.nma.visualisation.datasets.ComponentOutlineDataset;
@@ -42,21 +43,20 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 	/**
 	 * Draw the given images onto a consensus outline nucleus.
 	 * 
-	 * @param image the image processor to be drawn
+	 * @param warpedImage the image processor to be drawn
 	 * @return
 	 */
-	private JFreeChart makeSignalWarpChart(ImageProcessor image) {
+	private JFreeChart makeSignalWarpChart(ImageProcessor warpedImage) {
 
 		// Create the outline of the nucleus
 		final JFreeChart chart = createEmptyChart();
-
-//		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusBareOutlineChart();
 
 		final XYPlot plot = chart.getXYPlot();
 
 		LOGGER.finer("Creating outline datasets");
 
-		// Make outline of the components to draw
+		// Make outline of the components to draw. If there are multiple warp target
+		// datasets, there will be multiple consensus nuclei
 		final List<XYDataset> outlineDatasets = new ArrayList<>();
 
 		final List<CellularComponent> components = new ArrayList<>();
@@ -70,16 +70,21 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 
 		try {
 			for (final CellularComponent c : components) {
-				outlineDatasets.add(new ComponentOutlineDataset(c, c.getId().toString(), false, options.getScale()));
+				// Note that we cannot use micron scale if we are drawing a pixel image on top
+				outlineDatasets
+						.add(new ComponentOutlineDataset(c, c.getId().toString(), false, MeasurementScale.PIXELS));
 			}
-			LOGGER.finer(String.format("Image bounds: %s x %s", image.getWidth(), image.getHeight()));
+			LOGGER.finer(String.format("Image bounds: %s x %s", warpedImage.getWidth(), warpedImage.getHeight()));
 		} catch (final ChartDatasetCreationException e) {
 			LOGGER.log(Level.SEVERE, "Error creating outline", e);
 			return createErrorChart();
 		}
 
-		// Calculate the offset at which to draw the image since
-		// the plot area is larger than the image to be drawn
+		// The plot area is larger than the warped image to be drawn.
+		// Calculate the offset at which to draw the image so it is aligned with the
+		// consensus outlines
+
+		// Find the plot bounds
 		double xChartMin = Double.MAX_VALUE;
 		double yChartMin = Double.MAX_VALUE;
 		for (final XYDataset ds : outlineDatasets) {
@@ -92,8 +97,8 @@ public class WarpedSignalChartFactory extends OutlineChartFactory {
 		final int xOffset = (int) Math.round(-xChartMin);
 		final int yOffset = (int) Math.round(-yChartMin);
 
-		LOGGER.finer("Adding image as annotation with offset " + xOffset + " - " + yOffset);
-		drawImageAsAnnotation(image, plot, 255, -xOffset, -yOffset, options.isShowBounds());
+		LOGGER.finer("Adding image as annotation with offset %s - %s".formatted(xOffset, yOffset));
+		drawImageAsAnnotation(warpedImage, plot, 255, -xOffset, -yOffset, options.isShowBounds());
 
 		// Set the colour of the nucleus outline
 		plot.getRenderer().setDefaultPaint(Color.BLACK);

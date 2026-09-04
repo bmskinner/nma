@@ -76,6 +76,9 @@ public abstract class AbstractChartFactory {
 	/** The X and Y axis positive & negative range magnitude for empty charts */
 	protected static final int DEFAULT_EMPTY_RANGE = 10;
 
+	private static final int COLOR_PROCESSOR_RGB_WHITE = 16777215;
+	private static final int BYTE_PROCESSOR_WHITE = 255;
+
 	/**
 	 * The index profile charts begin at. Since the first index is 0, this prevents
 	 * the value at zero being hidden by the chart border
@@ -233,7 +236,7 @@ public abstract class AbstractChartFactory {
 		plot.getRenderer().setURLGenerator(null);
 		plot.getRenderer().setDefaultCreateEntities(false);
 		chart.setAntiAlias(GlobalOptions.getInstance().isAntiAlias()); // disabled for performance
-																		// testing
+		// testing
 		return chart;
 	}
 
@@ -322,11 +325,12 @@ public abstract class AbstractChartFactory {
 	/**
 	 * Create a chart with an image drawn as an annotation in the background layer.
 	 * 
-	 * @param ip      the image
-	 * @param plot    the plot to draw on
-	 * @param alpha   the opacity (0-255)
-	 * @param xOffset a position to move the image 0,0 to
-	 * @param yOffset a position to move the image 0,0 to
+	 * @param ip         the image
+	 * @param plot       the plot to draw on
+	 * @param alpha      the opacity (0-255)
+	 * @param xOffset    a position to move the image 0,0 to
+	 * @param yOffset    a position to move the image 0,0 to
+	 * @param showBounds draw a red border on the bounds for debugging
 	 * @return
 	 */
 	protected void drawImageAsAnnotation(ImageProcessor ip, XYPlot plot, int alpha, int xOffset,
@@ -336,8 +340,7 @@ public abstract class AbstractChartFactory {
 		plot.getRangeAxis().setInverted(false);
 
 		// Make a dataset to allow the autoscale to work even if no other datasets are
-		// present
-		// Hide the dataset from visibility
+		// present, but hide the dataset from visibility
 		final XYDataset bounds = new NucleusDatasetCreator(options).createAnnotationRectangleDataset(
 				ip.getWidth(),
 				ip.getHeight());
@@ -348,24 +351,26 @@ public abstract class AbstractChartFactory {
 		plot.getDomainAxis().setRange(0, ip.getWidth());
 		plot.getRangeAxis().setRange(0, ip.getHeight());
 
+		// Draw the image. Each pixel is a rectangular shape annotation, with a 10%
+		// overlap between pixels. The annotations are added to the plot background
+		// layer so any plotted data in the chart is above the image
 		for (int x = 0; x < ip.getWidth(); x++) {
 			for (int y = 0; y < ip.getHeight(); y++) {
 
 				final int pixel = ip.get(x, y);
 				Color col = null;
 
-				if (ip instanceof ColorProcessor) {
-					if (pixel < 16777215) {
-						col = new Color(pixel);
-						col = ColourSelecter.getTransparentColour(col, true, alpha);
-					}
-
-				} else if (pixel < 255) { // Ignore anything that is not signal - the background is
+				// We are assuming here that full intensity is white.
+				// Only draw non-white pixels
+				if (pixel < COLOR_PROCESSOR_RGB_WHITE) {
+					col = new Color(pixel);
+					col = ColourSelecter.getTransparentColour(col, true, alpha);
+				} else if (pixel < BYTE_PROCESSOR_WHITE) { // Ignore anything that is not signal - the background is
 					// already white
-											col = new Color(pixel, pixel, pixel, alpha);
+					col = new Color(pixel, pixel, pixel, alpha);
 				}
 
-				if (col == null && showBounds) { // Draw red pixels at bounds
+				if (col == null && showBounds) { // Draw red at white pixels for debugging
 					col = new Color(255, 0, 0, alpha);
 				}
 
@@ -374,6 +379,8 @@ public abstract class AbstractChartFactory {
 					// colour seeping through
 					final Rectangle2D r = new Rectangle2D.Double(x + xOffset - 0.1, y + yOffset - 0.1,
 							1.2, 1.2);
+
+					// No stroke or outline; fill only
 					final XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
 
 					rend.addAnnotation(a, Layer.BACKGROUND);
@@ -417,7 +424,7 @@ public abstract class AbstractChartFactory {
 
 		final ExportableLegendChart chart = new ExportableLegendChart(
 				ChartFactory.createXYLineChart(null, null, null, null,
-				PlotOrientation.VERTICAL, true, true,
+						PlotOrientation.VERTICAL, true, true,
 						false));
 
 		final XYPlot plot = chart.getXYPlot();
@@ -532,7 +539,7 @@ public abstract class AbstractChartFactory {
 	 */
 	protected static void drawImageAsAnnotation(@NonNull XYPlot plot, @NonNull ICell cell,
 			@NonNull CellularComponent component, RotationMode mode) {
-		
+
 		LOGGER.finer("Drawing background image for cell with primary nucleus %s"
 				.formatted(cell.getPrimaryNucleus().getNameAndNumber()));
 		try {

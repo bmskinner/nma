@@ -122,11 +122,11 @@ public class ImageAnnotator extends ImageFilterer {
 	 */
 	public ImageAnnotator(final ImageProcessor ip, final int maxWidth, final int maxHeight) {
 		super(ip);
-		int originalWidth = ip.getWidth();
-		int originalHeight = ip.getHeight();
+		final int originalWidth = ip.getWidth();
+		final int originalHeight = ip.getHeight();
 
 		// keep the image aspect ratio
-		double ratio = (double) originalWidth / (double) originalHeight;
+		final double ratio = (double) originalWidth / (double) originalHeight;
 
 		double finalWidth = maxHeight * ratio; // fix height
 		finalWidth = finalWidth > maxWidth ? maxWidth : finalWidth; // but
@@ -134,7 +134,7 @@ public class ImageAnnotator extends ImageFilterer {
 																	// width too
 
 		scale = finalWidth / originalWidth;
-		ImageProcessor result = ip.duplicate().resize((int) finalWidth);
+		final ImageProcessor result = ip.duplicate().resize((int) finalWidth);
 		this.ip = result;
 	}
 
@@ -151,7 +151,7 @@ public class ImageAnnotator extends ImageFilterer {
 			drawBorder(cell.getCytoplasm(), Color.CYAN);
 		}
 
-		for (Nucleus n : cell.getNuclei()) {
+		for (final Nucleus n : cell.getNuclei()) {
 			drawBorder(n, Color.ORANGE);
 		}
 		return this;
@@ -160,18 +160,18 @@ public class ImageAnnotator extends ImageFilterer {
 	public ImageAnnotator drawSegments(@NonNull Nucleus n) {
 		try {
 			// // Colour the border points for segments
-			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+			final ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			if (profile.hasSegments()) {
 
-				for (IProfileSegment seg : profile.getOrderedSegments()) {
-					Paint color = ColourSelecter.getColor(seg.getPosition(),
+				for (final IProfileSegment seg : profile.getOrderedSegments()) {
+					final Paint color = ColourSelecter.getColor(seg.getPosition(),
 							GlobalOptions.getInstance().getSwatch());
-					Iterator<Integer> it = seg.iterator();
-					int lastIndex = n.getIndexRelativeTo(OrientationMark.REFERENCE,
+					final Iterator<Integer> it = seg.iterator();
+					final int lastIndex = n.getIndexRelativeTo(OrientationMark.REFERENCE,
 							seg.getEndIndex());
 					while (it.hasNext()) {
-						int index = n.getIndexRelativeTo(OrientationMark.REFERENCE, it.next());
-						IPoint p = n.getBorderPoint(index);
+						final int index = n.getIndexRelativeTo(OrientationMark.REFERENCE, it.next());
+						final IPoint p = n.getBorderPoint(index);
 						// since segments overlap, draw the last index larger so the next segment
 						// can
 						// overlay
@@ -188,18 +188,18 @@ public class ImageAnnotator extends ImageFilterer {
 	public ImageAnnotator drawSignals(@NonNull Nucleus n) {
 		try {
 			// // Colour the border points for segments
-			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+			final ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 			if (profile.hasSegments()) {
 
-				for (IProfileSegment seg : profile.getOrderedSegments()) {
-					Paint color = ColourSelecter.getColor(seg.getPosition(),
+				for (final IProfileSegment seg : profile.getOrderedSegments()) {
+					final Paint color = ColourSelecter.getColor(seg.getPosition(),
 							GlobalOptions.getInstance().getSwatch());
-					Iterator<Integer> it = seg.iterator();
-					int lastIndex = n.getIndexRelativeTo(OrientationMark.REFERENCE,
+					final Iterator<Integer> it = seg.iterator();
+					final int lastIndex = n.getIndexRelativeTo(OrientationMark.REFERENCE,
 							seg.getEndIndex());
 					while (it.hasNext()) {
-						int index = n.getIndexRelativeTo(OrientationMark.REFERENCE, it.next());
-						IPoint p = n.getBorderPoint(index);
+						final int index = n.getIndexRelativeTo(OrientationMark.REFERENCE, it.next());
+						final IPoint p = n.getBorderPoint(index);
 						// since segments overlap, draw the last index larger so the next segment
 						// can
 						// overlay
@@ -224,8 +224,9 @@ public class ImageAnnotator extends ImageFilterer {
 		annotateCoM(n);
 		drawSegments(n);
 		annotateSignals(n);
-		for (OrientationMark lm : n.getOrientationMarks())
+		for (final OrientationMark lm : n.getOrientationMarks()) {
 			drawLandmark(lm, n);
+		}
 
 		return this;
 	}
@@ -240,13 +241,13 @@ public class ImageAnnotator extends ImageFilterer {
 	public ImageAnnotator annotate(ShellDetector.Shell shell, @NonNull Color colour) {
 
 		// This is in source image coordinates
-		Roi roi = shell.toRoi();
+		final Roi roi = shell.toRoi();
 
-		IPoint diff = shell.getSource().getOriginalBase().minus(shell.getOriginalBase());
+		final IPoint diff = shell.getSource().getOriginalBase().minus(shell.getOriginalBase());
 
 		// add an adjustment for the buffer, and for the location within the nucleus
 
-		IPoint base = shell.getSource().getBase().minus(diff);
+		final IPoint base = shell.getSource().getBase().minus(diff);
 
 		roi.setLocation(base.getX(), base.getY());
 		annotateRoi(roi, colour, 1);
@@ -301,7 +302,7 @@ public class ImageAnnotator extends ImageFilterer {
 	 */
 	public ImageAnnotator annotatePoint(@NonNull IPoint p, @NonNull Imageable template,
 			@NonNull Color c) {
-		IPoint offset = Imageable.translateCoordinateToComponentImage(p, template);
+		final IPoint offset = Imageable.translateCoordinateToComponentImage(p, template);
 		return annotatePoint(offset, c);
 	}
 
@@ -366,7 +367,7 @@ public class ImageAnnotator extends ImageFilterer {
 	private ImageAnnotator drawLandmark(OrientationMark lm, @NonNull Nucleus n) {
 		try {
 			return annotatePoint(n.getBorderPoint(lm), getDefaultColour(lm));
-		} catch (MissingLandmarkException e) {
+		} catch (final MissingLandmarkException e) {
 			LOGGER.log(Level.SEVERE, "Cannot find border tag " + lm, e);
 		}
 		return this;
@@ -392,16 +393,16 @@ public class ImageAnnotator extends ImageFilterer {
 	 * @return the annotator
 	 */
 	public ImageAnnotator drawBorder(@NonNull final CellularComponent n, final Color c) {
-		FloatPolygon p = n.toOriginalPolygon();
-		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
+		final FloatPolygon p = n.toOriginalPolygon();
+		final PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 
 		return annotatePolygon(roi, c);
 	}
 
 	public static ImageProcessor drawBorder(ImageProcessor ip, @NonNull final CellularComponent n,
 			final Color c) {
-		FloatPolygon p = n.toOriginalPolygon();
-		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
+		final FloatPolygon p = n.toOriginalPolygon();
+		final PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 		return annotatePolygon(ip, roi, c);
 	}
 
@@ -417,11 +418,11 @@ public class ImageAnnotator extends ImageFilterer {
 	public ImageAnnotator annotateBorder(@NonNull final CellularComponent n,
 			@NonNull final Imageable template,
 			@NonNull final Color c) {
-		FloatPolygon p = n.toOriginalPolygon();
-		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
+		final FloatPolygon p = n.toOriginalPolygon();
+		final PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 
-		IPoint base = n.getOriginalBase();
-		IPoint offset = Imageable.translateCoordinateToComponentImage(base, template);
+		final IPoint base = n.getOriginalBase();
+		final IPoint offset = Imageable.translateCoordinateToComponentImage(base, template);
 		roi.setLocation(offset.getX(), offset.getY());
 
 		return annotatePolygon(roi, c);
@@ -483,7 +484,7 @@ public class ImageAnnotator extends ImageFilterer {
 	 */
 	public ImageAnnotator annotateStats(CellularComponent n, Color text, Color back) {
 
-		DecimalFormat df = new DecimalFormat("#.##");
+		final DecimalFormat df = new DecimalFormat("#.##");
 
 		String areaLbl;
 		String perimLbl;
@@ -498,7 +499,7 @@ public class ImageAnnotator extends ImageFilterer {
 			if (n instanceof INuclearSignal) {
 
 				area = n.getMeasurement(Measurement.AREA);
-				double perim2 = Math.pow(n.getMeasurement(Measurement.PERIMETER), 2);
+				final double perim2 = Math.pow(n.getMeasurement(Measurement.PERIMETER), 2);
 				circ = (4 * Math.PI) * (area / perim2);
 
 			} else {
@@ -531,7 +532,7 @@ public class ImageAnnotator extends ImageFilterer {
 			Color text,
 			Color back) {
 
-		DecimalFormat df = new DecimalFormat("#.##");
+		final DecimalFormat df = new DecimalFormat("#.##");
 
 		String areaLbl;
 		String perimLbl;
@@ -546,7 +547,7 @@ public class ImageAnnotator extends ImageFilterer {
 			if (signal instanceof INuclearSignal) {
 
 				area = signal.getMeasurement(Measurement.AREA);
-				double perim2 = Math.pow(signal.getMeasurement(Measurement.PERIMETER), 2);
+				final double perim2 = Math.pow(signal.getMeasurement(Measurement.PERIMETER), 2);
 				circ = (4 * Math.PI) * (area / perim2);
 
 			}
@@ -555,7 +556,7 @@ public class ImageAnnotator extends ImageFilterer {
 
 			areaLbl = "Area: " + df.format(area);
 			perimLbl = "Circ: " + df.format(circ);
-			String fractLabel = "Fract: " + df.format(fraction);
+			final String fractLabel = "Fract: " + df.format(fraction);
 
 			label = areaLbl + "\n" + perimLbl + "\n" + fractLabel;
 
@@ -583,35 +584,35 @@ public class ImageAnnotator extends ImageFilterer {
 
 			// only draw if segments are present
 			if (n.getProfile(ProfileType.ANGLE).hasSegments()) {
-				List<IProfileSegment> segs = n.getProfile(ProfileType.ANGLE).getSegments();
+				final List<IProfileSegment> segs = n.getProfile(ProfileType.ANGLE).getSegments();
 
 				for (int i = 0; i < segs.size(); i++) {
 
-					IProfileSegment seg = segs.get(i);
+					final IProfileSegment seg = segs.get(i);
 
-					float[] xpoints = new float[seg.length() + 1];
-					float[] ypoints = new float[seg.length() + 1];
+					final float[] xpoints = new float[seg.length() + 1];
+					final float[] ypoints = new float[seg.length() + 1];
 					for (int j = 0; j <= seg.length(); j++) {
-						int k = n.wrapIndex(seg.getStartIndex() + j);
+						final int k = n.wrapIndex(seg.getStartIndex() + j);
 
-						IPoint p = n.getOriginalBorderPoint(k);
+						final IPoint p = n.getOriginalBorderPoint(k);
 						xpoints[j] = (float) (p.getX() * scale);
 						ypoints[j] = (float) (p.getY() * scale);
 					}
 
-					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
+					final PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
 
 					// Offset the segment relative to the nucleus component
 					// image
-					IPoint base = new FloatPoint(segRoi.getXBase(), segRoi.getYBase());
-					IPoint offset = Imageable.translateCoordinateToComponentImage(base, template);
+					final IPoint base = new FloatPoint(segRoi.getXBase(), segRoi.getYBase());
+					final IPoint offset = Imageable.translateCoordinateToComponentImage(base, template);
 
 					segRoi.setLocation(offset.getX(), offset.getY());
 
 					annotatePolygon(segRoi, ColourSelecter.getColor(i));
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error annotating segments", e);
 		}
 		return this;
@@ -626,26 +627,26 @@ public class ImageAnnotator extends ImageFilterer {
 	 */
 	public ImageAnnotator annotateSignals(@NonNull Nucleus n) {
 
-		ISignalCollection signalCollection = n.getSignalCollection();
+		final ISignalCollection signalCollection = n.getSignalCollection();
 
-		for (UUID id : signalCollection.getSignalGroupIds()) {
+		for (final UUID id : signalCollection.getSignalGroupIds()) {
 
 			if (signalCollection.hasSignal(id)) {
 
-				Color colour = ColourSelecter
+				final Color colour = ColourSelecter
 						.getSignalColour(signalCollection.getSourceChannel(id));
 
-				List<INuclearSignal> signals = signalCollection.getSignals(id);
+				final List<INuclearSignal> signals = signalCollection.getSignals(id);
 
-				for (INuclearSignal s : signals) {
+				for (final INuclearSignal s : signals) {
 
 					annotatePoint(s.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), colour);
-					IPoint base = s.getBase().plus(Imageable.COMPONENT_BUFFER);
+					final IPoint base = s.getBase().plus(Imageable.COMPONENT_BUFFER);
 
-					FloatPolygon p = s.toPolygon();
+					final FloatPolygon p = s.toPolygon();
 
-					float[] x = p.xpoints;
-					float[] y = p.ypoints;
+					final float[] x = p.xpoints;
+					final float[] y = p.ypoints;
 
 					if (Math.abs(scale - 1) > 0.0000001) {
 						for (int j = 0; j < p.npoints; j++) {
@@ -654,7 +655,7 @@ public class ImageAnnotator extends ImageFilterer {
 						}
 					}
 
-					PolygonRoi roi = new PolygonRoi(x, y, PolygonRoi.POLYGON);
+					final PolygonRoi roi = new PolygonRoi(x, y, PolygonRoi.POLYGON);
 					roi.setLocation(base.getX() * scale, base.getY() * scale);
 					annotatePolygon(roi, colour);
 				}
@@ -674,17 +675,17 @@ public class ImageAnnotator extends ImageFilterer {
 	public ImageAnnotator annotateSignal(@NonNull final Nucleus n, @NonNull UUID signalId,
 			@NonNull Color colour) {
 
-		ISignalCollection signalCollection = n.getSignalCollection();
+		final ISignalCollection signalCollection = n.getSignalCollection();
 
 		if (signalCollection.hasSignal(signalId)) {
 
-			List<INuclearSignal> signals = signalCollection.getSignals(signalId);
+			final List<INuclearSignal> signals = signalCollection.getSignals(signalId);
 
-			for (INuclearSignal s : signals) {
-				IPoint base = s.getBase();
+			for (final INuclearSignal s : signals) {
+				final IPoint base = s.getBase();
 
-				FloatPolygon p = s.toPolygon();
-				PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
+				final FloatPolygon p = s.toPolygon();
+				final PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 
 				roi.setLocation(base.getX(), base.getY());
 				annotatePolygon(roi, colour);
@@ -695,11 +696,13 @@ public class ImageAnnotator extends ImageFilterer {
 	}
 
 	public static ImageProcessor createMergedWarpedSignals(List<IWarpedSignal> signals) {
-		if (signals.isEmpty())
+		if (signals.isEmpty()) {
+			LOGGER.fine("No warped images provided to merger");
 			return ImageFilterer.createWhiteByteProcessor(100, 100);
+		}
 
 		// Recolour each of the grey images according to the stored colours
-		List<ImageProcessor> recoloured = isCommonTargetSelected(signals)
+		final List<ImageProcessor> recoloured = isCommonTargetSelected(signals)
 				? recolourImagesWithSameTarget(signals)
 				: recolourImagesWithDifferentTargets(signals);
 
@@ -722,8 +725,8 @@ public class ImageAnnotator extends ImageFilterer {
 			}
 			return ip1;
 
-		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Error averaging images", e);
+		} catch (final Exception e) {
+			LOGGER.log(Level.SEVERE, "Error blending images", e);
 			return ImageFilterer.createWhiteByteProcessor(100, 100);
 		}
 	}
@@ -734,23 +737,24 @@ public class ImageAnnotator extends ImageFilterer {
 	 * @return
 	 */
 	private static synchronized boolean isCommonTargetSelected(List<IWarpedSignal> signals) {
-		Nucleus t = signals.stream().findFirst().get().target();
+		final Nucleus t = signals.stream().findFirst().get().target();
 		return signals.stream().allMatch(s -> s.target().getId().equals(t.getId()));
 	}
 
 	private static synchronized List<ImageProcessor> recolourImagesWithSameTarget(
 			List<IWarpedSignal> signals) {
-		List<ImageProcessor> recoloured = new ArrayList<>();
-		for (IWarpedSignal k : signals) {
+		final List<ImageProcessor> recoloured = new ArrayList<>();
+		for (final IWarpedSignal k : signals) {
 			// The image from the warper is greyscale. Change to use the signal colour
-			ImageProcessor bp = k.toImage().convertToByteProcessor();
+			final ImageProcessor bp = k.toImage().convertToByteProcessor();
 			bp.invert();
 
 			ImageProcessor recol = bp;
-			if (k.isPseudoColour())
+			if (k.isPseudoColour()) {
 				recol = ImageFilterer.recolorImage(bp, k.colour());
-			else
+			} else {
 				recol = bp.convertToColorProcessor();
+			}
 
 			recol.setMinAndMax(0, k.displayThreshold());
 			recoloured.add(recol);
@@ -761,26 +765,28 @@ public class ImageAnnotator extends ImageFilterer {
 	private static synchronized List<ImageProcessor> recolourImagesWithDifferentTargets(
 			List<IWarpedSignal> signals) {
 
-		List<ImageProcessor> images = ImageFilterer
+		final List<ImageProcessor> images = ImageFilterer
 				.fitToCommonCanvas(signals.stream().map(IWarpedSignal::toImage).toList());
 
-		Map<IWarpedSignal, ImageProcessor> map = new HashMap<>();
-		for (int i = 0; i < images.size(); i++)
+		final Map<IWarpedSignal, ImageProcessor> map = new HashMap<>();
+		for (int i = 0; i < images.size(); i++) {
 			map.put(signals.get(i), images.get(i));
+		}
 
-		List<ImageProcessor> recoloured = new ArrayList<>();
+		final List<ImageProcessor> recoloured = new ArrayList<>();
 
-		for (Entry<IWarpedSignal, ImageProcessor> e : map.entrySet()) {
+		for (final Entry<IWarpedSignal, ImageProcessor> e : map.entrySet()) {
 
 			// The image from the warper is greyscale. Change to use the signal colour
-			ImageProcessor bp = e.getValue().convertToByteProcessor();
+			final ImageProcessor bp = e.getValue().convertToByteProcessor();
 			bp.invert();
 
 			ImageProcessor recol = bp;
-			if (e.getKey().isPseudoColour())
+			if (e.getKey().isPseudoColour()) {
 				recol = ImageFilterer.recolorImage(bp, e.getKey().colour());
-			else
+			} else {
 				recol = bp.convertToColorProcessor();
+			}
 
 			recol.setMinAndMax(0, e.getKey().displayThreshold());
 			recoloured.add(recol);
