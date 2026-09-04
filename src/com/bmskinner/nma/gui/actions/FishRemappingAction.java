@@ -18,7 +18,6 @@ package com.bmskinner.nma.gui.actions;
 
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,47 +58,35 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 				return;
 			}
 
-			File fishDir = FileSelector.choosePostFISHDirectory(dataset);
+			final File fishDir = FileSelector.choosePostFISHDirectory(dataset);
 			if (fishDir == null) {
 				LOGGER.info("Remapping cancelled");
 				cancel();
 				return;
 			}
 
-			FishRemappingProber fishMapper = new FishRemappingProber(dataset, fishDir);
+			final FishRemappingProber fishMapper = new FishRemappingProber(dataset, fishDir);
 
 			if (fishMapper.isOk()) {
 
-				LOGGER.info("Fetching collections...");
 				final List<IAnalysisDataset> newList = fishMapper.getNewDatasets();
 
 				if (newList.isEmpty()) {
-					LOGGER.info("No collections returned");
+					LOGGER.info("No cell collections returned");
 					cancel();
 					return;
 				}
 
-				LOGGER.info("Reapplying morphology...");
+				UIController.getInstance().fireDatasetAdded(newList);
+				finished();
+				LOGGER.info("Added remapped datasets");
 
-				CountDownLatch latch = new CountDownLatch(1);
-				new RunSegmentationAction(newList, dataset, progressAcceptors.get(0),
-						latch).run();
-				new Thread(() -> {
-					try {
-						latch.await();
-						UIController.getInstance().fireDatasetAdded(newList);
-						finished();
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-					}
-				}).start();
-
-			} else {
-				LOGGER.info("Remapping cancelled");
-				cancel();
+				} else {
+					LOGGER.info("Remapping cancelled");
+					cancel();
 			}
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error in FISH remapping: %s".formatted(e.getMessage()), e);
 		}
 	}
@@ -107,7 +94,7 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 	@Override
 	public void finished() {
 		// Do not use super.finished(), or it will trigger another save action
-		LOGGER.fine("FISH mapping complete");
+		LOGGER.fine("FISH remapping complete");
 		cancel();
 	}
 }

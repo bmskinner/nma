@@ -56,10 +56,10 @@ public class ProfileManager {
 	 * @return
 	 */
 	public int getSegmentCount() {
-		IProfileCollection pc = collection.getProfileCollection();
+		final IProfileCollection pc = collection.getProfileCollection();
 		try {
 			return pc.getSegments(OrientationMark.REFERENCE).size();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE,
 					"Error getting segment count from collection " + collection.getName(), e);
 			return 0;
@@ -77,38 +77,37 @@ public class ProfileManager {
 	 */
 	public void copySegmentsAndLandmarksTo(@NonNull final ICellCollection destination)
 			throws MissingDataException, SegmentUpdateException {
-
 		// Get the corresponding profile collection from the template
-		IProfileCollection sourcePC = collection.getProfileCollection();
+		final IProfileCollection sourcePC = collection.getProfileCollection();
 
-		List<IProfileSegment> segments = sourcePC.getSegments(OrientationMark.REFERENCE);
+		final List<IProfileSegment> segments = sourcePC.getSegments(OrientationMark.REFERENCE);
 		if (segments.isEmpty())
 			throw new MissingDataException("No segments in profile of " + collection.getName());
 
 		// Create a new profile collection for the destination, so profiles are
 		// refreshed
-		IProfileCollection destPC = destination.getProfileCollection();
+		final IProfileCollection destPC = destination.getProfileCollection();
 		destPC.calculateProfiles();
 
 		// Copy the tags from the source collection
 		// Use proportional indexes to allow for a changed aggregate length
 		// Note: only the RP must be at a segment boundary. Some mismatches may occur
 
-		for (Landmark om : sourcePC.getLandmarks()) {
-			double prop = sourcePC.getProportionOfIndex(om);
-			int adj = destPC.getIndexOfProportion(prop);
+		for (final Landmark om : sourcePC.getLandmarks()) {
+			final double prop = sourcePC.getProportionOfIndex(om);
+			final int adj = destPC.getIndexOfProportion(prop);
 			destPC.setLandmark(om, adj);
 		}
 
 		// Copy the segments, also adjusting the lengths using profile interpolation
-		ISegmentedProfile interpolatedMedian = sourcePC
+		final ISegmentedProfile interpolatedMedian = sourcePC
 				.getSegmentedProfile(ProfileType.ANGLE, OrientationMark.REFERENCE, Stats.MEDIAN)
 				.interpolate(destination.getMedianArrayLength());
 
 		destPC.setSegments(interpolatedMedian.getSegments());
 
 		// Final sanity check - did the segment IDs get copied properly?
-		List<IProfileSegment> newSegs = destPC.getSegments(OrientationMark.REFERENCE);
+		final List<IProfileSegment> newSegs = destPC.getSegments(OrientationMark.REFERENCE);
 
 		if (segments.size() != newSegs.size())
 			throw new SegmentUpdateException(
@@ -118,16 +117,14 @@ public class ProfileManager {
 		for (int i = 0; i < newSegs.size(); i++) {
 			// Start and end points can change, but id and lock state should be consistent
 			// Check ids are in correct order
-			if (!segments.get(i).getID().equals(newSegs.get(i).getID())) {
+			if (!segments.get(i).getID().equals(newSegs.get(i).getID()))
 				throw new SegmentUpdateException(
 						"Segment IDs are not consistent with the old profile");
-			}
 
 			// Check lock state preserved
-			if (segments.get(i).isLocked() != newSegs.get(i).isLocked()) {
+			if (segments.get(i).isLocked() != newSegs.get(i).isLocked())
 				throw new SegmentUpdateException(
 						"Segment lock state not consistent with the old profile");
-			}
 		}
 
 	}
@@ -149,7 +146,7 @@ public class ProfileManager {
 	 * @param b the segment lock state for all segments
 	 */
 	public void setLockOnAllNucleusSegments(boolean b) {
-		List<UUID> ids = collection.getProfileCollection().getSegmentIDs();
+		final List<UUID> ids = collection.getProfileCollection().getSegmentIDs();
 		collection.getNuclei().forEach(n -> ids.forEach(segID -> n.setSegmentStartLock(b, segID)));
 	}
 
@@ -165,26 +162,27 @@ public class ProfileManager {
 	public void updateCellSegmentStartIndex(@NonNull ICell cell, @NonNull UUID id, int index)
 			throws MissingDataException, SegmentUpdateException {
 
-		Nucleus n = cell.getPrimaryNucleus();
-		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+		final Nucleus n = cell.getPrimaryNucleus();
+		final ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
 
-		IProfileSegment seg = profile.getSegment(id);
+		final IProfileSegment seg = profile.getSegment(id);
 
-		int startPos = seg.getStartIndex();
-		int newStart = index;
-		int newEnd = seg.getEndIndex();
+		final int startPos = seg.getStartIndex();
+		final int newStart = index;
+		final int newEnd = seg.getEndIndex();
 
-		int rawOldIndex = n.getIndexRelativeTo(OrientationMark.REFERENCE, startPos);
+		final int rawOldIndex = n.getIndexRelativeTo(OrientationMark.REFERENCE, startPos);
 
 		try {
 			if (profile.update(seg, newStart, newEnd)) {
 				n.setSegments(profile.getSegments());
 
 				/* Check the landmarks - if they overlap the old index replace them */
-				int rawIndex = n.getIndexRelativeTo(OrientationMark.REFERENCE, index);
-				for (Entry<OrientationMark, Integer> entry : n.getOrientationMarkMap().entrySet()) {
-					if (entry.getValue().intValue() == rawOldIndex)
+				final int rawIndex = n.getIndexRelativeTo(OrientationMark.REFERENCE, index);
+				for (final Entry<OrientationMark, Integer> entry : n.getOrientationMarkMap().entrySet()) {
+					if (entry.getValue().intValue() == rawOldIndex) {
 						n.setOrientationMark(entry.getKey(), rawIndex);
+					}
 				}
 				n.clearMeasurements();
 
@@ -193,7 +191,7 @@ public class ProfileManager {
 						String.format("Updating %s start index from %s to %s failed", seg.getName(),
 								seg.getStartIndex(), index));
 			}
-		} catch (SegmentUpdateException e) {
+		} catch (final SegmentUpdateException e) {
 			LOGGER.warning(
 					String.format("Updating %s start index from %s to %s failed: %s", seg.getName(),
 							seg.getStartIndex(), index, e.getMessage()));
@@ -214,11 +212,11 @@ public class ProfileManager {
 	public void updateMedianProfileSegmentStartIndex(UUID id, int index)
 			throws ProfileException, MissingDataException, SegmentUpdateException {
 
-		ISegmentedProfile oldProfile = collection.getProfileCollection().getSegmentedProfile(
+		final ISegmentedProfile oldProfile = collection.getProfileCollection().getSegmentedProfile(
 				ProfileType.ANGLE,
 				OrientationMark.REFERENCE, Stats.MEDIAN);
 
-		IProfileSegment seg = oldProfile.getSegment(id);
+		final IProfileSegment seg = oldProfile.getSegment(id);
 
 		// Remove merge sources from the template segment
 		if (seg.hasMergeSources()) {
@@ -235,14 +233,14 @@ public class ProfileManager {
 		}
 
 		// Select the new endpoints for the segment
-		int newStart = index;
-		int newEnd = seg.getEndIndex();
+		final int newStart = index;
+		final int newEnd = seg.getEndIndex();
 
 		// if the segment start is on the RP, we must move the RP as well
 		if (seg.getStartIndex() == collection.getProfileCollection()
 				.getLandmarkIndex(OrientationMark.REFERENCE)) {
 
-			Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
+			final Landmark rp = collection.getRuleSetCollection().getLandmark(OrientationMark.REFERENCE)
 					.orElseThrow(MissingLandmarkException::new);
 			collection.getProfileCollection().setLandmark(rp, index);
 		}

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import javax.swing.JPanel;
 
@@ -60,22 +59,22 @@ public class FishRemappingProber extends IntegratedImageProber {
 			@NonNull final File fishImageDir) {
 		this.dataset = dataset;
 
-		Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
+		final Optional<IAnalysisOptions> analysisOptions = dataset.getAnalysisOptions();
 		if (analysisOptions.isPresent()) {
 			// make the panel
-			Finder<?> finder = new FishRemappingFinder(dataset.getAnalysisOptions().get(),
+			final Finder<?> finder = new FishRemappingFinder(dataset.getAnalysisOptions().get(),
 					fishImageDir);
 
 			try {
 				imageProberPanel = new FishRemappingProberPanel(dataset, finder, this);
-			} catch (MissingOptionException e) {
+			} catch (final MissingOptionException e) {
 				LOGGER.warning("No options in dataset");
 				this.dispose();
 			}
 
 			imageProberPanel.setSize(imageProberPanel.getPreferredSize());
 
-			JPanel footerPanel = createFooter();
+			final JPanel footerPanel = createFooter();
 			this.setOkButtonText(PROCEED_LBL);
 
 			this.add(imageProberPanel, BorderLayout.CENTER);
@@ -95,22 +94,20 @@ public class FishRemappingProber extends IntegratedImageProber {
 	@Override
 	protected void okButtonClicked() {
 
-		List<ICellCollection> subs = ((FishRemappingProberPanel) imageProberPanel)
+		final List<ICellCollection> subs = ((FishRemappingProberPanel) imageProberPanel)
 				.getSubCollections();
 
-		if (subs.isEmpty()) {
-
+		if (subs.isEmpty())
 			return;
-		}
 
-		for (ICellCollection sub : subs) {
+		for (final ICellCollection sub : subs) {
 
 			if (sub.hasCells()) {
 				try {
-					IAnalysisDataset subDataset = dataset.addChildCollection(sub);
+					final IAnalysisDataset subDataset = dataset.addChildCollection(sub);
 					newList.add(subDataset);
 				} catch (MissingDataException | SegmentUpdateException e) {
-					LOGGER.log(Level.SEVERE, "Error addig new child dataset", e);
+					LOGGER.log(Level.SEVERE, "Error adding new child dataset", e);
 				}
 			}
 		}

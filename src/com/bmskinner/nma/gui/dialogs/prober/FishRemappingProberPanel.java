@@ -25,7 +25,6 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -82,12 +81,12 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 	/**
 	 * Nuclei selected with the left button
 	 */
-	private final List<UUID> selectedNucleiLeft = new ArrayList<>(96);
+	private final List<UUID> selectedCellsLeft = new ArrayList<>(96);
 
 	/**
 	 * Nuclei selected with the right button
 	 */
-	private final List<UUID> selectedNucleiRight = new ArrayList<>(96);
+	private final List<UUID> selectedCellsRight = new ArrayList<>(96);
 
 	private Set<ICell> openCells = new HashSet<>();
 
@@ -132,12 +131,12 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				LOGGER.finer("Clicked at %s".formatted(e.getPoint()));
 				if (e.getClickCount() == 1) {
 
 					final Point pnt = e.getPoint();
 					final int row = table.rowAtPoint(pnt);
 					final int col = table.columnAtPoint(pnt);
-
 					if (row == ORIGINAL_IMG_ROW && col == ORIGINAL_IMG_COL) {
 
 						final Runnable r = () -> {
@@ -208,6 +207,8 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 			return;
 		}
 
+		LOGGER.finer("Clicked at position %s in original image".formatted(p.toString()));
+
 		// See if the clicked position is in a nucleus
 
 		final int row = table.rowAtPoint(pnt);
@@ -224,6 +225,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
 			for (final Nucleus n : c.getNuclei()) {
 				if (n.containsOriginalPoint(p)) {
+					LOGGER.finer("Match to nucleus %s".formatted(n.getNameAndNumber()));
 
 					updateSelectedNuclei(e, c);
 					drawNucleus(c, selectedData.getLargeIcon().getImage());
@@ -354,13 +356,14 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 	 */
 	private Color getCellColour(ICell c) {
 		Color color = Color.BLUE;
-		if (selectedNucleiLeft.contains(c.getId())) {
+		if (selectedCellsLeft.contains(c.getId())) {
 			color = ColourSelecter.getRemappingColour(0);
-
 		}
-		if (selectedNucleiRight.contains(c.getId())) {
+		if (selectedCellsRight.contains(c.getId())) {
 			color = ColourSelecter.getRemappingColour(1);
 		}
+
+		LOGGER.finer("Selected %s for %s".formatted(color, c.getPrimaryNucleus().getNameAndNumber()));
 
 		return color;
 	}
@@ -394,23 +397,22 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 	 * were selected, the list is empty
 	 * 
 	 * @return
-	 * @throws Exception
 	 */
 	public List<ICellCollection> getSubCollections() {
 		final List<ICellCollection> result = new ArrayList<>();
 
-		if (!selectedNucleiLeft.isEmpty()) {
+		if (!selectedCellsLeft.isEmpty()) {
 			final ICellCollection subCollectionLeft = new VirtualDataset(dataset, "SubCollectionLeft");
-			for (final UUID id : selectedNucleiLeft) {
+			for (final UUID id : selectedCellsLeft) {
 				final ICell cell = dataset.getCollection().getCell(id);
 				subCollectionLeft.add(cell);
 			}
 			result.add(subCollectionLeft);
 		}
 
-		if (!selectedNucleiRight.isEmpty()) {
+		if (!selectedCellsRight.isEmpty()) {
 			final ICellCollection subCollectionRight = new VirtualDataset(dataset, "SubCollectionRight");
-			for (final UUID id : selectedNucleiRight) {
+			for (final UUID id : selectedCellsRight) {
 				final ICell cell = dataset.getCollection().getCell(id);
 				subCollectionRight.add(cell);
 			}
@@ -421,33 +423,29 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 	}
 
 	/**
-	 * Update the lists of selected nuclei based on a click.
+	 * Update the selected nuclei based on whether the cell was clicked with left or
+	 * right mouse button
 	 * 
-	 * @param e
-	 * @param c
+	 * @param e the mouse event
+	 * @param c the cell that was selected
 	 */
 	private synchronized void updateSelectedNuclei(MouseEvent e, ICell c) {
 
 		// if present in list, remove it, otherwise add it
-		if (selectedNucleiLeft.contains(c.getId()) || selectedNucleiRight.contains(c.getId())) {
-
-			selectedNucleiLeft.remove(c.getId());
-			selectedNucleiRight.remove(c.getId());
+		if (selectedCellsLeft.contains(c.getId()) || selectedCellsRight.contains(c.getId())) {
+			selectedCellsLeft.remove(c.getId());
+			selectedCellsRight.remove(c.getId());
 
 		} else {
 
-			if ((e.getModifiersEx()
-					& InputEvent.BUTTON3_DOWN_MASK) == InputEvent.BUTTON3_DOWN_MASK) { // right
-				// button
-				selectedNucleiRight.add(c.getId());
-				selectedNucleiLeft.remove(c.getId());
+			if (e.getButton() == MouseEvent.BUTTON3) {
+				selectedCellsRight.add(c.getId());
+				selectedCellsLeft.remove(c.getId());
 			}
 
-			if ((e.getModifiersEx()
-					& InputEvent.BUTTON1_DOWN_MASK) == InputEvent.BUTTON1_DOWN_MASK) { // left
-				// button
-				selectedNucleiLeft.add(c.getId());
-				selectedNucleiRight.remove(c.getId());
+			if (e.getButton() == MouseEvent.BUTTON1) {
+				selectedCellsLeft.add(c.getId());
+				selectedCellsRight.remove(c.getId());
 			}
 
 		}
