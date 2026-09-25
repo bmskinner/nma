@@ -46,6 +46,7 @@ import com.bmskinner.nma.pipelines.ExportDataPipeline;
 import com.bmskinner.nma.pipelines.MergeFilesPipeline;
 import com.bmskinner.nma.pipelines.ModifyDataPipeline;
 import com.bmskinner.nma.pipelines.SavedOptionsAnalysisPipeline;
+import com.bmskinner.nma.pipelines.TextOutlineAnalysisPipeline;
 
 import ij.IJ;
 import ij.Prefs;
@@ -74,7 +75,7 @@ public class NuclearMorphologyAnalysis {
 	static {
 
 		// Create a config folder in the user home dir if needed
-		File logFolder = Io.getLogDir();
+		final File logFolder = Io.getLogDir();
 
 		if (!logFolder.exists()) {
 			logFolder.mkdirs();
@@ -120,25 +121,25 @@ public class NuclearMorphologyAnalysis {
 
 		// If the program is launched without arguments, we launch the GUI
 		// To do this, use a basic parser and check there are no arguments
-		ArgumentParser uiParser = ArgumentParsers
+		final ArgumentParser uiParser = ArgumentParsers
 				.newFor("Nuclear_Morphology_Analysis_" + Version.currentVersion()
 						+ "_standalone.jar")
 				.addHelp(false)
 				.build();
 
 		try {
-			Map<String, Object> argMap = new HashMap<>();
+			final Map<String, Object> argMap = new HashMap<>();
 			uiParser.parseArgs(args, argMap);
 			if (argMap.isEmpty()) {
 				loadConfigAndLaunch(new CommandOptions()); // options will be empty
 				return;
 			}
-		} catch (ArgumentParserException e) {
+		} catch (final ArgumentParserException e) {
 			// ignore errors and move to the next parser
 		}
 
 		// If arguments were passed, we want to handle them with a dedicated parser
-		ArgumentParser parser = ArgumentParsers
+		final ArgumentParser parser = ArgumentParsers
 				.newFor("Nuclear_Morphology_Analysis_" + Version.currentVersion()
 						+ "_standalone.jar")
 				.build()
@@ -152,7 +153,7 @@ public class NuclearMorphologyAnalysis {
 
 		// Each type of functionality should have a separate command. Options can be
 		// provided for each command specifically
-		Subparsers subparsers = parser.addSubparsers()
+		final Subparsers subparsers = parser.addSubparsers()
 				.title("subcommands")
 				.description("valid subcommands")
 				.metavar("COMMAND")
@@ -172,15 +173,15 @@ public class NuclearMorphologyAnalysis {
 		createMergeParser(subparsers);
 
 		// Store any options
-		CommandOptions opt = new CommandOptions();
+		final CommandOptions opt = new CommandOptions();
 
 		try {
 			parser.parseArgs(args, opt);
 
-		} catch (ArgumentParserException e) {
+		} catch (final ArgumentParserException e) {
 			parser.handleError(e);
 			System.exit(1);
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			System.err.println(Arrays.toString(args));
 			System.err.println(opt.toString());
 			e.printStackTrace();
@@ -192,14 +193,19 @@ public class NuclearMorphologyAnalysis {
 	}
 
 	private static void createDetectParser(Subparsers subparsers) {
-		Subparser analyseParser = subparsers.addParser("detect")
+		final Subparser analyseParser = subparsers.addParser("detect")
 				.help("Analyse images using a saved options file");
 
 		analyseParser.addArgument("-d", "--directory")
 				.type(Arguments.fileType().verifyIsDirectory().verifyCanRead())
 				.dest("directory")
-				.required(true)
 				.help("Directory of images to analyse");
+
+		analyseParser.addArgument("-f", "--outline-file")
+				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
+				.dest("outline-file")
+				.help("Text file of object outlines to analyse");
+
 		analyseParser.addArgument("-o", "--options")
 				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
 				.dest("options")
@@ -208,7 +214,7 @@ public class NuclearMorphologyAnalysis {
 
 	private static void createExportParser(Subparsers subparsers) {
 
-		Subparser exportParser = subparsers.addParser("export")
+		final Subparser exportParser = subparsers.addParser("export")
 				.help("Export data from an nmd file");
 
 		exportParser.addArgument("-f", "--file")
@@ -275,7 +281,7 @@ public class NuclearMorphologyAnalysis {
 	}
 
 	private static void createModifyParser(Subparsers subparsers) {
-		Subparser parser = subparsers.addParser("modify")
+		final Subparser parser = subparsers.addParser("modify")
 				.help("Modify data in an existing nmd file");
 
 		parser.addArgument("-f", "--file")
@@ -295,7 +301,7 @@ public class NuclearMorphologyAnalysis {
 	}
 
 	private static void createMergeParser(Subparsers subparsers) {
-		Subparser parser = subparsers.addParser("merge")
+		final Subparser parser = subparsers.addParser("merge")
 				.help("Merge existing nmd files");
 
 		parser.addArgument("--output")
@@ -321,7 +327,7 @@ public class NuclearMorphologyAnalysis {
 		
 		ConfigFileReader.readConfigFile();
 		
-		int ijThreads = GlobalOptions.getInstance().getInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY);
+		final int ijThreads = GlobalOptions.getInstance().getInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY);
 		Prefs.setThreads(ijThreads);
 		LOGGER.finer(
 				() -> "Internal ImageJ PluginFilter thread count set to %s".formatted(ijThreads));
@@ -374,9 +380,10 @@ public class NuclearMorphologyAnalysis {
 			LOGGER.config(() -> "NMA version: %s".formatted(Version.currentVersion()));
 
 			// Fix for issue 170 - tab docking requires a . in version string
-			String javaVersion = System.getProperty("java.version");
-			if (!javaVersion.contains("."))
+			final String javaVersion = System.getProperty("java.version");
+			if (!javaVersion.contains(".")) {
 				System.setProperty("java.version", javaVersion + ".0");
+			}
 
 			// First invokation of the thread manager will log available resources
 			ThreadManager.getInstance();
@@ -385,23 +392,23 @@ public class NuclearMorphologyAnalysis {
 			// 1.x.x stored logs in ~/.nma, rather than ~/.nma/logs
 			removeV1Logs();
 
-		} catch (SecurityException e) {
+		} catch (final SecurityException e) {
 			LOGGER.log(Level.SEVERE, "Error initialising logger", e);
 		}
 	}
 
 	private void removeV1Logs() {
 		try {
-			FilenameFilter filter = (dir, name) -> {
-				String lowercaseName = name.toLowerCase();
+			final FilenameFilter filter = (dir, name) -> {
+				final String lowercaseName = name.toLowerCase();
 				return (lowercaseName.endsWith(".log"));
 			};
 
-			for (File oldLog : Io.getConfigDir().listFiles(filter)) {
+			for (final File oldLog : Io.getConfigDir().listFiles(filter)) {
 				Files.deleteIfExists(oldLog.toPath());
 				LOGGER.fine("Removed v1 log file: " + oldLog.getName());
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Unable to delete old v1 log file", e);
 		}
 	}
@@ -413,13 +420,14 @@ public class NuclearMorphologyAnalysis {
 
 	private void configureSettingsFiles() {
 
-		if (!Io.getRulesetDir().exists())
+		if (!Io.getRulesetDir().exists()) {
 			try {
 				Files.createDirectories(Io.getRulesetDir().toPath());
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOGGER.log(Level.SEVERE,
 						"Error creating ruleset directory: %s".formatted(e.getMessage()), e);
 			}
+		}
 
 		// Check the default rulesets. If any have changed in this version,
 		// create an update. If this version does not change anything,
@@ -438,9 +446,9 @@ public class NuclearMorphologyAnalysis {
 		// Find rulesets with the same name
 
 		boolean isPresent = false;
-		for (File f : Io.getRulesetDir().listFiles()) {
+		for (final File f : Io.getRulesetDir().listFiles()) {
 			try {
-				RuleSetCollection present = XMLReader.readRulesetCollection(f);
+				final RuleSetCollection present = XMLReader.readRulesetCollection(f);
 
 				if (rsc.equals(present)) {
 					isPresent = true;
@@ -471,14 +479,14 @@ public class NuclearMorphologyAnalysis {
 	 * @param fileName
 	 */
 	private void ensureRuleSetFileExists(RuleSetCollection rsc, String fileName) {
-		File ruleFile = new File(Io.getRulesetDir(), fileName);
+		final File ruleFile = new File(Io.getRulesetDir(), fileName);
 
 		if (!ruleFile.exists()) {
 			// create as needed
 			LOGGER.config("Creating default ruleset: " + ruleFile.getAbsolutePath());
 			try {
 				XMLWriter.writeXML(rsc.toXmlElement(), ruleFile);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOGGER.log(Level.SEVERE,
 						"Error creating default ruleset: %s".formatted(e.getMessage()), e);
 			}
@@ -494,7 +502,7 @@ public class NuclearMorphologyAnalysis {
 		try {
 			LOGGER.info("Running export function");
 			new ExportDataPipeline(opt);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 		}
 	}
@@ -507,21 +515,38 @@ public class NuclearMorphologyAnalysis {
 
 	private void runHeadlessDetect(final CommandOptions opt) {
 
-		LOGGER.info("Running on folder: " + opt.directory.getAbsolutePath());
+		// Directory argument was set, assume a directory of images
+		if (opt.directory != null) {
+			LOGGER.info("Running on folder '%s'".formatted(opt.directory.getAbsolutePath()));
 
-		try {
-			if (opt.options != null) {
-				LOGGER.info("Running with saved options: " + opt.options.getAbsolutePath());
-				new SavedOptionsAnalysisPipeline(opt.directory, opt.options).call();
-			} else {
-				LOGGER.info(
-						"No analysis options provided, using defaults and assuming these are mouse sperm");
-				new BasicAnalysisPipeline(opt.directory);
+			try {
+				if (opt.options != null) {
+					LOGGER.info("Running with saved options: " + opt.options.getAbsolutePath());
+					new SavedOptionsAnalysisPipeline(opt.directory, opt.options).call();
+				} else {
+					LOGGER.info(
+							"No analysis options provided, using defaults and assuming these are mouse sperm");
+					new BasicAnalysisPipeline(opt.directory);
+				}
+
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 			}
-
-		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 		}
+
+		// A file with text outlines
+		if (opt.outlineFile != null) {
+			LOGGER.info("Running on file '%s'".formatted(opt.outlineFile.getAbsolutePath()));
+			
+			try {
+				new TextOutlineAnalysisPipeline(opt.outlineFile, opt.options).call();
+
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
+			}
+		}
+
+
 
 	}
 
@@ -536,7 +561,7 @@ public class NuclearMorphologyAnalysis {
 		try {
 			LOGGER.info("Running analysis function");
 			new ModifyDataPipeline(opt);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 		}
 
@@ -553,7 +578,7 @@ public class NuclearMorphologyAnalysis {
 		try {
 			LOGGER.info("Running merge function");
 			new MergeFilesPipeline(opt);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 		}
 
@@ -568,9 +593,9 @@ public class NuclearMorphologyAnalysis {
 
 		if (mw == null) {
 			try {
-				Runnable r = new RunWithGui();
+				final Runnable r = new RunWithGui();
 				EventQueue.invokeLater(r);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error loading GUI: %s".formatted(e.getMessage()), e);
 			}
 		} else {
@@ -591,17 +616,17 @@ public class NuclearMorphologyAnalysis {
 		public void run() {
 			IJ.setBackgroundColor(0, 0, 0); // default background is black
 			try {
-				String lAndF = UIManager.getSystemLookAndFeelClassName();
+				final String lAndF = UIManager.getSystemLookAndFeelClassName();
 				UIManager.setLookAndFeel(lAndF);
 				LOGGER.config("Set UI look and feel to " + UIManager.getLookAndFeel().getName());
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Unable to set look and feel", e);
 			}
 
 			// Ensure singleton instances created
 			UserActionController.getInstance();
-			DatasetListManager dlm = DatasetListManager.getInstance();
+			final DatasetListManager dlm = DatasetListManager.getInstance();
 			UIController.getInstance().addDatasetAddedListener(dlm);
 
 			// We need to create the JFrame after the look and feel has been set

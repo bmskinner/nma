@@ -339,12 +339,4 @@ public class SavedOptionsAnalysisPipeline extends AbstractAnalysisMethod
 		return new File(rootFolder, outputFolderName);
 	}
 
-	private void run(@NonNull List<IAnalysisMethod> methods) throws Exception {
-		for (final IAnalysisMethod method : methods) {
-			method.addProgressListener(this);
-			method.call();
-			method.removeProgressListener(this);
-			fireProgressEvent();
-		}
-	}
 }

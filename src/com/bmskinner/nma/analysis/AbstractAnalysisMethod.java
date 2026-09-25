@@ -46,7 +46,7 @@ public abstract class AbstractAnalysisMethod
 
 	private static final Logger LOGGER = Logger.getLogger(AbstractAnalysisMethod.class.getName());
 
-	private List<Object> listeners = new ArrayList<>();
+	private final List<Object> listeners = new ArrayList<>();
 	protected IAnalysisResult result = null;
 
 	protected AbstractAnalysisMethod() {
@@ -76,6 +76,15 @@ public abstract class AbstractAnalysisMethod
 		return this;
 	}
 
+	protected void run(@NonNull List<IAnalysisMethod> methods) throws Exception {
+		for (final IAnalysisMethod method : methods) {
+			method.addProgressListener(this);
+			method.call();
+			method.removeProgressListener(this);
+			fireProgressEvent();
+		}
+	}
+
 	/**
 	 * Update the total number of steps in the task, and alert progress listeners.
 	 * For example, can set progress bar lengths
@@ -101,7 +110,7 @@ public abstract class AbstractAnalysisMethod
 	 */
 	@Override
 	public final void fireProgressEvent() {
-		ProgressEvent e = new ProgressEvent(this);
+		final ProgressEvent e = new ProgressEvent(this);
 		fireProgressEvent(e);
 	}
 
@@ -113,14 +122,14 @@ public abstract class AbstractAnalysisMethod
 	 */
 	@Override
 	public final void fireProgressEvent(long stepsNewlyCompleted) {
-		ProgressEvent e = new ProgressEvent(this, ProgressEvent.INCREASE_BY_VALUE,
+		final ProgressEvent e = new ProgressEvent(this, ProgressEvent.INCREASE_BY_VALUE,
 				stepsNewlyCompleted);
 		fireProgressEvent(e);
 	}
 
 	@Override
 	public final void fireProgressEvent(ProgressEvent e) {
-		Iterator<Object> iterator = listeners.iterator();
+		final Iterator<Object> iterator = listeners.iterator();
 		while (iterator.hasNext()) {
 			((ProgressListener) iterator.next()).progressEventReceived(e);
 		}
@@ -143,7 +152,7 @@ public abstract class AbstractAnalysisMethod
 			fireProgressEvent();
 			try {
 				Thread.sleep(millisToSleep);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				LOGGER.log(Level.SEVERE, "Thread interrupted", e);
 				Thread.currentThread().interrupt();
 

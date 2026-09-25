@@ -29,6 +29,9 @@ public class CommandOptions {
 	@Arg(dest = "directory")
 	public File directory;
 
+	@Arg(dest = "outline-file")
+	public File outlineFile;
+
 	@Arg(dest = "options")
 	public File options;
 
@@ -91,7 +94,7 @@ public class CommandOptions {
 	 * @return
 	 */
 	public boolean hasOptions() {
-		for (Field f : this.getClass().getFields()) {
+		for (final Field f : this.getClass().getFields()) {
 			try {
 				if (f.get(this) != null)
 					return true;
@@ -107,9 +110,9 @@ public class CommandOptions {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 
-		for (Field f : this.getClass().getFields()) {
+		for (final Field f : this.getClass().getFields()) {
 			try {
 				sb.append(f.getName() + ": " + f.get(this) + Io.NEWLINE);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
