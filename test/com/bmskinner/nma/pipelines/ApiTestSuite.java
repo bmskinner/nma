@@ -13,7 +13,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({ 
 	BasicAnalysisPipelineTest.class, 
-	SavedOptionsAnalysisPipelineTest.class })
+		SavedOptionsAnalysisPipelineTest.class,
+		TextOutlineAnalysisPipelineTest.class })
 public class ApiTestSuite {
 
 }

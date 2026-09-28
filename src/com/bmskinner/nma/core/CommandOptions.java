@@ -114,6 +114,11 @@ public class CommandOptions {
 
 		for (final Field f : this.getClass().getFields()) {
 			try {
+
+				if (f.get(this) == null) {
+					continue;
+				}
+
 				sb.append(f.getName() + ": " + f.get(this) + Io.NEWLINE);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				LOGGER.log(Level.SEVERE,

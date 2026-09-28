@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -200,18 +202,24 @@ public class TextFileNucleusFinder extends CellFinder {
 		LOGGER.fine(
 				"Read %s coordinate lines from file %s".formatted(coordinates.size(), textFile.getAbsolutePath()));
 
-		final List<Nucleus> nuclei = coordinates.stream()
-				.collect(Collectors.groupingBy(CoordinateLine::objectName, Collectors.toList())).values().stream()
-				.map(l -> {
-					try {
-						return makeNucleus(l);
-					} catch (ComponentCreationException | IllegalArgumentException e) {
-						LOGGER.fine("Could not create a nucleus: %s".formatted(l.size(),
-								e.getMessage()));
-					}
-					return null;
-				}).toList();
+		// Each nucleus is made of a list of coordinate lines. Group by object name and
+		// make the nucleus
+		final List<Nucleus> nuclei = new ArrayList<>();
+		final Set<Entry<String, List<CoordinateLine>>> coordinateGroups = coordinates.stream()
+				.collect(Collectors.groupingBy(CoordinateLine::objectName, Collectors.toList())).entrySet();
+		
+		for (final Entry<String, List<CoordinateLine>> e : coordinateGroups) {
+			final String obj = e.getKey();
+			final List<CoordinateLine> values = e.getValue();
 
+			try {
+				nuclei.add(makeNucleus(values));
+			} catch (ComponentCreationException | IllegalArgumentException ex) {
+				LOGGER.fine("Could not create a nucleus from %s with %s coordinate lines".formatted(obj, values.size(),
+						ex.getMessage()));
+			}
+		}
+		
 		final List<ICell> result = new ArrayList<>();
 		for (final Nucleus n : nuclei) {
 			if (null == n)
@@ -228,6 +236,7 @@ public class TextFileNucleusFinder extends CellFinder {
 	private Nucleus makeNucleus(List<CoordinateLine> coordinates) throws ComponentCreationException {
 
 		final String image = coordinates.stream().map(c -> c.imageName).findFirst().get();
+
 		final File imageFile = new File(image);
 		final Float[] xPoints = coordinates.stream().map(CoordinateLine::x).toArray(Float[]::new);
 		final Float[] yPoints = coordinates.stream().map(CoordinateLine::y).toArray(Float[]::new);
@@ -243,6 +252,8 @@ public class TextFileNucleusFinder extends CellFinder {
 		final double yc = yMin + (yMax - yMin) / 2;
 
 		final IPoint com = new FloatPoint(xc, yc);
+
+		LOGGER.fine("Making nucleus from %s at %s".formatted(image, com));
 
 		final Roi r = new PolygonRoi(x, y, Roi.POLYGON);
 

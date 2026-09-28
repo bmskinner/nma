@@ -46,7 +46,7 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 	private final IAnalysisOptions templateOptions;
 
 	/** Map a folder of images to the detected cell collection */
-	private Map<File, ICellCollection> collectionGroup = new HashMap<>();
+	private final Map<File, ICellCollection> collectionGroup = new HashMap<>();
 
 	private final List<IAnalysisDataset> datasets = new ArrayList<>();
 
@@ -63,11 +63,16 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 			throws AnalysisMethodException {
 		// We need the parent of the output folder to exist so
 		// the folder can be created
-		if (outputFolder.getParentFile() == null || !outputFolder.getParentFile().exists())
+		if (outputFolder.getAbsoluteFile().getParentFile() == null)
 			throw new AnalysisMethodException(
-					"Output parent folder does not exist: " + outputFolder.getAbsolutePath());
+					"Parent of output folder %s is null".formatted(outputFolder.getAbsolutePath()));
 
-		this.outputFolder = outputFolder;
+		if (!outputFolder.getAbsoluteFile().getParentFile().exists())
+			throw new AnalysisMethodException(
+					"Parent of folder %s does not exist: %s".formatted(outputFolder.getAbsolutePath(),
+							outputFolder.getParent()));
+
+		this.outputFolder = outputFolder.getAbsoluteFile();
 		this.templateOptions = options;
 	}
 
@@ -88,12 +93,11 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 		LOGGER.info("Running nucleus detector");
 
 		// Detect the nuclei in the folders selected
-		File coordinateFile = templateOptions.getNucleusDetectionOptions().get()
+		final File coordinateFile = templateOptions.getNucleusDetectionOptions().get()
 				.getFile(HashOptions.COORDINATE_LOCATION_FILE_KEY);
 
-		if (!coordinateFile.exists()) {
+		if (!coordinateFile.exists())
 			throw new AnalysisMethodException("Coordinate file '%s' does not exist".formatted(coordinateFile.getAbsolutePath()));
-		}
 		
 		processCoordinateFile(coordinateFile);
 
@@ -102,13 +106,13 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 		if (Thread.interrupted())
 			return;
 
-		List<IAnalysisDataset> analysedDatasets = analysePopulations();
+		final List<IAnalysisDataset> analysedDatasets = analysePopulations();
 
 		if (analysedDatasets.isEmpty())
 			throw new AnalysisMethodException("No datasets returned");
 
 		datasets.addAll(analysedDatasets);
-		LOGGER.fine("Nucleus detection complete for"
+		LOGGER.fine("Nucleus detection complete for %s"
 				.formatted(analysedDatasets.size()));
 	}
 
@@ -121,21 +125,22 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 	private List<IAnalysisDataset> analysePopulations() {
 
 		LOGGER.finer("Creating cell collections");
-		List<IAnalysisDataset> foundDatasets = new ArrayList<>();
+		final List<IAnalysisDataset> foundDatasets = new ArrayList<>();
 
 		for (final Entry<File, ICellCollection> entry : collectionGroup.entrySet()) {
 			// Only keep collections containing nuclei
-			ICellCollection collection = entry.getValue();
-			if (collection.isEmpty())
+			final ICellCollection collection = entry.getValue();
+			if (collection.isEmpty()) {
 				continue;
+			}
 
-			File folder = entry.getKey();
-			IAnalysisDataset dataset = new DefaultAnalysisDataset(collection,
+			final File folder = entry.getKey();
+			final IAnalysisDataset dataset = new DefaultAnalysisDataset(collection,
 					new File(outputFolder, collection.getName() + Io.NMD_FILE_EXTENSION));
 
 			// Ensure the actual folder of images is set in the analysis options, not a root
 			// folder
-			IAnalysisOptions datasetOptions = templateOptions.duplicate();
+			final IAnalysisOptions datasetOptions = templateOptions.duplicate();
 			datasetOptions.setDetectionFolder(CellularComponent.NUCLEUS, folder.getAbsoluteFile());
 			dataset.setAnalysisOptions(datasetOptions);
 
@@ -146,7 +151,7 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 						collection.getName()));
 				foundDatasets.add(dataset);
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.severe("Cannot create cell collection: %s".formatted(e.getMessage()));
 			}
 		}
@@ -165,7 +170,7 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 			return;
 
 		// Make an empty cell collection
-		ICellCollection fc = new DefaultCellCollection(templateOptions.getRuleSetCollection(),
+		final ICellCollection fc = new DefaultCellCollection(templateOptions.getRuleSetCollection(),
 				coordinateFile.getName(), UUID.randomUUID());
 
 //		// Make a cell finder
@@ -176,11 +181,12 @@ public class TextFileDetectionMethod extends AbstractAnalysisMethod {
 		try {
 			final Collection<ICell> cells = finder.findInFile(coordinateFile);
 
-			if (!cells.isEmpty() && !outputFolder.exists())
+			if (!cells.isEmpty() && !outputFolder.exists()) {
 				outputFolder.mkdir();
+			}
 			fc.addAll(cells);
 
-		} catch (ImageImportException e) {
+		} catch (final ImageImportException e) {
 			LOGGER.log(Level.SEVERE, "Error searching directory: %s".formatted(e.getMessage()), e);
 		}
 

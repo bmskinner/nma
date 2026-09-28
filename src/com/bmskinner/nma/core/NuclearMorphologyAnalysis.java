@@ -177,6 +177,9 @@ public class NuclearMorphologyAnalysis {
 
 		try {
 			parser.parseArgs(args, opt);
+			if (args.length != 0) {
+				LOGGER.fine("Invoked with aguments %s".formatted(Arrays.toString(args)));
+			}
 
 		} catch (final ArgumentParserException e) {
 			parser.handleError(e);
@@ -325,6 +328,7 @@ public class NuclearMorphologyAnalysis {
 	private static void loadConfigAndLaunch(CommandOptions opt) {
 		instance = new NuclearMorphologyAnalysis();
 		
+
 		ConfigFileReader.readConfigFile();
 		
 		final int ijThreads = GlobalOptions.getInstance().getInt(GlobalOptions.NUM_IMAGEJ_THREADS_KEY);
@@ -505,6 +509,8 @@ public class NuclearMorphologyAnalysis {
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 		}
+		LOGGER.info("Task complete, quitting");
+		System.exit(0);
 	}
 
 	/**
@@ -536,7 +542,13 @@ public class NuclearMorphologyAnalysis {
 
 		// A file with text outlines
 		if (opt.outlineFile != null) {
-			LOGGER.info("Running on file '%s'".formatted(opt.outlineFile.getAbsolutePath()));
+			if (opt.options == null) {
+				LOGGER.log(Level.WARNING, "Unable to detect from an outline file without an options XML file");
+				return;
+			}
+
+			LOGGER.info("Running on outline file '%s' with options file %s".formatted(opt.outlineFile.getAbsolutePath(),
+					opt.options.getAbsolutePath()));
 			
 			try {
 				new TextOutlineAnalysisPipeline(opt.outlineFile, opt.options).call();
@@ -546,7 +558,8 @@ public class NuclearMorphologyAnalysis {
 			}
 		}
 
-
+		LOGGER.info("Task complete, quitting");
+		System.exit(0);
 
 	}
 
@@ -564,7 +577,8 @@ public class NuclearMorphologyAnalysis {
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 		}
-
+		LOGGER.info("Task complete, quitting");
+		System.exit(0);
 	}
 
 	/**
@@ -581,7 +595,8 @@ public class NuclearMorphologyAnalysis {
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);
 		}
-
+		LOGGER.info("Task complete, quitting");
+		System.exit(0);
 	}
 
 	/**

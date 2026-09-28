@@ -112,16 +112,19 @@ public class TextOutlineAnalysisPipeline extends AbstractAnalysisMethod
 		final IAnalysisOptions options = XMLReader.readAnalysisOptions(optionsXmlFile);
 
 		if (outputFolder == null) {
-			outputFolder = createOutputFolder(options);
+			outputFolder = chooseOutputFolder(options.getAnalysisTime());
 		}
 
-		LOGGER.finer("Output to '%s'".formatted(outputFolder.getAbsolutePath()));
+		LOGGER.fine("Outputting to '%s'".formatted(outputFolder.getAbsolutePath()));
 
 		// Analyse the text file
 		if (options.hasDetectionOptions(CellularComponent.NUCLEUS)) {
-			final List<IAnalysisDataset> datasets = createTextOutlineDetectionMethod(options, textFile);
-			createRefoldingMethod(datasets);
 
+			// Run detections so we have datasets. Queues profiling and segmentation
+			final List<IAnalysisDataset> datasets = createTextOutlineDetectionMethod(options);
+
+			// Queue other methods to run based on options
+			createRefoldingMethod(datasets);
 			createDimensionalityReductionMethods(datasets, options);
 			createClusteringMethods(datasets, options);
 
@@ -141,16 +144,22 @@ public class TextOutlineAnalysisPipeline extends AbstractAnalysisMethod
 	 * @param options the analysis options
 	 * @return
 	 */
-	private File createOutputFolder(@NonNull IAnalysisOptions options) {
-		LOGGER.fine("Making output folder name");
-		final Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
+	private File chooseOutputFolder(long analysisStartTime) {
+		final Instant inst = Instant.ofEpochMilli(analysisStartTime);
 		final LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
 		final String outputFolderName = anTime.format(DateTimeFormatter.ofPattern(DATE_FORMAT));
 		return new File(textFile.getParentFile(), outputFolderName);
 	}
 
-	private List<IAnalysisDataset> createTextOutlineDetectionMethod(@NonNull IAnalysisOptions options,
-			File textFile) throws Exception {
+	/**
+	 * Run object detection. Queue profiling and segmentation for detected datasets.
+	 * 
+	 * @param options
+	 * @return the detected datasets
+	 * @throws Exception
+	 */
+	private List<IAnalysisDataset> createTextOutlineDetectionMethod(@NonNull IAnalysisOptions options)
+			throws Exception {
 
 		options.getNucleusDetectionOptions().get().setFile(HashOptions.COORDINATE_LOCATION_FILE_KEY, textFile);
 
