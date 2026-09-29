@@ -10,7 +10,7 @@ The examples below use the cross platform standalone jar with a system installat
 
 To see the sub-commands:
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar -h
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar -h
 ```
 
 The available sub-commands are:
@@ -26,13 +26,19 @@ Command | Use to...
 
 To see all the detect options:
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar detect -h
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar detect -h
 ```
 
 For example, to run a new analysis:
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar detect --directory /path/to/image/directory --options /path/to/options/file.xml
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar detect --directory /path/to/image/directory --options /path/to/options/file.xml
+```
+
+To run a new analysis from a text file of outlines (as [described via the UI]{#text-analysis}):
+
+```
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar detect --outline-file /path/to/text/outline/file.txt --options /path/to/options/file.xml
 ```
 
 ### `export`
@@ -40,19 +46,19 @@ java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar detect -
 These commands correspond to the UI menu options in `Dataset > Export...`. 
 To see all the export options:
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar export -h
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar export -h
 ```
 
 To export nuclear measurements from an `.nmd` file:
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar export --file /path/to/file.nmd --measurements
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar export --file /path/to/file.nmd --measurements
 ```
 
 Export options can be combined. To export nuclear signal measurements and nuclear measurements:
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar export --file /path/to/file.nmd --measurements --signals
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar export --file /path/to/file.nmd --measurements --signals
 ```
 
 Exported data files will be created in the same directory as the `nmd` file.
@@ -63,7 +69,7 @@ These commands correspond to the UI menu options in `Dataset`.
 To see all the modify options:
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar modify -h
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar modify -h
 ```
 
 There are currently two operations available:
@@ -71,13 +77,13 @@ There are currently two operations available:
 1. Adding clusters to an nmd file that have been defined externally. For example, you exported nuclear measurements, clustered them in another stats package, exported a [cluster format file](#import-cluster-method), and now you want to look at the consensus shape of each cluster:
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar modify --file /path/to/existing.nmd --cluster-file /path/to/cluster/file
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar modify --file /path/to/existing.nmd --cluster-file /path/to/cluster/file
 ```
 
 2. Adding data based on analysis options. For example, you have an nmd file and you want to add nuclear signals or clusters according to the options from another dataset.
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar modify --file /path/to/existing.nmd --options /path/to/options/file.xml
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar modify --file /path/to/existing.nmd --options /path/to/options/file.xml
 ```
 
 ### `merge`
@@ -87,19 +93,19 @@ These commands correspond to the UI menu options in `Dataset>Merge`.
 To see all the merge options:
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar merge -h
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar merge -h
 ```
 
 This can be used to merge existing nmd files into one larger dataset. The individual files must all have the same nucleus type:
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar merge --output /path/to/new.nmd --input /path/to/input1.nmd /path/to/input2.nmd
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar merge --output /path/to/new.nmd --input /path/to/input1.nmd /path/to/input2.nmd
 ```
 
 Note above you can list multiple nmd files after the `--input` argument. You can also use standard shell wildcards to merge arbitrary numbers of nmd files:
 
 ```
-java -jar Nuclear_Morphology_Analysis_${project.version}_standalone.jar merge --output /path/to/new.nmd --input *.nmd
+java -jar Nuclear_Morphology_Analysis_${project.version}.jar merge --output /path/to/new.nmd --input *.nmd
 ```
 
 ## Detection of nuclei from text files {#text-analysis}

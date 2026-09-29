@@ -450,6 +450,10 @@ Data from all charts and tables can be copied or saved by right clicking, and se
 
 The charts can be saved as images via right clicking and `Save as...`. When it comes to making pretty figures for papers though, I usually recommend exporting the measurements and drawing your own.
 
+## Exporting single cell images
+
+You can export each nucleus in a dataset as a separate image to a folder in the same directory as the `nmd` file using the `Dataset > Export... > Single cell images` command. You will be given the option to mask out pixels inside or outside the nucleus; if these are selected, a binary image will be producedpixels within the nucleus will be set to white (255), and pixels outside the nucleus will be set to black (0). The images will be all be square; you may also choose to scale all the images to the same output size. 
+
 ### Exporting all measurements
 
 To export raw data for single or multiple datasets, select the datasets you want to export, and choose `Dataset > Export...`
