@@ -38,13 +38,14 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			Labels.AnalysisParameters.NUCLEUS_DETECTION, Labels.AnalysisParameters.NUCLEUS_SIZE,
 			Labels.AnalysisParameters.NUCLEUS_CIRCULARITY, Labels.AnalysisParameters.RUN_TIME,
 			Labels.AnalysisParameters.COLLECTION_SOURCE, Labels.AnalysisParameters.RULESET_USED,
-			Labels.AnalysisParameters.PROFILE_WINDOW, Labels.AnalysisParameters.PIXEL_SCALE,
+			Labels.AnalysisParameters.PROFILE_WINDOW, Labels.AnalysisParameters.PROFILE_SEGMENTED,
+			Labels.AnalysisParameters.PIXEL_SCALE,
 			Labels.AnalysisParameters.SOFTWARE_VERSION);
 
 	private String[] colNames;
 	private Object[][] rowData;
 
-	private List<IAnalysisDataset> datasets = new ArrayList<>();
+	private final List<IAnalysisDataset> datasets = new ArrayList<>();
 
 	public AnalysisParametersTableModel(@Nullable List<IAnalysisDataset> datasets,
 			boolean recoverable) {
@@ -57,13 +58,14 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 		this.datasets.addAll(datasets);
 
 		colNames = makeColNames(datasets);
-		int colCount = colNames.length + 1;
+		final int colCount = colNames.length + 1;
 
-		List<String> rowNames = new ArrayList<>(DEFAULT_ROW_NAMES);
-		if (DatasetUtils.hasMergeSource(datasets) && recoverable)
+		final List<String> rowNames = new ArrayList<>(DEFAULT_ROW_NAMES);
+		if (DatasetUtils.hasMergeSource(datasets) && recoverable) {
 			rowNames.add(Labels.Merges.RECOVER_SOURCE);
+		}
 
-		int rowCount = rowNames.size();
+		final int rowCount = rowNames.size();
 
 		rowData = new Object[rowCount][colCount];
 		for (int r = 0; r < rowCount; r++) {
@@ -80,24 +82,25 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 
 	private void createRowData(int r, int c) {
 
-		IAnalysisDataset d = datasets.get(c - 1);
+		final IAnalysisDataset d = datasets.get(c - 1);
 
 		// Skip datasets with missing options
-		Optional<IAnalysisOptions> optional = d.getAnalysisOptions();
+		final Optional<IAnalysisOptions> optional = d.getAnalysisOptions();
 		if (optional.isEmpty()) {
 			rowData[r][c] = Labels.NA;
 			return;
 		}
 
-		IAnalysisOptions mainOptions = optional.get();
+		final IAnalysisOptions mainOptions = optional.get();
 
-		Optional<HashOptions> nuclOptional = mainOptions.getNucleusDetectionOptions();
+		final Optional<HashOptions> nuclOptional = mainOptions.getNucleusDetectionOptions();
 		if (nuclOptional.isEmpty()) {
 			rowData[r][c] = Labels.NA;
 			return;
 		}
 
 		@NonNull
+		final
 		HashOptions options = nuclOptional.get();
 
 		try {
@@ -112,12 +115,13 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 			case 6 -> mainOptions.getRuleSetCollection().getName() + " (version "
 					+ mainOptions.getRuleSetCollection().getRulesetVersion() + ")";
 			case 7 -> String.valueOf(mainOptions.getProfileWindowProportion());
-			case 8 -> createPixelScaleString(d);
-			case 9 -> d.getVersionCreated().toString();
-			case 10 -> d; // only used in merge source table
+			case 8 -> String.valueOf(mainOptions.getProfilingOptions().getBoolean(HashOptions.IS_SEGMENT_PROFILES));
+			case 9 -> createPixelScaleString(d);
+			case 10 -> d.getVersionCreated().toString();
+			case 11 -> d; // only used in merge source table
 			default -> EMPTY_STRING;
 			};
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.fine("Error making analysis options table row " + r + " col " + c + " of "
 					+ rowData.length + ": "
 					+ e.getMessage());
@@ -135,23 +139,25 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 	}
 
 	private String createImagePreprocessingString(@NonNull HashOptions options) {
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 		if (options.hasBoolean(HashOptions.IS_USE_KUWAHARA)
-				&& options.getBoolean(HashOptions.IS_USE_KUWAHARA))
+				&& options.getBoolean(HashOptions.IS_USE_KUWAHARA)) {
 			builder.append("Kuwahara kernel: " + options.getInt(HashOptions.KUWAHARA_RADIUS_INT)
 					+ Io.NEWLINE);
+		}
 		if (options.hasBoolean(HashOptions.IS_USE_FLATTENING)
-				&& options.getBoolean(HashOptions.IS_USE_FLATTENING))
+				&& options.getBoolean(HashOptions.IS_USE_FLATTENING)) {
 			builder.append("Flattening threshold: "
 					+ options.getInt(HashOptions.FLATTENING_THRESHOLD_INT));
+		}
 		return builder.toString();
 	}
 
 	private String createNucleusEdgeDetectionString(@NonNull HashOptions options) {
 
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 
-		boolean isCanny = options.hasBoolean(HashOptions.IS_USE_CANNY)
+		final boolean isCanny = options.hasBoolean(HashOptions.IS_USE_CANNY)
 				&& options.getBoolean(HashOptions.IS_USE_CANNY);
 		if (isCanny) {
 			builder.append("Canny edge detection" + Io.NEWLINE);
@@ -173,16 +179,18 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 					"Closing radius: " + options.getInt(HashOptions.GAP_CLOSING_RADIUS_INT)
 							+ Io.NEWLINE);
 
-			if (options.getBoolean(HashOptions.IS_RULESET_EDGE_FILTER))
+			if (options.getBoolean(HashOptions.IS_RULESET_EDGE_FILTER)) {
 				builder.append("Poor edge detection filter applied");
+			}
 
 		}
 
 		if (options.hasInt(HashOptions.THRESHOLD)) {
 			builder.append("Threshold: " + options.getInt(HashOptions.THRESHOLD));
-			if (options.getBoolean(HashOptions.IS_USE_GAP_CLOSING))
+			if (options.getBoolean(HashOptions.IS_USE_GAP_CLOSING)) {
 				builder.append(Io.NEWLINE + "Closing radius: "
 						+ options.getInt(HashOptions.GAP_CLOSING_RADIUS_INT));
+			}
 		}
 
 		if (options.hasBoolean(HashOptions.IS_USE_WATERSHED)
@@ -195,7 +203,7 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 
 	private String createNucleusSizeFilterString(@NonNull HashOptions options) {
 
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 		if (options.hasInt(HashOptions.MIN_SIZE_PIXELS)) {
 			builder.append("Min pixels: " + options.getInt(HashOptions.MIN_SIZE_PIXELS) + Io.NEWLINE
 					+ "Max pixels: "
@@ -206,8 +214,8 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 
 	private String createNucleusCircFilterString(@NonNull HashOptions options) {
 
-		StringBuilder builder = new StringBuilder();
-		DecimalFormat formatter = new DecimalFormat("#.##");
+		final StringBuilder builder = new StringBuilder();
+		final DecimalFormat formatter = new DecimalFormat("#.##");
 		if (options.hasDouble(HashOptions.MIN_CIRC)) {
 			builder.append("Min: " + formatter.format(options.getDouble(HashOptions.MIN_CIRC))
 					+ Io.NEWLINE + "Max: "
@@ -218,15 +226,15 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 
 	private String createAnalysisRunTimeString(@NonNull IAnalysisOptions options) {
 
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 
-		long analysisTime = options.getAnalysisTime();
+		final long analysisTime = options.getAnalysisTime();
 		if (analysisTime > 0) { // stored from 1.14.0
-			Instant inst = Instant.ofEpochMilli(analysisTime);
-			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
+			final Instant inst = Instant.ofEpochMilli(analysisTime);
+			final LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
 
-			String date = anTime.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
-			String time = anTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+			final String date = anTime.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+			final String time = anTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 			builder.append(date + Io.NEWLINE + time);
 		} else { // fall back to folder name method
 			builder.append(Labels.NA);
@@ -236,27 +244,25 @@ public class AnalysisParametersTableModel extends DatasetTableModel {
 
 	private String createSourceFolderString(@NonNull IAnalysisDataset dataset,
 			@NonNull IAnalysisOptions options) {
-		if (dataset.hasMergeSources()) {
+		if (dataset.hasMergeSources())
 			return dataset.getAllMergeSources().stream()
 					.map(d -> d.getAnalysisOptions().get())
 					.map(o -> o.getNucleusDetectionFolder().isPresent()
 							? o.getNucleusDetectionFolder().get().getAbsolutePath()
 							: "No source folder present for merge source")
 					.collect(Collectors.joining(Io.NEWLINE)) + Io.NEWLINE;
-		}
 		// Note we add a newline so there is vertical room for word wrapping in the
 		// table
-		Optional<File> optionalFile = options.getNucleusDetectionFolder();
+		final Optional<File> optionalFile = options.getNucleusDetectionFolder();
 
-		if (optionalFile.isPresent()) {
+		if (optionalFile.isPresent())
 			return optionalFile.get().getAbsolutePath() + Io.NEWLINE;
-		}
 
 		return "No source folder present for " + dataset.getName() + Io.NEWLINE;
 	}
 
 	private String createPixelScaleString(@NonNull IAnalysisDataset dataset) {
-		String s = dataset.getCollection().getNuclei().stream()
+		final String s = dataset.getCollection().getNuclei().stream()
 				.map(Nucleus::getScale)
 				.map(Object::toString)
 				.distinct()

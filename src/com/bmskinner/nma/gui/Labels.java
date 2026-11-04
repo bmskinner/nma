@@ -318,6 +318,7 @@ public class Labels {
 
 	public static class AnalysisParameters {
 		public static final String PROFILE_WINDOW = "Profile window";
+		public static final String PROFILE_SEGMENTED = "Profile segmented";
 		public static final String IMAGE_PREPROCESSING = "Image filtering";
 		public static final String NUCLEUS_DETECTION = "Nucleus detection";
 		public static final String NUCLEUS_CIRCULARITY = "Nucleus circularity";
