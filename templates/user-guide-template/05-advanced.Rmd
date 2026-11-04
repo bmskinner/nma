@@ -41,6 +41,12 @@ To run a new analysis from a text file of outlines (as [described via the UI]{#t
 java -jar Nuclear_Morphology_Analysis_${project.version}.jar detect --outline-file /path/to/text/outline/file.txt --options /path/to/options/file.xml
 ```
 
+Option | Command
+--------|-----------
+`--directory` | Path to a directory of images for analysis
+`--outline-file` | Path to a file of text outlines for analysis
+`--options` | Path to an analysis options XML file
+
 ### `export`
 
 These commands correspond to the UI menu options in `Dataset > Export...`. 
@@ -62,6 +68,21 @@ java -jar Nuclear_Morphology_Analysis_${project.version}.jar export --file /path
 ```
 
 Exported data files will be created in the same directory as the `nmd` file.
+
+Option | Command
+--------|-----------
+`--file`| Path to the `.nmd` file to export data from
+`--measurements`| Basic measured values, as in `Nuclear charts`
+`--profiles`| Non-normalised angle profiles for each cell, starting from the reference point
+`--outlines`| Non-normalised outlines of each cell in XY pairs
+`--signals`| Measurements of nuclear signals, as in `Nuclear signals > Violin plots`
+`--shells`| Signal intensities in each shell, if a shell analysis has been performed
+`--single-cell-images`| a cropped image for each cell in the dataset, saved to a subfolder prefixed `SingleNucleusImages_`
+`--analysis-options`| the analysis options used to create this dataset
+`--rulesets`| the ruleset used to detect landmarks in this dataset, in XML format. Suitable to use in a new detection.
+`--consensus``| an SVG image of the consensus nucleus of the dataset, named `<dataset>.consensus.svg`
+`--cell-locations``| the locations of the centre of mass of each cell in its source image
+`--all` | all of the above, *except* `--cell-locations` (because that is a time-consuming step in larger datasets)
 
 ### `modify`
 
@@ -86,6 +107,12 @@ java -jar Nuclear_Morphology_Analysis_${project.version}.jar modify --file /path
 java -jar Nuclear_Morphology_Analysis_${project.version}.jar modify --file /path/to/existing.nmd --options /path/to/options/file.xml
 ```
 
+Option | Command
+--------|-----------
+`--file`| Path to the `.nmd` file to export data from
+`--cluster-file` | path to a file with clusters [as described in clustering section](#import-cluster-method)
+`--options` | path to an XML file with options for downstream analysis (signal detection or automatic clustering)
+
 ### `merge`
 
 These commands correspond to the UI menu options in `Dataset>Merge`.
@@ -107,6 +134,11 @@ Note above you can list multiple nmd files after the `--input` argument. You can
 ```
 java -jar Nuclear_Morphology_Analysis_${project.version}.jar merge --output /path/to/new.nmd --input *.nmd
 ```
+
+Option | Command
+--------|-----------
+`--output` | Path to the output `.nmd` file to be created
+`--input`| Paths to `.nmd` files that are to be merged
 
 ## Detection of nuclei from text files {#text-analysis}
 

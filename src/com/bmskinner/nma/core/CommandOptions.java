@@ -21,10 +21,11 @@ public class CommandOptions {
 
 	private static final Logger LOGGER = Logger.getLogger(CommandOptions.class.getName());
 
-	// Detect arguments
-
+	// Stores the subcommand (detect, export etc.)
 	@Arg(dest = "runMode")
 	public String runMode;
+
+	// Detect arguments
 
 	@Arg(dest = "directory")
 	public File directory;
@@ -32,11 +33,13 @@ public class CommandOptions {
 	@Arg(dest = "outline-file")
 	public File outlineFile;
 
+	// Used in Detect and Modify
 	@Arg(dest = "options")
 	public File options;
 
 	// Export arguments
 
+	// Export and modify: path to input nmd file
 	@Arg(dest = "file")
 	public File file;
 
@@ -73,11 +76,14 @@ public class CommandOptions {
 	@Arg(dest = "cell-locations")
 	public boolean isCellLocations = false;
 
-	// Analyse arguments
+	// Modify arguments
 
 	@Arg(dest = "cluster-file")
 	public File clusterFile;
 
+	// Merge
+
+	// Corresponds to --input on cli
 	@Arg(dest = "merge-sources")
 	public List<File> mergeSources;
 
