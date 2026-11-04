@@ -76,11 +76,12 @@ public interface ISegmentedProfile extends IProfile {
 	/**
 	 * Make this profile the length specified. Segments will be adjusted to the
 	 * closest proportional index that preserves minimum segment lengths. If
-	 * segments cannot be properly interpolated, a profile exception will be thrown.
+	 * segments cannot be properly interpolated, a segment update exception will be
+	 * thrown.
 	 * 
 	 * @param newLength the new profile length
 	 * @return the interpolated profile
-	 * @throws ProfileException if the interpolation fails
+	 * @throws SegmentUpdateException if the interpolation fails
 	 */
 	@Override
 	ISegmentedProfile interpolate(int newLength) throws SegmentUpdateException;

@@ -42,18 +42,17 @@ public class XMLImportMethod extends AbstractAnalysisMethod implements Importer 
 	}
 
 	private void run() {
-
+		LOGGER.fine("Reading file: %s".formatted(file.getAbsoluteFile()));
 		// Deserialise whatever is in the file
 		try (InputStream is = new FileInputStream(file);
 				CountedInputStream cis = new CountedInputStream(is);) {
 
-			cis.addCountListener((l) -> fireProgressEvent(l));
-			SAXBuilder saxBuilder = new SAXBuilder();
+			cis.addCountListener(this::fireProgressEvent);
+			final SAXBuilder saxBuilder = new SAXBuilder();
 			doc = saxBuilder.build(cis);
 			fireIndeterminateState();
 		} catch (IOException | JDOMException e) {
-			LOGGER.log(Level.SEVERE,
-					"Could not parse file as XML: " + file.getName() + ": " + e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, "Could not parse file as XML: %s".formatted(file.getName()), e);
 		}
 	}
 

@@ -158,8 +158,8 @@ public class OptionsFactory {
 	 * @return
 	 */
 	public static IAnalysisOptions makeAnalysisOptions(RuleSetCollection rsc) {
-		IAnalysisOptions op = new DefaultAnalysisOptions();
-		op.setRuleSetCollection(rsc);
+		final IAnalysisOptions op = new DefaultAnalysisOptions();
+		op.setRuleSetCollection(rsc.duplicate());
 		return op;
 	}
 
@@ -180,7 +180,7 @@ public class OptionsFactory {
 	 * @return the options
 	 */
 	public static IAnalysisOptions makeDefaultRodentAnalysisOptions(File testFolder) {
-		IAnalysisOptions op = makeAnalysisOptions(RuleSetCollection.mouseSpermRuleSetCollection());
+		final IAnalysisOptions op = makeAnalysisOptions(RuleSetCollection.mouseSpermRuleSetCollection());
 		op.setDetectionFolder(CellularComponent.NUCLEUS, testFolder.getAbsoluteFile());
 		op.setDetectionOptions(CellularComponent.NUCLEUS,
 				OptionsFactory.makeNucleusDetectionOptions().build());
@@ -194,10 +194,10 @@ public class OptionsFactory {
 	 * @return the options
 	 */
 	public static IAnalysisOptions makeDefaultPigAnalysisOptions(File testFolder) {
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisOptions op = OptionsFactory
 				.makeAnalysisOptions(RuleSetCollection.pigSpermRuleSetCollection());
 		op.setDetectionFolder(CellularComponent.NUCLEUS, testFolder.getAbsoluteFile());
-		HashOptions nop = OptionsFactory.makeNucleusDetectionOptions()
+		final HashOptions nop = OptionsFactory.makeNucleusDetectionOptions()
 				.withValue(HashOptions.MIN_CIRC, 0.1)
 				.withValue(HashOptions.MAX_CIRC, 0.9).build();
 
@@ -212,10 +212,10 @@ public class OptionsFactory {
 	 * @return the options
 	 */
 	public static IAnalysisOptions makeDefaultRoundAnalysisOptions(File testFolder) {
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisOptions op = OptionsFactory
 				.makeAnalysisOptions(RuleSetCollection.roundRuleSetCollection());
 		op.setDetectionFolder(CellularComponent.NUCLEUS, testFolder.getAbsoluteFile());
-		HashOptions nop = OptionsFactory.makeNucleusDetectionOptions()
+		final HashOptions nop = OptionsFactory.makeNucleusDetectionOptions()
 				.withValue(HashOptions.MIN_CIRC, 0.6)
 				.withValue(HashOptions.MAX_CIRC, 0.9).build();
 
@@ -248,8 +248,9 @@ public class OptionsFactory {
 				.withValue(HashOptions.CLUSTER_MANUAL_CLUSTER_NUMBER_KEY,
 						HashOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
 
-		for (Measurement stat : Measurement.getRoundNucleusStats())
+		for (final Measurement stat : Measurement.getRoundNucleusStats()) {
 			ob = ob.withValue(stat.toString(), false);
+		}
 
 		ob = ob.withValue(HashOptions.DEFAULT_PROFILE_TYPE.toString(),
 				HashOptions.DEFAULT_INCLUDE_PROFILE);

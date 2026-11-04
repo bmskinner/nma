@@ -120,10 +120,9 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 
 	@Override
 	public @NonNull IProfileSegment getSegment(@NonNull UUID id) throws MissingDataException {
-		for (IProfileSegment seg : this.segments) {
-			if (seg.getID().equals(id)) {
+		for (final IProfileSegment seg : this.segments) {
+			if (seg.getID().equals(id))
 				return seg;
-			}
 		}
 		throw new MissingDataException("Segment with id " + id.toString() + " not found");
 
@@ -131,10 +130,9 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 
 	@Override
 	public boolean hasSegment(@NonNull UUID id) {
-		for (IProfileSegment seg : this.segments) {
-			if (seg.getID().equals(id)) {
+		for (final IProfileSegment seg : this.segments) {
+			if (seg.getID().equals(id))
 				return true;
-			}
 		}
 		return false;
 	}
@@ -155,7 +153,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 	private List<IProfileSegment> getSegmentsFrom(@NonNull IProfileSegment firstSeg)
 			throws SegmentUpdateException {
 
-		List<IProfileSegment> result = new ArrayList<>();
+		final List<IProfileSegment> result = new ArrayList<>();
 
 		result.add(firstSeg);
 
@@ -169,7 +167,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 
 	@Override
 	public List<IProfileSegment> getOrderedSegments() throws SegmentUpdateException {
-		for (IProfileSegment seg : getSegments()) {
+		for (final IProfileSegment seg : getSegments()) {
 			if (seg.contains(ZERO_INDEX)
 					&& (getSegmentCount() == 1 || seg.getEndIndex() != ZERO_INDEX))
 				return getSegmentsFrom(seg);
@@ -186,10 +184,9 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 	@Override
 	public IProfileSegment getSegment(@NonNull String name) throws MissingDataException {
 
-		for (IProfileSegment seg : this.segments) {
-			if (seg.getName().equals(name)) {
+		for (final IProfileSegment seg : this.segments) {
+			if (seg.getName().equals(name))
 				return seg;
-			}
 		}
 		throw new MissingDataException("Requested segment name is not present");
 	}
@@ -197,14 +194,12 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 	@Override
 	public IProfileSegment getSegment(@NonNull IProfileSegment segment)
 			throws SegmentUpdateException {
-		if (!this.contains(segment)) {
+		if (!this.contains(segment))
 			throw new IllegalArgumentException("Requested segment name is not present");
-		}
 
-		for (IProfileSegment seg : this.segments) {
-			if (seg.equals(segment)) {
+		for (final IProfileSegment seg : this.segments) {
+			if (seg.equals(segment))
 				return seg;
-			}
 		}
 		throw new SegmentUpdateException("Cannot find segment " + segment.toString());
 	}
@@ -212,14 +207,12 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 	@Override
 	public IProfileSegment getSegmentContaining(int index) {
 
-		if (index < 0 || index >= this.size()) {
+		if (index < 0 || index >= this.size())
 			throw new IllegalArgumentException("Index is out of profile bounds");
-		}
 
-		for (IProfileSegment seg : segments) {
-			if (seg.contains(index)) {
+		for (final IProfileSegment seg : segments) {
+			if (seg.contains(index))
 				return seg;
-			}
 		}
 		throw new IllegalArgumentException("Index not in profile");
 	}
@@ -241,7 +234,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 
 			IProfileSegment.linkSegments(segments);
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warning("Cannot copy segments");
 		}
 	}
@@ -256,8 +249,8 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 
 	@Override
 	public List<String> getSegmentNames() {
-		List<String> result = new ArrayList<>();
-		for (IProfileSegment seg : segments) {
+		final List<String> result = new ArrayList<>();
+		for (final IProfileSegment seg : segments) {
 			result.add(seg.getName());
 		}
 		return result;
@@ -265,8 +258,8 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 
 	@Override
 	public List<UUID> getSegmentIDs() {
-		List<UUID> result = new ArrayList<>();
-		for (IProfileSegment seg : this.segments) {
+		final List<UUID> result = new ArrayList<>();
+		for (final IProfileSegment seg : this.segments) {
 			result.add(seg.getID());
 		}
 		return result;
@@ -280,24 +273,22 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 	@Override
 	public double getDisplacement(@NonNull IProfileSegment segment) {
 
-		if (!contains(segment)) {
-			throw new IllegalArgumentException("Segment is not in profile: " + segment);
-		}
-		double start = this.get(segment.getStartIndex());
-		double end = this.get(segment.getEndIndex());
+		if (!contains(segment))
+			throw new IllegalArgumentException("Segment %s is not in profile".formatted(segment));
+		final double start = this.get(segment.getStartIndex());
+		final double end = this.get(segment.getEndIndex());
 
-		double min = Math.min(start, end);
-		double max = Math.max(start, end);
+		final double min = Math.min(start, end);
+		final double max = Math.max(start, end);
 
 		return max - min;
 	}
 
 	@Override
 	public boolean contains(@NonNull IProfileSegment segment) {
-		for (IProfileSegment seg : this.segments) {
-			if (seg.equals(segment)) {
+		for (final IProfileSegment seg : this.segments) {
+			if (seg.equals(segment))
 				return true;
-			}
 		}
 		return false;
 	}
@@ -307,15 +298,15 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 			throws SegmentUpdateException {
 
 		if (!this.contains(segment))
-			throw new IllegalArgumentException("Segment is not part of this profile");
+			throw new IllegalArgumentException("Segment %s is not part of this profile".formatted(segment.getID()));
 
 		// test effect on all segments in list: the update should
 		// not allow the endpoints to move within a segment other than
 		// next or prev
-		IProfileSegment nextSegment = segment.nextSegment();
-		IProfileSegment prevSegment = segment.prevSegment();
+		final IProfileSegment nextSegment = segment.nextSegment();
+		final IProfileSegment prevSegment = segment.prevSegment();
 
-		for (IProfileSegment testSeg : this.segments) {
+		for (final IProfileSegment testSeg : this.segments) {
 
 			// if the proposed start or end index is found in another segment
 			// that is not next or prev, do not proceed
@@ -323,9 +314,8 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 
 				if (!testSeg.getName().equals(segment.getName())
 						&& !testSeg.getName().equals(nextSegment.getName())
-						&& !testSeg.getName().equals(prevSegment.getName())) {
+						&& !testSeg.getName().equals(prevSegment.getName()))
 					return false;
-				}
 			}
 		}
 
@@ -338,7 +328,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 	@Override
 	public void moveSegments(int offset) throws SegmentUpdateException {
 
-		List<IProfileSegment> result = getSegments();
+		final List<IProfileSegment> result = getSegments();
 
 		this.segments = new IProfileSegment[segments.length];
 		for (int i = 0; i < segments.length; i++) {
@@ -351,7 +341,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 	public ISegmentedProfile startFrom(int newStartIndex) throws SegmentUpdateException {
 
 		// get the basic profile with the offset applied
-		IProfile offsetProfile = super.startFrom(newStartIndex);
+		final IProfile offsetProfile = super.startFrom(newStartIndex);
 
 		/*
 		 * An example segmented profile starts like this:
@@ -367,7 +357,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 		 * up.
 		 * 
 		 */
-		ISegmentedProfile s = new DefaultSegmentedProfile(offsetProfile, getSegments());
+		final ISegmentedProfile s = new DefaultSegmentedProfile(offsetProfile, getSegments());
 		s.moveSegments(-newStartIndex);
 		return s;
 	}
@@ -375,11 +365,11 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 	@Override
 	public ISegmentedProfile interpolate(int length) throws SegmentUpdateException {
 		if (length < 1)
-			throw new IllegalArgumentException("Cannot interpolate to a zero or negative length");
+			throw new IllegalArgumentException("Cannot interpolate a profile to a zero or negative length");
 
 		// interpolate the IProfile
-		IProfile newProfile = super.interpolate(length);
-		List<IProfileSegment> newSegs = new ArrayList<>();
+		final IProfile newProfile = super.interpolate(length);
+		final List<IProfileSegment> newSegs = new ArrayList<>();
 
 		// No segments in profile or single default segment
 		if (segments.length <= 1) {
@@ -388,35 +378,45 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 			return new DefaultSegmentedProfile(newProfile, newSegs);
 		}
 
-		// get the proportions of the existing segments
-		double[] props = new double[segments.length];
+		// get the proportions of the start indexes of existing segments
+		final double[] props = new double[segments.length];
 
 		for (int i = 0; i < segments.length; i++) {
 			props[i] = this.getFractionOfIndex(segments[i].getStartIndex());
 		}
 
-		// get the target start indexes of the new segments
-
-		int[] newStarts = new int[segments.length];
+		// convert proportions into target start indexes for the new segments
+		final int[] newStarts = new int[segments.length];
 
 		for (int i = 0; i < segments.length; i++) {
 			newStarts[i] = (int) (props[i] * length);
 		}
 
-		// Make the new segments
+		// Also calculate the expected lengths of the new segments
+		final double[] newLengths = new double[segments.length];
+		for (int i = 0; i < segments.length; i++) {
+			newLengths[i] = ((double) segments[i].length()) / ((double) this.size()) * length;
+		}
 
+		// Make the new segments linking start index to next start index
 		for (int i = 0; i < segments.length - 1; i++) {
 
-			int testStart = newStarts[i];
-			int testEnd = newStarts[i + 1];
-
+			final int testStart = newStarts[i];
+			final int testEnd = newStarts[i + 1];
+			// We need to be sure the segment is not too small
 			if (testEnd - testStart < IProfileSegment.MINIMUM_SEGMENT_LENGTH) {
 				newStarts[i + 1] = newStarts[i + 1] + 1;
 			}
 
-			LOGGER.finer("Creating segment " + newStarts[i] + " - " + newStarts[i + 1]);
+			LOGGER.finer(
+					"Interpolating profile from length %s to %s; segment %s interpolating from length %s to %.2f via new indexes %s to %s (proportion %.2f to %.2f of profile)"
+							.formatted(
+									this.size(), length,
+									segments[i].getID(), segments[i].length(), newLengths[i],
+									newStarts[i], newStarts[i + 1],
+									props[i], props[i + 1]));
 
-			IProfileSegment seg = new DefaultProfileSegment(newStarts[i], newStarts[i + 1], length,
+			final IProfileSegment seg = new DefaultProfileSegment(newStarts[i], newStarts[i + 1], length,
 					segments[i].getID());
 			newSegs.add(seg);
 		}
@@ -427,8 +427,8 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 		// the end,
 		// i.e the start position of the first segment.
 
-		int firstStart = newStarts[0];
-		int lastStart = newStarts[segments.length - 1];
+		final int firstStart = newStarts[0];
+		final int lastStart = newStarts[segments.length - 1];
 		if (newSegs.get(0).wraps(newStarts[segments.length - 1], newStarts[0])) {
 			// wrapping final segment
 			if (firstStart + (length - lastStart) < IProfileSegment.MINIMUM_SEGMENT_LENGTH) {
@@ -440,28 +440,25 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 																					// segment
 			}
 
-		} else {
-			// non-wrapping final segment
-			if (firstStart - lastStart < IProfileSegment.MINIMUM_SEGMENT_LENGTH) {
-				newStarts[0] = firstStart + 1; // update the start in the
-												// array
-				newSegs.get(0).update(firstStart, newSegs.get(1).getStartIndex()); // update
-																					// the
-																					// new
-																					// segment
+		} else // non-wrapping final segment
+		if (firstStart - lastStart < IProfileSegment.MINIMUM_SEGMENT_LENGTH) {
+			newStarts[0] = firstStart + 1; // update the start in the
+											// array
+			newSegs.get(0).update(firstStart, newSegs.get(1).getStartIndex()); // update
+																				// the
+																				// new
+																				// segment
 
-			}
 		}
 
-		IProfileSegment lastSeg = new DefaultProfileSegment(newStarts[segments.length - 1],
+		final IProfileSegment lastSeg = new DefaultProfileSegment(newStarts[segments.length - 1],
 				newStarts[0], length,
 				segments[segments.length - 1].getID());
 		newSegs.add(lastSeg);
 
-		if (newSegs.size() != segments.length) {
-			throw new SegmentUpdateException("Error interpolating segments: was %s, and now is %s"
+		if (newSegs.size() != segments.length)
+			throw new SegmentUpdateException("Error interpolating segments: had %s segments, now has %s segments"
 					.formatted(segments.length, newSegs.size()));
-		}
 
 		// assign new segments
 		IProfileSegment.linkSegments(newSegs);
@@ -500,8 +497,8 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 		super.reverse();
 
 		// reverse the segments
-		List<IProfileSegment> newSegments = new ArrayList<>();
-		for (IProfileSegment seg : this.getSegments()) {
+		final List<IProfileSegment> newSegments = new ArrayList<>();
+		for (final IProfileSegment seg : this.getSegments()) {
 			newSegments.add(0, seg.reverse());
 		}
 		IProfileSegment.linkSegments(newSegments);
@@ -518,7 +515,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 		try {
 			segment1 = getSegment(seg1Id);
 			segment2 = getSegment(seg2Id);
-		} catch (MissingDataException e) {
+		} catch (final MissingDataException e) {
 			throw new IllegalArgumentException(
 					"An input segment is not part of this profile: " + e.getMessage());
 		}
@@ -538,26 +535,26 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 					String.format("Input segments %s and %s are not adjacent", segment1, segment2));
 
 		// Ensure we have the segments in the correct order
-		IProfileSegment firstSegment = segment1.nextSegment().getID().equals(segment2.getID())
+		final IProfileSegment firstSegment = segment1.nextSegment().getID().equals(segment2.getID())
 				? segment1
 				: segment2;
-		IProfileSegment secondSegment = segment2.nextSegment().getID().equals(segment1.getID())
+		final IProfileSegment secondSegment = segment2.nextSegment().getID().equals(segment1.getID())
 				? segment1
 				: segment2;
 
 		// Create the new segment
-		int startIndex = firstSegment.getStartIndex();
-		int endIndex = secondSegment.getEndIndex();
-		IProfileSegment mergedSegment = new DefaultProfileSegment(startIndex, endIndex, this.size(),
+		final int startIndex = firstSegment.getStartIndex();
+		final int endIndex = secondSegment.getEndIndex();
+		final IProfileSegment mergedSegment = new DefaultProfileSegment(startIndex, endIndex, this.size(),
 				newId);
 		mergedSegment.addMergeSource(firstSegment);
 		mergedSegment.addMergeSource(secondSegment);
 
 		// Replace the two segments in this profile
-		List<IProfileSegment> oldSegs = this.getSegments();
-		List<IProfileSegment> newSegs = new ArrayList<>();
+		final List<IProfileSegment> oldSegs = this.getSegments();
+		final List<IProfileSegment> newSegs = new ArrayList<>();
 
-		for (IProfileSegment oldSegment : oldSegs) {
+		for (final IProfileSegment oldSegment : oldSegs) {
 			if (oldSegment.getID().equals(firstSegment.getID())) {
 				// add the merge instead
 				newSegs.add(mergedSegment);
@@ -571,14 +568,16 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 
 		IProfileSegment.linkSegments(newSegs);
 
-		for (IProfileSegment s : newSegs)
-			if (s.getID().equals(newId))
+		for (final IProfileSegment s : newSegs)
+			if (s.getID().equals(newId)) {
 				assert (s.hasMergeSources());
+			}
 		this.setSegments(newSegs);
 
-		for (IProfileSegment s : segments)
-			if (s.getID().equals(newId))
+		for (final IProfileSegment s : segments)
+			if (s.getID().equals(newId)) {
 				assert (s.hasMergeSources());
+			}
 	}
 
 	@Override
@@ -597,24 +596,23 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 	@Override
 	public void unmergeSegment(@NonNull IProfileSegment segment) throws SegmentUpdateException {
 		// Check the segments belong to the profile
-		if (!this.contains(segment)) {
+		if (!this.contains(segment))
 			throw new IllegalArgumentException("Input segment is not part of this profile");
-		}
 
 		if (!segment.hasMergeSources())
 			return;
 
 		// Replace the two segments in this profile
-		List<IProfileSegment> oldSegs = this.getSegments();
-		List<IProfileSegment> newSegs = new ArrayList<>();
+		final List<IProfileSegment> oldSegs = this.getSegments();
+		final List<IProfileSegment> newSegs = new ArrayList<>();
 
 		int position = 0;
-		for (IProfileSegment oldSegment : oldSegs) {
+		for (final IProfileSegment oldSegment : oldSegs) {
 
 			if (oldSegment.equals(segment)) {
 
 				// add each of the old segments
-				for (IProfileSegment mergedSegment : segment.getMergeSources()) {
+				for (final IProfileSegment mergedSegment : segment.getMergeSources()) {
 					mergedSegment.setPosition(position);
 					newSegs.add(mergedSegment);
 					position++;
@@ -639,7 +637,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 			return false;
 
 		try {
-			IProfileSegment segment = getSegment(id);
+			final IProfileSegment segment = getSegment(id);
 
 			if (!segment.contains(splitIndex))
 				return false;
@@ -648,7 +646,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 					segment.getProfileLength())
 					&& IProfileSegment.isLongEnough(splitIndex, segment.getEndIndex(),
 							segment.getProfileLength());
-		} catch (MissingDataException e) {
+		} catch (final MissingDataException e) {
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			return false;
 		}
@@ -659,13 +657,11 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 	public void splitSegment(@NonNull IProfileSegment segment, int splitIndex, @NonNull UUID id1,
 			@NonNull UUID id2) throws SegmentUpdateException {
 		// Check the segments belong to the profile
-		if (!this.contains(segment)) {
+		if (!this.contains(segment))
 			throw new IllegalArgumentException("Input segment is not part of this profile");
-		}
 
-		if (!segment.contains(splitIndex)) {
+		if (!segment.contains(splitIndex))
 			throw new IllegalArgumentException("Splitting index is not within the segment");
-		}
 
 		// Remove old merge sources from this segment
 		segment.clearMergeSources();
@@ -676,11 +672,11 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 		 */
 
 		// Replace the two segments in this profile
-		List<IProfileSegment> oldSegs = this.getSegments();
-		List<IProfileSegment> newSegs = new ArrayList<>();
+		final List<IProfileSegment> oldSegs = this.getSegments();
+		final List<IProfileSegment> newSegs = new ArrayList<>();
 
 		// Add the new segments to a list
-		List<IProfileSegment> splitSegments = new ArrayList<>();
+		final List<IProfileSegment> splitSegments = new ArrayList<>();
 		splitSegments
 				.add(new DefaultProfileSegment(segment.getStartIndex(), splitIndex,
 						segment.getProfileLength(), id1));
@@ -691,7 +687,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 		segment.addMergeSource(splitSegments.get(1));
 
 		int position = 0;
-		for (IProfileSegment oldSegment : oldSegs) {
+		for (final IProfileSegment oldSegment : oldSegs) {
 
 			if (oldSegment.equals(segment)) {
 				newSegs.add(segment);
@@ -711,13 +707,13 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder(super.toString());
+		final StringBuilder builder = new StringBuilder(super.toString());
 		builder.append("\n");
 		try {
-			for (IProfileSegment seg : this.getOrderedSegments()) {
+			for (final IProfileSegment seg : this.getOrderedSegments()) {
 				builder.append(seg.toString() + Io.NEWLINE);
 			}
-		} catch (SegmentUpdateException e) {
+		} catch (final SegmentUpdateException e) {
 			builder.append("Unable to get segment: " + e.getMessage() + Io.NEWLINE);
 		}
 		return builder.toString();
@@ -745,7 +741,7 @@ public class DefaultSegmentedProfile extends DefaultProfile implements ISegmente
 
 		if (getClass() != obj.getClass())
 			return false;
-		DefaultSegmentedProfile other = (DefaultSegmentedProfile) obj;
+		final DefaultSegmentedProfile other = (DefaultSegmentedProfile) obj;
 		if (segments == null) {
 			if (other.segments != null)
 				return false;

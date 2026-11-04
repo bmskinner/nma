@@ -109,7 +109,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
 	@Override
 	public IAnalysisResult call() throws Exception {
-		IAnalysisDataset merged = run();
+		final IAnalysisDataset merged = run();
 		return new DefaultAnalysisResult(merged);
 	}
 
@@ -123,9 +123,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		// Set the names for the new collection
 		// ensure the new file name is valid
 		saveFile = checkName(saveFile).getAbsoluteFile();
-		String newDatasetName = saveFile.getName().replace(Io.NMD_FILE_EXTENSION, "");
+		final String newDatasetName = saveFile.getName().replace(Io.NMD_FILE_EXTENSION, "");
 
-		IAnalysisDataset newDataset = switch (operation) {
+		final IAnalysisDataset newDataset = switch (operation) {
 		case AND -> performAnd(newDatasetName);
 		case NOT -> performNot(newDatasetName);
 
@@ -153,7 +153,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
 		LOGGER.fine("Building new dataset");
 
-		for (Nucleus n : newCollection.getNuclei()) {
+		for (final Nucleus n : newCollection.getNuclei()) {
 			// Ensure that all nuclei have any existing segments removed
 			// and replaced with the default segment starting at the RP
 			n.setSegments(List.of(new DefaultProfileSegment(0, 0, n.getBorderLength(),
@@ -164,9 +164,9 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		mergeSignalGroups(newCollection);
 
 		// create the dataset; has no analysis options at present
-		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
+		final IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, saveFile);
 
-		IAnalysisOptions mergedOptions = mergeOptions(newDataset);
+		final IAnalysisOptions mergedOptions = mergeOptions(newDataset);
 		newDataset.setAnalysisOptions(mergedOptions);
 		mergeSignalOptions(newDataset);
 
@@ -194,8 +194,8 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		}
 
 		// check all collections are of the same type
-		RuleSetCollection testClass = datasets.get(0).getCollection().getRuleSetCollection();
-		for (IAnalysisDataset d : datasets) {
+		final RuleSetCollection testClass = datasets.get(0).getCollection().getRuleSetCollection();
+		for (final IAnalysisDataset d : datasets) {
 			if (!d.getCollection().getRuleSetCollection().equals(testClass)) {
 				LOGGER.warning("Cannot merge datasets with different rulesets");
 				return false;
@@ -209,10 +209,10 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			throws ProfileException, ComponentCreationException, MissingDataException,
 			SegmentUpdateException {
 
-		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
+		final List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
 				.toList();
 
-		ICellCollection newCollection = CellCollectionFilterer.and(collections);
+		final ICellCollection newCollection = CellCollectionFilterer.and(collections);
 		newCollection.setName(newDatasetName);
 
 		return buildDataset(newCollection);
@@ -221,10 +221,10 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	private IAnalysisDataset performNot(@NonNull String newDatasetName)
 			throws ComponentCreationException, MissingDataException,
 			SegmentUpdateException {
-		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
+		final List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
 				.toList();
 
-		ICellCollection newCollection = CellCollectionFilterer.not(collections);
+		final ICellCollection newCollection = CellCollectionFilterer.not(collections);
 
 		return buildDataset(newCollection);
 	}
@@ -232,10 +232,10 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	private IAnalysisDataset performXor(@NonNull String newDatasetName)
 			throws ComponentCreationException, MissingDataException,
 			SegmentUpdateException {
-		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
+		final List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
 				.toList();
 
-		ICellCollection newCollection = CellCollectionFilterer.xor(collections);
+		final ICellCollection newCollection = CellCollectionFilterer.xor(collections);
 
 		return buildDataset(newCollection);
 	}
@@ -256,16 +256,16 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	private IAnalysisDataset performOr(@NonNull String newDatasetName)
 			throws ComponentCreationException, MissingDataException,
 			SegmentUpdateException {
-		List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
+		final List<ICellCollection> collections = datasets.stream().map(IAnalysisDataset::getCollection)
 				.toList();
 
-		ICellCollection newCollection = CellCollectionFilterer.or(collections);
+		final ICellCollection newCollection = CellCollectionFilterer.or(collections);
 		newCollection.setName(newDatasetName);
 
-		IAnalysisDataset newDataset = buildDataset(newCollection);
+		final IAnalysisDataset newDataset = buildDataset(newCollection);
 
 		// Add the original datasets as merge sources
-		for (IAnalysisDataset d : datasets) {
+		for (final IAnalysisDataset d : datasets) {
 			newDataset.addMergeSource(d);
 		}
 		return newDataset;
@@ -280,22 +280,27 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	private IAnalysisOptions mergeOptions(IAnalysisDataset newDataset)
 			throws MissingOptionException {
 
-		IAnalysisDataset d1 = datasets.get(0);
-		IAnalysisOptions d1Options = d1.getAnalysisOptions()
+		final IAnalysisDataset d1 = datasets.get(0);
+		final IAnalysisOptions d1Options = d1.getAnalysisOptions()
 				.orElseThrow(MissingOptionException::new);
 
-		IAnalysisOptions mergedOptions = OptionsFactory
+		LOGGER.fine(
+				"First input dataset options has ruleset '%s'; using this for merged dataset"
+						.formatted(d1Options.getRuleSetCollection().getName()));
+
+		final IAnalysisOptions mergedOptions = OptionsFactory
 				.makeAnalysisOptions(d1Options.getRuleSetCollection());
 
 		// Start with a blank slate for nucleus options
-		HashOptions nOptions = new OptionsBuilder().build();
+		final HashOptions nOptions = new OptionsBuilder().build();
 
 		// Get a base template to compare the others to
-		HashOptions t1 = datasets.get(0).getAnalysisOptions()
+		final HashOptions t1 = datasets.get(0).getAnalysisOptions()
 				.orElseThrow(MissingOptionException::new).getNucleusDetectionOptions()
 				.orElseThrow(MissingOptionException::new);
 		mergeOptions(nOptions, t1);
 		mergedOptions.setDetectionOptions(CellularComponent.NUCLEUS, nOptions);
+		mergedOptions.setSecondaryOptions(IAnalysisOptions.PROFILING_OPTIONS, d1Options.getProfilingOptions());
 
 		mergedOptions.setAngleWindowProportion(d1Options.getProfileWindowProportion());
 
@@ -308,32 +313,32 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 			return;
 
 		// For each set of mergeable signals, make a new signal group
-		for (UUID newSignalId : pairedSignalGroups.getMergedSignalGroups()) {
+		for (final UUID newSignalId : pairedSignalGroups.getMergedSignalGroups()) {
 
-			HashOptions mergedOptions = new OptionsBuilder().build();
+			final HashOptions mergedOptions = new OptionsBuilder().build();
 
 			// Get the first signal options
-			List<DatasetSignalId> ids = pairedSignalGroups.get(newSignalId);
-			HashOptions template = ids.get(0).datasetId().getAnalysisOptions()
+			final List<DatasetSignalId> ids = pairedSignalGroups.get(newSignalId);
+			final HashOptions template = ids.get(0).datasetId().getAnalysisOptions()
 					.orElseThrow(MissingOptionException::new)
 					.getNuclearSignalOptions(ids.get(0).signalId().getId())
 					.orElseThrow(MissingOptionException::new);
 
 			// Add the original signal ids to the options so we can extradct later
-			for (DatasetSignalId d : pairedSignalGroups.get(newSignalId)) {
+			for (final DatasetSignalId d : pairedSignalGroups.get(newSignalId)) {
 				mergedOptions.setUUID(HashOptions.ORIGINAL_SIGNAL_PREFIX + d.datasetId().getId(),
 						d.signalId().getId());
 			}
 
 			// Check every key in the options. If any are the same across all signaal
 			// groups, keep them
-			for (String s : template.getKeys()) {
-				Object result = template.getValue(s);
+			for (final String s : template.getKeys()) {
+				final Object result = template.getValue(s);
 				boolean canAdd = true;
-				for (DatasetSignalId d : pairedSignalGroups.get(newSignalId)) {
-					IAnalysisOptions dOptions = d.datasetId().getAnalysisOptions()
+				for (final DatasetSignalId d : pairedSignalGroups.get(newSignalId)) {
+					final IAnalysisOptions dOptions = d.datasetId().getAnalysisOptions()
 							.orElseThrow(MissingOptionException::new);
-					HashOptions nOptions = dOptions.getNuclearSignalOptions(d.signalId().getId())
+					final HashOptions nOptions = dOptions.getNuclearSignalOptions(d.signalId().getId())
 							.orElseThrow(MissingOptionException::new);
 					canAdd &= Objects.equals(result, nOptions.getValue(s));
 				}
@@ -353,17 +358,26 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
 	}
 
+	/**
+	 * Merge all compatible options from a merged options and an input template
+	 * options. If both options have the same value for a given template, keep the
+	 * value.
+	 * 
+	 * @param mergedOptions
+	 * @param template
+	 * @throws MissingOptionException
+	 */
 	private void mergeOptions(HashOptions mergedOptions, HashOptions template)
 			throws MissingOptionException {
 
 		// Check every key in the options. If any are the same across all datasets
-		for (String s : template.getKeys()) {
-			Object result = template.getValue(s);
+		for (final String s : template.getKeys()) {
+			final Object result = template.getValue(s);
 			boolean canAdd = true;
-			for (IAnalysisDataset d : datasets) {
-				IAnalysisOptions dOptions = d.getAnalysisOptions()
+			for (final IAnalysisDataset d : datasets) {
+				final IAnalysisOptions dOptions = d.getAnalysisOptions()
 						.orElseThrow(MissingOptionException::new);
-				HashOptions nOptions = dOptions.getNucleusDetectionOptions()
+				final HashOptions nOptions = dOptions.getNucleusDetectionOptions()
 						.orElseThrow(MissingOptionException::new);
 				canAdd &= Objects.equals(result, nOptions.getValue(s));
 			}
@@ -387,23 +401,23 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 		}
 
 		// For each set of mergeable signals, make a new signal group
-		for (UUID newSignalId : pairedSignalGroups.getMergedSignalGroups()) {
+		for (final UUID newSignalId : pairedSignalGroups.getMergedSignalGroups()) {
 
-			List<DatasetSignalId> ids = pairedSignalGroups.get(newSignalId);
+			final List<DatasetSignalId> ids = pairedSignalGroups.get(newSignalId);
 
 			// Create merged group name
-			String newName = ids.stream().map(i -> i.signalId().getGroupName())
+			final String newName = ids.stream().map(i -> i.signalId().getGroupName())
 					.collect(Collectors.joining("_")) + "_merged";
 
-			DefaultSignalGroup newGroup = new DefaultSignalGroup(newName, newSignalId);
+			final DefaultSignalGroup newGroup = new DefaultSignalGroup(newName, newSignalId);
 
 			// Duplicate the signals into the new signal group
 			newCollection.addSignalGroup(newGroup);
-			for (Nucleus n : newCollection.getNuclei()) {
-				for (DatasetSignalId id : ids) {
-					List<INuclearSignal> signals = n.getSignalCollection()
+			for (final Nucleus n : newCollection.getNuclei()) {
+				for (final DatasetSignalId id : ids) {
+					final List<INuclearSignal> signals = n.getSignalCollection()
 							.getSignals(id.signalId().getId());
-					for (INuclearSignal s : signals) {
+					for (final INuclearSignal s : signals) {
 						n.getSignalCollection().addSignal(s.duplicate(), newSignalId);
 					}
 				}
@@ -421,7 +435,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 	 * @return
 	 */
 	private File checkName(File name) {
-		String fileName = name.getName();
+		final String fileName = name.getName();
 		String datasetName = fileName.replace(Io.NMD_FILE_EXTENSION, "");
 
 		File newFile = new File(name.getParentFile(), datasetName + Io.NMD_FILE_EXTENSION);

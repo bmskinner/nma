@@ -24,7 +24,7 @@ public class MergeFilesPipeline {
 	private static final Logger LOGGER = Logger
 			.getLogger(MergeFilesPipeline.class.getName());
 
-	private CommandOptions opt;
+	private final CommandOptions opt;
 
 	/**
 	 * Build a pipeline for merge options
@@ -38,30 +38,33 @@ public class MergeFilesPipeline {
 
 		this.opt = opt;
 
-		if (opt.mergeSources != null)
+		if (opt.mergeSources != null) {
 			mergeDatasets();
+		}
 
 		LOGGER.info("Merge complete");
 	}
 
 	private void mergeDatasets() throws Exception {
 
-		List<IAnalysisDataset> sources = new ArrayList<>();
+		final List<IAnalysisDataset> sources = new ArrayList<>();
 
-		for (File f : opt.mergeSources) {
-			XMLImportMethod m = new XMLImportMethod(f);
+		for (final File f : opt.mergeSources) {
+			final XMLImportMethod m = new XMLImportMethod(f);
 			m.call();
-			IAnalysisDataset d = new DatasetImportMethod(m.getXMLDocument()).call()
+			final IAnalysisDataset d = new DatasetImportMethod(m.getXMLDocument()).call()
 					.getFirstDataset();
 			sources.add(d);
 			LOGGER.info(
 					() -> "Read %s with %d cells".formatted(d.getName(), d.getCollection().size()));
 		}
 
-		LOGGER.info("Merging into " + opt.output.getAbsolutePath());
-		IAnalysisDataset merged = new DatasetMergeMethod(sources, BooleanOperation.OR, opt.output)
+		LOGGER.info("Merging into %s ".formatted(opt.output.getAbsolutePath()));
+		final IAnalysisDataset merged = new DatasetMergeMethod(sources, BooleanOperation.OR, opt.output)
 				.call()
 				.getFirstDataset();
+
+		LOGGER.info("Profiling and segmenting %s".formatted(merged.getName()));
 
 		new DefaultDatasetProfilingMethod(merged)
 				.then(new DatasetSegmentationMethod(merged,

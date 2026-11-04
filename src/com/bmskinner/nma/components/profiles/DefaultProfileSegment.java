@@ -93,15 +93,15 @@ public class DefaultProfileSegment implements IProfileSegment {
 			throw new IllegalArgumentException("Segment start and end indexes cannot be negative");
 
 		if (startIndex > total || endIndex > total)
-			throw new IllegalArgumentException("Segment start and end indexes (" + startIndex
-					+ " and " + endIndex + ") cannot be above total length (" + total + ")");
+			throw new IllegalArgumentException(
+					"Segment start and end indexes (%s and %s) cannot be above total length (%s)".formatted(startIndex,
+							endIndex, total));
 
 		// ensure that the segment meets minimum length requirements
 		if (!IProfileSegment.isLongEnough(startIndex, endIndex, total))
 			throw new IllegalArgumentException(
-					String.format(
-							"Cannot create default segment of length %s: shorter than minimum (%s)",
-							total, MINIMUM_SEGMENT_LENGTH));
+					"Cannot create default segment of length %s (index %s to %s): shorter than minimum (%s)".formatted(
+							total, startIndex, endIndex, MINIMUM_SEGMENT_LENGTH));
 
 		if (startIndex != endIndex && !IProfileSegment.isShortEnough(startIndex, endIndex, total))
 			throw new IllegalArgumentException(
@@ -116,15 +116,17 @@ public class DefaultProfileSegment implements IProfileSegment {
 
 	@Override
 	@NonNull public Element toXmlElement() {
-		Element e = new Element(XMLNames.XML_SEGMENT)
+		final Element e = new Element(XMLNames.XML_SEGMENT)
 				.setAttribute(XMLNames.XML_ID, uuid.toString())
 				.setAttribute(XMLNames.XML_SEGMENT_START, String.valueOf(startIndex))
 				.setAttribute(XMLNames.XML_SEGMENT_END, String.valueOf(endIndex))
 				.setAttribute(XMLNames.XML_SEGMENT_TOTAL, String.valueOf(totalLength));
 
 		if (isLocked)
+		 {
 			e.setAttribute(XMLNames.XML_SEGMENT_LOCK, "true"); // don't waste space on unlocked
 																// segments
+		}
 
 		if (mergeSourceA != null) {
 			e.addContent(new Element(XMLNames.XML_SEGMENT_MERGE_SOURCE)
@@ -145,7 +147,7 @@ public class DefaultProfileSegment implements IProfileSegment {
 
 			isLocked = e.getAttributeValue(XMLNames.XML_SEGMENT_LOCK) != null;
 
-			List<Element> merges = e.getChildren(XMLNames.XML_SEGMENT_MERGE_SOURCE);
+			final List<Element> merges = e.getChildren(XMLNames.XML_SEGMENT_MERGE_SOURCE);
 			if (!merges.isEmpty()) {
 				mergeSourceA = new DefaultProfileSegment(
 						merges.get(0).getChild(XMLNames.XML_SEGMENT));
@@ -190,7 +192,7 @@ public class DefaultProfileSegment implements IProfileSegment {
 		this.isLocked = n.isLocked();
 
 		if (n.hasMergeSources()) {
-			List<IProfileSegment> otherSources = n.getMergeSources();
+			final List<IProfileSegment> otherSources = n.getMergeSources();
 			mergeSourceA = otherSources.get(0).duplicate();
 			mergeSourceB = otherSources.get(1).duplicate();
 		}
@@ -301,25 +303,23 @@ public class DefaultProfileSegment implements IProfileSegment {
 	public int getProportionalIndex(double d) {
 		if (d < 0 || d > 1)
 			throw new IllegalArgumentException("Proportion must be between 0-1: " + d);
-		double targetLength = length() * d;
+		final double targetLength = length() * d;
 		return (int) Math
 				.round(CellularComponent.wrapIndex(startIndex + targetLength, getProfileLength()));
 	}
 
 	@Override
 	public double getIndexProportion(int index) {
-		if (!this.contains(index)) {
+		if (!this.contains(index))
 			throw new IllegalArgumentException("Segment does not contain index " + index);
-		}
 
 		int counter = 0;
-		Iterator<Integer> it = this.iterator();
+		final Iterator<Integer> it = this.iterator();
 		while (it.hasNext()) {
-			int test = it.next();
+			final int test = it.next();
 
-			if (index == test) {
+			if (index == test)
 				return (double) counter / (double) this.length();
-			}
 			counter++;
 		}
 
@@ -335,10 +335,9 @@ public class DefaultProfileSegment implements IProfileSegment {
 	public int getMidpointIndex() {
 		if (this.wraps()) {
 
-			int midLength = this.length() >> 1;
-			if (midLength + startIndex < totalLength) {
+			final int midLength = this.length() >> 1;
+			if (midLength + startIndex < totalLength)
 				return midLength + startIndex;
-			}
 			return endIndex - midLength;
 
 		}
@@ -347,28 +346,26 @@ public class DefaultProfileSegment implements IProfileSegment {
 
 	@Override
 	public int getShortestDistanceToStart(int index) {
-		if (index < 0 || index >= totalLength) {
+		if (index < 0 || index >= totalLength)
 			throw new IllegalArgumentException(
 					"Index is not in profile: " + index + "; total " + totalLength);
-		}
 
 		// Two possibilieites: abs distance or total - abs distance
 
-		int abs = Math.abs(index - startIndex);
-		int alt = totalLength - abs;
+		final int abs = Math.abs(index - startIndex);
+		final int alt = totalLength - abs;
 
 		return Math.min(abs, alt);
 	}
 
 	@Override
 	public int getShortestDistanceToEnd(int index) {
-		if (index < 0 || index >= totalLength) {
+		if (index < 0 || index >= totalLength)
 			throw new IllegalArgumentException(
 					"Index is not in profile: " + index + "; total " + totalLength);
-		}
 
-		int abs = Math.abs(index - endIndex);
-		int alt = totalLength - abs;
+		final int abs = Math.abs(index - endIndex);
+		final int alt = totalLength - abs;
 
 		return Math.min(abs, alt);
 	}
@@ -438,7 +435,7 @@ public class DefaultProfileSegment implements IProfileSegment {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DefaultProfileSegment other = (DefaultProfileSegment) obj;
+		final DefaultProfileSegment other = (DefaultProfileSegment) obj;
 
 		if (!uuid.equals(other.uuid))
 			return false;
@@ -461,7 +458,7 @@ public class DefaultProfileSegment implements IProfileSegment {
 
 	@Override
 	public IProfileSegment offset(int offset) {
-		IProfileSegment seg = new DefaultProfileSegment(
+		final IProfileSegment seg = new DefaultProfileSegment(
 				CellularComponent.wrapIndex(startIndex + offset, totalLength),
 				CellularComponent.wrapIndex(endIndex + offset, totalLength),
 				totalLength,
@@ -485,9 +482,8 @@ public class DefaultProfileSegment implements IProfileSegment {
 
 	@Override
 	public boolean wraps(int start, int end) {
-		if ((start < 0 || start > totalLength) || (end < 0 || end > totalLength)) {
+		if ((start < 0 || start > totalLength) || (end < 0 || end > totalLength))
 			throw new IllegalArgumentException("Index is outside profile bounds");
-		}
 		return (end <= start);
 	}
 
@@ -523,7 +519,7 @@ public class DefaultProfileSegment implements IProfileSegment {
 			return true;
 
 		// Check that the new positions will not make this segment too small
-		int testLength = testLength(startIndex, endIndex);
+		final int testLength = testLength(startIndex, endIndex);
 		if (testLength < MINIMUM_SEGMENT_LENGTH)
 			throw new SegmentUpdateException(
 					String.format("Segment will become too short (%d) if updated to %d - %d (%s)",
@@ -593,18 +589,16 @@ public class DefaultProfileSegment implements IProfileSegment {
 				// if the next segment goes from not wrapping to wrapping when
 				// this segment is altered,
 				// an inversion must have occurred. Prevent.
-				if (!nextSegment.wraps() && nextSegment.wraps(startIndex, endIndex)) {
+				if (!nextSegment.wraps() && nextSegment.wraps(startIndex, endIndex))
 					throw new SegmentUpdateException(
 							"Next segment would convert to wrapping");
-				}
 
 				// another wrapping test - if the new positions induce a wrap,
 				// the segment should contain 0
 				if (nextSegment.wraps(startIndex, endIndex)
-						&& !IProfileSegment.contains(startIndex, endIndex, 0, totalLength)) {
+						&& !IProfileSegment.contains(startIndex, endIndex, 0, totalLength))
 					throw new SegmentUpdateException(
 							"Segment would convert to wrapping but does not contain zero");
-				}
 			}
 		}
 		return true;
@@ -651,15 +645,17 @@ public class DefaultProfileSegment implements IProfileSegment {
 		if (this.getStartIndex() != startIndex) { // becomes false after the
 													// first pass of the circle
 			this.startIndex = startIndex;
-			if (this.hasPrevSegment())
+			if (this.hasPrevSegment()) {
 				prevSegment.update(prevSegment.getStartIndex(), startIndex);
+			}
 		}
 
 		if (this.getEndIndex() != endIndex) {
 			this.endIndex = endIndex;
 
-			if (this.hasNextSegment())
+			if (this.hasNextSegment()) {
 				nextSegment.update(endIndex, nextSegment.getEndIndex());
+			}
 		}
 		return true;
 
@@ -728,7 +724,7 @@ public class DefaultProfileSegment implements IProfileSegment {
 	@Override
 	public Iterator<Integer> iterator() {
 
-		List<Integer> indexes = new ArrayList<>();
+		final List<Integer> indexes = new ArrayList<>();
 		if (this.wraps()) {
 
 			for (int i = this.getStartIndex(); i < this.getProfileLength(); i++) {
@@ -751,11 +747,12 @@ public class DefaultProfileSegment implements IProfileSegment {
 		if (seg.getProfileLength() != getProfileLength())
 			return false;
 
-		Iterator<Integer> it = this.iterator();
+		final Iterator<Integer> it = this.iterator();
 		while (it.hasNext()) {
-			int index = it.next();
-			if (index == getStartIndex() || index == getEndIndex())
+			final int index = it.next();
+			if (index == getStartIndex() || index == getEndIndex()) {
 				continue;
+			}
 			if (seg.contains(index))
 				return true;
 		}
@@ -775,8 +772,8 @@ public class DefaultProfileSegment implements IProfileSegment {
 	@Override
 	public IProfileSegment reverse() {
 		// invert the segment by swapping start and end
-		int newStart = totalLength - 1 - getEndIndex();
-		int newEnd = totalLength - 1 - getStartIndex();
+		final int newStart = totalLength - 1 - getEndIndex();
+		final int newEnd = totalLength - 1 - getStartIndex();
 
 		return new DefaultProfileSegment(newStart, newEnd, totalLength, getID());
 	}

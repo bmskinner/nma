@@ -139,15 +139,15 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 		// Ensure segments are copied appropriately to verticals
 		// Ensure hook statistics are generated appropriately
-		for (Nucleus n : dataset.getCollection().getNuclei()) {
+		for (final Nucleus n : dataset.getCollection().getNuclei()) {
 			// Initialise all measurements that do not already exist
-			for (Measurement m : dataset.getAnalysisOptions()
+			for (final Measurement m : dataset.getAnalysisOptions()
 					.orElseThrow(MissingOptionException::new)
 					.getRuleSetCollection().getMeasurableValues()) {
 				n.getMeasurement(m);
 			}
 		}
-		DatasetValidator dv = new DatasetValidator();
+		final DatasetValidator dv = new DatasetValidator();
 		if (!dv.validate(dataset)) {
 			LOGGER.warning("Segmentation failed; resulting dataset did not validate");
 			throw new AnalysisMethodException(
@@ -158,22 +158,22 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	}
 
 	private IAnalysisResult applyMedianToNuclei() throws Exception {
-		ISegmentedProfile median = dataset.getCollection().getProfileCollection()
+		final ISegmentedProfile median = dataset.getCollection().getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE,
 						OrientationMark.REFERENCE, Stats.MEDIAN);
 
-		if (median.getSegmentCount() <= 0) {
+		if (median.getSegmentCount() <= 0)
 			throw new AnalysisMethodException("Error finding segments in median profile");
-		}
 
-		if (median.getSegmentCount() == 1)
+		if (median.getSegmentCount() == 1) {
 			LOGGER.info("No segments in median profile - creating single segment");
+		}
 
 		assignSegmentsToNuclei(median);// fit the segments to nuclei
 
 		// Consensus nucleus should reflect the median profile directly
 		if (collection.hasConsensus()) {
-			List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(median.getSegments(),
+			final List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(median.getSegments(),
 					collection.getRawConsensus().getBorderLength());
 			IProfileSegment.linkSegments(newSegs);
 			collection.getRawConsensus().setSegments(newSegs);
@@ -181,11 +181,11 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
 		// Copy segmentation to child datasets and their consensus nuclei
 		if (dataset.hasChildren()) {
-			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+			for (final IAnalysisDataset child : dataset.getAllChildDatasets()) {
 				dataset.getCollection().getProfileManager()
 						.copySegmentsAndLandmarksTo(child.getCollection());
 				if (child.getCollection().hasConsensus()) {
-					List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(
+					final List<IProfileSegment> newSegs = IProfileSegment.scaleSegments(
 							median.getSegments(),
 							child.getCollection().getRawConsensus().getBorderLength());
 					IProfileSegment.linkSegments(newSegs);
@@ -207,20 +207,19 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 * @throws Exception
 	 */
 	private IAnalysisResult runNewAnalysis() throws Exception {
-		if (!dataset.isRoot()) {
+		if (!dataset.isRoot())
 			throw new AnalysisMethodException("Dataset is not root, cannot segment");
-		}
 
 		dataset.getCollection().setConsensus(null); // clear if present
-		LOGGER.finer("Before segmentation median length: " + collection.getMedianArrayLength());
-		ISegmentedProfile median = createSegmentsInMedian(); // segment the median profile
+		LOGGER.finer("Before segmentation median length: %s".formatted(collection.getMedianArrayLength()));
+		final ISegmentedProfile median = createSegmentsInMedian(); // segment the median profile
 
-		if (median.getSegmentCount() <= 0) {
+		if (median.getSegmentCount() <= 0)
 			throw new AnalysisMethodException("Error finding segments in median profile");
-		}
 
-		if (median.getSegmentCount() == 1)
+		if (median.getSegmentCount() == 1) {
 			LOGGER.info("No segments in median profile - creating single segment");
+		}
 
 		// Make a new collection and aggregate to invalidate previous cached data,
 		// possibly
@@ -234,7 +233,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 		// The best segmentation pattern has been found
 		// Copy segmentation to child datasets and invalidate any consensus nuclei
 		if (dataset.hasChildren()) {
-			for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+			for (final IAnalysisDataset child : dataset.getAllChildDatasets()) {
 				child.getCollection().setConsensus(null);
 				dataset.getCollection().getProfileManager()
 						.copySegmentsAndLandmarksTo(child.getCollection());
@@ -282,15 +281,15 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 			throws SegmentUpdateException, MissingDataException {
 
 		// choose the best subset of nuclei and make a median profile from them
-		LOGGER.finer("Collection median length " + collection.getMedianArrayLength());
+		LOGGER.finer("Collection median length %s".formatted(collection.getMedianArrayLength()));
 
-		RepresentativeMedianFinder finder = new RepresentativeMedianFinder(collection);
+		final RepresentativeMedianFinder finder = new RepresentativeMedianFinder(collection);
 
 		final IProfile median = finder.findMedian();
-		LOGGER.finer(() -> "Representative median length %d".formatted(median.size()));
+		LOGGER.finer("Representative median length %d".formatted(median.size()));
 
-		ProfileSegmenter segmenter = new ProfileSegmenter(median);
-		List<IProfileSegment> segments = segmenter.segment();
+		final ProfileSegmenter segmenter = new ProfileSegmenter(median);
+		final List<IProfileSegment> segments = segmenter.segment();
 		return new DefaultSegmentedProfile(median, segments);
 	}
 
@@ -306,26 +305,25 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 	 */
 	private void assignSegmentsToNuclei(@NonNull ISegmentedProfile template)
 			throws ProfileException, MissingDataException, SegmentUpdateException {
-		IterativeSegmentFitter fitter = new IterativeSegmentFitter(template);
-		for (Nucleus n : collection.getNuclei()) {
+		final IterativeSegmentFitter fitter = new IterativeSegmentFitter(template);
+		for (final Nucleus n : collection.getNuclei()) {
 
 			// Ensure new segments can be assigned
-			boolean wasLocked = n.isLocked();
+			final boolean wasLocked = n.isLocked();
 			n.setLocked(false);
 
-			IProfile nucleusProfile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
-			ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
+			final IProfile nucleusProfile = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+			final ISegmentedProfile segProfile = fitter.fit(nucleusProfile);
 			n.setSegments(segProfile.getSegments());
 
 			if (segProfile.getSegmentCount() != template.getSegmentCount())
 				throw new ProfileException("Segments could not be fitted to nucleus");
 
 			if (template.getSegmentCount() == 1) {
-				ISegmentedProfile test = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
-				IProfileSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
-				if (seg.getStartIndex() != 0) {
+				final ISegmentedProfile test = n.getProfile(ProfileType.ANGLE, OrientationMark.REFERENCE);
+				final IProfileSegment seg = test.getSegment(IProfileCollection.DEFAULT_SEGMENT_ID);
+				if (seg.getStartIndex() != 0)
 					throw new ProfileException("Single segment does not start at RP in nucleus");
-				}
 			}
 			n.setLocked(wasLocked);
 		}

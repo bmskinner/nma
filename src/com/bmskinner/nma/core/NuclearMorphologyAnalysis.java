@@ -178,7 +178,7 @@ public class NuclearMorphologyAnalysis {
 		try {
 			parser.parseArgs(args, opt);
 			if (args.length != 0) {
-				LOGGER.fine("Invoked with aguments %s".formatted(Arrays.toString(args)));
+				LOGGER.fine("Invoked with arguments %s".formatted(Arrays.toString(args)));
 			}
 
 		} catch (final ArgumentParserException e) {
@@ -395,6 +395,9 @@ public class NuclearMorphologyAnalysis {
 			// Clean up log files from older versions
 			// 1.x.x stored logs in ~/.nma, rather than ~/.nma/logs
 			removeV1Logs();
+
+			LOGGER.finer("Finer logging is enabled");
+			LOGGER.finest("Finest logging is enabled");
 
 		} catch (final SecurityException e) {
 			LOGGER.log(Level.SEVERE, "Error initialising logger", e);

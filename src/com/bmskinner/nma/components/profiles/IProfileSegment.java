@@ -17,6 +17,7 @@
 package com.bmskinner.nma.components.profiles;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -509,13 +510,13 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 			throws SegmentUpdateException {
 
 		for (int i = 0; i < list.length; i++) {
-			IProfileSegment s = list[i];
+			final IProfileSegment s = list[i];
 			// Wrap indices
-			int p = i == 0 ? list.length - 1 : i - 1;
-			int n = i == list.length - 1 ? 0 : i + 1;
+			final int p = i == 0 ? list.length - 1 : i - 1;
+			final int n = i == list.length - 1 ? 0 : i + 1;
 
 			if (i == 0) {
-				boolean lockState = s.isLocked();
+				final boolean lockState = s.isLocked();
 				s.setLocked(false);
 				s.update(list[p].getEndIndex(), s.getEndIndex());
 				s.setLocked(lockState);
@@ -540,15 +541,15 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 			throws SegmentUpdateException {
 
 		for (int i = 0; i < list.size(); i++) {
-			IProfileSegment s = list.get(i);
+			final IProfileSegment s = list.get(i);
 			// Wrap indices
-			int p = i == 0 ? list.size() - 1 : i - 1;
-			int n = i == list.size() - 1 ? 0 : i + 1;
+			final int p = i == 0 ? list.size() - 1 : i - 1;
+			final int n = i == list.size() - 1 ? 0 : i + 1;
 
 			if (i == 0) {
 				// only update if really necessary, to stop merge sources being lost
 				if (s.getStartIndex() != list.get(p).getEndIndex()) {
-					boolean lockState = s.isLocked();
+					final boolean lockState = s.isLocked();
 					s.setLocked(false);
 					s.update(list.get(p).getEndIndex(), s.getEndIndex());
 					s.setLocked(lockState);
@@ -573,24 +574,23 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 */
 	static List<IProfileSegment> scaleSegments(@NonNull List<IProfileSegment> list, int newLength)
 			throws SegmentUpdateException {
-		List<IProfileSegment> result = new ArrayList<>();
+		final List<IProfileSegment> result = new ArrayList<>();
 
 		if (list.isEmpty())
 			return result;
 
 		// Special case when the length does not change - do nothing
-		if (list.get(0).getProfileLength() == newLength) {
+		if (list.get(0).getProfileLength() == newLength)
 			return list;
-		}
 
 		// Special case when there is only a single segment
 		if (list.size() == 1) {
 			// only a single segment; The single segment spans the entire profile,
 			// so just update the profile length. If the indexes are out of bounds,
 			// set to the closest valid index.
-			IProfileSegment oldSeg = list.get(0);
+			final IProfileSegment oldSeg = list.get(0);
 			if (oldSeg.getStartIndex() >= newLength) {
-				int newIndex = oldSeg.getStartIndex() - newLength;
+				final int newIndex = oldSeg.getStartIndex() - newLength;
 				result.add(new DefaultProfileSegment(newIndex,
 						newIndex, newLength, oldSeg.getID()));
 			} else {
@@ -602,47 +602,48 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 
 		// In case the start index of the segment list is not zero
 		int startIndex = list.get(0).getStartIndex();
-		double startProp = (double) startIndex / (double) list.get(0).getProfileLength();
+		final double startProp = (double) startIndex / (double) list.get(0).getProfileLength();
 		int newStartIndex = (int) (list.get(0).getProfileLength() * startProp);
 		startIndex = newStartIndex;
 
 		// Does the list of segments cover an entire profile or do we e.g. have merge
 		// sources covering only part of the profile?
-		int totalSegLength = list.stream().map(IProfileSegment::length).reduce(0,
+		final int totalSegLength = list.stream().map(IProfileSegment::length).reduce(0,
 				Integer::sum);
-		boolean isPartial = totalSegLength < list.get(0).getProfileLength();
+		final boolean isPartial = totalSegLength < list.get(0).getProfileLength();
 
 		for (int i = 0; i < list.size(); i++) {
-			IProfileSegment segment = list.get(i);
+			final IProfileSegment segment = list.get(i);
 //			LOGGER.fine("Scaling " + segment);
-			double proportion = (double) segment.length() / (double) segment.getProfileLength();
+			final double proportion = (double) segment.length() / (double) segment.getProfileLength();
 
-			int newSegLength = (int) (newLength * proportion);
+			final int newSegLength = (int) (newLength * proportion);
 
 			int segEnd = CellularComponent.wrapIndex(newStartIndex + newSegLength, newLength);
 
 			// Ensure final segment end index matches the first segment start index if we
 			// have a complete profile covered
-			if (!isPartial && i == list.size() - 1)
+			if (!isPartial && i == list.size() - 1) {
 				segEnd = startIndex;
+			}
 
-			IProfileSegment newSeg = new DefaultProfileSegment(newStartIndex, segEnd, newLength,
+			final IProfileSegment newSeg = new DefaultProfileSegment(newStartIndex, segEnd, newLength,
 					segment.getID());
 
 			// Scale merge sources recursively and add to the new segment
 			if (segment.hasMergeSources()) {
-				List<IProfileSegment> mergeSources = segment.getMergeSources();
-				List<IProfileSegment> mergeScaled = scaleSegments(mergeSources, newLength);
+				final List<IProfileSegment> mergeSources = segment.getMergeSources();
+				final List<IProfileSegment> mergeScaled = scaleSegments(mergeSources, newLength);
 
-				IProfileSegment m0 = mergeScaled.get(0);
-				IProfileSegment m1 = mergeScaled.get(1);
+				final IProfileSegment m0 = mergeScaled.get(0);
+				final IProfileSegment m1 = mergeScaled.get(1);
 
 				// Ensure the scaled merge sources endpoints still match the parent segment
 				// after int trunction of doubles
 				m0.update(newSeg.getStartIndex(), m0.getEndIndex());
 				m1.update(m1.getStartIndex(), newSeg.getEndIndex());
 
-				for (IProfileSegment p : mergeScaled) {
+				for (final IProfileSegment p : mergeScaled) {
 					newSeg.addMergeSource(p);
 				}
 			}
@@ -666,7 +667,7 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 		if (list.isEmpty())
 			throw new IllegalArgumentException(
 					"Cannot copy segments: segment list is null or empty");
-		List<IProfileSegment> result = copyWithoutLinking(list);
+		final List<IProfileSegment> result = copyWithoutLinking(list);
 		return linkSegments(result);
 	}
 
@@ -681,11 +682,9 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 			throws SegmentUpdateException {
 		if (segments.length == 0)
 			throw new IllegalArgumentException("Cannot copy segments: segment list is empty");
-		IProfileSegment[] temp = copyWithoutLinking(segments);
-		List<IProfileSegment> result = new ArrayList<>();
-		for (int i = 0; i < temp.length; i++) {
-			result.add(temp[i]);
-		}
+		final IProfileSegment[] temp = copyWithoutLinking(segments);
+		final List<IProfileSegment> result = new ArrayList<>();
+		Collections.addAll(result, temp);
 		return linkSegments(result);
 	}
 
@@ -702,9 +701,10 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 			throw new IllegalArgumentException(
 					"Cannot copy segments: segment list is null or empty");
 
-		List<IProfileSegment> result = new ArrayList<>();
-		for (IProfileSegment segment : list)
+		final List<IProfileSegment> result = new ArrayList<>();
+		for (final IProfileSegment segment : list) {
 			result.add(segment.duplicate());
+		}
 		return result;
 	}
 
@@ -715,14 +715,14 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 * @return a copy of the segments
 	 */
 	static IProfileSegment[] copyWithoutLinking(@NonNull IProfileSegment[] segments) {
-		if (segments == null || segments.length == 0) {
+		if (segments == null || segments.length == 0)
 			throw new IllegalArgumentException(
 					"Cannot copy segments: segment list is null or empty");
-		}
 
-		IProfileSegment[] result = new IProfileSegment[segments.length];
-		for (int i = 0; i < segments.length; i++)
+		final IProfileSegment[] result = new IProfileSegment[segments.length];
+		for (int i = 0; i < segments.length; i++) {
 			result[i] = segments[i].duplicate();
+		}
 
 		return result;
 	}
@@ -736,11 +736,10 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 */
 	static IProfileSegment getSegment(@NonNull final List<IProfileSegment> list, String segName) {
 
-		for (IProfileSegment segment : list) {
+		for (final IProfileSegment segment : list) {
 
-			if (segment.getName().equals(segName)) {
+			if (segment.getName().equals(segName))
 				return segment;
-			}
 		}
 		return null;
 	}
@@ -755,20 +754,19 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	static boolean segmentCountsMatch(@NonNull final List<IAnalysisDataset> list) {
 		if (list.isEmpty())
 			return false;
-		int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
-		for (IAnalysisDataset d : list) {
-			if (d.getCollection().getProfileManager().getSegmentCount() != segCount) {
+		final int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
+		for (final IAnalysisDataset d : list) {
+			if (d.getCollection().getProfileManager().getSegmentCount() != segCount)
 				return false;
-			}
 		}
 
 		return true;
 	}
 
 	static String toString(@NonNull List<IProfileSegment> list) {
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 		builder.append("List of segments:\n");
-		for (IProfileSegment segment : list) {
+		for (final IProfileSegment segment : list) {
 
 			builder.append("\t" + segment.toString() + "\n");
 		}
@@ -780,7 +778,7 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	}
 
 	/**
-	 * Test the length for new segments
+	 * Test the length for new segments. Is it long enough to be interpolatable?
 	 * 
 	 * @param start the segment start index
 	 * @param end   the segment end index
@@ -789,7 +787,7 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 *         {@link IProfileSegment.MINIMUM_SEGMENT_LENGTH}
 	 */
 	static boolean isLongEnough(int start, int end, int total) {
-		int testLength = calculateSegmentLength(start, end, total);
+		final int testLength = calculateSegmentLength(start, end, total);
 		return testLength >= INTERPOLATION_MINIMUM_LENGTH;
 	}
 
@@ -804,7 +802,7 @@ public interface IProfileSegment extends XmlSerializable, Iterable<Integer> {
 	 *         indexes is longer than {@link IProfileSegment.MINIMUM_SEGMENT_LENGTH}
 	 */
 	static boolean isShortEnough(int start, int end, int total) {
-		int testLength = calculateSegmentLength(start, end, total);
+		final int testLength = calculateSegmentLength(start, end, total);
 		return total - testLength >= INTERPOLATION_MINIMUM_LENGTH;
 	}
 
