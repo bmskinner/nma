@@ -13,6 +13,7 @@ import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.MeasurementScale;
 import com.bmskinner.nma.components.options.DefaultOptions;
 import com.bmskinner.nma.components.options.HashOptions;
+import com.bmskinner.nma.components.rules.OrientationMark;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
 import com.bmskinner.nma.core.CommandOptions;
 import com.bmskinner.nma.io.CellFileExporter;
@@ -115,44 +116,68 @@ public class ExportDataPipeline {
 
 	private void exportMeasurements() throws Exception {
 		final File statsFile = new File(root.getSavePath().getParentFile(),
-				root.getSavePath().getName() + ".measurements" + Io.TAB_FILE_EXTENSION);
+				"%s.measurements%s".formatted(root.getSavePath().getName(), Io.TAB_FILE_EXTENSION));
 		LOGGER.info("Exporting data to: " + statsFile.getAbsolutePath());
 
 		final HashOptions exportOptions = new DefaultOptions();
-		exportOptions.setInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 100);
 		exportOptions.setBoolean(HashOptions.EXPORT_MEASUREMENTS_KEY, true);
+		exportOptions.setBoolean(HashOptions.EXPORT_PROFILES_KEY, true);
+		exportOptions.setInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 100);
+		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINES_KEY, true);
+		exportOptions.setInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
+		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, true);
+		exportOptions.setString(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY, OrientationMark.REFERENCE.name());
+
 
 		new DatasetMeasurementsExportMethod(statsFile, datasets, exportOptions)
 				.call();
 	}
 
+	/**
+	 * Export the raw profiles for the cells in the dataset
+	 * 
+	 * @throws Exception
+	 */
 	private void exportProfiles() throws Exception {
 		final File statsFile = new File(root.getSavePath().getParentFile(),
-				root.getSavePath().getName() + ".profiles" + Io.TAB_FILE_EXTENSION);
-		LOGGER.info("Exporting profiles to: " + statsFile.getAbsolutePath());
+				"%s.profiles%s".formatted(root.getSavePath().getName(), Io.TAB_FILE_EXTENSION));
+		LOGGER.info("Exporting profiles to: %s".formatted(statsFile.getAbsolutePath()));
+
+		final HashOptions exportOptions = new DefaultOptions();
+		exportOptions.setBoolean(HashOptions.EXPORT_PROFILES_KEY, true);
+
+
 		new DatasetProfileExporter(statsFile, datasets, new DefaultOptions()).call();
 	}
 
+	/**
+	 * Export the raw outlines for the cells in the dataset.
+	 * 
+	 * @throws Exception
+	 */
 	private void exportOutlines() throws Exception {
 		final File statsFile = new File(root.getSavePath().getParentFile(),
-				root.getSavePath().getName() + ".outlines" + Io.TAB_FILE_EXTENSION);
-		LOGGER.info("Exporting outlines to: " + statsFile.getAbsolutePath());
+				"%s.outlines%s".formatted(root.getSavePath().getName(), Io.TAB_FILE_EXTENSION));
+		LOGGER.info("Exporting outlines to: %s".formatted(statsFile.getAbsolutePath()));
+		final HashOptions exportOptions = new DefaultOptions();
+		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINES_KEY, true);
+		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, false);
 
-		new DatasetOutlinesExportMethod(statsFile, datasets, new DefaultOptions()).call();
+		new DatasetOutlinesExportMethod(statsFile, datasets, exportOptions).call();
 	}
 
 	private void exportSignals() throws Exception {
 		final File statsFile = new File(root.getSavePath().getParentFile(),
-				root.getSavePath().getName() + ".signals" + Io.TAB_FILE_EXTENSION);
-		LOGGER.info("Exporting signals to: " + statsFile.getAbsolutePath());
+				"%s.signals%s".formatted(root.getSavePath().getName(), Io.TAB_FILE_EXTENSION));
+		LOGGER.info("Exporting signals to: %s".formatted(statsFile.getAbsolutePath()));
 
 		new DatasetSignalsExporter(statsFile, datasets, new DefaultOptions()).call();
 	}
 
 	private void exportShells() throws Exception {
 		final File statsFile = new File(root.getSavePath().getParentFile(),
-				root.getSavePath().getName() + ".shells" + Io.TAB_FILE_EXTENSION);
-		LOGGER.info("Exporting shells to: " + statsFile.getAbsolutePath());
+				"%s.shells%s".formatted(root.getSavePath().getName(), Io.TAB_FILE_EXTENSION));
+		LOGGER.info("Exporting shells to: %s".formatted(statsFile.getAbsolutePath()));
 
 		new DatasetShellsExporter(statsFile, datasets, new DefaultOptions()).call();
 	}
