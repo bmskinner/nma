@@ -36,6 +36,7 @@ import com.bmskinner.nma.components.cells.Nucleus;
 import com.bmskinner.nma.components.datasets.IAnalysisDataset;
 import com.bmskinner.nma.components.measure.Measurement;
 import com.bmskinner.nma.components.measure.MeasurementScale;
+import com.bmskinner.nma.components.options.HashOptions;
 import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.io.SampleDatasetReader;
@@ -61,22 +62,22 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 
 	@Test
 	public void testMouseDatasetMatchesSavedDataset() throws Exception {
-		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.MOUSE_TEST_DATASET);
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.MOUSE_TEST_DATASET);
+		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultRodentAnalysisOptions(TestResources.MOUSE_INPUT_FOLDER);
 
-		IAnalysisDataset obs = TestImageDatasetCreator
+		final IAnalysisDataset obs = TestImageDatasetCreator
 				.createTestDataset(TestResources.MOUSE_OUTPUT_FOLDER, op, false);
 		testDatasetEquality(exp, obs);
 	}
 
 	@Test
 	public void testPigDatasetMatchesSavedDataset() throws Exception {
-		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.PIG_TEST_DATASET);
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.PIG_TEST_DATASET);
+		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultPigAnalysisOptions(TestResources.PIG_INPUT_FOLDER);
 
-		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(
+		final IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(
 				TestResources.PIG_OUTPUT_FOLDER,
 				op, false);
 		testDatasetEquality(exp, obs);
@@ -84,11 +85,12 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 
 	@Test
 	public void testRoundDatasetMatchesSavedDataset() throws Exception {
-		IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.ROUND_TEST_DATASET);
-		IAnalysisOptions op = OptionsFactory
+		final IAnalysisDataset exp = SampleDatasetReader.openDataset(TestResources.ROUND_TEST_DATASET);
+		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultRoundAnalysisOptions(TestResources.ROUND_INPUT_FOLDER);
+		op.getNucleusDetectionOptions().get().setInt(HashOptions.MIN_SIZE_PIXELS, 500);
 
-		IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(
+		final IAnalysisDataset obs = TestImageDatasetCreator.createTestDataset(
 				TestResources.ROUND_OUTPUT_FOLDER,
 				op, false);
 		testDatasetEquality(exp, obs);
@@ -107,25 +109,26 @@ public class BasicAnalysisPipelineTest extends AnalysisPipelineTest {
 		assertEquals("Number of images", exp.getCollection().getImageFiles().size(),
 				obs.getCollection().getImageFiles().size());
 
-		List<Nucleus> expN = new ArrayList<>(exp.getCollection().getNuclei());
-		List<Nucleus> obsN = new ArrayList<>(obs.getCollection().getNuclei());
+		final List<Nucleus> expN = new ArrayList<>(exp.getCollection().getNuclei());
+		final List<Nucleus> obsN = new ArrayList<>(obs.getCollection().getNuclei());
 
 		Collections.sort(expN);
 		Collections.sort(obsN);
 
-		for (int i = 0; i < expN.size(); i++)
+		for (int i = 0; i < expN.size(); i++) {
 			assertEquals("Nucleus file name for: " + expN.get(i).getNameAndNumber(),
 					expN.get(i).getSourceFileName(), obsN.get(i).getSourceFileName());
+		}
 
 		assertEquals("Detected nuclei", exp.getCollection().getNucleusCount(),
 				obs.getCollection().getNucleusCount());
 
 		// Check the stats are the same
-		for (Measurement s : exp.getAnalysisOptions().get().getRuleSetCollection()
+		for (final Measurement s : exp.getAnalysisOptions().get().getRuleSetCollection()
 				.getMeasurableValues()) {
-			double eMed = exp.getCollection().getMedian(s, CellularComponent.NUCLEUS,
+			final double eMed = exp.getCollection().getMedian(s, CellularComponent.NUCLEUS,
 					MeasurementScale.PIXELS);
-			double oMed = obs.getCollection().getMedian(s, CellularComponent.NUCLEUS,
+			final double oMed = obs.getCollection().getMedian(s, CellularComponent.NUCLEUS,
 					MeasurementScale.PIXELS);
 
 			assertEquals("Stats should be equal: " + s.toString(), eMed, oMed, 0.3);
