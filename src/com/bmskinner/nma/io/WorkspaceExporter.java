@@ -43,19 +43,26 @@ public class WorkspaceExporter extends XMLWriter implements Io {
 
 		try {
 
-			File exportFile = w.getSaveFile();
+			final File exportFile = w.getSaveFile();
 			if (exportFile == null)
 				return;
-			if (exportFile.exists())
-				Files.delete(exportFile.toPath());
+			if (!exportFile.getParentFile().exists()) {
+				LOGGER.warning("The directory %s does not exist, cannot save a workspace here"
+						.formatted(exportFile.getParentFile().getAbsolutePath()));
+				return;
+			}
 
-			Document doc = new Document(w.toXmlElement());
+			if (exportFile.exists()) {
+				Files.delete(exportFile.toPath());
+			}
+
+			final Document doc = new Document(w.toXmlElement());
 
 			writeXML(doc, exportFile);
 
 			// Confirm save
 			DatasetListManager.getInstance().updateHashCode(w);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Unable to export workspace", e);
 		}
 

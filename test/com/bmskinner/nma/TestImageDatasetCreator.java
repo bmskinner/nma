@@ -34,14 +34,10 @@ import com.bmskinner.nma.components.options.IAnalysisOptions;
 import com.bmskinner.nma.components.options.OptionsBuilder;
 import com.bmskinner.nma.components.options.OptionsFactory;
 import com.bmskinner.nma.components.rules.RuleSetCollection;
-import com.bmskinner.nma.components.workspaces.IWorkspace;
-import com.bmskinner.nma.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nma.gui.tabs.signals.warping.SignalWarpingRunSettings;
 import com.bmskinner.nma.io.DatasetExportMethod;
 import com.bmskinner.nma.io.DatasetOptionsExportMethod;
 import com.bmskinner.nma.io.SampleDatasetReader;
-import com.bmskinner.nma.io.WorkspaceExporter;
-import com.bmskinner.nma.io.XMLReader;
 import com.bmskinner.nma.logging.ConsoleFormatter;
 import com.bmskinner.nma.logging.ConsoleHandler;
 
@@ -129,19 +125,6 @@ public class TestImageDatasetCreator {
 
 		saveTestDataset(d, TestResources.MOUSE_TEST_DATASET);
 		testUnmarshalling(d, TestResources.MOUSE_TEST_DATASET);
-
-		// Use mouse dataset to create a workspace
-		final IWorkspace w = WorkspaceFactory.createWorkspace(d);
-
-		final File f = new File(TestResources.DATASET_FOLDER, TestResources.WORKSPACE_NAME);
-		w.setSaveFile(f);
-
-		WorkspaceExporter.exportWorkspace(w);
-
-		final IWorkspace result = XMLReader.readWorkspace(f);
-
-		assertEquals("The test workspace dataset should be the mouse dataset", TestResources.MOUSE, result.getName());
-		assertEquals("Test workspace should have 1 file", 1, result.getFiles().size());
 	}
 
 	@Test
@@ -159,6 +142,7 @@ public class TestImageDatasetCreator {
 
 		final File testFolder = TestResources.ROUND_INPUT_FOLDER.getAbsoluteFile();
 		final IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
+		op.getNucleusDetectionOptions().get().setInt(HashOptions.MIN_SIZE_PIXELS, 500);
 		final IAnalysisDataset d = createTestDataset(TestResources.ROUND_OUTPUT_FOLDER, op, false);
 		saveTestDataset(d, TestResources.ROUND_TEST_DATASET);
 		testUnmarshalling(d, TestResources.ROUND_TEST_DATASET);
@@ -204,6 +188,7 @@ public class TestImageDatasetCreator {
 	public void createRoundWithClustersDataset() throws Exception {
 		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultRoundAnalysisOptions(TestResources.ROUND_CLUSTERS_INPUT_FOLDER);
+		op.getNucleusDetectionOptions().get().setInt(HashOptions.MIN_SIZE_PIXELS, 500);
 		final IAnalysisDataset d = createTestDataset(TestResources.ROUND_OUTPUT_FOLDER, op, true);
 		saveTestDataset(d, TestResources.ROUND_CLUSTERS_DATASET);
 		testUnmarshalling(d, TestResources.ROUND_CLUSTERS_DATASET);
@@ -220,7 +205,7 @@ public class TestImageDatasetCreator {
 		nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 2000);
 		nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 10000);
 
-		final IAnalysisDataset d = createTestSignalDataset(op, true, false);
+		final IAnalysisDataset d = createTestSignalDataset(TestResources.MOUSE_SIGNALS_OUTPUT_FOLDER, op, true, false);
 		saveTestDataset(d, TestResources.MOUSE_SIGNALS_DATASET);
 
 		// We know what should be detected for these images
@@ -239,7 +224,7 @@ public class TestImageDatasetCreator {
 		nucleus.setInt(HashOptions.MIN_SIZE_PIXELS, 4000);
 		nucleus.setInt(HashOptions.MAX_SIZE_PIXELS, 15000);
 
-		final IAnalysisDataset d = createTestSignalDataset(op, false, true);
+		final IAnalysisDataset d = createTestSignalDataset(TestResources.PIG_SIGNALS_OUTPUT_FOLDER, op, false, true);
 		saveTestDataset(d, TestResources.PIG_SIGNALS_DATASET);
 		testUnmarshalling(d, TestResources.PIG_SIGNALS_DATASET);
 	}
@@ -248,7 +233,8 @@ public class TestImageDatasetCreator {
 	public void createRoundWithSignalsDataset() throws Exception {
 		final IAnalysisOptions op = OptionsFactory
 				.makeDefaultRoundAnalysisOptions(TestResources.ROUND_SIGNALS_INPUT_FOLDER);
-		final IAnalysisDataset d = createTestSignalDataset(op, true, true);
+		op.getNucleusDetectionOptions().get().setInt(HashOptions.MIN_SIZE_PIXELS, 500);
+		final IAnalysisDataset d = createTestSignalDataset(TestResources.ROUND_SIGNALS_OUTPUT_FOLDER, op, true, true);
 		saveTestDataset(d, TestResources.ROUND_SIGNALS_DATASET);
 		testUnmarshalling(d, TestResources.ROUND_SIGNALS_DATASET);
 	}
@@ -257,20 +243,23 @@ public class TestImageDatasetCreator {
 	/**
 	 * Run a new analysis on the images using the given options.
 	 * 
-	 * @param op       the analysis options
-	 * @param addRed   should red signals be detected with default parameters?
-	 * @param addGreen should green signals be detected with default parameters?
+	 * @param outputFolder the output folder for save files
+	 * @param op           the analysis options
+	 * @param addRed       should red signals be detected with default parameters?
+	 * @param addGreen     should green signals be detected with default parameters?
 	 * @throws Exception
 	 */
-	public static IAnalysisDataset createTestSignalDataset(IAnalysisOptions op, boolean addRed,
+	public static IAnalysisDataset createTestSignalDataset(File outputFolder, IAnalysisOptions op, boolean addRed,
 			boolean addGreen) throws Exception {
 
-		final File testFolder = op.getNucleusDetectionFolder().get();
+		final File inputFolder = op.getNucleusDetectionFolder().get();
+		if (!inputFolder.exists())
+			throw new IllegalArgumentException(
+					"Input detection folder does not exist: " + inputFolder.getAbsolutePath());
 
-		if (!testFolder.exists())
-			throw new IllegalArgumentException("Detection folder does not exist");
 
-		final IAnalysisDataset d = new NucleusDetectionMethod(testFolder, op).call().getFirstDataset();
+		final IAnalysisDataset d = new NucleusDetectionMethod(outputFolder.getAbsoluteFile(), op).call()
+				.getFirstDataset();
 
 		new DefaultDatasetProfilingMethod(d)
 				.then(new DatasetSegmentationMethod(d, MorphologyAnalysisMode.SEGMENT_FROM_SCRATCH))
@@ -290,7 +279,7 @@ public class TestImageDatasetCreator {
 					.withValue(HashOptions.SIGNAL_GROUP_ID, RED_SIGNAL_ID.toString())
 					.build();
 
-			new SignalDetectionMethod(d, redOptions, testFolder).call();
+			new SignalDetectionMethod(d, redOptions, inputFolder).call();
 			assertTrue("Dataset should have red signals",
 					d.getCollection().hasSignalGroup(RED_SIGNAL_ID));
 			assertTrue("Dataset should have red signals",
@@ -312,7 +301,7 @@ public class TestImageDatasetCreator {
 					.withValue(HashOptions.SIGNAL_GROUP_ID, GREEN_SIGNAL_ID.toString())
 					.build();
 
-			new SignalDetectionMethod(d, greenOptions, testFolder).call();
+			new SignalDetectionMethod(d, greenOptions, inputFolder).call();
 			assertTrue("Dataset should have green signals",
 					d.getCollection().hasSignalGroup(GREEN_SIGNAL_ID));
 			assertTrue("Dataset should have green signals",
@@ -340,7 +329,7 @@ public class TestImageDatasetCreator {
 	/**
 	 * Create and run an analysis
 	 * 
-	 * @param folder       the output folder for save files
+	 * @param outputFolder the output folder for save files
 	 * @param op           the analysis options
 	 * @param makeClusters should clusters be created
 	 * @return a dataset with the results of the analysis

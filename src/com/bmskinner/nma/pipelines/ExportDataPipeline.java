@@ -117,7 +117,7 @@ public class ExportDataPipeline {
 	private void exportMeasurements() throws Exception {
 		final File statsFile = new File(root.getSavePath().getParentFile(),
 				"%s.measurements%s".formatted(root.getSavePath().getName(), Io.TAB_FILE_EXTENSION));
-		LOGGER.info("Exporting data to: " + statsFile.getAbsolutePath());
+		LOGGER.info("Exporting data from %s to %s".formatted(root.getSavePath(), statsFile.getAbsolutePath()));
 
 		final HashOptions exportOptions = new DefaultOptions();
 		exportOptions.setBoolean(HashOptions.EXPORT_MEASUREMENTS_KEY, true);
@@ -145,7 +145,6 @@ public class ExportDataPipeline {
 
 		final HashOptions exportOptions = new DefaultOptions();
 		exportOptions.setBoolean(HashOptions.EXPORT_PROFILES_KEY, true);
-
 
 		new DatasetProfileExporter(statsFile, datasets, new DefaultOptions()).call();
 	}
