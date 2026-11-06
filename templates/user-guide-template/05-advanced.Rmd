@@ -72,9 +72,9 @@ Exported data files will be created in the same directory as the `nmd` file.
 Option | Command
 --------|-----------
 `--file`| Path to the `.nmd` file to export data from
-`--measurements`| Basic measured values, as in `Nuclear charts`
-`--profiles`| Non-normalised angle profiles for each cell, starting from the reference point
-`--outlines`| Non-normalised outlines of each cell in XY pairs
+`--measurements`| Basic measured values, as in `Nuclear charts`, saved to a file named `.measurements.txt`
+`--profiles`| Non-normalised angle profiles for each cell to a file named `.profiles.txt`, starting from the reference point, plus normalised values in the same file as `--measurements` if `--measurements` was enabled
+`--outlines`| Non-normalised outlines of each cell in XY pairs to a file named `.outlines.txt`, plus normalised values in the same file as `--measurements` if `--measurements` was enabled
 `--signals`| Measurements of nuclear signals, as in `Nuclear signals > Violin plots`
 `--shells`| Signal intensities in each shell, if a shell analysis has been performed
 `--single-cell-images`| a cropped image for each cell in the dataset, saved to a subfolder prefixed `SingleNucleusImages_`

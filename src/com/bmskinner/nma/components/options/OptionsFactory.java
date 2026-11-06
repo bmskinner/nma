@@ -217,7 +217,7 @@ public class OptionsFactory {
 		op.setDetectionFolder(CellularComponent.NUCLEUS, testFolder.getAbsoluteFile());
 		final HashOptions nop = OptionsFactory.makeNucleusDetectionOptions()
 				.withValue(HashOptions.MIN_CIRC, 0.6)
-				.withValue(HashOptions.MAX_CIRC, 0.9).build();
+				.withValue(HashOptions.MAX_CIRC, 1.0).build();
 
 		op.setDetectionOptions(CellularComponent.NUCLEUS, nop);
 

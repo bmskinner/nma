@@ -70,7 +70,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 	 * 
 	 * @param d       the dataset to add signals to
 	 * @param options the analysis options
-	 * @param group   the signal group to add signals to
+	 * @param folder  the folder containing the images with signals
 	 * @throws MissingOptionException if dataset analysis options are not present
 	 */
 

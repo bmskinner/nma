@@ -56,7 +56,9 @@ public class ExportDataPipeline {
 
 		LOGGER.info("Read dataset from file");
 
-		if (opt.isMeasurements || opt.isAll) {
+		// The base measurements output - separate to dedicated profile and outline
+		// exports
+		if (opt.isMeasurements || opt.isProfiles || opt.isOutlines || opt.isAll) {
 			exportMeasurements();
 		}
 
@@ -120,10 +122,10 @@ public class ExportDataPipeline {
 		LOGGER.info("Exporting data from %s to %s".formatted(root.getSavePath(), statsFile.getAbsolutePath()));
 
 		final HashOptions exportOptions = new DefaultOptions();
-		exportOptions.setBoolean(HashOptions.EXPORT_MEASUREMENTS_KEY, true);
-		exportOptions.setBoolean(HashOptions.EXPORT_PROFILES_KEY, true);
+		exportOptions.setBoolean(HashOptions.EXPORT_MEASUREMENTS_KEY, opt.isMeasurements);
+		exportOptions.setBoolean(HashOptions.EXPORT_PROFILES_KEY, opt.isProfiles);
 		exportOptions.setInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 100);
-		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINES_KEY, true);
+		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINES_KEY, opt.isOutlines);
 		exportOptions.setInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
 		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, true);
 		exportOptions.setString(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY, OrientationMark.REFERENCE.name());
