@@ -76,6 +76,9 @@ public class CommandOptions {
 	@Arg(dest = "cell-locations")
 	public boolean isCellLocations = false;
 
+	@Arg(dest = "normalised-only")
+	public boolean isNormalisedOnly = false;
+
 	// Modify arguments
 
 	@Arg(dest = "cluster-file")

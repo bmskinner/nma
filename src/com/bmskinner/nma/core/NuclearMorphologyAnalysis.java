@@ -241,6 +241,12 @@ public class NuclearMorphologyAnalysis {
 				.dest("outlines")
 				.help("Export full nuclear outlines");
 
+		exportParser.addArgument("--normalised-only")
+				.action(Arguments.storeTrue())
+				.dest("normalised-only")
+				.help("Only export normalised profiles and/or outlines");
+		
+
 		exportParser.addArgument("--cell-locations")
 				.action(Arguments.storeTrue())
 				.dest("cell-locations")

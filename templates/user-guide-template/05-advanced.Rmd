@@ -83,6 +83,7 @@ Option | Command
 `--consensus`| an SVG image of the consensus nucleus of the dataset, named `<dataset>.consensus.svg`
 `--cell-locations``| the locations of the centre of mass of each cell in its source image
 `--all` | all of the above, *except* `--cell-locations` (because that is a time-consuming step in larger datasets)
+`--normalised-only | Only export normalised values for profiles and/or outlines into `.measurements.txt`; do not produce `.outlines.txt` or `.profiles.txt` files. Use when the raw profiles or outlines are not required. Example usage: `--measurements --profiles --normalised-only` would produce a single file `.measurements.txt` containing basic measurements and normalised profiles.
 
 ### `modify`
 

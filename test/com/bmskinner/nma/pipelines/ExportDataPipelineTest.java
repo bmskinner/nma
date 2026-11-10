@@ -1,5 +1,6 @@
 package com.bmskinner.nma.pipelines;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
@@ -36,6 +37,15 @@ public class ExportDataPipelineTest {
 
 	private static final Logger LOGGER = Logger.getLogger(ExportDataPipelineTest.class.getName());
 
+	private static final File MEASUREMENT_FILE = new File(
+			TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".measurements" + Io.TAB_FILE_EXTENSION);
+
+	private static final File OUTLINE_FILE = new File(
+			TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".outlines" + Io.TAB_FILE_EXTENSION);
+
+	private static final File PROFILE_FILE = new File(
+			TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".profiles" + Io.TAB_FILE_EXTENSION);
+
 	/**
 	 * Ensure the test datasets we need have been created if these tests are run
 	 * outside the full test pipeline.
@@ -51,12 +61,33 @@ public class ExportDataPipelineTest {
 	}
 
 	/**
+	 * Clear out any existing exported files before each test
+	 */
+	@Before
+	public void removeExistingExportFiles() {
+		if (MEASUREMENT_FILE.exists()) {
+			MEASUREMENT_FILE.delete();
+		}
+
+		// Profiles should also give a file with long format outlines
+		if (PROFILE_FILE.exists()) {
+			PROFILE_FILE.delete();
+		}
+
+		// Outlines should also give a file with long format outlines
+		if (OUTLINE_FILE.exists()) {
+			OUTLINE_FILE.delete();
+		}
+	}
+
+	/**
 	 * Read the first line of the given input file, and extract column names.
 	 * 
 	 * @param inputFile the file to read
 	 * @param sep       the column separator
 	 * @return
 	 */
+
 	static List<String> readColumnHeaders(File inputFile, String sep) {
 		final List<String> result = new ArrayList<>();
 
@@ -245,14 +276,13 @@ public class ExportDataPipelineTest {
 	 */
 	@Test
 	public void testPipelineExportsMeasurementsData() throws Exception {
-		final File outputFile = new File(
-				TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".measurements" + Io.TAB_FILE_EXTENSION);
-		if (outputFile.exists()) {
-			outputFile.delete();
+
+		if (MEASUREMENT_FILE.exists()) {
+			MEASUREMENT_FILE.delete();
 		}
 
 		LOGGER.info("Saving measurements file from %s to %s".formatted(TestResources.MOUSE_SIGNALS_DATASET,
-				outputFile.getAbsolutePath()));
+				MEASUREMENT_FILE.getAbsolutePath()));
 
 		final IAnalysisDataset dataset  = SampleDatasetReader.openDataset(TestResources.MOUSE_SIGNALS_DATASET);
 
@@ -261,9 +291,9 @@ public class ExportDataPipelineTest {
 		options.isMeasurements = true;
 
 		new ExportDataPipeline(options);
-		assertTrue(outputFile.exists());
+		assertTrue(MEASUREMENT_FILE.exists());
 		// Read the real columns exported
-		final List<String> colHeaders = readColumnHeaders(outputFile);
+		final List<String> colHeaders = readColumnHeaders(MEASUREMENT_FILE);
 
 		// Define the columns expected
 		final List<String> expectedHeaders = new ArrayList<>();
@@ -280,21 +310,9 @@ public class ExportDataPipelineTest {
 	 */
 	@Test
 	public void testPipelineExportProfileData() throws Exception {
-		final File outputFile = new File(
-				TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".measurements" + Io.TAB_FILE_EXTENSION);
-		if (outputFile.exists()) {
-			outputFile.delete();
-		}
-
-		// Outlines should also give a file with long format outlines
-		final File longOutputFile = new File(
-				TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".profiles" + Io.TAB_FILE_EXTENSION);
-		if (longOutputFile.exists()) {
-			longOutputFile.delete();
-		}
 
 		LOGGER.info("Saving measurements file from %s to %s".formatted(TestResources.MOUSE_SIGNALS_DATASET,
-				outputFile.getAbsolutePath()));
+				MEASUREMENT_FILE.getAbsolutePath()));
 
 		final IAnalysisDataset dataset = SampleDatasetReader.openDataset(TestResources.MOUSE_SIGNALS_DATASET);
 
@@ -303,9 +321,9 @@ public class ExportDataPipelineTest {
 		options.isProfiles = true;
 
 		new ExportDataPipeline(options);
-		assertTrue(outputFile.exists());
+		assertTrue(MEASUREMENT_FILE.exists());
 		// Read the real columns exported
-		final List<String> colHeaders = readColumnHeaders(outputFile);
+		final List<String> colHeaders = readColumnHeaders(MEASUREMENT_FILE);
 
 		// Define the columns expected
 		final List<String> expectedHeaders = new ArrayList<>();
@@ -314,7 +332,8 @@ public class ExportDataPipelineTest {
 		testColumnHeadersMatch(expectedHeaders, colHeaders);
 
 		// Define the columns expected
-		final List<String> longHeaders = readColumnHeaders(longOutputFile);
+		assertTrue(PROFILE_FILE.exists());
+		final List<String> longHeaders = readColumnHeaders(PROFILE_FILE);
 		final List<String> expectedLongHeaders = new ArrayList<>();
 		expectedHeaders.addAll(makeBaseColumnNames());
 		expectedLongHeaders.addAll(makeLongProfileColumnNames());
@@ -331,31 +350,17 @@ public class ExportDataPipelineTest {
 	@Test
 	public void testPipelineExportOutlinesData() throws Exception {
 
-		// Outlines should be added to measurements output file
-		final File outputFile = new File(
-				TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".measurements" + Io.TAB_FILE_EXTENSION);
-		if (outputFile.exists()) {
-			outputFile.delete();
-		}
-
-		// Outlines should also give a file with long format outlines
-		final File longOutputFile = new File(
-				TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".outlines" + Io.TAB_FILE_EXTENSION);
-		if (longOutputFile.exists()) {
-			longOutputFile.delete();
-		}
-
 		LOGGER.info("Saving measurements file from %s to %s".formatted(TestResources.MOUSE_SIGNALS_DATASET,
-				outputFile.getAbsolutePath()));
+				MEASUREMENT_FILE.getAbsolutePath()));
 
 		final CommandOptions options = new CommandOptions();
 		options.file = TestResources.MOUSE_SIGNALS_DATASET;
 		options.isOutlines = true;
 
 		new ExportDataPipeline(options);
-		assertTrue(outputFile.exists());
+		assertTrue(MEASUREMENT_FILE.exists());
 		// Read the real columns exported
-		final List<String> colHeaders = readColumnHeaders(outputFile);
+		final List<String> colHeaders = readColumnHeaders(MEASUREMENT_FILE);
 
 		// Define the columns expected
 		final List<String> expectedHeaders = new ArrayList<>();
@@ -364,11 +369,11 @@ public class ExportDataPipelineTest {
 		testColumnHeadersMatch(expectedHeaders, colHeaders);
 
 		// Define the columns expected
-		final List<String> longHeaders = readColumnHeaders(longOutputFile);
-		final List<String> expectedLongHeaders = new ArrayList<>();
-		expectedHeaders.addAll(makeBaseColumnNames());
-		expectedLongHeaders.addAll(makeLongOutlineColumnNames());
-		testColumnHeadersMatch(expectedLongHeaders, longHeaders);
+		assertTrue(OUTLINE_FILE.exists());
+		final List<String> longOutlineHeaders = readColumnHeaders(OUTLINE_FILE);
+		final List<String> expectedLongOutlineHeaders = new ArrayList<>();
+		expectedLongOutlineHeaders.addAll(makeLongOutlineColumnNames());
+		testColumnHeadersMatch(expectedLongOutlineHeaders, longOutlineHeaders);
 	}
 
 	/**
@@ -379,14 +384,9 @@ public class ExportDataPipelineTest {
 	 */
 	@Test
 	public void testPipelineExportsMeasurementsAndProfileData() throws Exception {
-		final File outputFile = new File(
-				TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".measurements" + Io.TAB_FILE_EXTENSION);
-		if (outputFile.exists()) {
-			outputFile.delete();
-		}
 
 		LOGGER.info("Saving measurements file from %s to %s".formatted(TestResources.MOUSE_SIGNALS_DATASET,
-				outputFile.getAbsolutePath()));
+				MEASUREMENT_FILE.getAbsolutePath()));
 
 		final IAnalysisDataset dataset = SampleDatasetReader.openDataset(TestResources.MOUSE_SIGNALS_DATASET);
 
@@ -396,9 +396,9 @@ public class ExportDataPipelineTest {
 		options.isProfiles = true;
 
 		new ExportDataPipeline(options);
-		assertTrue(outputFile.exists());
+		assertTrue(MEASUREMENT_FILE.exists());
 		// Read the real columns exported
-		final List<String> colHeaders = readColumnHeaders(outputFile);
+		final List<String> colHeaders = readColumnHeaders(MEASUREMENT_FILE);
 
 		// Define the columns expected
 		final List<String> expectedHeaders = new ArrayList<>();
@@ -406,6 +406,12 @@ public class ExportDataPipelineTest {
 		expectedHeaders.addAll(makeMeasurementColumnNames(dataset));
 		expectedHeaders.addAll(makeProfileColumnNames(dataset));
 		testColumnHeadersMatch(expectedHeaders, colHeaders);
+
+		assertTrue(PROFILE_FILE.exists());
+		final List<String> longProfileHeaders = readColumnHeaders(PROFILE_FILE);
+		final List<String> expectedLongProfileHeaders = new ArrayList<>();
+		expectedLongProfileHeaders.addAll(makeLongProfileColumnNames());
+		testColumnHeadersMatch(expectedLongProfileHeaders, longProfileHeaders);
 	}
 
 	/**
@@ -416,14 +422,10 @@ public class ExportDataPipelineTest {
 	 */
 	@Test
 	public void testPipelineExportsMeasurementsAndProfileAndOutlinesData() throws Exception {
-		final File outputFile = new File(
-				TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".measurements" + Io.TAB_FILE_EXTENSION);
-		if (outputFile.exists()) {
-			outputFile.delete();
-		}
+
 
 		LOGGER.info("Saving measurements file from %s to %s".formatted(TestResources.MOUSE_SIGNALS_DATASET,
-				outputFile.getAbsolutePath()));
+				MEASUREMENT_FILE.getAbsolutePath()));
 
 		final IAnalysisDataset dataset = SampleDatasetReader.openDataset(TestResources.MOUSE_SIGNALS_DATASET);
 
@@ -434,9 +436,9 @@ public class ExportDataPipelineTest {
 		options.isOutlines = true;
 
 		new ExportDataPipeline(options);
-		assertTrue(outputFile.exists());
+		assertTrue(MEASUREMENT_FILE.exists());
 		// Read the real columns exported
-		final List<String> colHeaders = readColumnHeaders(outputFile);
+		final List<String> colHeaders = readColumnHeaders(MEASUREMENT_FILE);
 
 		// Define the columns expected
 		final List<String> expectedHeaders = new ArrayList<>();
@@ -445,5 +447,55 @@ public class ExportDataPipelineTest {
 		expectedHeaders.addAll(makeProfileColumnNames(dataset));
 		expectedHeaders.addAll(makeOutlineColumnNames());
 		testColumnHeadersMatch(expectedHeaders, colHeaders);
+
+		assertTrue(OUTLINE_FILE.exists());
+		final List<String> longOutlineHeaders = readColumnHeaders(OUTLINE_FILE);
+		final List<String> expectedLongOutlineHeaders = new ArrayList<>();
+		expectedLongOutlineHeaders.addAll(makeLongOutlineColumnNames());
+		testColumnHeadersMatch(expectedLongOutlineHeaders, longOutlineHeaders);
+
+		assertTrue(PROFILE_FILE.exists());
+		final List<String> longProfileHeaders = readColumnHeaders(PROFILE_FILE);
+		final List<String> expectedLongProfileHeaders = new ArrayList<>();
+		expectedLongProfileHeaders.addAll(makeLongProfileColumnNames());
+		testColumnHeadersMatch(expectedLongProfileHeaders, longProfileHeaders);
+	}
+
+	/**
+	 * Test the --measurements --profiles --outlines --normalised-only export flags
+	 * create an export file with appropriate columns.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testPipelineExportsMeasurementsAndProfileAndOutlinesDataNormalisedOnly() throws Exception {
+
+		LOGGER.info("Saving measurements file from %s to %s".formatted(TestResources.MOUSE_SIGNALS_DATASET,
+				MEASUREMENT_FILE.getAbsolutePath()));
+
+		final IAnalysisDataset dataset = SampleDatasetReader.openDataset(TestResources.MOUSE_SIGNALS_DATASET);
+
+		final CommandOptions options = new CommandOptions();
+		options.file = TestResources.MOUSE_SIGNALS_DATASET;
+		options.isMeasurements = true;
+		options.isProfiles = true;
+		options.isOutlines = true;
+		options.isNormalisedOnly = true;
+
+		new ExportDataPipeline(options);
+		assertTrue(MEASUREMENT_FILE.exists());
+		// Read the real columns exported
+		final List<String> colHeaders = readColumnHeaders(MEASUREMENT_FILE);
+
+		// Define the columns expected
+		final List<String> expectedHeaders = new ArrayList<>();
+		expectedHeaders.addAll(makeBaseColumnNames());
+		expectedHeaders.addAll(makeMeasurementColumnNames(dataset));
+		expectedHeaders.addAll(makeProfileColumnNames(dataset));
+		expectedHeaders.addAll(makeOutlineColumnNames());
+		testColumnHeadersMatch(expectedHeaders, colHeaders);
+
+		assertFalse(OUTLINE_FILE.exists());
+		assertFalse(PROFILE_FILE.exists());
 	}
 }

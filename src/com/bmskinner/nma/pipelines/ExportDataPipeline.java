@@ -62,11 +62,11 @@ public class ExportDataPipeline {
 			exportMeasurements();
 		}
 
-		if (opt.isProfiles || opt.isAll) {
+		if (!opt.isNormalisedOnly && (opt.isProfiles || opt.isAll)) {
 			exportProfiles();
 		}
 
-		if (opt.isOutlines || opt.isAll) {
+		if (!opt.isNormalisedOnly && (opt.isOutlines || opt.isAll)) {
 			exportOutlines();
 		}
 
