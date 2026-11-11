@@ -118,14 +118,14 @@ public class ExportDataPipeline {
 
 	private void exportMeasurements() throws Exception {
 		final File statsFile = new File(root.getSavePath().getParentFile(),
-				"%s.measurements%s".formatted(root.getSavePath().getName(), Io.TAB_FILE_EXTENSION));
+				"%s.measurements%s".formatted(root.getName(), Io.TAB_FILE_EXTENSION));
 		LOGGER.info("Exporting data from %s to %s".formatted(root.getSavePath(), statsFile.getAbsolutePath()));
 
 		final HashOptions exportOptions = new DefaultOptions();
-		exportOptions.setBoolean(HashOptions.EXPORT_MEASUREMENTS_KEY, opt.isMeasurements);
-		exportOptions.setBoolean(HashOptions.EXPORT_PROFILES_KEY, opt.isProfiles);
+		exportOptions.setBoolean(HashOptions.EXPORT_MEASUREMENTS_KEY, opt.isMeasurements || opt.isAll);
+		exportOptions.setBoolean(HashOptions.EXPORT_PROFILES_KEY, opt.isProfiles || opt.isAll);
 		exportOptions.setInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 100);
-		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINES_KEY, opt.isOutlines);
+		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINES_KEY, opt.isOutlines || opt.isAll);
 		exportOptions.setInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
 		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, true);
 		exportOptions.setString(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY, OrientationMark.REFERENCE.name());
@@ -142,7 +142,7 @@ public class ExportDataPipeline {
 	 */
 	private void exportProfiles() throws Exception {
 		final File statsFile = new File(root.getSavePath().getParentFile(),
-				"%s.profiles%s".formatted(root.getSavePath().getName(), Io.TAB_FILE_EXTENSION));
+				"%s.profiles%s".formatted(root.getName(), Io.TAB_FILE_EXTENSION));
 		LOGGER.info("Exporting profiles to: %s".formatted(statsFile.getAbsolutePath()));
 
 		final HashOptions exportOptions = new DefaultOptions();
@@ -158,7 +158,7 @@ public class ExportDataPipeline {
 	 */
 	private void exportOutlines() throws Exception {
 		final File statsFile = new File(root.getSavePath().getParentFile(),
-				"%s.outlines%s".formatted(root.getSavePath().getName(), Io.TAB_FILE_EXTENSION));
+				"%s.outlines%s".formatted(root.getName(), Io.TAB_FILE_EXTENSION));
 		LOGGER.info("Exporting outlines to: %s".formatted(statsFile.getAbsolutePath()));
 		final HashOptions exportOptions = new DefaultOptions();
 		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINES_KEY, true);
@@ -169,7 +169,7 @@ public class ExportDataPipeline {
 
 	private void exportSignals() throws Exception {
 		final File statsFile = new File(root.getSavePath().getParentFile(),
-				"%s.signals%s".formatted(root.getSavePath().getName(), Io.TAB_FILE_EXTENSION));
+				"%s.signals%s".formatted(root.getName(), Io.TAB_FILE_EXTENSION));
 		LOGGER.info("Exporting signals to: %s".formatted(statsFile.getAbsolutePath()));
 
 		new DatasetSignalsExporter(statsFile, datasets, new DefaultOptions()).call();
@@ -177,7 +177,7 @@ public class ExportDataPipeline {
 
 	private void exportShells() throws Exception {
 		final File statsFile = new File(root.getSavePath().getParentFile(),
-				"%s.shells%s".formatted(root.getSavePath().getName(), Io.TAB_FILE_EXTENSION));
+				"%s.shells%s".formatted(root.getName(), Io.TAB_FILE_EXTENSION));
 		LOGGER.info("Exporting shells to: %s".formatted(statsFile.getAbsolutePath()));
 
 		new DatasetShellsExporter(statsFile, datasets, new DefaultOptions()).call();
@@ -202,7 +202,7 @@ public class ExportDataPipeline {
 
 	private void exportAnalysisOptions() throws Exception {
 		final File outFile = new File(root.getSavePath().getParentFile(),
-				root.getSavePath().getName() + ".analysis-options" + Io.XML_FILE_EXTENSION);
+				root.getName() + ".analysis-options" + Io.XML_FILE_EXTENSION);
 		LOGGER.info("Exporting analysis options to: " + outFile.getAbsolutePath());
 
 		new DatasetOptionsExportMethod(root, outFile).call();
@@ -210,7 +210,7 @@ public class ExportDataPipeline {
 
 	private void exportRulesets() throws Exception {
 		final File outFile = new File(root.getSavePath().getParentFile(),
-				root.getSavePath().getName() + ".rulesets" + Io.XML_FILE_EXTENSION);
+				root.getName() + ".rulesets" + Io.XML_FILE_EXTENSION);
 		LOGGER.info("Exporting rulesets to: " + outFile.getAbsolutePath());
 
 		final RuleSetCollection rsc = root.getCollection().getRuleSetCollection();
@@ -223,7 +223,7 @@ public class ExportDataPipeline {
 
 	private void exportConsensus() throws Exception {
 		final File outFile = new File(root.getSavePath().getParentFile(),
-				root.getSavePath().getName() + ".consensus" + Io.SVG_FILE_EXTENSION);
+				root.getName() + ".consensus" + Io.SVG_FILE_EXTENSION);
 		LOGGER.info("Exporting consensus nucleus to: " + outFile.getAbsolutePath());
 
 		// Ensure all datasets have a consensus

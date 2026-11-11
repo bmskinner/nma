@@ -37,14 +37,43 @@ public class ExportDataPipelineTest {
 
 	private static final Logger LOGGER = Logger.getLogger(ExportDataPipelineTest.class.getName());
 
+	private static final String TEST_DATASET_NAME = TestResources.MOUSE + TestResources.WITH_SIGNALS;
+
 	private static final File MEASUREMENT_FILE = new File(
-			TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".measurements" + Io.TAB_FILE_EXTENSION);
+			TestResources.MOUSE_SIGNALS_DATASET.getParent(),
+			"%s.measurements%s".formatted(TEST_DATASET_NAME, Io.TAB_FILE_EXTENSION));
 
 	private static final File OUTLINE_FILE = new File(
-			TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".outlines" + Io.TAB_FILE_EXTENSION);
+			TestResources.MOUSE_SIGNALS_DATASET.getParent(),
+			"%s.outlines%s".formatted(TEST_DATASET_NAME, Io.TAB_FILE_EXTENSION));
 
 	private static final File PROFILE_FILE = new File(
-			TestResources.MOUSE_SIGNALS_DATASET.getAbsolutePath() + ".profiles" + Io.TAB_FILE_EXTENSION);
+			TestResources.MOUSE_SIGNALS_DATASET.getParent(),
+			"%s.profiles%s".formatted(TEST_DATASET_NAME, Io.TAB_FILE_EXTENSION));
+
+	private static final File SIGNALS_FILE = new File(
+			TestResources.MOUSE_SIGNALS_DATASET.getParent(),
+			"%s.signals%s".formatted(TEST_DATASET_NAME, Io.TAB_FILE_EXTENSION));
+
+	private static final File SHELLS_FILE = new File(
+			TestResources.MOUSE_SIGNALS_DATASET.getParent(),
+			"%s.shells%s".formatted(TEST_DATASET_NAME, Io.TAB_FILE_EXTENSION));
+
+	private static final File ANALYSIS_OPTIONS_FILE = new File(
+			TestResources.MOUSE_SIGNALS_DATASET.getParent(),
+			"%s.analysis-options%s".formatted(TEST_DATASET_NAME, Io.XML_FILE_EXTENSION));
+
+	private static final File RULESETS_FILE = new File(
+			TestResources.MOUSE_SIGNALS_DATASET.getParent(),
+			"%s.rulesets%s".formatted(TEST_DATASET_NAME, Io.XML_FILE_EXTENSION));
+
+	private static final File CELL_LOCATIONS_FILE = new File(
+			TestResources.MOUSE_SIGNALS_DATASET.getParent(),
+			"%s.cell-locations%s".formatted(TEST_DATASET_NAME, Io.TAB_FILE_EXTENSION));
+
+	private static final File CONSENSUS_NUCLEUS_FILE = new File(
+			TestResources.MOUSE_SIGNALS_DATASET.getParent(),
+			"%s.consensus%s".formatted(TEST_DATASET_NAME, Io.SVG_FILE_EXTENSION));
 
 	/**
 	 * Ensure the test datasets we need have been created if these tests are run
@@ -65,18 +94,23 @@ public class ExportDataPipelineTest {
 	 */
 	@Before
 	public void removeExistingExportFiles() {
-		if (MEASUREMENT_FILE.exists()) {
-			MEASUREMENT_FILE.delete();
-		}
 
-		// Profiles should also give a file with long format outlines
-		if (PROFILE_FILE.exists()) {
-			PROFILE_FILE.delete();
-		}
+		final File[] outputFiles = {
+				MEASUREMENT_FILE,
+				PROFILE_FILE,
+				OUTLINE_FILE,
+				SIGNALS_FILE,
+				SHELLS_FILE,
+				ANALYSIS_OPTIONS_FILE,
+				RULESETS_FILE,
+				CELL_LOCATIONS_FILE,
+				CONSENSUS_NUCLEUS_FILE
+		};
 
-		// Outlines should also give a file with long format outlines
-		if (OUTLINE_FILE.exists()) {
-			OUTLINE_FILE.delete();
+		for (final File f : outputFiles) {
+			if (f.exists()) {
+				f.delete();
+			}
 		}
 	}
 
@@ -311,9 +345,6 @@ public class ExportDataPipelineTest {
 	@Test
 	public void testPipelineExportProfileData() throws Exception {
 
-		LOGGER.info("Saving measurements file from %s to %s".formatted(TestResources.MOUSE_SIGNALS_DATASET,
-				MEASUREMENT_FILE.getAbsolutePath()));
-
 		final IAnalysisDataset dataset = SampleDatasetReader.openDataset(TestResources.MOUSE_SIGNALS_DATASET);
 
 		final CommandOptions options = new CommandOptions();
@@ -350,9 +381,6 @@ public class ExportDataPipelineTest {
 	@Test
 	public void testPipelineExportOutlinesData() throws Exception {
 
-		LOGGER.info("Saving measurements file from %s to %s".formatted(TestResources.MOUSE_SIGNALS_DATASET,
-				MEASUREMENT_FILE.getAbsolutePath()));
-
 		final CommandOptions options = new CommandOptions();
 		options.file = TestResources.MOUSE_SIGNALS_DATASET;
 		options.isOutlines = true;
@@ -384,9 +412,6 @@ public class ExportDataPipelineTest {
 	 */
 	@Test
 	public void testPipelineExportsMeasurementsAndProfileData() throws Exception {
-
-		LOGGER.info("Saving measurements file from %s to %s".formatted(TestResources.MOUSE_SIGNALS_DATASET,
-				MEASUREMENT_FILE.getAbsolutePath()));
 
 		final IAnalysisDataset dataset = SampleDatasetReader.openDataset(TestResources.MOUSE_SIGNALS_DATASET);
 
@@ -422,10 +447,6 @@ public class ExportDataPipelineTest {
 	 */
 	@Test
 	public void testPipelineExportsMeasurementsAndProfileAndOutlinesData() throws Exception {
-
-
-		LOGGER.info("Saving measurements file from %s to %s".formatted(TestResources.MOUSE_SIGNALS_DATASET,
-				MEASUREMENT_FILE.getAbsolutePath()));
 
 		final IAnalysisDataset dataset = SampleDatasetReader.openDataset(TestResources.MOUSE_SIGNALS_DATASET);
 
@@ -469,10 +490,6 @@ public class ExportDataPipelineTest {
 	 */
 	@Test
 	public void testPipelineExportsMeasurementsAndProfileAndOutlinesDataNormalisedOnly() throws Exception {
-
-		LOGGER.info("Saving measurements file from %s to %s".formatted(TestResources.MOUSE_SIGNALS_DATASET,
-				MEASUREMENT_FILE.getAbsolutePath()));
-
 		final IAnalysisDataset dataset = SampleDatasetReader.openDataset(TestResources.MOUSE_SIGNALS_DATASET);
 
 		final CommandOptions options = new CommandOptions();
@@ -497,5 +514,90 @@ public class ExportDataPipelineTest {
 
 		assertFalse(OUTLINE_FILE.exists());
 		assertFalse(PROFILE_FILE.exists());
+	}
+
+	/**
+	 * Test the --all export flags create an export file with appropriate columns.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testPipelineExportsAll() throws Exception {
+
+		final IAnalysisDataset dataset = SampleDatasetReader.openDataset(TestResources.MOUSE_SIGNALS_DATASET);
+
+		final CommandOptions options = new CommandOptions();
+		options.file = TestResources.MOUSE_SIGNALS_DATASET;
+		options.isAll = true;
+
+		new ExportDataPipeline(options);
+		assertTrue("The file %s should exist".formatted(MEASUREMENT_FILE.getAbsolutePath()), MEASUREMENT_FILE.exists());
+		// Read the real columns exported
+		final List<String> colHeaders = readColumnHeaders(MEASUREMENT_FILE);
+
+		// Define the columns expected
+		final List<String> expectedHeaders = new ArrayList<>();
+		expectedHeaders.addAll(makeBaseColumnNames());
+		expectedHeaders.addAll(makeMeasurementColumnNames(dataset));
+		expectedHeaders.addAll(makeProfileColumnNames(dataset));
+		expectedHeaders.addAll(makeOutlineColumnNames());
+		testColumnHeadersMatch(expectedHeaders, colHeaders);
+
+		assertTrue(OUTLINE_FILE.exists());
+		final List<String> longOutlineHeaders = readColumnHeaders(OUTLINE_FILE);
+		testColumnHeadersMatch(makeLongOutlineColumnNames(), longOutlineHeaders);
+
+		assertTrue(PROFILE_FILE.exists());
+		final List<String> longProfileHeaders = readColumnHeaders(PROFILE_FILE);
+		testColumnHeadersMatch(makeLongProfileColumnNames(), longProfileHeaders);
+		assertTrue(SIGNALS_FILE.exists());
+		assertTrue(SHELLS_FILE.exists());
+		assertTrue(ANALYSIS_OPTIONS_FILE.exists());
+		assertTrue(RULESETS_FILE.exists());
+		assertTrue(CELL_LOCATIONS_FILE.exists());
+		assertTrue(CONSENSUS_NUCLEUS_FILE.exists());
+
+	}
+
+	/**
+	 * Test the --all --normalised-only export flags creates export files with
+	 * appropriate columns.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testPipelineExportsAllNormalisedOnly() throws Exception {
+
+		final IAnalysisDataset dataset = SampleDatasetReader.openDataset(TestResources.MOUSE_SIGNALS_DATASET);
+
+		final CommandOptions options = new CommandOptions();
+		options.file = TestResources.MOUSE_SIGNALS_DATASET;
+		options.isAll = true;
+		options.isNormalisedOnly = true;
+
+		new ExportDataPipeline(options);
+		assertTrue("The file %s should exist".formatted(MEASUREMENT_FILE.getAbsolutePath()), MEASUREMENT_FILE.exists());
+		// Read the real columns exported
+		final List<String> colHeaders = readColumnHeaders(MEASUREMENT_FILE);
+
+		// Define the columns expected
+		final List<String> expectedHeaders = new ArrayList<>();
+		expectedHeaders.addAll(makeBaseColumnNames());
+		expectedHeaders.addAll(makeMeasurementColumnNames(dataset));
+		expectedHeaders.addAll(makeProfileColumnNames(dataset));
+		expectedHeaders.addAll(makeOutlineColumnNames());
+		testColumnHeadersMatch(expectedHeaders, colHeaders);
+
+		// These should be suppressed
+		assertFalse(OUTLINE_FILE.exists());
+		assertFalse(PROFILE_FILE.exists());
+
+		assertTrue(SIGNALS_FILE.exists());
+		assertTrue(SHELLS_FILE.exists());
+		assertTrue(ANALYSIS_OPTIONS_FILE.exists());
+		assertTrue(RULESETS_FILE.exists());
+		assertTrue(CELL_LOCATIONS_FILE.exists());
+		assertTrue(CONSENSUS_NUCLEUS_FILE.exists());
+
 	}
 }

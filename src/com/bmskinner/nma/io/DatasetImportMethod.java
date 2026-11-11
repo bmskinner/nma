@@ -144,7 +144,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 			LOGGER.warning("The dataset is not properly segmented");
 			LOGGER.warning("Curated datasets and groups have been saved");
 			LOGGER.warning(
-					"Redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
+					"Redetect cells and import the .cell-locations.txt file");
 
 			new CellFileExporter(dataset).call();
 			throw new AnalysisMethodException("Unable to validate or repair dataset");

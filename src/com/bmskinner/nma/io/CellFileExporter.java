@@ -64,7 +64,7 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements I
 
 	@Override
 	public IAnalysisResult call() throws Exception {
-		for (IAnalysisDataset d : datasets) {
+		for (final IAnalysisDataset d : datasets) {
 			exportCellLocations(d);
 		}
 		return new DefaultAnalysisResult(datasets);
@@ -72,23 +72,24 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements I
 
 	private boolean exportCellLocations(IAnalysisDataset d) {
 
-		String fileName = d.getName() + "." + Io.LOC_FILE_EXTENSION;
+		final String fileName = d.getName() + ".cell-locations" + Io.TAB_FILE_EXTENSION;
 		File exportFile = new File(d.getSavePath().getParent(), fileName);
 
 		if (!exportFile.getParentFile().isDirectory()) {
-			// the desired output folder does not exist
 			LOGGER.warning("The intended export folder does not exist");
 
-			File folder = GlobalOptions.getInstance().getDefaultDir();
+			final File folder = GlobalOptions.getInstance().getDefaultDir();
 			exportFile = new File(folder, fileName);
 		}
 
-		LOGGER.info("Exporting cells to " + exportFile.getAbsolutePath());
+		LOGGER.info("Exporting cells to %s".formatted(exportFile.getAbsolutePath()));
 
-		if (exportFile.exists())
+		if (exportFile.exists()) {
+			LOGGER.fine("Overwriting existing cell location file %s".formatted(exportFile.getAbsolutePath()));
 			exportFile.delete();
+		}
 
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 
 		/*
 		 * Add the cells from the root dataset
@@ -103,7 +104,7 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements I
 
 		try {
 			export(builder.toString(), exportFile);
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			return false;
 		}
@@ -117,9 +118,9 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements I
 	 * @return
 	 */
 	private static String makeChildString(IAnalysisDataset d) {
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 
-		for (IAnalysisDataset child : d.getChildDatasets()) {
+		for (final IAnalysisDataset child : d.getChildDatasets()) {
 			builder.append(makeDatasetHeaderString(child, d.getId()));
 			builder.append(makeDatasetCellsString(child));
 
@@ -138,26 +139,26 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements I
 	 * @return
 	 */
 	private static String makeDatasetCellsString(IAnalysisDataset d) {
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 
-		for (ICell c : d.getCollection().getCells()) {
+		for (final ICell c : d.getCollection().getCells()) {
 
-			IPoint com = c.getPrimaryNucleus().getCentreOfMass();
+			final IPoint com = c.getPrimaryNucleus().getCentreOfMass();
 
-			double x = com.getX() + c.getPrimaryNucleus().getXBase();
-			double y = com.getY() + c.getPrimaryNucleus().getYBase();
+			final double x = com.getX() + c.getPrimaryNucleus().getXBase();
+			final double y = com.getY() + c.getPrimaryNucleus().getYBase();
 
 			try {
 
 				if (c.getPrimaryNucleus().getSourceFile() != null) {
 					builder.append(c.getPrimaryNucleus().getSourceFile().getAbsolutePath());
-					builder.append("\t");
+					builder.append(Io.TAB);
 					builder.append(x);
 					builder.append("-");
 					builder.append(y);
 					builder.append(NEWLINE);
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				return null;
 			}
 
@@ -173,7 +174,7 @@ public class CellFileExporter extends MultipleDatasetAnalysisMethod implements I
 	 * @return
 	 */
 	private static String makeDatasetHeaderString(IAnalysisDataset child, UUID parent) {
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 
 		builder.append("UUID\t");
 		builder.append(child.getId().toString());

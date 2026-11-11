@@ -48,9 +48,9 @@ public class FileSelector {
 
 	public static @Nullable File chooseTableExportFile() {
 
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
+		final FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
 
-		File dir = GlobalOptions.getInstance().getDefaultDir();
+		final File dir = GlobalOptions.getInstance().getDefaultDir();
 		File file = chooseSaveFile(dir, filter, null);
 
 		if (file == null)
@@ -88,7 +88,7 @@ public class FileSelector {
 			}
 		}
 
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
+		final FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
 
 		File file = chooseSaveFile(dir, filter, defaultName);
 		if (file == null)
@@ -110,18 +110,19 @@ public class FileSelector {
 	 */
 	public static @Nullable File chooseOptionsExportFile(@NonNull IAnalysisDataset dataset) {
 
-		File dir = dataset.getSavePath().getParentFile();
-		String defaultName = dataset.getName() + Io.XML_FILE_EXTENSION;
+		final File dir = dataset.getSavePath().getParentFile();
+		final String defaultName = dataset.getName() + Io.XML_FILE_EXTENSION;
 
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Options file", "xml");
+		final FileNameExtensionFilter filter = new FileNameExtensionFilter("Options file", "xml");
 
 		File file = chooseSaveFile(dir, filter, defaultName);
 		if (file == null)
 			return null;
 
 		// Add extension if needed
-		if (!file.getAbsolutePath().endsWith(Io.XML_FILE_EXTENSION))
+		if (!file.getAbsolutePath().endsWith(Io.XML_FILE_EXTENSION)) {
 			file = new File(file.getAbsolutePath() + Io.XML_FILE_EXTENSION);
+		}
 		return file;
 	}
 
@@ -132,7 +133,7 @@ public class FileSelector {
 	 * @return the file to export to
 	 */
 	public static @Nullable File chooseOptionsImportFile(@Nullable File defaultFolder) {
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Options file", "xml");
+		final FileNameExtensionFilter filter = new FileNameExtensionFilter("Options file", "xml");
 		return chooseFile(defaultFolder, filter, "Choose options file");
 	}
 
@@ -143,14 +144,14 @@ public class FileSelector {
 	 */
 	public static @Nullable File chooseRemappingFile(@NonNull IAnalysisDataset dataset) {
 
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file",
-				Io.LOC_FILE_EXTENSION);
+		final FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file",
+				Io.TAB_FILE_EXTENSION_NODOT);
 
-		Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+		final Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
 		if (!op.isPresent())
 			return null;
 
-		Optional<File> of = op.get().getNucleusDetectionFolder();
+		final Optional<File> of = op.get().getNucleusDetectionFolder();
 		if (!of.isPresent())
 			return null;
 
@@ -189,19 +190,21 @@ public class FileSelector {
 	 */
 	private static @Nullable File chooseOpenFile(File defaultFolder, FileNameExtensionFilter filter,
 			@Nullable String message) {
-		JFileChooser fc = new JFileChooser(defaultFolder);
+		final JFileChooser fc = new JFileChooser(defaultFolder);
 
-		if (filter != null)
+		if (filter != null) {
 			fc.setFileFilter(filter);
+		}
 
-		if (message != null)
+		if (message != null) {
 			fc.setDialogTitle(message);
+		}
 
-		int returnVal = fc.showOpenDialog(fc);
+		final int returnVal = fc.showOpenDialog(fc);
 		if (returnVal != 0)
 			return null;
 
-		File file = fc.getSelectedFile();
+		final File file = fc.getSelectedFile();
 
 		if (file.isDirectory())
 			return null;
@@ -217,17 +220,19 @@ public class FileSelector {
 	 */
 	public static @Nullable File chooseSaveFile(@Nullable File defaultFolder,
 			@Nullable FileNameExtensionFilter filter, @Nullable String defaultName) {
-		JFileChooser fc = new JFileChooser(defaultFolder);
+		final JFileChooser fc = new JFileChooser(defaultFolder);
 
-		if (filter != null)
+		if (filter != null) {
 			fc.setFileFilter(filter);
+		}
 
 		fc.setDialogTitle("Specify a file to save as");
 
-		if (defaultName != null)
+		if (defaultName != null) {
 			fc.setSelectedFile(new File(defaultFolder, defaultName));
+		}
 
-		int returnVal = fc.showSaveDialog(fc);
+		final int returnVal = fc.showSaveDialog(fc);
 		if (returnVal != 0)
 			return null; // user cancelled
 
@@ -243,18 +248,19 @@ public class FileSelector {
 	public static @Nullable File chooseFolder(@Nullable String title,
 			@Nullable File defaultFolder) {
 
-		if (defaultFolder != null && !defaultFolder.exists())
+		if (defaultFolder != null && !defaultFolder.exists()) {
 			defaultFolder = null;
+		}
 
-		JFileChooser fc = new JFileChooser(defaultFolder); // if null, will be home
+		final JFileChooser fc = new JFileChooser(defaultFolder); // if null, will be home
 		fc.setDialogTitle(title);
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-		int returnVal = fc.showOpenDialog(fc);
+		final int returnVal = fc.showOpenDialog(fc);
 		if (returnVal != 0)
 			return null; // user cancelled
 
-		File file = fc.getSelectedFile();
+		final File file = fc.getSelectedFile();
 
 		if (!file.isDirectory())
 			return null;
@@ -284,14 +290,13 @@ public class FileSelector {
 			}
 		}
 
-		JFileChooser fc = new JFileChooser(dir);
+		final JFileChooser fc = new JFileChooser(dir);
 		fc.setSelectedFile(new File(fileName));
 		fc.setDialogTitle("Save workspace as");
 
-		int returnVal = fc.showSaveDialog(fc);
-		if (returnVal != 0) {
+		final int returnVal = fc.showSaveDialog(fc);
+		if (returnVal != 0)
 			return null; // user cancelled
-		}
 
 		File file = fc.getSelectedFile();
 
@@ -311,11 +316,11 @@ public class FileSelector {
 	 */
 	public static File chooseFISHDirectory(IAnalysisDataset dataset) {
 
-		Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+		final Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
 		if (!op.isPresent())
 			return null;
 
-		Optional<File> of = op.get().getNucleusDetectionFolder();
+		final Optional<File> of = op.get().getNucleusDetectionFolder();
 		if (!of.isPresent())
 			return null;
 
@@ -329,11 +334,11 @@ public class FileSelector {
 	 * @return the selected folder, or null if user cancelled or invalid choice
 	 */
 	public static File choosePostFISHDirectory(IAnalysisDataset dataset) {
-		Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+		final Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
 		if (!op.isPresent())
 			return null;
 
-		Optional<File> of = op.get().getNucleusDetectionFolder();
+		final Optional<File> of = op.get().getNucleusDetectionFolder();
 		if (!of.isPresent())
 			return null;
 
@@ -353,18 +358,18 @@ public class FileSelector {
 		if (!dataset.getCollection().hasSignalGroup(signalGroupId))
 			return null;
 
-		String signalName = dataset.getCollection().getSignalGroup(signalGroupId).get()
+		final String signalName = dataset.getCollection().getSignalGroup(signalGroupId).get()
 				.getGroupName();
 
 		JOptionPane.showMessageDialog(null,
 				"Choose the folder with images for signal group " + signalName);
 
 		// We expect the signal images to be in the folder above the nmd file
-		File defaultFolder = dataset.getSavePath().getParentFile();
-		JFileChooser fc = new JFileChooser(defaultFolder);
+		final File defaultFolder = dataset.getSavePath().getParentFile();
+		final JFileChooser fc = new JFileChooser(defaultFolder);
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-		int returnVal = fc.showOpenDialog(fc);
+		final int returnVal = fc.showOpenDialog(fc);
 		if (returnVal != 0)
 			return null;
 
