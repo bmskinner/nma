@@ -240,13 +240,7 @@ public class NuclearMorphologyAnalysis {
 				.action(Arguments.storeTrue())
 				.dest("outlines")
 				.help("Export full nuclear outlines");
-
-		exportParser.addArgument("--normalised-only")
-				.action(Arguments.storeTrue())
-				.dest("normalised-only")
-				.help("Only export normalised profiles and/or outlines");
 		
-
 		exportParser.addArgument("--cell-locations")
 				.action(Arguments.storeTrue())
 				.dest("cell-locations")
@@ -261,11 +255,6 @@ public class NuclearMorphologyAnalysis {
 				.action(Arguments.storeTrue())
 				.dest("signals")
 				.help("Export nuclear signal measurements");
-
-		exportParser.addArgument("--single-cell-images")
-				.action(Arguments.storeTrue())
-				.dest("single-cell-images")
-				.help("Export each cell in a cropped image");
 
 		exportParser.addArgument("--shells")
 				.action(Arguments.storeTrue())
@@ -285,7 +274,23 @@ public class NuclearMorphologyAnalysis {
 		exportParser.addArgument("--all")
 				.action(Arguments.storeTrue())
 				.dest("all")
-				.help("Export all the above from the dataset except for single cell images");
+				.help("All above options");
+
+		exportParser.addArgument("--single-cell-images")
+				.action(Arguments.storeTrue())
+				.dest("single-cell-images")
+				.help("Export each cell in a cropped image");
+
+		exportParser.addArgument("--normalised-only")
+				.action(Arguments.storeTrue())
+				.dest("normalised-only")
+				.help("Only export normalised profiles and/or outlines");
+
+		exportParser.addArgument("--normalise-length")
+				.type(Integer.class)
+				.dest("normalise-length")
+				.setDefault(100)
+				.help("The length for normalised profiles and/or outlines");
 
 	}
 

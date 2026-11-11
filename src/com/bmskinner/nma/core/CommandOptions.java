@@ -79,6 +79,9 @@ public class CommandOptions {
 	@Arg(dest = "normalised-only")
 	public boolean isNormalisedOnly = false;
 
+	@Arg(dest = "normalise-length")
+	public int normalisationLength = 100;
+
 	// Modify arguments
 
 	@Arg(dest = "cluster-file")

@@ -124,9 +124,9 @@ public class ExportDataPipeline {
 		final HashOptions exportOptions = new DefaultOptions();
 		exportOptions.setBoolean(HashOptions.EXPORT_MEASUREMENTS_KEY, opt.isMeasurements || opt.isAll);
 		exportOptions.setBoolean(HashOptions.EXPORT_PROFILES_KEY, opt.isProfiles || opt.isAll);
-		exportOptions.setInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, 100);
+		exportOptions.setInt(HashOptions.EXPORT_PROFILE_INTERPOLATION_LENGTH, opt.normalisationLength);
 		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINES_KEY, opt.isOutlines || opt.isAll);
-		exportOptions.setInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, 100);
+		exportOptions.setInt(HashOptions.EXPORT_OUTLINE_N_SAMPLES_KEY, opt.normalisationLength);
 		exportOptions.setBoolean(HashOptions.EXPORT_OUTLINE_IS_NORMALISED_KEY, true);
 		exportOptions.setString(HashOptions.EXPORT_OUTLINE_STARTING_LANDMARK_KEY, OrientationMark.REFERENCE.name());
 

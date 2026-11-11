@@ -228,9 +228,9 @@ public class ExportDataPipelineTest {
 	 * @param dataset
 	 * @return
 	 */
-	static List<String> makeProfileColumnNames(IAnalysisDataset dataset) {
+	static List<String> makeProfileColumnNames(IAnalysisDataset dataset, int length) {
 		final List<String> expectedHeaders = new ArrayList<>();
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < length; i++) {
 			expectedHeaders.add("Angle_profile_" + i);
 			expectedHeaders.add("Diameter_profile_" + i);
 			expectedHeaders.add("Radius_profile_" + i);
@@ -253,9 +253,9 @@ public class ExportDataPipelineTest {
 	 * @param dataset
 	 * @return
 	 */
-	static List<String> makeOutlineColumnNames() {
+	static List<String> makeOutlineColumnNames(int length) {
 		final List<String> expectedHeaders = new ArrayList<>();
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < length; i++) {
 			expectedHeaders.add("Outline_RawCoordinates_X_" + i);
 			expectedHeaders.add("Outline_RawCoordinates_Y_" + i);
 			expectedHeaders.add("Outline_OrientedCoordinates_X_" + i);
@@ -350,6 +350,7 @@ public class ExportDataPipelineTest {
 		final CommandOptions options = new CommandOptions();
 		options.file = TestResources.MOUSE_SIGNALS_DATASET;
 		options.isProfiles = true;
+		options.normalisationLength = 120;
 
 		new ExportDataPipeline(options);
 		assertTrue(MEASUREMENT_FILE.exists());
@@ -359,7 +360,7 @@ public class ExportDataPipelineTest {
 		// Define the columns expected
 		final List<String> expectedHeaders = new ArrayList<>();
 		expectedHeaders.addAll(makeBaseColumnNames());
-		expectedHeaders.addAll(makeProfileColumnNames(dataset));
+		expectedHeaders.addAll(makeProfileColumnNames(dataset, options.normalisationLength));
 		testColumnHeadersMatch(expectedHeaders, colHeaders);
 
 		// Define the columns expected
@@ -384,6 +385,7 @@ public class ExportDataPipelineTest {
 		final CommandOptions options = new CommandOptions();
 		options.file = TestResources.MOUSE_SIGNALS_DATASET;
 		options.isOutlines = true;
+		options.normalisationLength = 120;
 
 		new ExportDataPipeline(options);
 		assertTrue(MEASUREMENT_FILE.exists());
@@ -393,7 +395,7 @@ public class ExportDataPipelineTest {
 		// Define the columns expected
 		final List<String> expectedHeaders = new ArrayList<>();
 		expectedHeaders.addAll(makeBaseColumnNames());
-		expectedHeaders.addAll(makeOutlineColumnNames());
+		expectedHeaders.addAll(makeOutlineColumnNames(options.normalisationLength));
 		testColumnHeadersMatch(expectedHeaders, colHeaders);
 
 		// Define the columns expected
@@ -419,6 +421,7 @@ public class ExportDataPipelineTest {
 		options.file = TestResources.MOUSE_SIGNALS_DATASET;
 		options.isMeasurements = true;
 		options.isProfiles = true;
+		options.normalisationLength = 120;
 
 		new ExportDataPipeline(options);
 		assertTrue(MEASUREMENT_FILE.exists());
@@ -429,7 +432,7 @@ public class ExportDataPipelineTest {
 		final List<String> expectedHeaders = new ArrayList<>();
 		expectedHeaders.addAll(makeBaseColumnNames());
 		expectedHeaders.addAll(makeMeasurementColumnNames(dataset));
-		expectedHeaders.addAll(makeProfileColumnNames(dataset));
+		expectedHeaders.addAll(makeProfileColumnNames(dataset, options.normalisationLength));
 		testColumnHeadersMatch(expectedHeaders, colHeaders);
 
 		assertTrue(PROFILE_FILE.exists());
@@ -455,6 +458,7 @@ public class ExportDataPipelineTest {
 		options.isMeasurements = true;
 		options.isProfiles = true;
 		options.isOutlines = true;
+		options.normalisationLength = 120;
 
 		new ExportDataPipeline(options);
 		assertTrue(MEASUREMENT_FILE.exists());
@@ -465,8 +469,8 @@ public class ExportDataPipelineTest {
 		final List<String> expectedHeaders = new ArrayList<>();
 		expectedHeaders.addAll(makeBaseColumnNames());
 		expectedHeaders.addAll(makeMeasurementColumnNames(dataset));
-		expectedHeaders.addAll(makeProfileColumnNames(dataset));
-		expectedHeaders.addAll(makeOutlineColumnNames());
+		expectedHeaders.addAll(makeProfileColumnNames(dataset, options.normalisationLength));
+		expectedHeaders.addAll(makeOutlineColumnNames(options.normalisationLength));
 		testColumnHeadersMatch(expectedHeaders, colHeaders);
 
 		assertTrue(OUTLINE_FILE.exists());
@@ -498,6 +502,7 @@ public class ExportDataPipelineTest {
 		options.isProfiles = true;
 		options.isOutlines = true;
 		options.isNormalisedOnly = true;
+		options.normalisationLength = 120;
 
 		new ExportDataPipeline(options);
 		assertTrue(MEASUREMENT_FILE.exists());
@@ -508,8 +513,8 @@ public class ExportDataPipelineTest {
 		final List<String> expectedHeaders = new ArrayList<>();
 		expectedHeaders.addAll(makeBaseColumnNames());
 		expectedHeaders.addAll(makeMeasurementColumnNames(dataset));
-		expectedHeaders.addAll(makeProfileColumnNames(dataset));
-		expectedHeaders.addAll(makeOutlineColumnNames());
+		expectedHeaders.addAll(makeProfileColumnNames(dataset, options.normalisationLength));
+		expectedHeaders.addAll(makeOutlineColumnNames(options.normalisationLength));
 		testColumnHeadersMatch(expectedHeaders, colHeaders);
 
 		assertFalse(OUTLINE_FILE.exists());
@@ -529,6 +534,7 @@ public class ExportDataPipelineTest {
 		final CommandOptions options = new CommandOptions();
 		options.file = TestResources.MOUSE_SIGNALS_DATASET;
 		options.isAll = true;
+		options.normalisationLength = 120;
 
 		new ExportDataPipeline(options);
 		assertTrue("The file %s should exist".formatted(MEASUREMENT_FILE.getAbsolutePath()), MEASUREMENT_FILE.exists());
@@ -539,8 +545,8 @@ public class ExportDataPipelineTest {
 		final List<String> expectedHeaders = new ArrayList<>();
 		expectedHeaders.addAll(makeBaseColumnNames());
 		expectedHeaders.addAll(makeMeasurementColumnNames(dataset));
-		expectedHeaders.addAll(makeProfileColumnNames(dataset));
-		expectedHeaders.addAll(makeOutlineColumnNames());
+		expectedHeaders.addAll(makeProfileColumnNames(dataset, options.normalisationLength));
+		expectedHeaders.addAll(makeOutlineColumnNames(options.normalisationLength));
 		testColumnHeadersMatch(expectedHeaders, colHeaders);
 
 		assertTrue(OUTLINE_FILE.exists());
@@ -574,6 +580,7 @@ public class ExportDataPipelineTest {
 		options.file = TestResources.MOUSE_SIGNALS_DATASET;
 		options.isAll = true;
 		options.isNormalisedOnly = true;
+		options.normalisationLength = 120;
 
 		new ExportDataPipeline(options);
 		assertTrue("The file %s should exist".formatted(MEASUREMENT_FILE.getAbsolutePath()), MEASUREMENT_FILE.exists());
@@ -584,8 +591,8 @@ public class ExportDataPipelineTest {
 		final List<String> expectedHeaders = new ArrayList<>();
 		expectedHeaders.addAll(makeBaseColumnNames());
 		expectedHeaders.addAll(makeMeasurementColumnNames(dataset));
-		expectedHeaders.addAll(makeProfileColumnNames(dataset));
-		expectedHeaders.addAll(makeOutlineColumnNames());
+		expectedHeaders.addAll(makeProfileColumnNames(dataset, options.normalisationLength));
+		expectedHeaders.addAll(makeOutlineColumnNames(options.normalisationLength));
 		testColumnHeadersMatch(expectedHeaders, colHeaders);
 
 		// These should be suppressed

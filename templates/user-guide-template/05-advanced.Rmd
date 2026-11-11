@@ -84,6 +84,7 @@ Option | Command
 `--all` | all of the above options for convenience
 `--single-cell-images`| a cropped image for each cell in the dataset, saved to a subfolder prefixed `SingleNucleusImages_`. Not included in `--all` because this is a time-consuming step in larger datasets. 
 `--normalised-only` | Only export normalised values for profiles and/or outlines into `<dataset>.measurements.txt`; do not produce `<dataset>.outlines.txt` or `<dataset>.profiles.txt` files. Use when the raw profiles or outlines are not required. Example usage: `--measurements --profiles --normalised-only` would produce a single file `.measurements.txt` containing basic measurements and normalised profiles.
+`--normalise-length` 150 | The length for normalised profiles and outlines. Default value is 100.
 
 ### `modify`
 
