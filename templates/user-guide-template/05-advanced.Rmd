@@ -44,6 +44,7 @@ java -jar Nuclear_Morphology_Analysis_${project.version}.jar detect --outline-fi
 Option | Command
 --------|-----------
 `--directory` | Path to a directory of images for analysis
+`--output-dir` | Path to a directory in which to save the output `.nmd` files. If the directory does not exist, it will be created. If not provided, output `.nmds` will be saved to a sub-directory of the image directory with the analysis date and time.
 `--outline-file` | Path to a file of text outlines for analysis
 `--options` | Path to an analysis options XML file
 

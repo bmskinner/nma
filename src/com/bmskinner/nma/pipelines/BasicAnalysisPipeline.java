@@ -21,9 +21,11 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nma.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nma.analysis.nucleus.NucleusDetectionMethod;
@@ -49,17 +51,29 @@ public class BasicAnalysisPipeline {
 
 	private static final Logger LOGGER = Logger.getLogger(BasicAnalysisPipeline.class.getName());
 
-	public BasicAnalysisPipeline(@NonNull final File folder) throws Exception {
+	/**
+	 * Create with a directory of images to analyse, and an optional directory in
+	 * which to save the outputs
+	 * 
+	 * @param folder    the directory of images
+	 * @param outputDir the output directory. If null, a directory will be created
+	 *                  based on the current datetime
+	 * @throws Exception
+	 */
+	public BasicAnalysisPipeline(@NonNull final File folder, @Nullable File outputDir) throws Exception {
 
-		IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(folder);
+		final IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(folder);
 
-		Instant inst = Instant.ofEpochMilli(op.getAnalysisTime());
-		LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
-		String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-		File outFolder = new File(folder, outputFolderName);
-		outFolder.mkdirs();
-		File saveFile = new File(outFolder, folder.getName() + Io.NMD_FILE_EXTENSION);
-		runNewAnalysis(outFolder, op, saveFile);
+		if (Objects.isNull(outputDir)) {
+			final Instant inst = Instant.ofEpochMilli(op.getAnalysisTime());
+			final LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneOffset.systemDefault());
+			final String outputFolderName = anTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+			outputDir = new File(folder, outputFolderName);
+		}
+
+		outputDir.mkdirs();
+		final File saveFile = new File(outputDir, folder.getName() + Io.NMD_FILE_EXTENSION);
+		runNewAnalysis(outputDir, op, saveFile);
 	}
 
 	/**
@@ -80,9 +94,9 @@ public class BasicAnalysisPipeline {
 				.exists())
 			throw new IllegalArgumentException("Detection image folder does not exist");
 
-		LOGGER.info(() -> "Outputting data to folder: %s".formatted(outFolder.getAbsolutePath()));
+		LOGGER.info("Outputting data to %s".formatted(outFolder.getAbsolutePath()));
 
-		IAnalysisDataset obs = new NucleusDetectionMethod(outFolder, op)
+		final IAnalysisDataset obs = new NucleusDetectionMethod(outFolder, op)
 				.call().getFirstDataset();
 
 		new DefaultDatasetProfilingMethod(obs)

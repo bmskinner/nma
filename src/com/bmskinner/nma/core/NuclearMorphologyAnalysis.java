@@ -197,22 +197,27 @@ public class NuclearMorphologyAnalysis {
 
 	private static void createDetectParser(Subparsers subparsers) {
 		final Subparser analyseParser = subparsers.addParser("detect")
-				.help("Analyse images using a saved options file");
+				.help("Analyse images or existing outlines using a saved options file");
 
 		analyseParser.addArgument("-d", "--directory")
 				.type(Arguments.fileType().verifyIsDirectory().verifyCanRead())
 				.dest("directory")
 				.help("Directory of images to analyse");
 
+		analyseParser.addArgument("--output-dir")
+				.type(Arguments.fileType())
+				.dest("output-dir")
+				.help("Directory in which to save the output files. If not provided, output will be saved to a timestamped directory within the image directory");
+
 		analyseParser.addArgument("-f", "--outline-file")
 				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
 				.dest("outline-file")
-				.help("Text file of object outlines to analyse");
+				.help("Text file of object outlines to analyse. Alternative to providing an image directory.");
 
 		analyseParser.addArgument("-o", "--options")
 				.type(Arguments.fileType().verifyIsFile().verifyCanRead())
 				.dest("options")
-				.help("File of analysis options to use (.xml)");
+				.help("File of analysis options to use in .xml format");
 	}
 
 	private static void createExportParser(Subparsers subparsers) {
@@ -470,7 +475,7 @@ public class NuclearMorphologyAnalysis {
 
 				if (rsc.equals(present)) {
 					isPresent = true;
-					LOGGER.fine(() -> "Found existing ruleset with unchanged optons for %s"
+					LOGGER.fine("Found existing ruleset with unchanged options for %s"
 							.formatted(rsc.getName()));
 					break;
 				}
@@ -484,7 +489,7 @@ public class NuclearMorphologyAnalysis {
 		// create default rulesets for this version of NMA if needed
 		if (!isPresent) {
 			LOGGER.fine(
-					() -> "Ruleset for %s has changed in this version, adding"
+					"Ruleset for %s has changed in this version, adding"
 							.formatted(rsc.getName()));
 			ensureRuleSetFileExists(rsc, fileName);
 		}
@@ -501,7 +506,7 @@ public class NuclearMorphologyAnalysis {
 
 		if (!ruleFile.exists()) {
 			// create as needed
-			LOGGER.config("Creating default ruleset: " + ruleFile.getAbsolutePath());
+			LOGGER.config("Creating default ruleset: %s".formatted(ruleFile.getAbsolutePath()));
 			try {
 				XMLWriter.writeXML(rsc.toXmlElement(), ruleFile);
 			} catch (final IOException e) {
@@ -542,11 +547,11 @@ public class NuclearMorphologyAnalysis {
 			try {
 				if (opt.options != null) {
 					LOGGER.info("Running with saved options: " + opt.options.getAbsolutePath());
-					new SavedOptionsAnalysisPipeline(opt.directory, opt.options).call();
+					new SavedOptionsAnalysisPipeline(opt.directory, opt.options, opt.outputDir).call();
 				} else {
 					LOGGER.info(
 							"No analysis options provided, using defaults and assuming these are mouse sperm");
-					new BasicAnalysisPipeline(opt.directory);
+					new BasicAnalysisPipeline(opt.directory, opt.outputDir);
 				}
 
 			} catch (final Exception e) {
@@ -565,7 +570,7 @@ public class NuclearMorphologyAnalysis {
 					opt.options.getAbsolutePath()));
 			
 			try {
-				new TextOutlineAnalysisPipeline(opt.outlineFile, opt.options).call();
+				new TextOutlineAnalysisPipeline(opt.outlineFile, opt.options, opt.outputDir).call();
 
 			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error running pipeline: %s".formatted(e.getMessage()), e);

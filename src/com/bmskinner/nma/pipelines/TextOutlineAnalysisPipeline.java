@@ -99,6 +99,16 @@ public class TextOutlineAnalysisPipeline extends AbstractAnalysisMethod
 		run();
 	}
 
+	public void run(@NonNull final File textFile,
+			@NonNull final File optionsXmlFile,
+			@Nullable final File outputDir)
+			throws Exception {
+		this.optionsXmlFile = optionsXmlFile;
+		this.textFile = textFile;
+		this.outputFolder = outputDir;
+		run();
+	}
+
 	/**
 	 * Build a pipeline covering all the options within the given file
 	 * 

@@ -89,7 +89,7 @@ public class NewAnalysisAction extends VoidResultAction {
 		if(folder == null) {
 			try {
 				folder = new DefaultInputSupplier().requestFolder("Select image directory", GlobalOptions.getInstance().getDefaultDir());
-			} catch (RequestCancelledException e) {
+			} catch (final RequestCancelledException e) {
 				// user cancelled
 				this.cancel();
 				return;
@@ -104,10 +104,10 @@ public class NewAnalysisAction extends VoidResultAction {
 		}
 
 		// Initialise an options with default values
-		IAnalysisOptions options = OptionsFactory
+		final IAnalysisOptions options = OptionsFactory
 				.makeAnalysisOptions(RuleSetCollection.mouseSpermRuleSetCollection());
 		options.setDetectionFolder(CellularComponent.NUCLEUS, this.folder);
-		HashOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions()
+		final HashOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions()
 				.build();
 		options.setDetectionOptions(CellularComponent.NUCLEUS, nucleusOptions);
 
@@ -116,12 +116,12 @@ public class NewAnalysisAction extends VoidResultAction {
 		LOGGER.fine("Creating for " + folder.getAbsolutePath());
 
 		// Start the image prober to set analysis options
-		NucleusImageProber analysisSetup = new NucleusImageProber(folder, options);
+		final NucleusImageProber analysisSetup = new NucleusImageProber(folder, options);
 
 		if (analysisSetup.isOk()) {
 
 			// Don't run if the selected folder has been removed
-			Optional<File> detectionFolder = options.getDetectionFolder(CellularComponent.NUCLEUS);
+			final Optional<File> detectionFolder = options.getDetectionFolder(CellularComponent.NUCLEUS);
 			if (!detectionFolder.isPresent()) {
 				cancel();
 				return;
@@ -130,18 +130,19 @@ public class NewAnalysisAction extends VoidResultAction {
 			LOGGER.info("Directory: " + detectionFolder.get().getName());
 
 			// Get the start time of the analysis to make the output directory
-			Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
-			LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
+			final Instant inst = Instant.ofEpochMilli(options.getAnalysisTime());
+			final LocalDateTime anTime = LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
 
-			File outputFolder = new File(detectionFolder.get(), anTime
-					.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")));
+			final String outputFolderName = anTime
+					.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+			final File outputFolder = new File(detectionFolder.get(), outputFolderName);
 
 			try {
-				IAnalysisMethod m = new NucleusDetectionMethod(outputFolder, options);
+				final IAnalysisMethod m = new NucleusDetectionMethod(outputFolder, options);
 				worker = new DefaultAnalysisWorker(m);
 				worker.addPropertyChangeListener(this);
 				ThreadManager.getInstance().submit(worker);
-			} catch (AnalysisMethodException e) {
+			} catch (final AnalysisMethodException e) {
 				LOGGER.info("Unable to run detection: " + e.getMessage());
 			} finally {
 				analysisSetup.dispose();
@@ -159,8 +160,8 @@ public class NewAnalysisAction extends VoidResultAction {
 
 		try {
 			LOGGER.fine("New analysis action finished");
-			IAnalysisResult r = worker.get();
-			List<IAnalysisDataset> datasets = r.getDatasets();
+			final IAnalysisResult r = worker.get();
+			final List<IAnalysisDataset> datasets = r.getDatasets();
 
 			if (datasets == null || datasets.isEmpty()) {
 				LOGGER.info("No datasets returned");
@@ -170,11 +171,11 @@ public class NewAnalysisAction extends VoidResultAction {
 								datasets));
 			}
 
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			LOGGER.warning("Interruption to swing worker");
 			LOGGER.log(Level.SEVERE, "Interruption to swing worker", e);
 			Thread.currentThread().interrupt();
-		} catch (ExecutionException e) {
+		} catch (final ExecutionException e) {
 			LOGGER.warning("Execution error in swing worker");
 			LOGGER.log(Level.SEVERE, "Execution error in swing worker", e);
 		}

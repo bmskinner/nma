@@ -33,6 +33,9 @@ public class CommandOptions {
 	@Arg(dest = "outline-file")
 	public File outlineFile;
 
+	@Arg(dest = "output-dir")
+	public File outputDir = null;
+
 	// Used in Detect and Modify
 	@Arg(dest = "options")
 	public File options;
